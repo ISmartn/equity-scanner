@@ -1,0 +1,18 @@
+{
+  "schema_version": "1.1",
+  "description": "Optional overrides merged over scoring / quality defaults",
+  "min_scores": {
+    "vcp": 85.0,
+    "high_tight_flag": 95.0,
+    "pocket_pivot": 95.0,
+    "pocket_pivot_setup": 85.0,
+    "inside_bar_cluster": 90.0,
+    "power_gap": 85.0,
+    "tight_range_near_pivot": 80.0
+  },
+  "quality": {
+    "max_20d_runup_pct": 18.0,
+    "max_20d_runup_with_higher_low_pct": 25.0,
+    "allow_extended_with_higher_low": true
+  }
+}

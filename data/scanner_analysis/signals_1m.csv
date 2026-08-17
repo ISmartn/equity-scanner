@@ -1,0 +1,774 @@
+trade_date,ticker,company_name,sector,pattern_type,score,pattern_score,macro_pass,triggered_today,setup_ready,entry_close,last_trade_date,last_close,trading_days_forward,return_to_last_pct,return_5d_pct,return_10d_pct,return_20d_pct,max_favorable_pct,max_adverse_pct,fundamental_pass,market_score_delta,pre_scan_sessions
+2026-06-01,GHCLTEXTIL,GHCL Textiles Limited,,pocket_pivot,100.0,100.0,False,True,False,99.45,2026-07-10,109.35,28,9.9548,-3.0367,-8.9291,0.181,13.816,-9.7838,False,0.0,25
+2026-06-01,INDSWFTLAB,Ind-Swift Laboratories Limited,,pocket_pivot,100.0,100.0,True,True,False,164.19,2026-07-10,246.44,28,50.0944,-4.5374,-1.4313,23.96,51.0445,-6.9371,False,0.0,25
+2026-06-01,KERNEX,Kernex Microsystems (India) Limited,,pocket_pivot,100.0,100.0,True,True,False,1836.7,2026-07-10,2157.5,28,17.4661,2.7386,10.9163,17.5968,33.1192,-8.4227,True,0.0,25
+2026-06-01,LUMAXTECH,Lumax Auto Technologies Limited,,pocket_pivot,100.0,100.0,True,True,False,1761.2,2026-07-10,1491.0,28,-15.3418,-8.6418,-4.6162,-12.923,2.3734,-18.9076,True,0.0,25
+2026-06-01,NSLNISP,NMDC Steel Limited,,pocket_pivot,100.0,100.0,False,True,False,50.5,2026-07-10,43.32,28,-14.2178,-4.3366,-5.2475,-15.1485,6.4356,-16.4158,False,0.0,25
+2026-06-01,PTCIL,PTC Industries Limited,,pocket_pivot,100.0,100.0,False,True,False,18489.0,2026-07-10,17602.0,28,-4.7974,-1.1737,0.9032,-7.2476,7.3665,-8.8647,False,0.0,25
+2026-06-01,SUPRIYA,Supriya Lifescience Limited,,pocket_pivot,100.0,100.0,False,True,False,1052.5,2026-07-10,854.6,28,-18.8029,-12.6746,-9.2447,-3.2732,3.0879,-20.6176,True,0.0,25
+2026-06-01,TEGA,Tega Industries Limited,,pocket_pivot,100.0,100.0,False,True,False,1811.4,2026-07-10,1669.0,28,-7.8613,-2.1641,-1.6396,-6.3266,4.56,-11.5601,False,0.0,25
+2026-06-01,TMB,Tamilnad Mercantile Bank Limited,,pocket_pivot,100.0,100.0,True,True,False,728.25,2026-07-10,801.6,28,10.0721,1.4693,6.3096,0.714,10.944,-5.7535,False,0.0,25
+2026-06-01,WELSPUNLIV,Welspun Living Limited,,pocket_pivot,100.0,100.0,False,True,False,145.13,2026-07-10,166.17,28,14.4973,-1.888,-0.1378,9.4467,19.4791,-8.1238,False,0.0,25
+2026-06-01,THANGAMAYL,Thangamayil Jewellery Limited,,vcp,98.2,98.2,True,True,False,4284.1,2026-07-10,6540.5,28,52.6692,28.188,28.4167,49.3476,67.2463,-3.5503,True,0.0,25
+2026-06-01,NMDC,NMDC Limited,,pocket_pivot,94.6,94.6,True,True,False,92.37,2026-07-10,84.92,28,-8.0654,-3.0096,-4.2222,-7.8056,5.5429,-10.144,True,0.0,25
+2026-06-01,ICIL,Indo Count Industries Limited,,pocket_pivot,90.0,90.0,False,True,False,334.75,2026-07-10,412.55,28,23.2412,-3.8686,4.4361,30.9186,38.5512,-5.8999,False,0.0,25
+2026-06-01,PAISALO,Paisalo Digital Limited,,pocket_pivot,90.0,90.0,True,True,False,52.86,2026-07-10,73.24,28,38.5547,12.2588,10.0265,11.8048,41.695,-3.216,False,0.0,25
+2026-06-01,SIGMAADV,SIGMA ADVANCED SYSTEMS LIMITED,,pocket_pivot,90.0,90.0,True,True,False,426.4,2026-07-10,582.65,28,36.644,-2.2866,8.3959,30.1829,49.6482,-4.7608,True,0.0,25
+2026-06-01,SPORTKING,Sportking India Limited,,pocket_pivot,90.0,90.0,True,True,False,185.67,2026-07-10,182.64,28,-1.6319,-5.8976,-1.1741,-6.1453,6.9101,-9.7593,False,0.0,25
+2026-06-01,VISHNU,Vishnu Chemicals Limited,,pocket_pivot,90.0,90.0,True,True,False,619.75,2026-07-10,597.0,28,-3.6708,-5.357,-2.8318,-2.9931,5.2037,-7.2045,False,0.0,25
+2026-06-01,WOCKPHARMA,Wockhardt Limited,,pocket_pivot,90.0,90.0,False,True,False,2152.9,2026-07-10,1810.7,28,-15.8948,-12.0767,-11.3939,-9.824,12.5134,-16.4662,False,0.0,25
+2026-06-02,ACMESOLAR,Acme Solar Holdings Limited,,pocket_pivot,100.0,100.0,False,True,False,334.75,2026-07-10,377.0,27,12.6214,4.1673,1.4638,16.7438,18.9395,-11.6057,False,0.0,25
+2026-06-02,BALAMINES,Balaji Amines Limited,,pocket_pivot,100.0,100.0,False,True,False,2016.1,2026-07-10,2414.9,27,19.7808,11.2098,2.9959,3.6754,20.0337,-13.8882,False,0.0,25
+2026-06-02,IFCI,IFCI Limited,,pocket_pivot,100.0,100.0,True,True,False,71.64,2026-07-10,77.46,27,8.124,7.5796,23.9531,6.9095,33.7242,-7.0212,False,0.0,25
+2026-06-02,JAGRAN,Jagran Prakashan Limited,,pocket_pivot,100.0,100.0,False,True,False,76.99,2026-07-10,63.91,27,-16.9892,-16.8074,-16.3008,-16.4307,2.4808,-20.3143,False,0.0,25
+2026-06-02,JSFB,Jana Small Finance Bank Limited,,pocket_pivot,100.0,100.0,False,True,False,490.75,2026-07-10,474.1,27,-3.3928,-3.1788,-4.7988,-4.6663,0.8456,-10.5451,False,0.0,25
+2026-06-02,NMDC,NMDC Limited,,pocket_pivot,100.0,100.0,True,True,False,95.31,2026-07-10,84.92,27,-10.9013,-5.5293,-7.5753,-11.5518,2.2873,-12.9157,True,0.0,25
+2026-06-02,NSLNISP,NMDC Steel Limited,,pocket_pivot,100.0,100.0,False,True,False,52.55,2026-07-10,43.32,27,-17.5642,-6.1465,-9.3435,-17.6974,2.2835,-19.6765,False,0.0,25
+2026-06-02,PTCIL,PTC Industries Limited,,pocket_pivot,100.0,100.0,False,True,False,19380.0,2026-07-10,17602.0,27,-9.1744,-3.5501,-8.1063,-10.289,2.4303,-13.0547,False,0.0,25
+2026-06-02,SKYGOLD,SKY GOLD AND DIAMONDS LIMITED,,pocket_pivot,100.0,100.0,True,True,False,559.7,2026-07-10,623.85,27,11.4615,-8.3348,-5.3064,-5.5029,13.9896,-13.2571,True,0.0,25
+2026-06-02,THANGAMAYL,Thangamayil Jewellery Limited,,pocket_pivot,100.0,100.0,True,True,False,4590.7,2026-07-10,6540.5,27,42.4728,19.1431,18.6006,29.5118,56.0764,-7.0469,True,0.0,25
+2026-06-02,UNIVCABLES,Universal Cables Limited,,pocket_pivot,100.0,100.0,True,True,False,1239.2,2026-07-10,1130.3,27,-8.7879,-1.275,-3.8331,-0.1049,12.2498,-13.0891,False,0.0,25
+2026-06-02,VADILALIND,Vadilal Industries Limited,,pocket_pivot,100.0,100.0,False,True,False,5384.9,2026-07-10,6410.0,27,19.0366,6.9212,14.7282,13.0105,21.1722,-3.2015,True,0.0,25
+2026-06-02,VENUSREM,Venus Remedies Limited,,pocket_pivot,100.0,100.0,True,True,False,1411.3,2026-07-10,1719.5,27,21.838,14.1288,32.3461,24.1338,44.8523,-3.9821,True,0.0,25
+2026-06-02,GVPIL,GE Power India Limited,,pocket_pivot,99.7,99.7,True,True,False,858.95,2026-07-10,820.35,27,-4.4939,5.4194,19.3085,6.572,26.2006,-9.0925,True,0.0,25
+2026-06-02,ICIL,Indo Count Industries Limited,,pocket_pivot,96.8,96.8,False,True,False,346.25,2026-07-10,412.55,27,19.148,-2.8159,-0.6931,26.1805,33.9495,-9.0253,False,0.0,25
+2026-06-02,MANGLMCEM,Mangalam Cement Limited,,pocket_pivot,95.4,95.4,False,True,False,841.65,2026-07-10,964.55,27,14.6023,0.3089,1.1228,8.4477,15.0062,-3.0238,False,0.0,25
+2026-06-02,TFCILTD,Tourism Finance Corporation of India Limited,,pocket_pivot,91.1,91.1,True,True,False,75.5,2026-07-10,75.15,27,-0.4636,-1.351,0.5033,1.3775,8.9801,-5.0331,False,0.0,25
+2026-06-02,GOLDIAM,Goldiam International Limited,,pocket_pivot,90.0,90.0,False,True,False,424.45,2026-07-10,378.0,27,-10.9436,2.356,14.4187,5.2185,19.5547,-27.9067,True,0.0,25
+2026-06-02,MSPL,MSP Steel & Power Limited,,pocket_pivot,90.0,90.0,False,True,False,40.97,2026-07-10,39.14,27,-4.4667,-1.6842,3.6856,4.0029,12.5702,-5.4674,False,0.0,25
+2026-06-03,ADFFOODS,ADF Foods Limited,,pocket_pivot,100.0,100.0,False,True,False,290.3,2026-07-10,319.9,26,10.1963,-3.4792,3.7892,9.2318,19.5143,-7.9228,True,0.0,25
+2026-06-03,ATHERENERG,Ather Energy Limited,,pocket_pivot,100.0,100.0,True,True,False,1022.05,2026-07-10,1225.8,26,19.9354,1.952,-3.1163,11.8341,21.6085,-7.0153,False,0.0,25
+2026-06-03,BALAMINES,Balaji Amines Limited,,pocket_pivot,100.0,100.0,False,True,False,2122.2,2026-07-10,2414.9,26,13.7923,0.4194,1.4231,5.1409,14.0326,-11.1771,False,0.0,25
+2026-06-03,CONFIPET,Confidence Petroleum India Limited,,pocket_pivot,100.0,100.0,False,True,False,76.79,2026-07-10,76.45,26,-0.4428,-5.0397,-11.9156,0.8204,4.9225,-13.6606,False,0.0,25
+2026-06-03,FIEMIND,Fiem Industries Limited,,pocket_pivot,100.0,100.0,False,True,False,2347.0,2026-07-10,2249.9,26,-4.1372,-4.6442,-1.6958,-3.6344,2.8973,-8.3937,True,0.0,25
+2026-06-03,IFCI,IFCI Limited,,pocket_pivot,100.0,100.0,True,True,False,80.42,2026-07-10,77.46,26,-3.6807,-10.6814,11.9995,-4.4889,19.1246,-12.9445,False,0.0,25
+2026-06-03,J&KBANK,The Jammu & Kashmir Bank Limited,,pocket_pivot,100.0,100.0,True,True,False,148.65,2026-07-10,192.65,26,29.5997,3.8076,9.6199,10.7972,35.7215,-4.5274,False,0.0,25
+2026-06-03,KPRMILL,K.P.R. Mill Limited,,pocket_pivot,100.0,100.0,False,True,False,1085.8,2026-07-10,1110.1,26,2.238,-3.7069,-3.9188,8.7493,22.8587,-8.3072,True,0.0,25
+2026-06-03,ORCHPHARMA,Orchid Pharma Limited,,pocket_pivot,100.0,100.0,False,True,False,836.85,2026-07-10,1012.55,26,20.9954,1.6849,23.8991,17.0222,30.7283,-2.2824,False,0.0,25
+2026-06-03,SOTL,Savita Oil Technologies Limited,,pocket_pivot,100.0,100.0,False,True,False,514.6,2026-07-10,607.45,26,18.0431,6.986,18.6747,0.4178,24.2033,-15.274,False,0.0,25
+2026-06-03,SOUTHBANK,The South Indian Bank Limited,,pocket_pivot,100.0,100.0,False,True,False,43.6,2026-07-10,45.81,26,5.0688,3.5092,11.1239,4.4495,14.4495,-3.6697,False,0.0,25
+2026-06-03,SPECTRUM,Spectrum Electrical Industries Limited,,pocket_pivot,100.0,100.0,False,True,False,1621.1,2026-07-10,1921.6,26,18.5368,-0.0062,1.4496,16.205,35.7103,-9.0926,True,0.0,25
+2026-06-03,IZMO,IZMO Limited,,power_gap,93.5,93.5,False,True,False,869.15,2026-07-10,1009.9,26,16.194,8.5313,18.3743,16.5622,29.897,-2.2033,False,0.0,25
+2026-06-03,RRKABEL,R R Kabel Limited,,pocket_pivot,91.8,91.8,True,True,False,2155.9,2026-07-10,2225.7,26,3.2376,0.5381,2.5001,11.0209,18.2337,-6.299,True,0.0,25
+2026-06-03,JAGRAN,Jagran Prakashan Limited,,pocket_pivot,90.0,90.0,False,True,False,77.44,2026-07-10,63.91,26,-17.4716,-19.1374,-15.3926,-16.6322,1.8853,-20.7774,False,0.0,25
+2026-06-03,NH,Narayana Hrudayalaya Ltd.,,vcp,85.0,85.0,False,True,False,1980.6,2026-07-10,2027.3,26,2.3579,-3.7261,-6.9423,0.2827,3.4787,-7.422,False,0.0,25
+2026-06-04,APCOTEXIND,Apcotex Industries Limited,,pocket_pivot,100.0,100.0,False,True,False,538.35,2026-07-10,507.4,25,-5.749,-3.0835,-2.2476,-2.3776,7.5508,-8.7768,True,0.0,25
+2026-06-04,GMRAIRPORT,GMR AIRPORTS LIMITED,,pocket_pivot,100.0,100.0,False,True,False,101.99,2026-07-10,112.51,25,10.3147,-1.8531,8.393,10.5991,13.3837,-4.6377,False,0.0,25
+2026-06-04,IFCI,IFCI Limited,,pocket_pivot,100.0,100.0,True,True,False,81.98,2026-07-10,77.46,25,-5.5135,-14.0278,0.4025,-7.4042,16.8578,-14.6011,False,0.0,25
+2026-06-04,JAGRAN,Jagran Prakashan Limited,,pocket_pivot,100.0,100.0,False,True,False,78.2,2026-07-10,63.91,25,-18.2737,-21.3171,-15.5371,-16.9565,0.3836,-21.5473,False,0.0,25
+2026-06-04,JINDALSAW,Jindal Saw Limited,,pocket_pivot,100.0,100.0,False,True,False,260.0,2026-07-10,275.8,25,6.0769,-14.0423,1.5615,0.3654,7.2885,-14.7308,False,0.0,25
+2026-06-04,KPRMILL,K.P.R. Mill Limited,,pocket_pivot,100.0,100.0,False,True,False,1103.2,2026-07-10,1110.1,25,0.6255,-4.3963,7.5417,7.3695,20.921,-7.6051,True,0.0,25
+2026-06-04,MIDHANI,Mishra Dhatu Nigam Limited,,pocket_pivot,100.0,100.0,False,True,False,443.25,2026-07-10,415.9,25,-6.1703,-4.7829,-2.7524,-3.4743,2.6058,-8.4151,False,0.0,25
+2026-06-04,MSTCLTD,Mstc Limited,,pocket_pivot,100.0,100.0,False,True,False,531.85,2026-07-10,670.65,25,26.0976,5.4339,29.2846,34.568,39.8703,-15.7657,True,0.0,25
+2026-06-04,PANACEABIO,Panacea Biotec Limited,,pocket_pivot,100.0,100.0,False,True,False,520.3,2026-07-10,546.6,25,5.0548,0.3844,2.7965,5.9389,24.3513,-18.0857,False,0.0,25
+2026-06-04,PARAS,Paras Defence and Space Technologies Limited,,pocket_pivot,100.0,100.0,True,True,False,893.8,2026-07-10,1253.1,25,40.1991,10.6623,46.5988,44.7751,61.4455,-5.7284,False,0.0,25
+2026-06-04,PSPPROJECT,PSP Projects Limited,,pocket_pivot,100.0,100.0,False,True,False,898.65,2026-07-10,1069.2,25,18.9785,-2.309,1.391,14.149,27.1908,-8.9412,False,0.0,25
+2026-06-04,RICOAUTO,Rico Auto Industries Limited,,pocket_pivot,100.0,100.0,False,True,False,131.37,2026-07-10,132.94,25,1.1951,-3.0068,9.9414,4.3998,19.5098,-13.2222,False,0.0,25
+2026-06-04,RUBYMILLS,The Ruby Mills Limited,,pocket_pivot,100.0,100.0,False,True,False,336.2,2026-07-10,383.75,25,14.1434,1.9929,-0.6692,1.0262,14.1582,-16.2403,False,0.0,25
+2026-06-04,SHYAMMETL,Shyam Metalics and Energy Limited,,vcp,100.0,100.0,False,True,False,1002.0,2026-07-10,975.1,25,-2.6846,-3.2485,-2.6846,-4.6806,1.1976,-8.5729,False,0.0,25
+2026-06-04,SOTL,Savita Oil Technologies Limited,,pocket_pivot,100.0,100.0,False,True,False,564.3,2026-07-10,607.45,25,7.6466,-3.6683,4.448,-5.6087,13.2642,-12.0415,False,0.0,25
+2026-06-04,THANGAMAYL,Thangamayil Jewellery Limited,,pocket_pivot,100.0,100.0,True,True,False,5520.6,2026-07-10,6540.5,25,18.4744,-1.9056,-1.5379,11.573,29.7866,-13.9206,True,0.0,25
+2026-06-04,VENUSREM,Venus Remedies Limited,,pocket_pivot,100.0,100.0,True,True,False,1555.8,2026-07-10,1719.5,25,10.5219,10.2391,11.7817,10.6119,31.3986,-2.4232,True,0.0,25
+2026-06-04,MINDACORP,Minda Corporation Limited,,pocket_pivot,99.4,99.4,False,True,False,645.3,2026-07-10,698.9,25,8.3062,-1.9216,0.8678,8.9648,10.592,-3.1226,False,0.0,25
+2026-06-04,VIJAYA,Vijaya Diagnostic Centre Limited,,pocket_pivot,98.3,98.3,True,True,False,1359.4,2026-07-10,1389.1,25,2.1848,-5.8997,-3.9576,0.4267,5.0316,-7.9005,True,0.0,25
+2026-06-04,NAM-INDIA,Nippon Life India Asset Management Limited,,pocket_pivot,97.3,97.3,True,True,False,1129.1,2026-07-10,1212.7,25,7.4041,-7.7495,3.3921,7.8912,9.2463,-8.0772,True,0.0,25
+2026-06-04,SOUTHBANK,The South Indian Bank Limited,,pocket_pivot,96.4,96.4,False,True,False,44.61,2026-07-10,45.81,25,2.69,1.5916,8.6976,3.3401,11.8583,-3.5866,False,0.0,25
+2026-06-04,WELENT,Welspun Enterprises Limited,,pocket_pivot,95.2,95.2,False,True,False,540.75,2026-07-10,614.0,25,13.546,1.7846,5.4739,11.558,17.1891,-4.2164,False,0.0,25
+2026-06-04,NITINSPIN,Nitin Spinners Limited,,pocket_pivot,92.4,92.4,True,True,False,541.55,2026-07-10,543.2,25,0.3047,-1.4403,3.5915,4.0624,7.1923,-6.8599,False,0.0,25
+2026-06-04,PARACABLES,Paramount Communications Limited,,pocket_pivot,92.1,92.1,False,True,False,69.36,2026-07-10,66.95,25,-3.4746,-12.2693,0.6632,2.5375,9.1407,-13.7832,False,0.0,25
+2026-06-04,GVPIL,GE Power India Limited,,pocket_pivot,90.3,90.3,True,True,False,907.55,2026-07-10,820.35,25,-9.6083,-2.4517,10.4567,-3.7243,19.4425,-9.9003,True,0.0,25
+2026-06-04,JBMA,JBM Auto Limited,,pocket_pivot,90.0,90.0,False,True,False,692.8,2026-07-10,684.7,25,-1.1692,-6.9212,1.9775,1.5517,6.5964,-7.2965,False,0.0,25
+2026-06-05,ACUTAAS,Acutaas Chemicals Limited,,pocket_pivot,100.0,100.0,True,True,False,3328.3,2026-07-10,3400.8,24,2.1783,-5.4983,-2.4667,5.6035,12.3697,-11.0597,True,0.0,25
+2026-06-05,EQUITASBNK,Equitas Small Finance Bank Limited,,pocket_pivot,100.0,100.0,True,True,False,73.95,2026-07-10,82.24,24,11.2103,2.1501,4.4625,4.8546,12.238,-3.9892,False,0.0,25
+2026-06-05,GANESHBE,Ganesh Benzoplast Limited,,pocket_pivot,100.0,100.0,False,True,False,111.95,2026-07-10,96.95,24,-13.3988,-3.2782,-4.4395,-9.4864,5.4042,-15.766,False,0.0,25
+2026-06-05,GUFICBIO,Gufic Biosciences Limited,,pocket_pivot,100.0,100.0,False,True,False,369.95,2026-07-10,392.4,24,6.0684,0.3514,-3.9735,1.4056,21.0974,-5.7711,False,0.0,25
+2026-06-05,ITDC,India Tourism Development Corporation Limited,,pocket_pivot,100.0,100.0,False,True,False,669.95,2026-07-10,716.8,24,6.9931,-12.6651,-7.605,-12.5756,17.5535,-15.5086,True,0.0,25
+2026-06-05,KIMS,Krishna Institute of Medical Sciences Limited,,pocket_pivot,100.0,100.0,False,True,False,788.95,2026-07-10,814.9,24,3.2892,-0.488,1.9393,4.4743,8.7521,-3.6568,False,0.0,25
+2026-06-05,MANINDS,Man Industries (India) Limited,,pocket_pivot,100.0,100.0,True,True,False,537.55,2026-07-10,566.5,24,5.3855,1.5626,9.3108,6.3808,16.0264,-9.1619,False,0.0,25
+2026-06-05,PARAS,Paras Defence and Space Technologies Limited,,pocket_pivot,100.0,100.0,True,True,False,960.15,2026-07-10,1253.1,24,30.5109,14.2686,46.7115,41.4779,50.289,-5.7387,False,0.0,25
+2026-06-05,RICOAUTO,Rico Auto Industries Limited,,pocket_pivot,100.0,100.0,False,True,False,136.85,2026-07-10,132.94,24,-2.8571,-2.6745,6.16,-0.6942,14.7242,-7.2853,False,0.0,25
+2026-06-05,RPEL,Raghav Productivity Enhancers Limited,,pocket_pivot,100.0,100.0,False,True,False,1110.15,2026-07-10,1294.7,24,16.6239,7.1071,7.9088,16.7049,19.8036,-9.1249,True,0.0,25
+2026-06-05,RSWM,RSWM Limited,,pocket_pivot,100.0,100.0,False,True,False,197.1,2026-07-10,199.29,24,1.1111,6.1136,-2.7752,-0.0761,13.6479,-10.4515,False,0.0,25
+2026-06-05,SAILIFE,Sai Life Sciences Limited,,vcp,100.0,100.0,True,True,False,1186.4,2026-07-10,1265.0,24,6.6251,2.6719,2.5287,3.8941,8.4794,-2.4781,False,0.0,25
+2026-06-05,SPECTRUM,Spectrum Electrical Industries Limited,,pocket_pivot,100.0,100.0,False,True,False,1769.1,2026-07-10,1921.6,24,8.6202,-9.6433,2.0293,16.3643,24.357,-12.6675,True,0.0,25
+2026-06-05,TVSSCS,TVS Supply Chain Solutions Limited,,pocket_pivot,100.0,100.0,False,True,False,129.67,2026-07-10,141.66,24,9.2465,1.9974,8.2054,6.5165,12.9791,-7.9664,False,0.0,25
+2026-06-05,TVSSCS,TVS Supply Chain Solutions Limited,,power_gap,100.0,100.0,False,True,False,129.67,2026-07-10,141.66,24,9.2465,1.9974,8.2054,6.5165,12.9791,-7.9664,False,0.0,25
+2026-06-05,VADILALIND,Vadilal Industries Limited,,pocket_pivot,100.0,100.0,False,True,False,5780.7,2026-07-10,6410.0,24,10.8862,3.9545,5.6619,11.0246,12.8756,-5.7208,True,0.0,25
+2026-06-05,VENUSREM,Venus Remedies Limited,,pocket_pivot,100.0,100.0,True,True,False,1633.5,2026-07-10,1719.5,24,5.2648,10.0398,6.4646,1.861,25.1485,-4.5179,True,0.0,25
+2026-06-05,ADANIGREEN,Adani Green Energy Limited,,pocket_pivot,99.8,99.8,True,True,False,1525.7,2026-07-10,1536.6,24,0.7144,-2.6217,-1.5272,1.5403,4.1555,-6.266,False,0.0,25
+2026-06-05,HSCL,Himadri Speciality Chemical Limited,,pocket_pivot,96.4,96.4,True,True,False,685.05,2026-07-10,660.45,24,-3.591,-0.6642,-2.0436,-0.1314,4.8099,-8.8826,True,0.0,25
+2026-06-05,PASUPTAC,Pasupati Acrylon Limited,,pocket_pivot,91.1,91.1,True,True,False,74.21,2026-07-10,60.17,24,-18.9193,-10.7398,-9.1093,-16.8441,6.3873,-23.7973,True,0.0,25
+2026-06-05,PANACEABIO,Panacea Biotec Limited,,pocket_pivot,90.0,90.0,False,True,False,540.2,2026-07-10,546.6,24,1.1847,-0.7775,-0.7034,-1.0367,19.7705,-4.8871,False,0.0,25
+2026-06-05,FEDERALBNK,The Federal Bank  Limited,,vcp,87.4,87.4,True,True,False,304.15,2026-07-10,329.85,24,8.4498,3.7975,6.5099,8.5977,9.9129,-2.7618,False,0.0,25
+2026-06-08,CAPLIPOINT,Caplin Point Laboratories Limited,,pocket_pivot,100.0,100.0,False,True,False,2111.0,2026-07-10,2583.6,23,22.3875,12.0133,20.199,21.2364,27.3804,-5.1871,True,0.0,25
+2026-06-08,CCL,CCL Products (India) Limited,,pocket_pivot,100.0,100.0,True,True,False,1173.0,2026-07-10,1214.0,23,3.4953,-3.376,-2.0716,1.6368,5.3879,-9.5311,True,0.0,25
+2026-06-08,GULPOLY,Gulshan Polyols Limited,,pocket_pivot,100.0,100.0,True,True,False,213.38,2026-07-10,190.06,23,-10.9289,-0.2999,-2.84,-10.5399,3.9226,-14.2375,False,0.0,25
+2026-06-08,INOXINDIA,INOX India Limited,,pocket_pivot,100.0,100.0,True,True,False,1665.1,2026-07-10,1978.0,23,18.7917,7.2848,22.5692,8.486,26.0585,-7.3029,True,0.0,25
+2026-06-08,KIMS,Krishna Institute of Medical Sciences Limited,,pocket_pivot,100.0,100.0,False,True,False,801.2,2026-07-10,814.9,23,1.7099,-3.9129,0.6178,0.5554,7.0894,-5.1298,False,0.0,25
+2026-06-08,NRBBEARING,NRB Bearing Limited,,pocket_pivot,100.0,100.0,True,True,False,428.35,2026-07-10,428.95,23,0.1401,0.3969,0.0584,1.0856,9.1631,-9.5249,False,0.0,25
+2026-06-08,PARAS,Paras Defence and Space Technologies Limited,,pocket_pivot,100.0,100.0,True,True,False,964.75,2026-07-10,1253.1,23,29.8886,14.864,42.923,34.1798,49.5724,-2.4618,False,0.0,25
+2026-06-08,RSWM,RSWM Limited,,pocket_pivot,100.0,100.0,True,True,False,204.37,2026-07-10,199.29,23,-2.4857,1.2037,-5.1231,-5.0741,9.6051,-10.5299,False,0.0,25
+2026-06-08,SAILIFE,Sai Life Sciences Limited,,vcp,100.0,100.0,True,True,False,1194.6,2026-07-10,1265.0,23,5.8932,1.1133,0.6111,1.1719,7.7348,-2.7206,False,0.0,25
+2026-06-08,VENUSREM,Venus Remedies Limited,,pocket_pivot,100.0,100.0,True,True,False,1695.4,2026-07-10,1719.5,23,1.4215,11.0652,-0.2064,2.5127,20.5792,-7.5852,True,0.0,25
+2026-06-08,FORTIS,Fortis Healthcare Limited,,pocket_pivot,94.7,94.7,False,True,False,989.1,2026-07-10,968.0,23,-2.1333,-0.9049,-1.3396,-1.739,2.1231,-5.409,False,0.0,25
+2026-06-08,ZYDUSWELL,Zydus Wellness Limited,,vcp,94.7,94.7,False,True,False,523.5,2026-07-10,592.45,23,13.171,-4.6132,2.4928,10.0,15.9408,-7.1538,False,0.0,25
+2026-06-08,PAISALO,Paisalo Digital Limited,,pocket_pivot,94.6,94.6,True,True,False,59.34,2026-07-10,73.24,23,23.4243,-1.9885,-0.4382,17.1891,26.2218,-4.6849,False,0.0,25
+2026-06-08,THANGAMAYL,Thangamayil Jewellery Limited,,pocket_pivot,94.2,94.2,True,True,False,5491.7,2026-07-10,6540.5,23,19.0979,0.1785,1.1891,16.0479,30.4696,-5.1988,True,0.0,25
+2026-06-08,BALRAMCHIN,Balrampur Chini Mills Limited,,pocket_pivot,90.2,90.2,False,True,False,550.4,2026-07-10,566.9,23,2.9978,0.218,-2.5073,3.8608,5.3052,-4.9782,False,0.0,25
+2026-06-08,GUFICBIO,Gufic Biosciences Limited,,pocket_pivot,90.0,90.0,False,True,False,376.7,2026-07-10,392.4,23,4.1678,-4.3271,-4.3271,0.9822,18.9275,-7.4595,False,0.0,25
+2026-06-09,ABSLAMC,Aditya Birla Sun Life AMC Limited,,pocket_pivot,100.0,100.0,True,True,False,1062.4,2026-07-10,1146.6,22,7.9255,5.4782,12.8577,5.8453,15.2956,-2.0143,True,0.0,25
+2026-06-09,BELRISE,Belrise Industries Limited,,pocket_pivot,100.0,100.0,True,True,False,234.73,2026-07-10,231.56,22,-1.3505,1.1503,3.127,-3.8299,7.3574,-6.9484,False,0.0,25
+2026-06-09,CAPLIPOINT,Caplin Point Laboratories Limited,,pocket_pivot,100.0,100.0,False,True,False,2255.2,2026-07-10,2583.6,22,14.5619,5.4363,10.4514,12.1142,19.2355,-5.9374,True,0.0,25
+2026-06-09,DATAPATTNS,Data Patterns (India) Limited,,pocket_pivot,100.0,100.0,True,True,False,4558.5,2026-07-10,4343.0,22,-4.7274,-1.7813,5.9778,-5.8835,8.7178,-8.8231,True,0.0,25
+2026-06-09,J&KBANK,The Jammu & Kashmir Bank Limited,,pocket_pivot,100.0,100.0,True,True,False,156.98,2026-07-10,192.65,22,22.7226,3.1915,2.0512,5.7205,28.5196,-5.5294,False,0.0,25
+2026-06-09,JNKINDIA,JNK India Limited,,pocket_pivot,100.0,100.0,False,True,False,484.05,2026-07-10,509.35,22,5.2267,1.7147,0.6921,-3.9562,10.3192,-11.1662,False,0.0,25
+2026-06-09,MAYURUNIQ,Mayur Uniquoters Ltd,,pocket_pivot,100.0,100.0,True,True,False,798.85,2026-07-10,833.55,22,4.3437,3.142,-0.3568,6.8098,13.5382,-9.8704,True,0.0,25
+2026-06-09,MENONBE,Menon Bearings Limited,,pocket_pivot,100.0,100.0,False,True,False,169.81,2026-07-10,171.53,22,1.0129,4.4285,0.0118,-2.4321,7.7675,-16.2888,True,0.0,25
+2026-06-09,MSTCLTD,Mstc Limited,,pocket_pivot,100.0,100.0,False,True,False,544.95,2026-07-10,670.65,22,23.0663,30.067,20.8459,20.3321,36.5079,-9.8816,True,0.0,25
+2026-06-09,OCCLLTD,OCCL Limited,,pocket_pivot,100.0,100.0,False,True,False,139.92,2026-07-10,124.0,22,-11.3779,-3.3162,-6.4823,-15.08,2.916,-15.809,False,0.0,25
+2026-06-09,PARAS,Paras Defence and Space Technologies Limited,,pocket_pivot,100.0,100.0,True,True,False,1039.15,2026-07-10,1253.1,22,20.5889,4.8309,28.2779,22.8312,38.8635,-7.5206,False,0.0,25
+2026-06-09,PSPPROJECT,PSP Projects Limited,,pocket_pivot,100.0,100.0,False,True,False,917.7,2026-07-10,1069.2,22,16.5087,-1.0788,4.8327,13.2505,24.5505,-6.4999,False,0.0,25
+2026-06-09,SOUTHWEST,South West Pinnacle Exploration Limited,,pocket_pivot,98.8,98.8,True,True,False,260.15,2026-07-10,226.63,22,-12.8849,-3.0559,-6.4386,-12.2045,4.9395,-18.4893,True,0.0,25
+2026-06-09,MIDHANI,Mishra Dhatu Nigam Limited,,pocket_pivot,95.3,95.3,False,True,False,450.35,2026-07-10,415.9,22,-7.6496,-2.5092,-2.709,-9.2484,0.9881,-9.859,False,0.0,25
+2026-06-09,DIVISLAB,Divi's Laboratories Limited,Pharma,pocket_pivot,94.9,94.9,False,True,False,6753.0,2026-07-10,6836.0,22,1.2291,-0.5997,0.0,0.0296,3.0505,-3.2948,True,0.0,25
+2026-06-09,FEDERALBNK,The Federal Bank  Limited,,vcp,94.0,94.0,True,True,False,315.1,2026-07-10,329.85,22,4.6811,1.7455,1.5233,3.6338,6.0933,-2.7769,False,0.0,25
+2026-06-09,PANACEABIO,Panacea Biotec Limited,,pocket_pivot,90.0,90.0,False,True,False,607.75,2026-07-10,546.6,22,-10.0617,-10.3332,-8.9757,-13.2127,6.4582,-15.4587,False,0.0,25
+2026-06-10,AKUMS,Akums Drugs and Pharmaceuticals Limited,,pocket_pivot,100.0,100.0,True,True,False,592.1,2026-07-10,701.95,21,18.5526,-0.0929,3.6311,11.1637,19.4731,-7.9547,False,0.0,25
+2026-06-10,CARYSIL,CARYSIL LIMITED,,pocket_pivot,100.0,100.0,True,True,False,1191.9,2026-07-10,1173.1,21,-1.5773,-0.344,0.5537,-0.4447,4.6984,-9.1283,True,0.0,25
+2026-06-10,ELECTHERM,Electrotherm (India) Limited,,pocket_pivot,100.0,100.0,False,True,False,1146.8,2026-07-10,1119.5,21,-2.3805,-2.35,-3.9763,-2.4154,11.3533,-14.4358,False,0.0,25
+2026-06-10,HSCL,Himadri Speciality Chemical Limited,,inside_bar_cluster,100.0,100.0,True,True,False,693.0,2026-07-10,660.45,21,-4.697,1.1688,-4.329,-6.1977,3.6075,-9.0837,True,0.0,25
+2026-06-10,INOXINDIA,INOX India Limited,,pocket_pivot,100.0,100.0,True,True,False,1891.6,2026-07-10,1978.0,21,4.5676,1.2423,5.1121,6.0584,10.9643,-10.5519,True,0.0,25
+2026-06-10,JNKINDIA,JNK India Limited,,pocket_pivot,100.0,100.0,False,True,False,498.0,2026-07-10,509.35,21,2.2791,-5.3815,-0.4016,2.2992,7.2289,-7.7912,False,0.0,25
+2026-06-10,MANINDS,Man Industries (India) Limited,,inside_bar_cluster,100.0,100.0,True,True,False,528.75,2026-07-10,566.5,21,7.1395,12.0757,12.2459,8.6147,17.9574,-4.1891,False,0.0,25
+2026-06-10,PANAMAPET,Panama Petrochem Limited,,pocket_pivot,100.0,100.0,False,True,False,381.55,2026-07-10,428.1,21,12.2002,-1.9526,17.822,11.9119,34.2026,-8.6358,False,0.0,25
+2026-06-10,PARAS,Paras Defence and Space Technologies Limited,,pocket_pivot,100.0,100.0,True,True,False,1040.5,2026-07-10,1253.1,21,20.4325,23.5608,23.8299,16.9438,38.6833,-6.9582,False,0.0,25
+2026-06-10,SHRIPISTON,SPR Auto Technologies Limited,,pocket_pivot,100.0,100.0,True,True,False,3424.8,2026-07-10,4189.6,21,22.3312,8.1523,14.7512,23.9868,29.1024,-4.4003,True,0.0,25
+2026-06-10,SOUTHWEST,South West Pinnacle Exploration Limited,,pocket_pivot,100.0,100.0,True,True,False,267.75,2026-07-10,226.63,21,-15.3576,-6.2558,-13.9683,-14.0728,1.9608,-20.803,True,0.0,25
+2026-06-10,ATALREAL,Atal Realtech Limited,,pocket_pivot,99.5,99.5,True,True,False,29.65,2026-07-10,29.31,21,-1.1467,5.3963,2.0573,-3.7774,7.9258,-14.0978,False,0.0,25
+2026-06-10,WELENT,Welspun Enterprises Limited,,pocket_pivot,98.8,98.8,False,True,False,556.1,2026-07-10,614.0,21,10.4118,-1.1509,2.3287,10.4118,13.9543,-2.8952,False,0.0,25
+2026-06-10,CCL,CCL Products (India) Limited,,pocket_pivot,90.0,90.0,True,True,False,1193.4,2026-07-10,1214.0,21,1.7262,-6.603,-2.2038,1.3239,3.5864,-7.6504,True,0.0,25
+2026-06-10,DLINKINDIA,D-Link (India) Limited,,pocket_pivot,90.0,90.0,False,True,False,501.45,2026-07-10,506.45,21,0.9971,1.9045,3.2207,8.8942,9.5224,-2.6822,True,0.0,25
+2026-06-10,MUNJALAU,Munjal Auto Industries Limited,,pocket_pivot,90.0,90.0,False,True,False,98.46,2026-07-10,101.33,21,2.9149,-1.818,-2.9758,2.2446,16.7885,-7.8611,False,0.0,25
+2026-06-11,ABDL,Allied Blenders and Distillers Limited,,pocket_pivot,100.0,100.0,False,True,False,608.45,2026-07-10,648.75,20,6.6234,4.002,2.2763,6.6234,16.9693,-7.9629,False,0.0,25
+2026-06-11,AEGISLOG,Aegis Logistics Limited,,pocket_pivot,100.0,100.0,False,True,False,925.9,2026-07-10,1246.1,20,34.5826,8.7482,23.1936,34.5826,53.7423,-13.5814,False,0.0,25
+2026-06-11,AKUMS,Akums Drugs and Pharmaceuticals Limited,,pocket_pivot,100.0,100.0,True,True,False,609.1,2026-07-10,701.95,20,15.2438,-1.2149,0.041,15.2438,16.1386,-3.5462,False,0.0,25
+2026-06-11,CUPID,Cupid Limited,,pocket_pivot,100.0,100.0,True,True,False,155.18,2026-07-10,212.24,20,36.7702,9.0282,17.6762,36.7702,45.6373,-8.1776,True,0.0,25
+2026-06-11,ELECTHERM,Electrotherm (India) Limited,,pocket_pivot,100.0,100.0,False,True,False,1182.65,2026-07-10,1119.5,20,-5.3397,-8.5528,-3.6444,-5.3397,7.9778,-12.0534,False,0.0,25
+2026-06-11,GLAND,Gland Pharma Limited,,pocket_pivot,100.0,100.0,False,True,False,2306.5,2026-07-10,2479.4,20,7.4962,-4.522,0.3599,7.4962,11.576,-6.0134,False,0.0,25
+2026-06-11,INNOVACAP,Innova Captab Limited,,pocket_pivot,100.0,100.0,False,True,False,950.75,2026-07-10,989.35,20,4.06,-1.8722,-0.9887,4.06,8.7352,-4.102,False,0.0,25
+2026-06-11,DIFFNKG,Diffusion Engineers Limited,,pocket_pivot,99.4,99.4,False,True,False,362.4,2026-07-10,403.4,20,11.3135,2.718,7.1468,11.3135,20.3642,-5.3532,False,0.0,25
+2026-06-11,APARINDS,Apar Industries Limited,,pocket_pivot,92.6,92.6,True,True,False,14551.0,2026-07-10,14058.0,20,-3.3881,8.6661,10.1093,-3.3881,17.9094,-7.9032,True,0.0,25
+2026-06-11,ICICIBANK,ICICI Bank Limited,Banking,pocket_pivot,91.6,91.6,False,True,False,1317.0,2026-07-10,1401.2,20,6.3933,1.921,5.3531,6.3933,8.8079,-2.3159,True,0.0,25
+2026-06-11,VINCOFE,Vintage Coffee And Beverages Limited,,pocket_pivot,90.0,90.0,False,True,False,158.85,2026-07-10,161.55,20,1.6997,-4.7718,-4.8347,1.6997,6.7044,-9.6317,False,0.0,25
+2026-06-11,JBCHEPHARM,JB Chemicals & Pharmaceuticals Limited,,vcp,87.1,87.1,True,True,False,2252.7,2026-07-10,2435.5,20,8.1147,-2.406,-0.3906,8.1147,9.8238,-3.9774,True,0.0,25
+2026-06-12,ABDL,Allied Blenders and Distillers Limited,,pocket_pivot,100.0,100.0,False,True,False,644.45,2026-07-10,648.75,19,0.6672,-2.0483,2.3353,,10.4353,-5.5241,False,0.0,25
+2026-06-12,CGCL,Capri Global Capital Limited,,vcp,100.0,100.0,False,True,False,208.48,2026-07-10,252.22,19,20.9804,5.9862,3.9045,,26.8851,-4.5232,False,0.0,25
+2026-06-12,EQUITASBNK,Equitas Small Finance Bank Limited,,pocket_pivot,100.0,100.0,True,True,False,75.54,2026-07-10,82.24,19,8.8695,2.2637,-1.2444,,9.8756,-3.892,False,0.0,25
+2026-06-12,GOLDIAM,Goldiam International Limited,,pocket_pivot,100.0,100.0,False,True,False,478.8,2026-07-10,378.0,19,-21.0526,-0.8772,-5.4616,,5.9837,-36.0902,True,0.0,25
+2026-06-12,IFCI,IFCI Limited,,pocket_pivot,100.0,100.0,True,True,False,84.57,2026-07-10,77.46,19,-8.4072,1.3716,-8.7383,,13.2789,-14.5087,False,0.0,25
+2026-06-12,MEDPLUS,Medplus Health Services Limited,,pocket_pivot,100.0,100.0,False,True,False,881.95,2026-07-10,826.1,19,-6.3326,-4.2519,-9.1162,,1.9389,-9.6661,False,0.0,25
+2026-06-12,MMTC,MMTC Limited,,pocket_pivot,100.0,100.0,False,True,False,68.06,2026-07-10,65.1,19,-4.3491,9.5357,-1.9248,,15.119,-7.9195,False,0.0,25
+2026-06-12,NGLFINE,NGL Fine-Chem Limited,,pocket_pivot,100.0,100.0,True,True,False,3048.8,2026-07-10,3193.6,19,4.7494,0.223,1.1349,,9.1905,-9.2955,False,0.0,25
+2026-06-12,ORCHPHARMA,Orchid Pharma Limited,,pocket_pivot,100.0,100.0,False,True,False,917.1,2026-07-10,1012.55,19,10.4078,6.755,3.6746,,19.2891,-7.6437,False,0.0,25
+2026-06-12,PRIVISCL,Privi Speciality Chemicals Limited,,pocket_pivot,100.0,100.0,True,True,False,3444.3,2026-07-10,3662.8,19,6.3438,1.4401,4.4683,,9.1659,-5.3189,True,0.0,25
+2026-06-12,WALCHANNAG,Walchandnagar Industries Limited,,pocket_pivot,100.0,100.0,False,True,False,265.45,2026-07-10,261.0,19,-1.6764,17.5551,3.2586,,18.9678,-15.2194,False,0.0,25
+2026-06-12,YASHO,Yasho Industries Limited,,pocket_pivot,100.0,100.0,False,True,False,2870.4,2026-07-10,3037.9,19,5.8354,0.2857,3.0484,,10.7964,-9.6572,False,0.0,25
+2026-06-12,TVSSCS,TVS Supply Chain Solutions Limited,,pocket_pivot,98.3,98.3,False,True,False,132.26,2026-07-10,141.66,19,7.1072,6.0865,-0.3402,,10.7667,-7.7574,False,0.0,25
+2026-06-12,APARINDS,Apar Industries Limited,,pocket_pivot,95.9,95.9,True,True,False,15221.0,2026-07-10,14058.0,19,-7.6408,6.9575,5.026,,12.7193,-11.9572,True,0.0,25
+2026-06-12,ABSLAMC,Aditya Birla Sun Life AMC Limited,,pocket_pivot,93.8,93.8,True,True,False,1101.2,2026-07-10,1146.6,19,4.1228,7.2103,6.3204,,11.2332,-2.3157,True,0.0,25
+2026-06-12,E2E,E2E Networks Limited,,pocket_pivot,93.8,93.8,False,True,False,386.4,2026-07-10,397.9,19,2.9762,10.2226,2.3292,,21.4803,-6.5217,False,0.0,25
+2026-06-12,AUBANK,AU Small Finance Bank Limited,,pocket_pivot,92.2,92.2,True,True,False,1015.5,2026-07-10,1072.1,19,5.5736,1.7282,1.4722,,7.3757,-5.5539,True,0.0,25
+2026-06-12,PARAS,Paras Defence and Space Technologies Limited,,pocket_pivot,91.2,91.2,True,True,False,1097.15,2026-07-10,1253.1,19,14.2141,28.3917,7.8157,,31.5226,-8.2213,False,0.0,25
+2026-06-12,MSPL,MSP Steel & Power Limited,,pocket_pivot,90.7,90.7,False,True,False,41.47,2026-07-10,39.14,19,-5.6185,6.8724,-0.5305,,11.2129,-6.6072,False,0.0,25
+2026-06-12,SENORES,Senores Pharmaceuticals Limited,,pocket_pivot,90.6,90.6,True,True,False,1290.0,2026-07-10,1417.8,19,9.907,1.938,2.2946,,15.3411,-8.3101,False,0.0,25
+2026-06-12,AEGISLOG,Aegis Logistics Limited,,pocket_pivot,90.0,90.0,False,True,False,944.4,2026-07-10,1246.1,19,31.9462,6.7133,24.3223,,50.7306,-3.3037,False,0.0,25
+2026-06-12,VINCOFE,Vintage Coffee And Beverages Limited,,pocket_pivot,90.0,90.0,False,True,False,159.45,2026-07-10,161.55,19,1.317,-4.572,-5.9392,,3.7316,-9.9718,False,0.0,25
+2026-06-12,GAIL,GAIL (India) Limited,,vcp,85.0,85.0,False,True,False,170.5,2026-07-10,173.73,19,1.8944,1.9941,1.0088,,4.6745,-2.2463,False,0.0,25
+2026-06-15,AARTIIND,Aarti Industries Limited,,pocket_pivot,100.0,100.0,True,True,False,498.15,2026-07-10,484.1,18,-2.8204,-2.3989,-7.9996,,1.355,-10.0672,False,0.0,25
+2026-06-15,ANGELONE,Angel One Limited,,vcp,100.0,100.0,True,True,False,352.3,2026-07-10,346.05,18,-1.7741,0.7096,-6.1453,,2.3134,-7.153,True,0.0,25
+2026-06-15,CGCL,Capri Global Capital Limited,,vcp,100.0,100.0,False,True,False,214.18,2026-07-10,252.22,18,17.7608,0.8964,6.2938,,23.5083,-2.5633,False,0.0,25
+2026-06-15,DIVGIITTS,Divgi Torqtransfer Systems Limited,,pocket_pivot,100.0,100.0,True,True,False,869.2,2026-07-10,967.4,18,11.2977,-0.5522,13.616,,22.5265,-5.3152,False,0.0,25
+2026-06-15,FINEORG,Fine Organic Industries Limited,,pocket_pivot,100.0,100.0,False,True,False,4924.0,2026-07-10,4999.5,18,1.5333,5.6803,7.5508,,9.8091,-3.5784,True,0.0,25
+2026-06-15,GAIL,GAIL (India) Limited,,vcp,100.0,100.0,False,True,False,175.41,2026-07-10,173.73,18,-0.9578,1.0775,-1.1117,,1.7445,-4.2472,False,0.0,25
+2026-06-15,GALAPREC,Gala Precision Engineering Limited,,pocket_pivot,100.0,100.0,False,True,False,1034.05,2026-07-10,1187.7,18,14.859,13.4471,7.0596,,21.851,-7.5383,False,0.0,25
+2026-06-15,GMRAIRPORT,GMR AIRPORTS LIMITED,,vcp,100.0,100.0,False,True,False,106.66,2026-07-10,112.51,18,5.4847,1.4251,5.0909,,8.4193,-0.9188,False,0.0,25
+2026-06-15,GRASIM,Grasim Industries Limited,Infrastructure,vcp,100.0,100.0,False,True,False,3164.5,2026-07-10,3213.6,18,1.5516,0.3381,-2.0382,,2.5754,-2.9136,False,0.0,25
+2026-06-15,HONAUT,Honeywell Automation India Limited,,inside_bar_cluster,100.0,100.0,False,True,False,35905.0,2026-07-10,38175.0,18,6.3222,6.1134,10.667,,12.742,-0.376,False,0.0,25
+2026-06-15,IFCI,IFCI Limited,,pocket_pivot,100.0,100.0,True,True,False,89.6,2026-07-10,77.46,18,-13.5491,-6.9643,-16.4286,,6.9196,-18.1696,False,0.0,25
+2026-06-15,LTF,L&T Finance Limited,,pocket_pivot,100.0,100.0,False,True,False,293.25,2026-07-10,321.25,18,9.5482,-1.5516,5.9676,,15.4646,-3.717,False,0.0,25
+2026-06-15,MINDACORP,Minda Corporation Limited,,pocket_pivot,100.0,100.0,False,True,False,662.55,2026-07-10,698.9,18,5.4864,-0.5056,5.1694,,7.7126,-3.3809,False,0.0,25
+2026-06-15,MOTHERSON,Samvardhana Motherson International Limited,,vcp,100.0,100.0,True,True,False,148.12,2026-07-10,143.19,18,-3.3284,-1.5325,-0.0068,,4.8137,-7.7032,False,0.0,25
+2026-06-15,MOTILALOFS,Motilal Oswal Financial Services Limited,,pocket_pivot,100.0,100.0,False,True,False,939.45,2026-07-10,979.35,18,4.2472,0.9953,1.2614,,4.6304,-3.8799,False,0.0,25
+2026-06-15,MSTCLTD,Mstc Limited,,pocket_pivot,100.0,100.0,False,True,False,629.75,2026-07-10,670.65,18,6.4946,9.607,12.6479,,18.1262,-7.8761,True,0.0,25
+2026-06-15,SHRIPISTON,SPR Auto Technologies Limited,,pocket_pivot,100.0,100.0,True,True,False,3741.9,2026-07-10,4189.6,18,11.9645,1.5741,11.9057,,18.1619,-4.4069,True,0.0,25
+2026-06-15,SPAL,S. P. Apparels Limited,,pocket_pivot,100.0,100.0,False,True,False,867.85,2026-07-10,1159.7,18,33.6291,12.8133,31.1459,,40.7962,-8.233,False,0.0,25
+2026-06-15,THELEELA,Leela Palaces Hotels & Resorts Limited,,pocket_pivot,100.0,100.0,False,True,False,458.2,2026-07-10,501.0,18,9.3409,8.1187,3.7647,,11.5234,-5.4998,False,0.0,25
+2026-06-15,VBL,Varun Beverages Limited,,vcp,100.0,100.0,True,True,False,541.0,2026-07-10,478.1,18,-11.6266,-5.1848,-6.183,,2.7357,-12.7357,True,0.0,25
+2026-06-15,CHOLAFIN,Cholamandalam Investment and Finance Company Limited,,pocket_pivot,99.7,99.7,False,True,False,1653.6,2026-07-10,1807.8,18,9.3251,3.9429,8.2366,,13.389,-2.8,False,0.0,25
+2026-06-15,ABSLAMC,Aditya Birla Sun Life AMC Limited,,pocket_pivot,98.9,98.9,True,True,False,1146.1,2026-07-10,1146.6,18,0.0436,2.9928,0.7504,,6.8755,-4.8251,True,0.0,25
+2026-06-15,APARINDS,Apar Industries Limited,,pocket_pivot,98.5,98.5,True,True,False,15986.0,2026-07-10,14058.0,18,-12.0606,1.1635,-1.8203,,7.3252,-16.1704,True,0.0,25
+2026-06-15,TVSMOTOR,TVS Motor Company Limited,,pocket_pivot,95.3,95.3,False,True,False,3459.5,2026-07-10,3623.1,18,4.729,0.8441,0.0318,,9.1198,-3.6566,True,0.0,25
+2026-06-15,FIEMIND,Fiem Industries Limited,,pocket_pivot,95.1,95.1,True,True,False,2386.8,2026-07-10,2249.9,18,-5.7357,-3.2177,-5.2581,,1.1815,-9.9212,True,0.0,25
+2026-06-15,STEELXIND,STEEL EXCHANGE INDIA LIMITED,,pocket_pivot,93.6,93.6,False,True,False,12.35,2026-07-10,12.01,18,-2.753,7.1255,1.4575,,12.9555,-5.9109,True,0.0,25
+2026-06-15,PARAS,Paras Defence and Space Technologies Limited,,pocket_pivot,93.1,93.1,True,True,False,1108.15,2026-07-10,1253.1,18,13.0804,24.4281,16.3245,,30.217,-6.1499,False,0.0,25
+2026-06-15,GAIL,GAIL (India) Limited,,pocket_pivot,93.0,93.0,False,True,False,175.41,2026-07-10,173.73,18,-0.9578,1.0775,-1.1117,,1.7445,-4.2472,False,0.0,25
+2026-06-15,SHRIRAMFIN,Shriram Finance Limited,,pocket_pivot,91.1,91.1,True,True,False,1000.65,2026-07-10,1044.1,18,4.3422,-0.7795,4.1473,,8.6594,-2.0087,False,0.0,25
+2026-06-15,HDFCAMC,HDFC Asset Management Company Limited,,pocket_pivot,90.1,90.1,False,True,False,2622.9,2026-07-10,2761.2,18,5.2728,2.5544,1.1552,,8.2161,-4.7238,True,0.0,25
+2026-06-15,BETA,Beta Drugs Limited,,pocket_pivot,90.0,90.0,False,True,False,1835.6,2026-07-10,2366.8,18,28.9388,16.9917,19.0183,,30.475,-2.8111,True,0.0,25
+2026-06-15,DIACABS,Diamond Power Infrastructure Limited,,pocket_pivot,90.0,90.0,True,True,False,215.34,2026-07-10,229.01,18,6.3481,-3.5711,-2.7863,,16.9314,-8.2846,False,0.0,25
+2026-06-15,KEI,KEI Industries Limited,,vcp,89.5,89.5,True,True,False,5460.5,2026-07-10,5149.5,18,-5.6954,3.6535,-0.6043,,4.5326,-9.8068,False,0.0,25
+2026-06-15,MANINDS,Man Industries (India) Limited,,vcp,87.2,87.2,True,True,False,573.05,2026-07-10,566.5,18,-1.143,4.9472,1.5007,,8.8387,-5.5667,False,0.0,25
+2026-06-15,AGARIND,Agarwal Industrial Corporation Limited,,power_gap,85.0,85.0,False,True,False,580.25,2026-07-10,537.8,18,-7.3158,-6.0146,-7.8156,,5.1099,-13.3132,False,0.0,25
+2026-06-15,CENTRALBK,Central Bank of India,,vcp,85.0,85.0,False,True,False,31.87,2026-07-10,32.6,18,2.2906,3.6398,2.0709,,8.1895,-2.3847,False,0.0,25
+2026-06-15,MAXHEALTH,Max Healthcare Institute Limited,,vcp,85.0,85.0,False,True,False,1028.9,2026-07-10,1108.1,18,7.6975,6.4292,9.7531,,13.5096,-1.7349,False,0.0,25
+2026-06-15,NAZARA,Nazara Technologies Limited,,vcp,85.0,85.0,False,True,False,290.95,2026-07-10,304.3,18,4.5884,3.2995,4.176,,6.8912,-1.4779,True,0.0,25
+2026-06-16,BETA,Beta Drugs Limited,,pocket_pivot,100.0,100.0,False,True,False,1890.3,2026-07-10,2366.8,17,25.2076,11.5696,15.5901,,26.6995,-2.1319,True,0.0,25
+2026-06-16,CUPID,Cupid Limited,,pocket_pivot,100.0,100.0,True,True,False,164.89,2026-07-10,212.24,17,28.7161,10.3706,17.2782,,37.0611,-7.502,True,0.0,25
+2026-06-16,FACT,Fertilizers and Chemicals Travancore Limited,,pocket_pivot,100.0,100.0,False,True,False,997.8,2026-07-10,855.55,17,-14.2564,-10.5181,-11.9613,,6.0934,-15.7647,False,0.0,25
+2026-06-16,GNFC,Gujarat Narmada Valley Fertilizers and Chemicals Limited,,pocket_pivot,100.0,100.0,False,True,False,536.05,2026-07-10,502.45,17,-6.2681,4.4212,-1.0167,,14.9147,-7.5366,False,0.0,25
+2026-06-16,GODAVARIB,Godavari Biorefineries Limited,,pocket_pivot,100.0,100.0,False,True,False,301.3,2026-07-10,270.7,17,-10.156,-4.7295,-6.223,,4.1985,-14.703,False,0.0,25
+2026-06-16,KPIL,Kalpataru Projects International Limited,,pocket_pivot,100.0,100.0,False,True,False,1365.7,2026-07-10,1352.0,17,-1.0031,5.4111,-0.7322,,8.34,-4.0858,False,0.0,25
+2026-06-16,LLOYDSENGG,LLOYDS ENGINEERING WORKS LIMITED,,pocket_pivot,100.0,100.0,False,True,False,79.94,2026-07-10,90.6,17,13.335,9.9199,5.329,,15.8244,-10.1826,False,0.0,25
+2026-06-16,MMTC,MMTC Limited,,pocket_pivot,100.0,100.0,False,True,False,75.74,2026-07-10,65.1,17,-14.0481,-3.2083,-10.5757,,3.446,-17.2564,False,0.0,25
+2026-06-16,MSTCLTD,Mstc Limited,,pocket_pivot,100.0,100.0,False,True,False,708.8,2026-07-10,670.65,17,-5.3823,-7.0894,0.9876,,4.952,-11.4701,True,0.0,25
+2026-06-16,ORCHPHARMA,Orchid Pharma Limited,,pocket_pivot,100.0,100.0,False,True,False,1048.15,2026-07-10,1012.55,17,-3.3965,-5.5813,-6.998,,4.3744,-14.1344,False,0.0,25
+2026-06-16,PHOENIXLTD,The Phoenix Mills Limited,,pocket_pivot,100.0,100.0,True,True,False,1868.2,2026-07-10,2138.9,17,14.4899,-1.2311,8.0452,,15.0305,-1.4988,False,0.0,25
+2026-06-16,PREMEXPLN,Premier Explosives Limited,,pocket_pivot,100.0,100.0,False,True,False,737.8,2026-07-10,687.5,17,-6.8176,2.0534,7.0209,,12.4695,-7.8341,True,0.0,25
+2026-06-16,RPTECH,Rashi Peripherals Limited,,pocket_pivot,100.0,100.0,True,True,False,662.6,2026-07-10,783.05,17,18.1784,11.0021,18.9179,,22.6758,-13.9752,False,0.0,25
+2026-06-16,TIMKEN,Timken India Limited,,pocket_pivot,100.0,100.0,False,True,False,3634.3,2026-07-10,3205.0,17,-11.8125,3.954,-4.1411,,7.9988,-12.5003,False,0.0,25
+2026-06-16,VARROC,Varroc Engineering Limited,,pocket_pivot,100.0,100.0,False,True,False,623.0,2026-07-10,661.45,17,6.1717,-2.6244,2.2713,,9.679,-6.4125,False,0.0,25
+2026-06-16,WABAG,VA Tech Wabag Limited,,pocket_pivot,100.0,100.0,False,True,False,1754.3,2026-07-10,2221.2,17,26.6146,19.0218,18.7254,,28.1423,-6.8004,False,0.0,25
+2026-06-16,XPROINDIA,Xpro India Limited,,pocket_pivot,100.0,100.0,False,True,False,1393.8,2026-07-10,1457.8,17,4.5918,-4.4196,2.4107,,12.9861,-13.2587,False,0.0,25
+2026-06-16,AVL,Aditya Vision Limited,,pocket_pivot,96.8,96.8,False,True,False,590.9,2026-07-10,635.8,17,7.5986,5.6693,9.4348,,19.3095,-4.0108,True,0.0,25
+2026-06-16,MARINE,Marine Electricals (India) Limited,,pocket_pivot,96.0,96.0,True,True,False,261.55,2026-07-10,258.7,17,-1.0897,5.0086,11.2407,,13.8979,-6.71,False,0.0,25
+2026-06-16,EDELWEISS,Edelweiss Financial Services Limited,,pocket_pivot,95.5,95.5,False,True,False,120.55,2026-07-10,120.14,17,-0.3401,5.7238,4.0564,,11.0742,-5.1846,False,0.0,25
+2026-06-16,LALPATHLAB,Dr. Lal Path Labs Ltd.,,pocket_pivot,90.0,90.0,False,True,False,1642.0,2026-07-10,1692.8,17,3.0938,1.6809,-1.151,,9.8051,-1.9428,True,0.0,25
+2026-06-17,AEROENTER,Aeroflex Enterprises Limited,,pocket_pivot,100.0,100.0,False,True,False,115.65,2026-07-10,124.97,16,8.0588,15.9879,18.1669,,29.3126,-8.3182,False,0.0,25
+2026-06-17,AVL,Aditya Vision Limited,,pocket_pivot,100.0,100.0,False,True,False,607.5,2026-07-10,635.8,16,4.6584,6.0741,5.4074,,16.0494,-3.9259,True,0.0,25
+2026-06-17,BEL,Bharat Electronics Limited,,pocket_pivot,100.0,100.0,False,True,False,419.85,2026-07-10,414.85,16,-1.1909,-1.5005,-1.1433,,3.6084,-3.8823,True,0.0,25
+2026-06-17,BLUSPRING,Bluspring Enterprises Limited,,pocket_pivot,100.0,100.0,False,True,False,109.35,2026-07-10,113.04,16,3.3745,4.0878,9.593,,20.5487,-15.4184,False,0.0,25
+2026-06-17,CGPOWER,CG Power and Industrial Solutions Limited,,vcp,100.0,100.0,False,True,False,963.75,2026-07-10,916.6,16,-4.8923,-4.5966,-0.4514,,1.7795,-7.9533,True,0.0,25
+2026-06-17,FEDERALBNK,The Federal Bank  Limited,,vcp,100.0,100.0,True,True,False,322.7,2026-07-10,329.85,16,2.2157,0.7747,2.572,,3.5947,-1.3945,False,0.0,25
+2026-06-17,GNFC,Gujarat Narmada Valley Fertilizers and Chemicals Limited,,pocket_pivot,100.0,100.0,False,True,False,559.25,2026-07-10,502.45,16,-10.1565,-0.2235,-4.4882,,10.1475,-11.3724,False,0.0,25
+2026-06-17,GVT&D,GE Vernova T&D India Limited,,vcp,100.0,100.0,True,True,False,5152.5,2026-07-10,4677.1,16,-9.2266,-1.9408,-6.3988,,9.6555,-16.1572,True,0.0,25
+2026-06-17,HAPPYFORGE,Happy Forgings Limited,,pocket_pivot,100.0,100.0,True,True,False,1431.2,2026-07-10,1582.3,16,10.5576,6.8195,7.7557,,11.6755,-6.3373,False,0.0,25
+2026-06-17,IOB,Indian Overseas Bank,,pocket_pivot,100.0,100.0,False,True,False,35.58,2026-07-10,34.58,16,-2.8106,-1.9112,-3.1478,,2.67,-6.4643,False,0.0,25
+2026-06-17,KIRLPNU,Kirloskar Pneumatic Company Limited,,pocket_pivot,100.0,100.0,True,True,False,1832.4,2026-07-10,1783.7,16,-2.6577,4.1912,1.6972,,19.9029,-9.714,True,0.0,25
+2026-06-17,LLOYDSENGG,LLOYDS ENGINEERING WORKS LIMITED,,pocket_pivot,100.0,100.0,False,True,False,87.69,2026-07-10,90.6,16,3.3185,-2.2808,-5.0405,,5.5879,-8.6555,False,0.0,25
+2026-06-17,LMW,LMW Limited,,pocket_pivot,100.0,100.0,False,True,False,16410.0,2026-07-10,16134.0,16,-1.6819,-2.4497,-3.8026,,3.3333,-5.5454,False,0.0,25
+2026-06-17,MAITHANALL,Maithan Alloys Limited,,pocket_pivot,100.0,100.0,False,True,False,1129.1,2026-07-10,1034.2,16,-8.4049,-8.4226,-10.07,,7.1739,-12.7624,False,0.0,25
+2026-06-17,PARAS,Paras Defence and Space Technologies Limited,,pocket_pivot,100.0,100.0,True,True,False,1285.65,2026-07-10,1253.1,16,-2.5318,0.2178,4.523,,12.2389,-15.0858,False,0.0,25
+2026-06-17,RATNAVEER,Ratnaveer Precision Engineering Limited,,pocket_pivot,100.0,100.0,True,True,False,181.17,2026-07-10,180.01,16,-0.6403,0.6789,-2.2907,,8.7376,-9.9409,False,0.0,25
+2026-06-17,RICOAUTO,Rico Auto Industries Limited,,pocket_pivot,100.0,100.0,True,True,False,143.29,2026-07-10,132.94,16,-7.2231,-1.7377,-3.5871,,9.568,-10.9638,False,0.0,25
+2026-06-17,ROSSTECH,Rossell Techsys Limited,,pocket_pivot,100.0,100.0,True,True,False,1020.4,2026-07-10,1011.5,16,-0.8722,-8.8397,-2.0433,,8.1929,-11.0741,False,0.0,25
+2026-06-17,SIMPLEXINF,Simplex Infrastructures Limited,,pocket_pivot,100.0,100.0,False,True,False,281.85,2026-07-10,271.75,16,-3.5835,-10.3246,-5.6945,,3.6012,-12.5776,False,0.0,25
+2026-06-17,SUNPHARMA,Sun Pharmaceutical Industries Limited,Pharma,vcp,100.0,100.0,False,True,False,1820.4,2026-07-10,1935.5,16,6.3228,2.9664,2.7796,,7.3336,-0.9778,False,0.0,25
+2026-06-17,WALCHANNAG,Walchandnagar Industries Limited,,pocket_pivot,100.0,100.0,True,True,False,280.05,2026-07-10,261.0,16,-6.8024,2.4281,-11.8907,,12.7656,-19.6394,False,0.0,25
+2026-06-17,YESBANK,Yes Bank Limited,,pocket_pivot,100.0,100.0,False,True,False,25.11,2026-07-10,23.94,16,-4.6595,-0.677,-3.4249,,2.6683,-7.1286,False,0.0,25
+2026-06-17,KRISHNADEF,Krishna Defence And Allied Industries Limited,,pocket_pivot,99.5,99.5,True,True,False,1306.0,2026-07-10,1315.2,16,0.7044,1.9908,-7.0674,,7.1975,-10.4135,True,0.0,25
+2026-06-17,DMART,Avenue Supermarts Limited,,pocket_pivot,94.6,94.6,False,True,False,4287.5,2026-07-10,4081.1,16,-4.814,1.1312,-2.344,,3.3096,-7.172,False,0.0,25
+2026-06-17,NBCC,NBCC (India) Limited,,pocket_pivot,93.4,93.4,False,True,False,112.83,2026-07-10,99.98,16,-11.3888,-3.5008,-8.659,,1.294,-16.3875,True,0.0,25
+2026-06-17,ASTRAMICRO,Astra Microwave Products Limited,,pocket_pivot,90.6,90.6,False,True,False,1574.4,2026-07-10,1803.7,16,14.5643,5.6021,14.0561,,18.8389,-5.9896,False,0.0,25
+2026-06-17,RPTECH,Rashi Peripherals Limited,,pocket_pivot,90.0,90.0,True,True,False,685.8,2026-07-10,783.05,16,14.1805,11.1184,16.2438,,18.5258,-5.2129,False,0.0,25
+2026-06-18,3MINDIA,3M India Limited,,vcp,100.0,100.0,False,True,False,33250.0,2026-07-10,35370.0,15,6.3759,0.391,5.9699,,6.7669,-2.7669,True,0.0,25
+2026-06-18,AEROENTER,Aeroflex Enterprises Limited,,pocket_pivot,100.0,100.0,True,True,False,124.42,2026-07-10,124.97,15,0.4421,10.5932,5.0072,,20.1977,-7.2496,False,0.0,25
+2026-06-18,ALOKINDS,Alok Industries Limited,,inside_bar_cluster,100.0,100.0,False,True,False,13.23,2026-07-10,12.58,15,-4.9131,-3.0234,-0.6047,,3.7793,-6.9539,False,0.0,25
+2026-06-18,BEL,Bharat Electronics Limited,,pocket_pivot,100.0,100.0,False,True,False,428.6,2026-07-10,414.85,15,-3.2081,-4.993,-2.4615,,1.4932,-5.8446,True,0.0,25
+2026-06-18,BEPL,Bhansali Engineering Polymers Limited,,pocket_pivot,100.0,100.0,False,True,False,107.06,2026-07-10,103.14,15,-3.6615,-7.5191,-3.9324,,2.5593,-10.6389,True,0.0,25
+2026-06-18,CUPID,Cupid Limited,,pocket_pivot,100.0,100.0,True,True,False,169.19,2026-07-10,212.24,15,25.4448,7.9319,17.5247,,33.5776,-4.7048,True,0.0,25
+2026-06-18,DLINKINDIA,D-Link (India) Limited,,pocket_pivot,100.0,100.0,False,True,False,526.3,2026-07-10,506.45,15,-3.7716,-1.9476,-0.2945,,4.3511,-5.7572,True,0.0,25
+2026-06-18,ENGINERSIN,Engineers India Limited,,pocket_pivot,100.0,100.0,True,True,False,253.15,2026-07-10,239.64,15,-5.3368,-0.5254,-6.1861,,4.681,-7.94,True,0.0,25
+2026-06-18,FLUOROCHEM,Gujarat Fluorochemicals Limited,,pocket_pivot,100.0,100.0,False,True,False,3837.5,2026-07-10,3941.5,15,2.7101,1.8684,3.3355,,5.2248,-4.4378,False,0.0,25
+2026-06-18,GANDHAR,Gandhar Oil Refinery (India) Limited,,pocket_pivot,100.0,100.0,True,True,False,174.11,2026-07-10,203.15,15,16.6791,0.5973,7.2483,,20.4985,-10.0569,False,0.0,25
+2026-06-18,ICIL,Indo Count Industries Limited,,pocket_pivot,100.0,100.0,True,True,False,405.85,2026-07-10,412.55,15,1.6509,5.0634,5.0881,,14.2787,-15.4614,False,0.0,25
+2026-06-18,KPRMILL,K.P.R. Mill Limited,,pocket_pivot,100.0,100.0,False,True,False,1186.4,2026-07-10,1110.1,15,-6.4312,0.413,-0.1601,,12.441,-11.7245,True,0.0,25
+2026-06-18,LICI,Life Insurance Corporation Of India,,pocket_pivot,100.0,100.0,False,True,False,430.0,2026-07-10,443.05,15,3.0349,-1.5465,0.0581,,4.6977,-2.6279,False,0.0,25
+2026-06-18,MFSL,Max Financial Services Limited,,pocket_pivot,100.0,100.0,False,True,False,1688.2,2026-07-10,1633.1,15,-3.2638,-4.5492,-5.4259,,1.5046,-8.3284,False,0.0,25
+2026-06-18,NYKAA,FSN E-Commerce Ventures Limited,,pocket_pivot,100.0,100.0,True,True,False,298.1,2026-07-10,330.1,15,10.7347,1.0902,4.0926,,11.0198,-5.468,False,0.0,25
+2026-06-18,RADICO,Radico Khaitan Limited,,pocket_pivot,100.0,100.0,True,True,False,3690.0,2026-07-10,4073.7,15,10.3984,3.7886,5.4824,,12.7859,-3.3442,True,0.0,25
+2026-06-18,RPTECH,Rashi Peripherals Limited,,pocket_pivot,100.0,100.0,True,True,False,730.0,2026-07-10,783.05,15,7.2671,6.9726,3.8288,,11.3493,-5.3425,False,0.0,25
+2026-06-18,SBC,SBC Exports Limited,,pocket_pivot,100.0,100.0,True,True,False,39.88,2026-07-10,42.38,15,6.2688,4.2879,5.667,,12.8385,-5.9428,True,0.0,25
+2026-06-18,SPAL,S. P. Apparels Limited,,pocket_pivot,100.0,100.0,True,True,False,920.95,2026-07-10,1159.7,15,25.9243,19.4365,21.4615,,32.6782,-7.704,False,0.0,25
+2026-06-18,SPAL,S. P. Apparels Limited,,inside_bar_cluster,100.0,100.0,True,True,False,920.95,2026-07-10,1159.7,15,25.9243,19.4365,21.4615,,32.6782,-7.704,False,0.0,25
+2026-06-18,STARHEALTH,Star Health and Allied Insurance Company Limited,,pocket_pivot,100.0,100.0,True,True,False,565.65,2026-07-10,603.25,15,6.6472,2.0242,2.5899,,8.583,-4.897,False,0.0,25
+2026-06-18,STEELXIND,STEEL EXCHANGE INDIA LIMITED,,pocket_pivot,100.0,100.0,False,True,False,13.05,2026-07-10,12.01,15,-7.9693,-4.9042,-2.3755,,6.8966,-10.9579,True,0.0,25
+2026-06-18,SUNPHARMA,Sun Pharmaceutical Industries Limited,Pharma,vcp,100.0,100.0,False,True,False,1824.8,2026-07-10,1935.5,15,6.0664,2.0824,4.384,,7.0747,-0.674,False,0.0,25
+2026-06-18,UNITDSPR,United Spirits Limited,,pocket_pivot,100.0,100.0,False,True,False,1350.3,2026-07-10,1385.7,15,2.6216,2.5624,3.1845,,6.717,-2.8364,True,0.0,25
+2026-06-18,VTL,Vardhman Textiles Limited,,pocket_pivot,100.0,100.0,True,True,False,661.4,2026-07-10,636.15,15,-3.8177,-4.0974,0.7333,,4.0218,-6.2594,False,0.0,25
+2026-06-18,WALCHANNAG,Walchandnagar Industries Limited,,pocket_pivot,100.0,100.0,True,True,False,301.35,2026-07-10,261.0,15,-13.3897,-9.1588,-19.1804,,4.7951,-25.3194,False,0.0,25
+2026-06-18,WELENT,Welspun Enterprises Limited,,pocket_pivot,100.0,100.0,False,True,False,570.35,2026-07-10,614.0,15,7.6532,0.3682,5.7684,,11.1072,-3.5329,False,0.0,25
+2026-06-18,WELSPUNLIV,Welspun Living Limited,,pocket_pivot,100.0,100.0,True,True,False,163.0,2026-07-10,166.17,15,1.9448,2.6503,4.865,,6.3804,-9.319,False,0.0,25
+2026-06-18,ZFCVINDIA,ZF Commercial Vehicle Control Systems India Limited,,pocket_pivot,100.0,100.0,False,True,False,15581.0,2026-07-10,2333.8,15,-85.0215,-83.2103,-84.4914,,4.6403,-85.2237,False,0.0,25
+2026-06-18,LINDEINDIA,Linde India Limited,,vcp,98.6,98.6,False,True,False,7275.5,2026-07-10,7033.0,15,-3.3331,-3.4912,-1.3332,,4.0478,-5.1612,False,0.0,25
+2026-06-18,GMRAIRPORT,GMR AIRPORTS LIMITED,,vcp,98.5,98.5,True,True,False,110.55,2026-07-10,112.51,15,1.773,-1.9086,2.0353,,4.6043,-3.7811,False,0.0,25
+2026-06-18,UNIONBANK,Union Bank of India,,vcp,97.0,97.0,True,True,False,176.12,2026-07-10,164.51,15,-6.5921,-0.8006,-7.3984,,0.8403,-12.8435,True,0.0,25
+2026-06-18,JSWINFRA,JSW Infrastructure Limited,,pocket_pivot,96.1,96.1,False,True,False,307.95,2026-07-10,330.05,15,7.1765,7.1278,5.8776,,11.5278,-3.4908,False,0.0,25
+2026-06-18,YESBANK,Yes Bank Limited,,pocket_pivot,94.8,94.8,False,True,False,25.48,2026-07-10,23.94,15,-6.044,-2.394,-4.2779,,1.1774,-8.4772,False,0.0,25
+2026-06-18,ASTRAMICRO,Astra Microwave Products Limited,,pocket_pivot,94.1,94.1,False,True,False,1670.0,2026-07-10,1803.7,15,8.006,3.0958,10.6886,,12.0359,-5.6886,False,0.0,25
+2026-06-18,SETL,Standard Engineering Technology Limited,,pocket_pivot,93.3,93.3,False,True,False,180.17,2026-07-10,290.7,15,61.3476,18.7545,56.3801,,69.4511,-4.135,False,0.0,25
+2026-06-18,NIBE,NIBE Limited,,pocket_pivot,91.1,91.1,False,True,False,1748.4,2026-07-10,1608.0,15,-8.0302,-5.2734,-5.7424,,5.6966,-16.2091,False,0.0,25
+2026-06-18,MARICO,Marico Limited,,pocket_pivot,90.9,90.9,False,True,False,820.75,2026-07-10,852.5,15,3.8684,0.6153,2.1687,,6.3661,-1.8702,True,0.0,25
+2026-06-18,CARBORUNIV,Carborundum Universal Limited,,pocket_pivot,90.0,90.0,False,True,False,1192.2,2026-07-10,1091.2,15,-8.4717,-4.1017,-4.412,,9.6209,-10.2248,False,0.0,25
+2026-06-18,GNA,GNA Axles Limited,,pocket_pivot,90.0,90.0,True,True,False,412.85,2026-07-10,475.4,15,15.1508,5.7769,12.8739,,16.7494,-5.4257,False,0.0,25
+2026-06-18,GOCLCORP,GOCL Corporation Limited,,pocket_pivot,90.0,90.0,False,True,False,424.95,2026-07-10,406.3,15,-4.3888,-3.8004,-5.0477,,8.2245,-8.1539,False,0.0,25
+2026-06-18,MAITHANALL,Maithan Alloys Limited,,pocket_pivot,90.0,90.0,False,True,False,1136.2,2026-07-10,1034.2,15,-8.9773,-10.8608,-10.8256,,6.5041,-13.3075,False,0.0,25
+2026-06-18,PARAS,Paras Defence and Space Technologies Limited,,pocket_pivot,90.0,90.0,True,True,False,1310.3,2026-07-10,1253.1,15,-4.3654,-5.8422,-1.244,,10.1275,-10.5548,False,0.0,25
+2026-06-18,RATNAVEER,Ratnaveer Precision Engineering Limited,,pocket_pivot,90.0,90.0,True,True,False,187.13,2026-07-10,180.01,15,-3.8048,-3.5376,-7.2516,,5.2744,-8.5555,False,0.0,25
+2026-06-18,LUPIN,Lupin Limited,,vcp,88.6,88.6,False,True,False,2327.1,2026-07-10,2496.3,15,7.2709,0.7047,6.3985,,8.5858,-2.0584,True,0.0,25
+2026-06-18,MAXHEALTH,Max Healthcare Institute Limited,,vcp,85.0,85.0,False,True,False,1090.45,2026-07-10,1108.1,15,1.6186,3.0171,5.7728,,7.1026,-5.8646,False,0.0,25
+2026-06-18,SBIN,State Bank of India,Banking,vcp,85.0,85.0,False,True,False,1042.7,2026-07-10,1036.0,15,-0.6426,0.2589,-0.2589,,1.64,-2.9731,True,0.0,25
+2026-06-19,AADHARHFC,Aadhar Housing Finance Limited,,pocket_pivot,100.0,100.0,False,True,False,515.1,2026-07-10,534.55,14,3.776,0.7086,8.0373,,9.2992,-6.4162,False,0.0,25
+2026-06-19,ABCAPITAL,Aditya Birla Capital Limited,,pocket_pivot,100.0,100.0,True,True,False,375.9,2026-07-10,408.3,14,8.6193,2.5007,9.0051,,9.2578,-1.942,False,0.0,25
+2026-06-19,AEROENTER,Aeroflex Enterprises Limited,,pocket_pivot,100.0,100.0,True,True,False,135.87,2026-07-10,124.97,14,-8.0224,4.7325,-3.6653,,10.0684,-15.0659,False,0.0,25
+2026-06-19,AVL,Aditya Vision Limited,,pocket_pivot,100.0,100.0,False,True,False,629.9,2026-07-10,635.8,14,0.9367,6.1359,3.1434,,11.9225,-3.9451,True,0.0,25
+2026-06-19,BERGEPAINT,Berger Paints (I) Limited,,pocket_pivot,100.0,100.0,False,True,False,550.7,2026-07-10,497.25,14,-9.7058,-5.8834,-5.2388,,1.6343,-11.7487,True,0.0,25
+2026-06-19,BHAGCHEM,Bhagiradha Chemicals & Industries Limited,,pocket_pivot,100.0,100.0,False,True,False,279.26,2026-07-10,295.9,14,5.9586,1.1602,1.8406,,9.8976,-13.0917,False,0.0,25
+2026-06-19,CARBORUNIV,Carborundum Universal Limited,,pocket_pivot,100.0,100.0,False,True,False,1241.7,2026-07-10,1091.2,14,-12.1205,-4.0106,-7.828,,5.2509,-13.8037,False,0.0,25
+2026-06-19,CUPID,Cupid Limited,,pocket_pivot,100.0,100.0,True,True,False,176.92,2026-07-10,212.24,14,19.9638,6.4888,20.4443,,27.7414,-3.7701,True,0.0,25
+2026-06-19,ESAFSFB,ESAF Small Finance Bank Limited,,pocket_pivot,100.0,100.0,False,True,False,36.33,2026-07-10,35.73,14,-1.6515,-10.4321,-5.0647,,2.3947,-12.7993,False,0.0,25
+2026-06-19,FINEORG,Fine Organic Industries Limited,,pocket_pivot,100.0,100.0,False,True,False,5285.8,2026-07-10,4999.5,14,-5.4164,0.9138,-2.8056,,2.2929,-8.2069,True,0.0,25
+2026-06-19,GANDHAR,Gandhar Oil Refinery (India) Limited,,pocket_pivot,100.0,100.0,True,True,False,180.26,2026-07-10,203.15,14,12.6983,-0.6102,4.4547,,16.3874,-4.5712,False,0.0,25
+2026-06-19,GOODLUCK,Goodluck India Limited,,pocket_pivot,100.0,100.0,False,True,False,1423.4,2026-07-10,1565.9,14,10.0112,3.597,4.4963,,10.6506,-6.351,False,0.0,25
+2026-06-19,HAPPYFORGE,Happy Forgings Limited,,pocket_pivot,100.0,100.0,True,True,False,1465.0,2026-07-10,1582.3,14,8.0068,4.3003,4.2253,,9.099,-1.7065,False,0.0,25
+2026-06-19,INDSWFTLAB,Ind-Swift Laboratories Limited,,pocket_pivot,100.0,100.0,True,True,False,187.38,2026-07-10,246.44,14,31.5188,9.5474,18.3371,,32.3514,-9.5421,False,0.0,25
+2026-06-19,INDUSINDBK,IndusInd Bank Limited,Banking,pocket_pivot,100.0,100.0,True,True,False,947.45,2026-07-10,1015.8,14,7.2141,-3.3828,6.5808,,9.5572,-4.9923,False,0.0,25
+2026-06-19,JTLIND,JTL INDUSTRIES LIMITED,,pocket_pivot,100.0,100.0,False,True,False,79.23,2026-07-10,78.04,14,-1.502,-1.3379,4.8719,,10.0593,-10.1855,False,0.0,25
+2026-06-19,KMEW,Knowledge Marine & Engineering Works Limited,,pocket_pivot,100.0,100.0,True,True,False,2072.9,2026-07-10,2412.7,14,16.3925,7.3858,8.9102,,17.7095,-5.2053,False,0.0,25
+2026-06-19,LICI,Life Insurance Corporation Of India,,pocket_pivot,100.0,100.0,False,True,False,440.15,2026-07-10,443.05,14,0.6589,-2.022,-2.5105,,2.2833,-4.4871,False,0.0,25
+2026-06-19,MACPOWER,Macpower CNC Machines Limited,,pocket_pivot,100.0,100.0,True,True,False,1182.05,2026-07-10,1371.7,14,16.0442,11.497,21.137,,24.3602,-11.0021,True,0.0,25
+2026-06-19,NIACL,The New India Assurance Company Limited,,pocket_pivot,100.0,100.0,False,True,False,202.31,2026-07-10,183.92,14,-9.09,-10.3406,-8.0372,,7.7554,-13.2025,False,0.0,25
+2026-06-19,OLECTRA,Olectra Greentech Limited,,pocket_pivot,100.0,100.0,False,True,False,1520.3,2026-07-10,1423.6,14,-6.3606,-3.0389,-2.7034,,2.3482,-9.2284,False,0.0,25
+2026-06-19,PANAMAPET,Panama Petrochem Limited,,pocket_pivot,100.0,100.0,True,True,False,483.25,2026-07-10,428.1,14,-11.4123,-17.1133,-8.3704,,5.9596,-17.5996,False,0.0,25
+2026-06-19,PARAS,Paras Defence and Space Technologies Limited,,pocket_pivot,100.0,100.0,True,True,False,1408.65,2026-07-10,1253.1,14,-11.0425,-16.026,-3.5672,,2.4385,-16.7998,False,0.0,25
+2026-06-19,PSPPROJECT,PSP Projects Limited,,pocket_pivot,100.0,100.0,True,True,False,969.1,2026-07-10,1069.2,14,10.3292,1.0061,13.4042,,17.9445,-7.8217,False,0.0,25
+2026-06-19,RELTD,Ravindra Energy Limited,,pocket_pivot,100.0,100.0,False,True,False,170.75,2026-07-10,174.12,14,1.9736,-4.5505,3.7775,,15.0512,-15.672,False,0.0,25
+2026-06-19,RML,Rane (Madras) Limited,,pocket_pivot,100.0,100.0,False,True,False,1121.15,2026-07-10,1299.6,14,15.9167,0.4148,11.35,,18.0841,-12.5898,False,0.0,25
+2026-06-19,SBC,SBC Exports Limited,,pocket_pivot,100.0,100.0,True,True,False,43.59,2026-07-10,42.38,14,-2.7759,-4.2212,-3.2576,,3.2347,-8.0064,True,0.0,25
+2026-06-19,SCHAEFFLER,Schaeffler India Limited,,pocket_pivot,100.0,100.0,False,True,False,4329.9,2026-07-10,4085.0,14,-5.656,-5.4897,-4.4689,,2.2887,-6.9263,True,0.0,25
+2026-06-19,SHRIRAMPPS,Shriram Properties Limited,,vcp,100.0,100.0,False,True,False,91.81,2026-07-10,89.96,14,-2.015,-5.0866,-0.5337,,2.3854,-8.9968,False,0.0,25
+2026-06-19,SIEMENS,Siemens Limited,,vcp,100.0,100.0,True,True,False,3759.6,2026-07-10,3496.5,14,-6.9981,-4.9606,-5.0005,,1.2794,-9.6154,True,0.0,25
+2026-06-19,SPAL,S. P. Apparels Limited,,pocket_pivot,100.0,100.0,True,True,False,1028.4,2026-07-10,1159.7,14,12.7674,2.2365,7.3512,,18.8156,-9.0675,False,0.0,25
+2026-06-19,STARHEALTH,Star Health and Allied Insurance Company Limited,,pocket_pivot,100.0,100.0,True,True,False,580.25,2026-07-10,603.25,14,3.9638,0.7755,0.1896,,5.8509,-3.7398,False,0.0,25
+2026-06-19,SUNPHARMA,Sun Pharmaceutical Industries Limited,Pharma,vcp,100.0,100.0,False,True,False,1838.3,2026-07-10,1935.5,14,5.2875,1.9855,4.0527,,6.2884,-0.9465,False,0.0,25
+2026-06-19,THELEELA,Leela Palaces Hotels & Resorts Limited,,pocket_pivot,100.0,100.0,False,True,False,494.2,2026-07-10,501.0,14,1.376,-2.9846,1.6188,,3.3994,-8.8628,False,0.0,25
+2026-06-19,VENUSPIPES,Venus Pipes & Tubes Limited,,pocket_pivot,100.0,100.0,False,True,False,1546.1,2026-07-10,1807.9,14,16.9329,10.0317,17.1658,,21.2729,-3.2404,True,0.0,25
+2026-06-19,WABAG,VA Tech Wabag Limited,,pocket_pivot,100.0,100.0,False,True,False,1983.6,2026-07-10,2221.2,14,11.9782,0.731,3.6146,,13.3293,-6.7352,False,0.0,25
+2026-06-19,TVSSCS,TVS Supply Chain Solutions Limited,,pocket_pivot,99.8,99.8,False,True,False,140.31,2026-07-10,141.66,14,0.9622,-6.058,-1.5608,,4.4117,-7.9467,False,0.0,25
+2026-06-19,KIRLPNU,Kirloskar Pneumatic Company Limited,,pocket_pivot,98.3,98.3,True,True,False,1950.0,2026-07-10,1783.7,14,-8.5282,-2.2718,-5.2,,12.6718,-11.4462,True,0.0,25
+2026-06-19,ICICIGI,ICICI Lombard General Insurance Company Limited,,pocket_pivot,96.4,96.4,False,True,False,1870.1,2026-07-10,1826.2,14,-2.3475,-5.4543,-4.5292,,1.2513,-7.3312,True,0.0,25
+2026-06-19,WALCHANNAG,Walchandnagar Industries Limited,,pocket_pivot,96.3,96.3,True,True,False,312.05,2026-07-10,261.0,14,-16.3596,-12.1615,-24.307,,1.2017,-27.8801,False,0.0,25
+2026-06-19,GABRIEL,Gabriel India Limited,,pocket_pivot,93.3,93.3,False,True,False,1197.4,2026-07-10,1250.8,14,4.4597,6.4974,6.4891,,7.9255,-5.4535,True,0.0,25
+2026-06-19,SETL,Standard Engineering Technology Limited,,pocket_pivot,92.8,92.8,False,True,False,186.11,2026-07-10,290.7,14,56.1979,25.4258,43.8397,,64.0428,-3.8203,False,0.0,25
+2026-06-19,RBLBANK,RBL Bank Limited,,pocket_pivot,92.1,92.1,True,True,False,378.85,2026-07-10,380.65,14,0.4751,-3.9725,-2.7056,,0.7523,-6.3746,False,0.0,25
+2026-06-19,LINDEINDIA,Linde India Limited,,vcp,91.5,91.5,True,True,False,7460.5,2026-07-10,7033.0,14,-5.7302,-2.1915,-3.5788,,1.4677,-7.5129,False,0.0,25
+2026-06-19,GNA,GNA Axles Limited,,pocket_pivot,90.0,90.0,True,True,False,413.15,2026-07-10,475.4,14,15.0672,4.381,14.5589,,16.6646,-1.2465,False,0.0,25
+2026-06-19,POLICYBZR,PB Fintech Limited,,vcp,85.0,85.0,False,True,False,1636.7,2026-07-10,1580.4,14,-3.4398,-0.8309,-3.4215,,4.558,-5.5722,False,0.0,25
+2026-06-22,ABCAPITAL,Aditya Birla Capital Limited,,pocket_pivot,100.0,100.0,True,True,False,391.95,2026-07-10,408.3,13,4.1715,0.0,3.4316,,4.7838,-4.3118,False,1.0,25
+2026-06-22,AEROENTER,Aeroflex Enterprises Limited,,pocket_pivot,100.0,100.0,True,True,False,144.99,2026-07-10,124.97,13,-13.8078,-2.5795,-16.1873,,3.145,-20.4083,False,0.0,25
+2026-06-22,AJANTPHARM,Ajanta Pharma Limited,,vcp,100.0,100.0,True,True,False,3189.7,2026-07-10,3348.6,13,4.9817,7.3048,3.9283,,9.9445,-3.7151,True,0.0,25
+2026-06-22,BBL,Bharat Bijlee Limited,,pocket_pivot,100.0,100.0,False,True,False,2899.5,2026-07-10,2756.0,13,-4.9491,-0.5035,-6.6287,,3.673,-9.2602,False,0.0,25
+2026-06-22,BELRISE,Belrise Industries Limited,,vcp,100.0,100.0,True,True,False,247.5,2026-07-10,231.56,13,-6.4404,-3.6081,-7.0828,,1.8182,-11.1879,False,0.0,25
+2026-06-22,CANFINHOME,Can Fin Homes Limited,,vcp,100.0,100.0,False,True,False,892.4,2026-07-10,921.5,13,3.2609,-2.7398,1.9498,,4.4263,-7.7039,False,0.0,25
+2026-06-22,CERA,Cera Sanitaryware Limited,,vcp,100.0,100.0,False,True,False,6661.5,2026-07-10,6313.5,13,-5.224,-3.1524,-4.2633,,1.1784,-6.5226,True,0.0,25
+2026-06-22,CHOLAFIN,Cholamandalam Investment and Finance Company Limited,,vcp,100.0,100.0,False,True,False,1718.8,2026-07-10,1807.8,13,5.178,4.1308,7.831,,9.0877,-1.3905,False,-1.0,25
+2026-06-22,CUPID,Cupid Limited,,pocket_pivot,100.0,100.0,True,True,False,179.79,2026-07-10,212.24,13,18.0488,5.6399,22.9824,,25.7022,-3.2149,True,0.0,25
+2026-06-22,DELHIVERY,Delhivery Limited,,pocket_pivot,100.0,100.0,False,True,False,483.8,2026-07-10,520.3,13,7.5444,-2.4287,7.0484,,8.3092,-4.9504,False,1.0,25
+2026-06-22,GALAPREC,Gala Precision Engineering Limited,,pocket_pivot,100.0,100.0,True,True,False,1173.1,2026-07-10,1187.7,13,1.2446,-5.6304,1.8668,,7.4077,-9.8372,False,0.0,25
+2026-06-22,GPTINFRA,GPT Infraprojects Limited,,pocket_pivot,100.0,100.0,False,True,False,135.56,2026-07-10,123.87,13,-8.6235,-1.6081,-8.2325,,10.6521,-10.2759,True,0.0,25
+2026-06-22,GREAVESCOT,Greaves Cotton Limited,,pocket_pivot,100.0,100.0,False,True,False,212.55,2026-07-10,263.6,13,24.0179,3.4956,4.4225,,25.6175,-7.0572,False,0.0,25
+2026-06-22,HAPPYFORGE,Happy Forgings Limited,,pocket_pivot,100.0,100.0,True,True,False,1554.8,2026-07-10,1582.3,13,1.7687,-1.0934,-3.8011,,2.7978,-5.4348,False,0.0,25
+2026-06-22,JASH,Jash Engineering Limited,,pocket_pivot,100.0,100.0,False,True,False,549.0,2026-07-10,532.75,13,-2.9599,-7.5956,-11.2386,,4.3443,-13.4699,False,0.0,25
+2026-06-22,KDDL,KDDL Limited,,pocket_pivot,100.0,100.0,False,True,False,3164.4,2026-07-10,3251.2,13,2.743,1.8203,-0.8027,,7.951,-6.1402,False,0.0,25
+2026-06-22,KIRLOSENG,Kirloskar Oil Engines Limited,,pocket_pivot,100.0,100.0,True,True,False,2389.8,2026-07-10,2491.9,13,4.2723,-1.0796,-5.0172,,13.8171,-7.9421,True,0.0,25
+2026-06-22,KIRLOSIND,Kirloskar Industries Limited,,pocket_pivot,100.0,100.0,False,True,False,4313.4,2026-07-10,4134.3,13,-4.1522,-9.234,-6.7418,,6.0602,-12.5446,False,0.0,25
+2026-06-22,KMEW,Knowledge Marine & Engineering Works Limited,,pocket_pivot,100.0,100.0,True,True,False,2337.0,2026-07-10,2412.7,13,3.2392,-1.9298,-2.2465,,4.4074,-10.3723,False,0.0,25
+2026-06-22,NHPC,NHPC Limited,,vcp,100.0,100.0,False,True,False,78.22,2026-07-10,79.82,13,2.0455,3.976,0.8566,,5.4717,-3.2856,False,1.0,25
+2026-06-22,NIACL,The New India Assurance Company Limited,,pocket_pivot,100.0,100.0,False,True,False,212.11,2026-07-10,183.92,13,-13.2903,-16.0766,-12.7811,,2.7769,-17.2128,False,0.0,25
+2026-06-22,NOCIL,NOCIL Limited,,pocket_pivot,100.0,100.0,False,True,False,190.82,2026-07-10,175.44,13,-8.06,-5.7698,-7.6722,,7.1691,-13.4839,False,0.0,25
+2026-06-22,PANAMAPET,Panama Petrochem Limited,,pocket_pivot,100.0,100.0,True,True,False,496.45,2026-07-10,428.1,13,-13.7678,-15.2885,-12.7405,,3.1423,-19.7905,False,0.0,25
+2026-06-22,POKARNA,Pokarna Limited,,pocket_pivot,100.0,100.0,False,True,False,1018.5,2026-07-10,1042.6,13,2.3662,1.836,-2.8179,,12.2533,-6.4899,False,0.0,25
+2026-06-22,RBA,Restaurant Brands Asia Limited,,pocket_pivot,100.0,100.0,False,True,False,79.68,2026-07-10,73.52,13,-7.7309,-0.6275,-8.6847,,2.7861,-10.1908,False,0.0,25
+2026-06-22,RECLTD,REC Limited,,vcp,100.0,100.0,False,True,False,369.85,2026-07-10,351.95,13,-4.8398,-1.6358,-3.6772,,0.6759,-6.5297,False,1.0,25
+2026-06-22,RELIGARE,Religare Enterprises Limited,,pocket_pivot,100.0,100.0,False,True,False,265.53,2026-07-10,270.45,13,1.8529,1.7813,2.4931,,5.4495,-4.2669,False,0.0,25
+2026-06-22,ROSSTECH,Rossell Techsys Limited,,pocket_pivot,100.0,100.0,True,True,False,1081.3,2026-07-10,1011.5,13,-6.4552,-10.3487,-10.5151,,2.0993,-16.0825,False,0.0,25
+2026-06-22,SANSTAR,Sanstar Limited,,pocket_pivot,100.0,100.0,False,True,False,124.27,2026-07-10,113.22,13,-8.8919,-2.2532,-3.1947,,10.6381,-11.475,True,0.0,25
+2026-06-22,SETL,Standard Engineering Technology Limited,,pocket_pivot,100.0,100.0,False,True,False,202.34,2026-07-10,290.7,13,43.6691,26.9003,29.0155,,50.8846,-7.4676,False,0.0,25
+2026-06-22,SUNPHARMA,Sun Pharmaceutical Industries Limited,Pharma,vcp,100.0,100.0,False,True,False,1862.9,2026-07-10,1935.5,13,3.8971,-0.0215,2.174,,4.8849,-1.5513,False,1.0,25
+2026-06-22,TATACOMM,Tata Communications Limited,,pocket_pivot,100.0,100.0,False,True,False,2061.7,2026-07-10,1856.2,13,-9.9675,-4.4187,-7.5084,,2.3427,-10.2682,False,0.0,25
+2026-06-22,TVSMOTOR,TVS Motor Company Limited,,vcp,100.0,100.0,False,True,False,3488.7,2026-07-10,3623.1,13,3.8524,-0.8055,6.4207,,8.2065,-3.239,True,1.0,25
+2026-06-22,VENUSPIPES,Venus Pipes & Tubes Limited,,pocket_pivot,100.0,100.0,False,True,False,1673.5,2026-07-10,1807.9,13,8.0311,3.406,10.2719,,12.0406,-4.9895,True,0.0,25
+2026-06-22,VISHNU,Vishnu Chemicals Limited,,vcp,100.0,100.0,True,True,False,631.4,2026-07-10,597.0,13,-5.4482,-4.783,-3.5398,,1.3621,-8.0773,False,0.0,25
+2026-06-22,WABAG,VA Tech Wabag Limited,,pocket_pivot,100.0,100.0,False,True,False,2061.8,2026-07-10,2221.2,13,7.7311,-2.556,6.8581,,9.0309,-4.3263,False,0.0,25
+2026-06-22,PRIVISCL,Privi Speciality Chemicals Limited,,pocket_pivot,97.5,97.5,True,True,False,3655.8,2026-07-10,3662.8,13,0.1915,0.4486,-0.4513,,2.8503,-5.055,True,0.0,25
+2026-06-22,MEDANTA,Global Health Limited,,pocket_pivot,96.7,96.7,False,True,False,1288.1,2026-07-10,1336.9,13,3.7885,1.9952,2.8103,,6.3349,-2.1039,False,0.0,25
+2026-06-22,EDELWEISS,Edelweiss Financial Services Limited,,pocket_pivot,94.2,94.2,False,True,False,130.28,2026-07-10,120.14,13,-7.7832,-7.269,-6.0025,,2.7786,-10.8535,False,0.0,25
+2026-06-22,IDFCFIRSTB,IDFC First Bank Limited,,pocket_pivot,91.3,91.3,False,True,False,80.69,2026-07-10,80.83,13,0.1735,-1.4872,-0.3222,,1.3385,-3.9906,False,0.0,25
+2026-06-22,BETA,Beta Drugs Limited,,pocket_pivot,90.0,90.0,False,True,False,2147.5,2026-07-10,2366.8,13,10.2119,1.7322,-3.6508,,11.525,-7.7998,True,0.0,25
+2026-06-22,GOODLUCK,Goodluck India Limited,,pocket_pivot,90.0,90.0,False,True,False,1483.3,2026-07-10,1565.9,13,5.5687,0.2494,-0.0809,,6.1822,-6.1754,False,0.0,25
+2026-06-22,KIRLPNU,Kirloskar Pneumatic Company Limited,,pocket_pivot,90.0,90.0,True,True,False,2091.5,2026-07-10,1783.7,13,-14.7167,-6.622,-15.7112,,5.049,-17.4372,True,0.0,25
+2026-06-22,TIMKEN,Timken India Limited,,pocket_pivot,90.0,90.0,True,True,False,3761.0,2026-07-10,3205.0,13,-14.7833,-7.3199,-13.297,,4.3605,-15.448,False,0.0,25
+2026-06-22,VOLTAS,Voltas Limited,,pocket_pivot,90.0,90.0,False,True,False,1354.0,2026-07-10,1286.7,13,-4.9705,-5.6425,-4.8744,,4.2762,-7.9025,False,0.0,25
+2026-06-22,CONCOR,Container Corporation of India Limited,,vcp,85.0,85.0,False,True,False,473.65,2026-07-10,463.75,13,-2.0902,0.3378,-0.19,,3.6736,-5.3204,False,0.0,25
+2026-06-22,FDC,FDC Limited,,vcp,85.0,85.0,False,True,False,403.5,2026-07-10,432.3,13,7.1375,5.0434,5.5266,,9.5415,-4.052,False,0.0,25
+2026-06-22,ISGEC,Isgec Heavy Engineering Limited,,vcp,85.0,85.0,False,True,False,957.15,2026-07-10,902.25,13,-5.7358,-3.4582,-3.15,,3.2179,-7.0104,False,0.0,25
+2026-06-22,ROLEXRINGS,Rolex Rings Limited,,vcp,85.0,85.0,False,True,False,145.36,2026-07-10,141.07,13,-2.9513,2.9031,-2.91,,3.8319,-5.5173,False,0.0,25
+2026-06-22,SRM,SRM Contractors Limited,,vcp,85.0,85.0,False,True,False,516.1,2026-07-10,500.65,13,-2.9936,-0.5813,-5.0765,,4.8246,-9.2521,True,0.0,25
+2026-06-22,SUNDARMFIN,Sundaram Finance Limited,,vcp,85.0,85.0,False,True,False,4539.2,2026-07-10,4574.9,13,0.7865,-0.716,5.393,,5.9702,-2.3837,False,0.0,25
+2026-06-23,ALIVUS,Alivus Life Sciences Limited,,pocket_pivot,100.0,100.0,True,True,False,1118.9,2026-07-10,1160.1,12,3.6822,1.564,1.001,,6.703,-3.0298,True,0.0,25
+2026-06-23,CHOLAFIN,Cholamandalam Investment and Finance Company Limited,,vcp,100.0,100.0,False,True,False,1725.9,2026-07-10,1807.8,12,4.7454,4.4846,2.5204,,8.639,-0.8228,False,-1.0,25
+2026-06-23,GENUSPOWER,Genus Power Infrastructures Limited,,pocket_pivot,100.0,100.0,False,True,False,345.55,2026-07-10,317.05,12,-8.2477,-10.8957,-12.7189,,3.8779,-18.362,True,0.0,25
+2026-06-23,GLAND,Gland Pharma Limited,,pocket_pivot,100.0,100.0,False,True,False,2298.2,2026-07-10,2479.4,12,7.8844,7.2666,8.598,,11.9789,-4.9256,False,0.0,25
+2026-06-23,JASH,Jash Engineering Limited,,pocket_pivot,100.0,100.0,False,True,False,559.8,2026-07-10,532.75,12,-4.8321,-9.95,-11.5309,,2.3312,-15.1393,False,0.0,25
+2026-06-23,JSWINFRA,JSW Infrastructure Limited,,pocket_pivot,100.0,100.0,False,True,False,314.95,2026-07-10,330.05,12,4.7944,4.9214,-0.2223,,9.0491,-1.8892,False,0.0,25
+2026-06-23,MAHLOG,Mahindra Logistics Limited,,pocket_pivot,100.0,100.0,True,True,False,383.6,2026-07-10,387.2,12,0.9385,-3.1804,-0.2868,,8.6548,-4.562,False,0.0,25
+2026-06-23,MARINE,Marine Electricals (India) Limited,,pocket_pivot,100.0,100.0,False,True,False,274.65,2026-07-10,258.7,12,-5.8074,5.9348,-9.8307,,8.4653,-10.7227,False,0.0,25
+2026-06-23,NEULANDLAB,Neuland Laboratories Limited,,pocket_pivot,100.0,100.0,False,True,False,18102.0,2026-07-10,19506.0,12,7.756,3.7786,4.3476,,10.9767,-4.6846,True,0.0,25
+2026-06-23,OFSS,Oracle Financial Services Software Limited,,vcp,100.0,100.0,False,True,False,9862.5,2026-07-10,11651.0,12,18.1343,10.1445,11.5539,,18.4791,-2.5196,True,1.0,25
+2026-06-23,POKARNA,Pokarna Limited,,pocket_pivot,100.0,100.0,False,True,False,1089.8,2026-07-10,1042.6,12,-4.3311,-6.102,-8.9007,,4.9092,-10.2679,False,0.0,25
+2026-06-23,RELIGARE,Religare Enterprises Limited,,pocket_pivot,100.0,100.0,False,True,False,270.0,2026-07-10,270.45,12,0.1667,-2.0741,-1.4444,,3.7037,-3.6111,False,0.0,25
+2026-06-23,SANSERA,Sansera Engineering Limited,,pocket_pivot,100.0,100.0,True,True,False,3120.6,2026-07-10,3304.0,12,5.8771,1.426,-0.7659,,6.9987,-4.3069,False,0.0,25
+2026-06-23,SHILPAMED,Shilpa Medicare Limited,,pocket_pivot,100.0,100.0,False,True,False,591.15,2026-07-10,627.15,12,6.0898,-3.4509,0.7105,,7.1302,-7.2655,False,0.0,25
+2026-06-23,TINNARUBR,Tinna Rubber and Infrastructure Limited,,pocket_pivot,100.0,100.0,False,True,False,943.7,2026-07-10,971.35,12,2.93,1.4994,-4.1857,,5.3778,-5.9023,True,0.0,25
+2026-06-23,WABAG,VA Tech Wabag Limited,,pocket_pivot,100.0,100.0,False,True,False,2088.0,2026-07-10,2221.2,12,6.3793,-0.249,-0.3161,,7.6628,-4.933,False,0.0,25
+2026-06-23,ZFCVINDIA,ZF Commercial Vehicle Control Systems India Limited,,pocket_pivot,100.0,100.0,True,True,False,16086.0,2026-07-10,2333.8,12,-85.4917,-84.5481,-85.4302,,1.3552,-85.6876,False,0.0,25
+2026-06-23,LAURUSLABS,Laurus Labs Limited,,pocket_pivot,91.6,91.6,True,True,False,1481.0,2026-07-10,1537.8,12,3.8352,0.8305,-0.7968,,4.9966,-3.106,True,1.0,25
+2026-06-23,SUNPHARMA,Sun Pharmaceutical Industries Limited,Pharma,vcp,91.5,91.5,False,True,False,1868.0,2026-07-10,1935.5,12,3.6135,-0.0964,1.0814,,4.5985,-0.6478,False,1.0,25
+2026-06-23,INDOBORAX,Indo Borax & Chemicals Limited,,pocket_pivot,90.0,90.0,True,True,False,383.15,2026-07-10,453.8,12,18.4393,-1.7356,8.4301,,21.2188,-5.7419,False,0.0,25
+2026-06-23,KIRLOSENG,Kirloskar Oil Engines Limited,,pocket_pivot,90.0,90.0,True,True,False,2504.4,2026-07-10,2491.9,12,-0.4991,-6.5205,-9.08,,8.6088,-11.356,True,0.0,25
+2026-06-23,SETL,Standard Engineering Technology Limited,,pocket_pivot,90.0,90.0,False,True,False,206.58,2026-07-10,290.7,12,40.7203,36.7267,28.57,,47.7878,-2.2945,False,0.0,25
+2026-06-23,CONCOR,Container Corporation of India Limited,,vcp,85.0,85.0,False,True,False,479.25,2026-07-10,463.75,12,-3.2342,0.2087,-5.8112,,2.4622,-6.4267,False,1.0,25
+2026-06-23,FDC,FDC Limited,,vcp,85.0,85.0,False,True,False,412.1,2026-07-10,432.3,12,4.9017,4.4771,2.7421,,7.2555,-1.9655,False,0.0,25
+2026-06-23,SRM,SRM Contractors Limited,,vcp,85.0,85.0,False,True,False,527.55,2026-07-10,500.65,12,-5.099,-2.8433,-10.0844,,2.5495,-11.2217,True,0.0,25
+2026-06-24,AETHER,Aether Industries Limited,,pocket_pivot,100.0,100.0,True,True,False,1357.2,2026-07-10,1500.8,11,10.5806,1.12,9.4754,,13.3584,-9.1586,False,0.0,25
+2026-06-24,AUBANK,AU Small Finance Bank Limited,,pocket_pivot,100.0,100.0,True,True,False,1067.2,2026-07-10,1072.1,11,0.4591,-0.9558,-1.8553,,2.1739,-4.8398,True,0.0,25
+2026-06-24,AXISBANK,Axis Bank Limited,Banking,vcp,100.0,100.0,True,True,False,1384.5,2026-07-10,1323.7,11,-4.3915,-1.5818,-6.2766,,1.1268,-6.6667,False,1.0,25
+2026-06-24,BAJFINANCE,Bajaj Finance Limited,Financial Services,vcp,100.0,100.0,False,True,False,990.95,2026-07-10,1020.5,11,2.982,2.7701,1.2967,,6.2516,-3.8902,False,0.0,25
+2026-06-24,CGCL,Capri Global Capital Limited,,pocket_pivot,100.0,100.0,False,True,False,218.39,2026-07-10,252.22,11,15.4906,4.2905,15.683,,21.1273,-1.4378,False,0.0,25
+2026-06-24,CONFIPET,Confidence Petroleum India Limited,,pocket_pivot,100.0,100.0,True,True,False,73.44,2026-07-10,76.45,11,4.0986,5.4194,-1.5251,,9.4771,-7.067,False,0.0,25
+2026-06-24,DELHIVERY,Delhivery Limited,,pocket_pivot,100.0,100.0,False,True,False,481.05,2026-07-10,520.3,11,8.1592,5.8726,7.1926,,8.9284,-4.407,False,1.0,25
+2026-06-24,EXIDEIND,Exide Industries Limited,,pocket_pivot,100.0,100.0,False,True,False,399.5,2026-07-10,424.4,11,6.2328,4.9687,6.433,,7.8849,-5.4568,False,1.0,25
+2026-06-24,FEDERALBNK,The Federal Bank  Limited,,vcp,100.0,100.0,True,True,False,325.2,2026-07-10,329.85,11,1.4299,1.7835,0.7841,,2.7983,-2.1525,False,0.0,25
+2026-06-24,GMRAIRPORT,GMR AIRPORTS LIMITED,,pocket_pivot,100.0,100.0,True,True,False,108.07,2026-07-10,112.51,11,4.1084,3.4422,3.4792,,7.0047,-1.5731,False,1.0,25
+2026-06-24,GOKEX,Gokaldas Exports Limited,,pocket_pivot,100.0,100.0,False,True,False,859.35,2026-07-10,832.75,11,-3.0954,2.0364,-3.2234,,4.1136,-7.1391,False,0.0,25
+2026-06-24,GREAVESCOT,Greaves Cotton Limited,,pocket_pivot,100.0,100.0,False,True,False,213.98,2026-07-10,263.6,11,23.1891,7.968,10.8655,,24.778,-4.6173,False,0.0,25
+2026-06-24,ICICIBANK,ICICI Bank Limited,Banking,vcp,100.0,100.0,False,True,False,1373.6,2026-07-10,1401.2,11,2.0093,1.922,0.5169,,4.3244,-2.4024,True,0.0,25
+2026-06-24,ICIL,Indo Count Industries Limited,,pocket_pivot,100.0,100.0,True,True,False,433.9,2026-07-10,412.55,11,-4.9205,1.6478,-2.7771,,6.891,-8.9652,False,0.0,25
+2026-06-24,JSWINFRA,JSW Infrastructure Limited,,pocket_pivot,100.0,100.0,False,True,False,338.4,2026-07-10,330.05,11,-2.4675,-3.221,-4.2849,,1.4923,-7.8605,False,0.0,25
+2026-06-24,KIRLOSENG,Kirloskar Oil Engines Limited,,pocket_pivot,100.0,100.0,True,True,False,2563.6,2026-07-10,2491.9,11,-2.7968,-9.4477,-5.4143,,1.1468,-13.403,True,0.0,25
+2026-06-24,KRISHANA,Krishana Phoschem Limited,,pocket_pivot,100.0,100.0,True,True,False,733.95,2026-07-10,140.2,11,-80.8979,-80.5573,-81.1772,,0.8107,-82.7986,True,0.0,25
+2026-06-24,PGIL,Pearl Global Industries Limited,,pocket_pivot,100.0,100.0,True,True,False,2081.0,2026-07-10,1998.0,11,-3.9885,-0.2835,-4.863,,1.6675,-11.0187,True,0.0,25
+2026-06-24,PHOENIXLTD,The Phoenix Mills Limited,,vcp,100.0,100.0,True,True,False,1912.3,2026-07-10,2138.9,11,11.8496,5.2398,9.1879,,12.3778,-3.7703,False,1.0,25
+2026-06-24,PNBHOUSING,PNB Housing Finance Limited,,vcp,100.0,100.0,True,True,False,1046.6,2026-07-10,1110.6,11,6.115,0.8599,3.5735,,6.9176,-2.7327,False,1.0,25
+2026-06-24,POKARNA,Pokarna Limited,,pocket_pivot,100.0,100.0,False,True,False,1132.4,2026-07-10,1042.6,11,-7.9301,-9.4931,-8.5659,,0.9626,-13.6436,False,0.0,25
+2026-06-24,RAMCOSYS,Ramco Systems Limited,,pocket_pivot,100.0,100.0,False,True,False,673.8,2026-07-10,805.6,11,19.5607,18.1953,24.2728,,43.5886,-16.5925,True,0.0,25
+2026-06-24,SETL,Standard Engineering Technology Limited,,pocket_pivot,100.0,100.0,False,True,False,224.26,2026-07-10,290.7,11,29.6263,32.2349,23.4728,,36.1366,-9.9973,False,0.0,25
+2026-06-24,SPAL,S. P. Apparels Limited,,pocket_pivot,100.0,100.0,True,True,False,1109.1,2026-07-10,1159.7,11,4.5623,-0.3787,6.2663,,10.1704,-13.7138,False,0.0,25
+2026-06-24,WELSPUNLIV,Welspun Living Limited,,pocket_pivot,100.0,100.0,True,True,False,169.84,2026-07-10,166.17,11,-2.1609,-1.7723,-1.9489,,2.0961,-6.7887,False,0.0,25
+2026-06-24,MEDANTA,Global Health Limited,,pocket_pivot,99.8,99.8,False,True,False,1321.0,2026-07-10,1336.9,11,1.2036,1.8395,2.0666,,3.6866,-2.0061,False,0.0,25
+2026-06-24,RELIGARE,Religare Enterprises Limited,,pocket_pivot,97.1,97.1,False,True,False,278.36,2026-07-10,270.45,11,-2.8416,-5.6438,-2.4644,,0.5892,-6.506,False,0.0,25
+2026-06-24,OFSS,Oracle Financial Services Software Limited,,pocket_pivot,94.3,94.3,False,True,False,10468.5,2026-07-10,11651.0,11,11.2958,4.9434,6.3572,,11.6206,-5.6742,True,1.0,25
+2026-06-24,OBEROIRLTY,Oberoi Realty Limited,,pocket_pivot,90.9,90.9,False,True,False,1753.1,2026-07-10,1924.8,11,9.7941,6.3659,6.8507,,13.2907,-3.4111,False,1.0,25
+2026-06-24,GENUSPOWER,Genus Power Infrastructures Limited,,pocket_pivot,90.0,90.0,False,True,False,348.95,2026-07-10,317.05,11,-9.1417,-10.1734,-12.0075,,2.8657,-19.1575,True,0.0,25
+2026-06-24,KPRMILL,K.P.R. Mill Limited,,pocket_pivot,90.0,90.0,False,True,False,1218.45,2026-07-10,1110.1,11,-8.8924,-3.09,-8.4821,,9.4834,-10.0414,True,0.0,25
+2026-06-24,MARINE,Marine Electricals (India) Limited,,pocket_pivot,90.0,90.0,False,True,False,275.15,2026-07-10,258.7,11,-5.9786,3.2891,-9.831,,8.2682,-10.885,False,0.0,25
+2026-06-24,SANSTAR,Sanstar Limited,,pocket_pivot,90.0,90.0,True,True,False,127.43,2026-07-10,113.22,11,-11.1512,-6.4741,-11.0414,,7.8945,-13.6703,True,0.0,25
+2026-06-24,SIS,SIS LIMITED,,pocket_pivot,90.0,90.0,False,True,False,441.5,2026-07-10,435.5,11,-1.359,-3.6353,-0.8381,,8.9354,-8.8222,False,0.0,25
+2026-06-24,STEELCAS,Steelcast Limited,,pocket_pivot,90.0,90.0,True,True,False,307.2,2026-07-10,312.8,11,1.8229,-2.36,-0.472,,11.9792,-5.4199,True,0.0,25
+2026-06-24,SUNDARMFIN,Sundaram Finance Limited,,vcp,85.0,85.0,False,True,False,4607.0,2026-07-10,4574.9,11,-0.6968,-0.3864,0.3082,,4.4107,-3.8203,False,0.0,25
+2026-06-25,APOLLOHOSP,Apollo Hospitals Enterprise Limited,Healthcare,vcp,100.0,100.0,False,True,False,8592.0,2026-07-10,8841.0,10,2.898,3.5091,2.898,,4.1667,-0.6576,True,1.0,25
+2026-06-25,FUSION,Fusion Finance Limited,,pocket_pivot,100.0,100.0,False,True,False,192.77,2026-07-10,234.04,10,21.4089,19.0019,21.4089,,25.5382,-5.587,False,0.0,25
+2026-06-25,ICICIBANK,ICICI Bank Limited,Banking,vcp,100.0,100.0,False,True,False,1387.5,2026-07-10,1401.2,10,0.9874,1.7225,0.9874,,3.2793,-1.5423,True,0.0,25
+2026-06-25,INDIGO,InterGlobe Aviation Limited,,pocket_pivot,100.0,100.0,False,True,False,5450.0,2026-07-10,5312.0,10,-2.5321,-0.4312,-2.5321,,0.4862,-6.5321,False,0.0,25
+2026-06-25,MANAPPURAM,Manappuram Finance Limited,,pocket_pivot,100.0,100.0,False,True,False,318.5,2026-07-10,341.3,10,7.1586,3.0455,7.1586,,9.2308,-2.8728,False,1.0,25
+2026-06-25,MAXHEALTH,Max Healthcare Institute Limited,,vcp,100.0,100.0,False,True,False,1123.35,2026-07-10,1108.1,10,-1.3575,2.675,-1.3575,,3.9658,-4.2596,False,1.0,25
+2026-06-25,MOTHERSON,Samvardhana Motherson International Limited,,pocket_pivot,100.0,100.0,True,True,False,151.71,2026-07-10,143.19,10,-5.616,-3.566,-5.616,,2.3334,-9.8873,False,1.0,25
+2026-06-25,NARMADA,Narmada Agrobase Limited,,pocket_pivot,100.0,100.0,True,True,False,42.73,2026-07-10,34.78,10,-18.6052,-14.9544,-18.6052,,0.6319,-21.2263,False,0.0,25
+2026-06-25,OFSS,Oracle Financial Services Software Limited,,pocket_pivot,100.0,100.0,False,True,False,10974.5,2026-07-10,11651.0,10,6.1643,2.4921,6.1643,,6.4741,-5.1346,True,1.0,25
+2026-06-25,PIXTRANS,Pix Transmissions Limited,,pocket_pivot,100.0,100.0,True,True,False,1796.1,2026-07-10,1820.0,10,1.3307,0.8073,1.3307,,7.455,-9.8101,True,0.0,25
+2026-06-25,RAMCOIND,Ramco Industries Limited,,pocket_pivot,100.0,100.0,False,True,False,342.75,2026-07-10,367.75,10,7.2939,-1.9402,7.2939,,9.7009,-8.6798,False,0.0,25
+2026-06-25,RAMCOSYS,Ramco Systems Limited,,pocket_pivot,100.0,100.0,False,True,False,709.8,2026-07-10,805.6,10,13.4968,12.6515,13.4968,,36.306,-5.0719,True,0.0,25
+2026-06-25,REPCOHOME,Repco Home Finance Limited,,pocket_pivot,100.0,100.0,False,True,False,420.0,2026-07-10,409.05,10,-2.6071,3.1786,-2.6071,,4.7381,-6.9643,False,0.0,25
+2026-06-25,SUNDRMFAST,Sundram Fasteners Limited,,pocket_pivot,100.0,100.0,False,True,False,929.0,2026-07-10,940.8,10,1.2702,0.3391,1.2702,,3.0355,-2.5996,False,0.0,25
+2026-06-25,WELCORP,Welspun Corp Limited,,pocket_pivot,100.0,100.0,True,True,False,1455.1,2026-07-10,1612.6,10,10.824,-1.0858,10.824,,12.2947,-3.2025,True,0.0,25
+2026-06-25,TVSMOTOR,TVS Motor Company Limited,,pocket_pivot,98.0,98.0,False,True,False,3569.7,2026-07-10,3623.1,10,1.4959,1.6164,1.4959,,5.7512,-3.9415,True,1.0,25
+2026-06-25,AADHARHFC,Aadhar Housing Finance Limited,,pocket_pivot,90.0,90.0,False,True,False,518.5,2026-07-10,534.55,10,3.0955,7.1553,3.0955,,8.5824,-3.1437,False,0.0,25
+2026-06-25,AVL,Aditya Vision Limited,,pocket_pivot,90.0,90.0,False,True,False,660.5,2026-07-10,635.8,10,-3.7396,-3.3232,-3.7396,,6.7373,-6.1998,True,0.0,25
+2026-06-25,EMCURE,Emcure Pharmaceuticals Limited,,pocket_pivot,90.0,90.0,True,True,False,1880.2,2026-07-10,1814.4,10,-3.4996,-2.1859,-3.4996,,3.3933,-4.808,True,0.0,25
+2026-06-25,TALBROAUTO,Talbros Automotive Components Limited,,pocket_pivot,90.0,90.0,False,True,False,406.5,2026-07-10,408.1,10,0.3936,1.3776,0.3936,,7.0111,-4.797,False,0.0,25
+2026-06-25,GULFOILLUB,Gulf Oil Lubricants India Limited,,vcp,85.0,85.0,False,True,False,1085.5,2026-07-10,1046.8,10,-3.5652,-2.7545,-3.5652,,1.7918,-5.4998,True,0.0,25
+2026-06-25,SUNDARMFIN,Sundaram Finance Limited,,vcp,85.0,85.0,False,True,False,4627.1,2026-07-10,4574.9,10,-1.1281,-1.1173,-1.1281,,3.9571,-4.2381,False,0.0,25
+2026-06-29,ABB,ABB India Limited,,pocket_pivot,100.0,100.0,True,True,False,7128.0,2026-07-10,6836.0,9,-4.0965,-0.7716,,,1.9641,-5.6538,True,1.0,25
+2026-06-29,ABDL,Allied Blenders and Distillers Limited,,pocket_pivot,100.0,100.0,False,True,False,659.5,2026-07-10,648.75,9,-1.63,6.5504,,,7.9151,-5.3753,False,0.0,25
+2026-06-29,ABSLAMC,Aditya Birla Sun Life AMC Limited,,pocket_pivot,100.0,100.0,True,True,False,1170.8,2026-07-10,1146.6,9,-2.067,-0.8627,,,2.8015,-4.7489,True,0.0,25
+2026-06-29,ACUTAAS,Acutaas Chemicals Limited,,pocket_pivot,100.0,100.0,True,True,False,3568.2,2026-07-10,3400.8,9,-4.6914,-1.4966,,,4.8148,-9.0438,True,0.0,25
+2026-06-29,AJANTPHARM,Ajanta Pharma Limited,,pocket_pivot,100.0,100.0,True,True,False,3384.2,2026-07-10,3348.6,9,-1.0519,-0.3162,,,3.6257,-6.3856,True,0.0,25
+2026-06-29,ANANDRATHI,Anand Rathi Wealth Limited,,pocket_pivot,100.0,100.0,True,True,False,1988.7,2026-07-10,2146.8,9,7.9499,5.3703,,,9.4283,-4.6412,True,0.0,25
+2026-06-29,ATHERENERG,Ather Energy Limited,,pocket_pivot,100.0,100.0,True,True,False,1083.75,2026-07-10,1225.8,9,13.1073,3.8431,,,14.6851,-8.6597,False,0.0,25
+2026-06-29,BHARATFORG,Bharat Forge Limited,,pocket_pivot,100.0,100.0,True,True,False,2170.9,2026-07-10,2117.0,9,-2.4828,-1.4833,,,3.0909,-5.2881,False,1.0,25
+2026-06-29,BHEL,Bharat Heavy Electricals Limited,,pocket_pivot,100.0,100.0,True,True,False,413.75,2026-07-10,395.25,9,-4.4713,-6.3444,,,2.0906,-10.139,False,1.0,25
+2026-06-29,BLSE,BLS E-Services Limited,,pocket_pivot,100.0,100.0,True,True,False,232.88,2026-07-10,263.25,9,13.0411,15.3942,,,22.7671,-4.0021,False,0.0,25
+2026-06-29,BOROSCI,Borosil Scientific Limited,,pocket_pivot,100.0,100.0,False,True,False,173.29,2026-07-10,158.16,9,-8.731,-5.6668,,,4.3338,-11.7029,False,0.0,25
+2026-06-29,CGPOWER,CG Power and Industrial Solutions Limited,,pocket_pivot,100.0,100.0,False,True,False,956.25,2026-07-10,916.6,9,-4.1464,-3.2627,,,2.5778,-7.2314,True,1.0,25
+2026-06-29,CHOICEIN,Choice International Limited,,pocket_pivot,100.0,100.0,False,True,False,745.2,2026-07-10,835.0,9,12.0505,6.5217,,,13.5266,-2.0196,False,0.0,25
+2026-06-29,DIFFNKG,Diffusion Engineers Limited,,pocket_pivot,100.0,100.0,False,True,False,415.3,2026-07-10,403.4,9,-2.8654,-0.3612,,,5.0325,-9.15,False,0.0,25
+2026-06-29,FINCABLES,Finolex Cables Limited,,pocket_pivot,100.0,100.0,True,True,False,1179.2,2026-07-10,1054.5,9,-10.575,-7.8189,,,1.1957,-13.4498,False,0.0,25
+2026-06-29,GOODLUCK,Goodluck India Limited,,pocket_pivot,100.0,100.0,False,True,False,1474.6,2026-07-10,1565.9,9,6.1915,0.868,,,6.8086,-5.1946,False,0.0,25
+2026-06-29,IOLCP,IOL Chemicals and Pharmaceuticals Limited,,pocket_pivot,100.0,100.0,False,True,False,142.33,2026-07-10,171.06,9,20.1855,1.4965,,,24.9912,-6.8222,False,0.0,25
+2026-06-29,JBCHEPHARM,JB Chemicals & Pharmaceuticals Limited,,pocket_pivot,100.0,100.0,True,True,False,2303.2,2026-07-10,2435.5,9,5.7442,3.7687,,,7.4158,-2.9047,True,0.0,25
+2026-06-29,KARURVYSYA,Karur Vysya Bank Limited,,pocket_pivot,100.0,100.0,True,True,False,298.85,2026-07-10,305.65,9,2.2754,1.7735,,,3.1789,-3.5971,True,0.0,25
+2026-06-29,KEI,KEI Industries Limited,,pocket_pivot,100.0,100.0,True,True,False,5452.0,2026-07-10,5149.5,9,-5.5484,-3.6867,,,2.7146,-9.6662,False,1.0,25
+2026-06-29,LAURUSLABS,Laurus Labs Limited,,pocket_pivot,100.0,100.0,True,True,False,1500.3,2026-07-10,1537.8,9,2.4995,1.9263,,,3.6459,-3.4726,True,1.0,25
+2026-06-29,LICHSGFIN,LIC Housing Finance Limited,,pocket_pivot,100.0,100.0,False,True,False,560.75,2026-07-10,549.15,9,-2.0687,-2.1222,,,1.3821,-5.8404,False,1.0,25
+2026-06-29,LINDEINDIA,Linde India Limited,,pocket_pivot,100.0,100.0,False,True,False,7297.0,2026-07-10,7033.0,9,-3.6179,-1.4184,,,1.946,-5.4406,False,0.0,25
+2026-06-29,LUPIN,Lupin Limited,,pocket_pivot,100.0,100.0,True,True,False,2409.3,2026-07-10,2496.3,9,3.611,3.4159,,,4.8811,-2.7269,True,1.0,25
+2026-06-29,MACPOWER,Macpower CNC Machines Limited,,pocket_pivot,100.0,100.0,True,True,False,1317.95,2026-07-10,1371.7,9,4.0783,8.646,,,11.5369,-10.8729,True,0.0,25
+2026-06-29,MAHABANK,Bank of Maharashtra,,pocket_pivot,100.0,100.0,True,True,False,93.85,2026-07-10,84.25,9,-10.2291,-7.821,,,0.6926,-14.8641,True,0.0,25
+2026-06-29,MARICO,Marico Limited,,pocket_pivot,100.0,100.0,False,True,False,839.95,2026-07-10,852.5,9,1.4941,-0.2203,,,3.9348,-1.8275,True,1.0,25
+2026-06-29,NHPC,NHPC Limited,,pocket_pivot,100.0,100.0,False,True,False,81.57,2026-07-10,79.82,9,-2.1454,-2.1086,,,1.1401,-4.6708,False,1.0,25
+2026-06-29,NTPC,NTPC Limited,Energy,pocket_pivot,100.0,100.0,False,True,False,356.1,2026-07-10,344.55,9,-3.2435,0.0421,,,1.3339,-3.6507,False,0.0,25
+2026-06-29,PIXTRANS,Pix Transmissions Limited,,pocket_pivot,100.0,100.0,True,True,False,1869.6,2026-07-10,1820.0,9,-2.653,-4.3271,,,3.2306,-8.1568,True,0.0,25
+2026-06-29,POLYCAB,Polycab India Limited,,pocket_pivot,100.0,100.0,True,True,False,9779.0,2026-07-10,9210.5,9,-5.8135,-1.9941,,,2.3418,-7.9558,True,1.0,25
+2026-06-29,RADICO,Radico Khaitan Limited,,pocket_pivot,100.0,100.0,True,True,False,3876.9,2026-07-10,4073.7,9,5.0762,5.9274,,,7.3487,-2.3447,True,1.0,25
+2026-06-29,RAMCOSYS,Ramco Systems Limited,,pocket_pivot,100.0,100.0,False,True,False,793.2,2026-07-10,805.6,9,1.5633,10.8863,,,21.9743,-9.8714,True,0.0,25
+2026-06-29,SKMEGGPROD,SKM Egg Products Export (India) Limited,,pocket_pivot,100.0,100.0,True,True,False,304.05,2026-07-10,321.35,9,5.6899,5.0485,,,6.9068,-11.5244,True,0.0,25
+2026-06-29,SOLARINDS,Solar Industries India Limited,,pocket_pivot,100.0,100.0,True,True,False,17798.0,2026-07-10,18236.0,9,2.461,4.1634,,,6.5962,-4.3263,True,1.0,25
+2026-06-29,SONACOMS,Sona BLW Precision Forgings Limited,,pocket_pivot,100.0,100.0,True,True,False,620.75,2026-07-10,668.55,9,7.7004,7.5312,,,9.8993,-2.0056,False,1.0,25
+2026-06-29,THERMAX,Thermax Limited,,pocket_pivot,100.0,100.0,True,True,False,5125.1,2026-07-10,4809.0,9,-6.1677,-7.5823,,,2.9795,-11.5627,False,0.0,25
+2026-06-29,TORNTPHARM,Torrent Pharmaceuticals Limited,,pocket_pivot,100.0,100.0,True,True,False,4657.6,2026-07-10,4901.5,9,5.2366,3.5447,,,6.235,-3.2527,True,1.0,25
+2026-06-29,WELCORP,Welspun Corp Limited,,pocket_pivot,100.0,100.0,True,True,False,1510.8,2026-07-10,1612.6,9,6.7382,2.171,,,8.1546,-6.7712,True,0.0,25
+2026-06-29,WHEELS,Wheels India Limited,,pocket_pivot,100.0,100.0,True,True,False,1772.0,2026-07-10,1513.1,9,-14.6106,-16.7043,,,2.0316,-20.1411,False,0.0,25
+2026-06-29,ZYDUSWELL,Zydus Wellness Limited,,pocket_pivot,100.0,100.0,False,True,False,569.45,2026-07-10,592.45,9,4.039,2.3356,,,6.5853,-9.0087,False,0.0,25
+2026-06-29,NHPC,NHPC Limited,,vcp,98.5,98.5,False,True,False,81.57,2026-07-10,79.82,9,-2.1454,-2.1086,,,1.1401,-4.6708,False,1.0,25
+2026-06-29,POWERINDIA,Hitachi Energy India Limited,,pocket_pivot,98.2,98.2,True,True,False,34975.0,2026-07-10,32605.0,9,-6.7763,-7.4768,,,1.544,-13.0808,True,1.0,25
+2026-06-29,ACMESOLAR,Acme Solar Holdings Limited,,pocket_pivot,97.5,97.5,False,True,False,379.25,2026-07-10,377.0,9,-0.5933,1.1734,,,4.9835,-5.9987,False,0.0,25
+2026-06-29,SCHNEIDER,Schneider Electric Infrastructure Limited,,pocket_pivot,96.5,96.5,True,True,False,1453.6,2026-07-10,1414.2,9,-2.7105,3.2609,,,6.4942,-9.191,True,0.0,25
+2026-06-29,PREMEXPLN,Premier Explosives Limited,,pocket_pivot,95.9,95.9,False,True,False,808.5,2026-07-10,687.5,9,-14.966,-7.1923,,,2.6345,-15.8936,True,0.0,25
+2026-06-29,BEL,Bharat Electronics Limited,,pocket_pivot,92.1,92.1,False,True,False,411.6,2026-07-10,414.85,9,0.7896,3.3892,,,4.4461,-1.9558,True,1.0,25
+2026-06-29,LLOYDSME,Lloyds Metals And Energy Limited,,pocket_pivot,90.7,90.7,True,True,False,1805.7,2026-07-10,1799.6,9,-0.3378,-2.7856,,,2.3426,-5.3608,True,0.0,25
+2026-06-29,DRREDDY,Dr. Reddy's Laboratories Limited,Pharma,pocket_pivot,90.0,90.0,False,True,False,1375.7,2026-07-10,1244.3,9,-9.5515,-0.567,,,2.8495,-11.1725,False,1.0,25
+2026-06-29,GMRAIRPORT,GMR AIRPORTS LIMITED,,pocket_pivot,90.0,90.0,True,True,False,109.42,2026-07-10,112.51,9,2.824,3.6831,,,5.6845,-0.8956,False,1.0,25
+2026-06-29,LTF,L&T Finance Limited,,pocket_pivot,90.0,90.0,False,True,False,299.05,2026-07-10,321.25,9,7.4235,12.222,,,13.2252,-0.5183,False,0.0,25
+2026-06-29,NYKAA,FSN E-Commerce Ventures Limited,,pocket_pivot,90.0,90.0,True,True,False,302.05,2026-07-10,330.1,9,9.2865,3.7908,,,9.568,-0.629,False,0.0,25
+2026-06-30,ALIVUS,Alivus Life Sciences Limited,,pocket_pivot,100.0,100.0,True,True,False,1156.5,2026-07-10,1160.1,8,0.3113,-1.1673,,,3.2339,-4.2456,True,0.0,25
+2026-06-30,ARVIND,Arvind Limited,,pocket_pivot,100.0,100.0,True,True,False,587.1,2026-07-10,526.7,8,-10.2879,-8.1758,,,2.1972,-11.0969,False,0.0,25
+2026-06-30,ATHERENERG,Ather Energy Limited,,pocket_pivot,100.0,100.0,True,True,False,1140.55,2026-07-10,1225.8,8,7.4745,0.0044,,,8.9737,-6.2733,False,0.0,25
+2026-06-30,CGCL,Capri Global Capital Limited,,pocket_pivot,100.0,100.0,False,True,False,227.66,2026-07-10,252.22,8,10.788,4.3091,,,16.1952,-4.9811,False,0.0,25
+2026-06-30,DIVGIITTS,Divgi Torqtransfer Systems Limited,,pocket_pivot,100.0,100.0,True,True,False,987.55,2026-07-10,967.4,8,-2.0404,-2.4303,,,7.8426,-10.7893,False,0.0,25
+2026-06-30,GLAND,Gland Pharma Limited,,pocket_pivot,100.0,100.0,False,True,False,2495.0,2026-07-10,2479.4,8,-0.6253,2.2044,,,3.1463,-4.4168,False,0.0,25
+2026-06-30,GREAVESCOT,Greaves Cotton Limited,,pocket_pivot,100.0,100.0,False,True,False,219.98,2026-07-10,263.6,8,19.8291,0.8955,,,21.3747,-4.3322,False,0.0,25
+2026-06-30,INDOTECH,Indo Tech Transformers Limited,,pocket_pivot,100.0,100.0,True,True,False,3235.9,2026-07-10,3304.3,8,2.1138,-5.7727,,,2.1138,-10.331,True,0.0,25
+2026-06-30,IPCALAB,IPCA Laboratories Limited,,pocket_pivot,100.0,100.0,True,True,False,1701.0,2026-07-10,1787.9,8,5.1088,5.4145,,,6.555,-3.833,False,0.0,25
+2026-06-30,MOREPENLAB,Morepen Laboratories Limited,,pocket_pivot,100.0,100.0,False,True,False,59.12,2026-07-10,61.22,8,3.5521,3.5014,,,7.2395,-6.8843,False,0.0,25
+2026-06-30,NEOGEN,Neogen Chemicals Limited,,pocket_pivot,100.0,100.0,False,True,False,2024.9,2026-07-10,2085.1,8,2.973,-3.4273,,,4.0051,-5.1805,False,0.0,25
+2026-06-30,RAMCOSYS,Ramco Systems Limited,,pocket_pivot,100.0,100.0,False,True,False,836.05,2026-07-10,805.6,8,-3.6421,5.2628,,,15.7227,-9.0365,True,0.0,25
+2026-06-30,SHILPAMED,Shilpa Medicare Limited,,pocket_pivot,100.0,100.0,False,True,False,598.4,2026-07-10,627.15,8,4.8045,0.234,,,5.8322,-6.1664,False,0.0,25
+2026-06-30,SIGNPOST,Signpost India Limited,,pocket_pivot,100.0,100.0,False,True,False,273.35,2026-07-10,317.6,8,16.188,7.8654,,,19.4074,-10.5542,True,0.0,25
+2026-06-30,SMSPHARMA,SMS Pharmaceuticals Limited,,pocket_pivot,100.0,100.0,True,True,False,412.55,2026-07-10,402.7,8,-2.3876,2.6542,,,6.2417,-7.89,False,0.0,25
+2026-06-30,THANGAMAYL,Thangamayil Jewellery Limited,,pocket_pivot,100.0,100.0,True,True,False,6398.2,2026-07-10,6540.5,8,2.2241,-0.3939,,,11.9846,-10.1232,True,0.0,25
+2026-06-30,TIRUPATIFL,Tirupati Forge Limited,,pocket_pivot,100.0,100.0,True,True,False,64.07,2026-07-10,68.1,8,6.29,9.5989,,,16.9034,-9.474,False,0.0,25
+2026-06-30,UJJIVANSFB,Ujjivan Small Finance Bank Limited,,pocket_pivot,100.0,100.0,False,True,False,59.05,2026-07-10,65.27,8,10.5334,4.3522,,,11.4987,-3.9966,False,0.0,25
+2026-06-30,WELENT,Welspun Enterprises Limited,,pocket_pivot,100.0,100.0,False,True,False,601.45,2026-07-10,614.0,8,2.0866,1.4216,,,5.362,-4.4476,False,0.0,25
+2026-06-30,WSTCSTPAPR,West Coast Paper Mills Limited,,pocket_pivot,100.0,100.0,False,True,False,534.35,2026-07-10,538.2,8,0.7205,-0.4398,,,6.2974,-4.5757,False,0.0,25
+2026-06-30,LTF,L&T Finance Limited,,pocket_pivot,97.8,97.8,False,True,False,310.75,2026-07-10,321.25,8,3.3789,7.5463,,,8.9622,-4.2156,False,1.0,25
+2026-06-30,SOLARINDS,Solar Industries India Limited,,pocket_pivot,95.1,95.1,True,True,False,18696.0,2026-07-10,18236.0,8,-2.4604,-2.2893,,,1.4763,-8.9217,True,1.0,25
+2026-06-30,SHRIPISTON,SPR Auto Technologies Limited,,pocket_pivot,94.9,94.9,True,True,False,4187.4,2026-07-10,4189.6,8,0.0525,1.9511,,,5.5906,-4.6974,True,0.0,25
+2026-06-30,SPAL,S. P. Apparels Limited,,pocket_pivot,92.9,92.9,True,True,False,1138.15,2026-07-10,1159.7,8,1.8934,1.173,,,7.3584,-10.5698,False,0.0,25
+2026-06-30,ALKEM,Alkem Laboratories Limited,,pocket_pivot,92.6,92.6,False,True,False,5570.0,2026-07-10,5669.5,8,1.7864,1.7504,,,2.9623,-2.7558,True,1.0,25
+2026-06-30,INDHOTEL,The Indian Hotels Company Limited,,pocket_pivot,92.5,92.5,False,True,False,713.95,2026-07-10,752.3,8,5.3715,4.4821,,,5.6096,-1.7998,False,0.0,25
+2026-06-30,MANORAMA,Manorama Industries Limited,,pocket_pivot,91.4,91.4,False,True,False,1655.3,2026-07-10,1603.4,8,-3.1354,-7.8536,,,1.2928,-9.3155,True,0.0,25
+2026-06-30,PHOENIXLTD,The Phoenix Mills Limited,,pocket_pivot,90.7,90.7,True,True,False,1948.6,2026-07-10,2138.9,8,9.766,6.4918,,,10.2843,-1.8731,False,1.0,25
+2026-06-30,CONFIPET,Confidence Petroleum India Limited,,pocket_pivot,90.4,90.4,True,True,False,73.14,2026-07-10,76.45,8,4.5256,-3.7873,,,9.9262,-6.6858,False,0.0,25
+2026-06-30,DIFFNKG,Diffusion Engineers Limited,,pocket_pivot,90.0,90.0,False,True,False,424.2,2026-07-10,403.4,8,-4.9033,-6.3296,,,2.8289,-11.0561,False,0.0,25
+2026-06-30,GUFICBIO,Gufic Biosciences Limited,,pocket_pivot,90.0,90.0,False,True,False,407.05,2026-07-10,392.4,8,-3.5991,-6.5471,,,10.0602,-8.6722,False,0.0,25
+2026-06-30,SAMMAANCAP,Sammaan Capital Limited,,pocket_pivot,90.0,90.0,False,True,False,173.62,2026-07-10,166.46,8,-4.1239,-2.6898,,,5.345,-7.7871,False,0.0,25
+2026-06-30,VARROC,Varroc Engineering Limited,,pocket_pivot,90.0,90.0,False,True,False,633.0,2026-07-10,661.45,8,4.4945,2.8673,,,7.9463,-2.6619,False,0.0,25
+2026-07-01,BHARATSE,Bharat Seats Limited,,pocket_pivot,100.0,100.0,False,True,False,222.58,2026-07-10,241.54,7,8.5183,3.1944,,,16.3627,-14.5341,True,0.0,25
+2026-07-01,BLSE,BLS E-Services Limited,,pocket_pivot,100.0,100.0,True,True,False,255.42,2026-07-10,263.25,7,3.0655,2.3412,,,11.9333,-9.3571,False,0.0,25
+2026-07-01,DELHIVERY,Delhivery Limited,,pocket_pivot,100.0,100.0,False,True,False,507.7,2026-07-10,520.3,7,2.4818,-1.1621,,,3.2106,-7.3272,False,1.0,25
+2026-07-01,FUSION,Fusion Finance Limited,,pocket_pivot,100.0,100.0,False,True,False,203.91,2026-07-10,234.04,7,14.7761,8.033,,,18.6798,-7.312,False,0.0,25
+2026-07-01,IKS,Inventurus Knowledge Solutions Limited,,pocket_pivot,100.0,100.0,True,True,False,1800.2,2026-07-10,1928.1,7,7.1048,1.7609,,,7.377,-7.227,True,0.0,25
+2026-07-01,MOREPENLAB,Morepen Laboratories Limited,,pocket_pivot,100.0,100.0,False,True,False,62.68,2026-07-10,61.22,7,-2.3293,-5.9349,,,1.1487,-6.7964,False,0.0,25
+2026-07-01,MUNJALAU,Munjal Auto Industries Limited,,pocket_pivot,100.0,100.0,False,True,False,102.09,2026-07-10,101.33,7,-0.7444,-1.5085,,,12.6359,-9.2565,False,0.0,25
+2026-07-01,PAISALO,Paisalo Digital Limited,,pocket_pivot,100.0,100.0,True,True,False,70.84,2026-07-10,73.24,7,3.3879,-0.5929,,,5.7312,-15.1609,False,0.0,25
+2026-07-01,SIGNPOST,Signpost India Limited,,pocket_pivot,100.0,100.0,False,True,False,306.5,2026-07-10,317.6,7,3.6215,1.1909,,,6.4927,-8.9723,True,0.0,25
+2026-07-01,SSWL,Steel Strips Wheels Limited,,pocket_pivot,100.0,100.0,False,True,False,246.98,2026-07-10,246.05,7,-0.3765,-3.8505,,,3.4902,-6.7374,False,0.0,25
+2026-07-01,SWARAJENG,Swaraj Engines Limited,,pocket_pivot,100.0,100.0,False,True,False,4038.7,2026-07-10,3779.4,7,-6.4204,-7.2994,,,1.9635,-8.0397,True,0.0,25
+2026-07-01,TRIVENI,Triveni Engineering & Industries Limited,,pocket_pivot,100.0,100.0,True,True,False,451.75,2026-07-10,462.4,7,2.3575,-0.5866,,,5.047,-6.4859,False,0.0,25
+2026-07-01,UJJIVANSFB,Ujjivan Small Finance Bank Limited,,pocket_pivot,100.0,100.0,False,True,False,61.31,2026-07-10,65.27,7,6.459,-2.7402,,,7.3887,-4.0287,False,0.0,25
+2026-07-01,VENUSPIPES,Venus Pipes & Tubes Limited,,inside_bar_cluster,100.0,100.0,False,True,False,1807.0,2026-07-10,1807.9,7,0.0498,-4.0897,,,3.7631,-5.4123,True,0.0,25
+2026-07-01,WAAREERTL,Waaree Renewable Technologies Limited,,inside_bar_cluster,100.0,100.0,False,True,False,1040.1,2026-07-10,1016.3,7,-2.2882,-5.9802,,,2.1056,-6.7109,True,0.0,25
+2026-07-01,KARURVYSYA,Karur Vysya Bank Limited,,pocket_pivot,94.1,94.1,True,True,False,300.1,2026-07-10,305.65,7,1.8494,-1.8161,,,2.7491,-3.7654,True,0.0,25
+2026-07-01,SHRIPISTON,SPR Auto Technologies Limited,,pocket_pivot,91.0,91.0,True,True,False,4380.2,2026-07-10,4189.6,7,-4.3514,-6.0134,,,0.9429,-6.6709,True,0.0,25
+2026-07-01,PAGEIND,Page Industries Limited,,pocket_pivot,90.3,90.3,False,True,False,43610.0,2026-07-10,39395.0,7,-9.6652,-5.0332,,,0.5618,-9.9977,True,0.0,25
+2026-07-01,DIVGIITTS,Divgi Torqtransfer Systems Limited,,pocket_pivot,90.0,90.0,True,True,False,987.85,2026-07-10,967.4,7,-2.0702,-4.1757,,,7.8099,-5.4462,False,0.0,25
+2026-07-01,WELENT,Welspun Enterprises Limited,,pocket_pivot,90.0,90.0,False,True,False,610.35,2026-07-10,614.0,7,0.598,-1.5483,,,3.8257,-3.3342,False,0.0,25
+2026-07-02,AADHARHFC,Aadhar Housing Finance Limited,,pocket_pivot,100.0,100.0,False,True,False,535.7,2026-07-10,534.55,6,-0.2147,-0.7654,,,5.0961,-3.3041,False,0.0,25
+2026-07-02,BHARATSE,Bharat Seats Limited,,pocket_pivot,100.0,100.0,False,True,False,240.76,2026-07-10,241.54,6,0.324,1.7985,,,7.576,-6.0351,True,0.0,25
+2026-07-02,COMSYN,Commercial Syn Bags Limited,,pocket_pivot,100.0,100.0,True,True,False,186.76,2026-07-10,193.94,6,3.8445,2.2007,,,14.0501,-16.3579,False,0.0,25
+2026-07-02,DCBBANK,DCB Bank Limited,,pocket_pivot,100.0,100.0,True,True,False,193.49,2026-07-10,188.67,6,-2.4911,-3.8658,,,0.5737,-7.8505,False,0.0,25
+2026-07-02,DELHIVERY,Delhivery Limited,,pocket_pivot,100.0,100.0,False,True,False,509.3,2026-07-10,520.3,6,2.1598,1.2468,,,2.8863,-2.2187,False,1.0,25
+2026-07-02,EXIDEIND,Exide Industries Limited,,pocket_pivot,100.0,100.0,False,True,False,419.35,2026-07-10,424.4,6,1.2042,1.395,,,2.7781,-6.6889,False,1.0,25
+2026-07-02,FUSION,Fusion Finance Limited,,pocket_pivot,100.0,100.0,False,True,False,216.21,2026-07-10,234.04,6,8.2466,6.0635,,,11.9282,-6.1098,False,0.0,25
+2026-07-02,GHCLTEXTIL,GHCL Textiles Limited,,pocket_pivot,100.0,100.0,True,True,False,104.06,2026-07-10,109.35,6,5.0836,3.5076,,,8.7738,-7.265,False,0.0,25
+2026-07-02,GREAVESCOT,Greaves Cotton Limited,,pocket_pivot,100.0,100.0,False,True,False,231.03,2026-07-10,263.6,6,14.0977,2.6836,,,15.5694,-6.1594,False,0.0,25
+2026-07-02,IKS,Inventurus Knowledge Solutions Limited,,pocket_pivot,100.0,100.0,True,True,False,1837.5,2026-07-10,1928.1,6,4.9306,1.3823,,,5.1973,-2.0408,True,0.0,25
+2026-07-02,INDIAGLYCO,India Glycols Limited,,pocket_pivot,100.0,100.0,True,True,False,1075.35,2026-07-10,1067.75,6,-0.7067,-3.0362,,,3.2641,-5.6121,False,0.0,25
+2026-07-02,JAMNAAUTO,Jamna Auto Industries Limited,,pocket_pivot,100.0,100.0,False,True,False,139.46,2026-07-10,136.56,6,-2.0794,-2.395,,,1.1043,-6.2742,True,0.0,25
+2026-07-02,MEDANTA,Global Health Limited,,vcp,100.0,100.0,False,True,False,1345.3,2026-07-10,1336.9,6,-0.6244,0.223,,,1.8137,-3.672,False,0.0,25
+2026-07-02,PHOENIXLTD,The Phoenix Mills Limited,,pocket_pivot,100.0,100.0,True,True,False,2012.5,2026-07-10,2138.9,6,6.2807,3.7516,,,6.7826,-1.754,False,1.0,25
+2026-07-02,PRESTIGE,Prestige Estates Projects Limited,,pocket_pivot,100.0,100.0,False,True,False,1674.1,2026-07-10,1733.2,6,3.5303,-0.0119,,,4.026,-3.363,False,1.0,25
+2026-07-02,PRIVISCL,Privi Speciality Chemicals Limited,,vcp,100.0,100.0,True,True,False,3750.8,2026-07-10,3662.8,6,-2.3462,-3.4526,,,0.2453,-6.5399,True,0.0,25
+2026-07-02,RISHABH,Rishabh Instruments Limited,,pocket_pivot,100.0,100.0,True,True,False,645.75,2026-07-10,662.1,6,2.5319,1.0608,,,7.2861,-8.4708,False,0.0,25
+2026-07-02,SONACOMS,Sona BLW Precision Forgings Limited,,pocket_pivot,100.0,100.0,True,True,False,662.3,2026-07-10,668.55,6,0.9437,1.2759,,,3.0047,-6.8624,False,1.0,25
+2026-07-02,SWARAJENG,Swaraj Engines Limited,,pocket_pivot,100.0,100.0,False,True,False,4103.5,2026-07-10,3779.4,6,-7.8981,-9.0459,,,0.3534,-9.4919,True,0.0,25
+2026-07-02,TRIVENI,Triveni Engineering & Industries Limited,,pocket_pivot,100.0,100.0,True,True,False,468.3,2026-07-10,462.4,6,-1.2599,-2.8294,,,1.3346,-5.3705,False,0.0,25
+2026-07-02,CHOICEIN,Choice International Limited,,pocket_pivot,98.2,98.2,False,True,False,780.2,2026-07-10,835.0,6,7.0238,6.4407,,,8.4337,-2.3199,False,0.0,25
+2026-07-02,J&KBANK,The Jammu & Kashmir Bank Limited,,pocket_pivot,98.2,98.2,True,True,False,164.7,2026-07-10,192.65,6,16.9702,2.2526,,,22.4954,-4.2805,False,0.0,25
+2026-07-02,TIRUPATIFL,Tirupati Forge Limited,,pocket_pivot,97.8,97.8,True,True,False,69.52,2026-07-10,68.1,6,-2.0426,-3.4954,,,7.7388,-7.0771,False,0.0,25
+2026-07-02,OBEROIRLTY,Oberoi Realty Limited,,pocket_pivot,94.9,94.9,False,True,False,1864.7,2026-07-10,1924.8,6,3.223,0.4558,,,6.5104,-2.7779,False,1.0,25
+2026-07-02,WABAG,VA Tech Wabag Limited,,pocket_pivot,90.5,90.5,False,True,False,2190.3,2026-07-10,2221.2,6,1.4108,-3.3146,,,2.6343,-7.0904,False,0.0,25
+2026-07-02,ADFFOODS,ADF Foods Limited,,pocket_pivot,90.0,90.0,True,True,False,317.1,2026-07-10,319.9,6,0.883,0.1419,,,9.4134,-4.6042,True,0.0,25
+2026-07-02,MMFL,MM Forgings Limited,,pocket_pivot,90.0,90.0,True,True,False,486.2,2026-07-10,523.4,6,7.6512,4.9157,,,8.3916,-4.9877,False,0.0,25
+2026-07-02,PAISALO,Paisalo Digital Limited,,pocket_pivot,90.0,90.0,True,True,False,71.92,2026-07-10,73.24,6,1.8354,0.6674,,,4.1435,-4.4633,False,0.0,25
+2026-07-02,TBOTEK,TBO Tek Limited,,pocket_pivot,90.0,90.0,False,True,False,1526.3,2026-07-10,1504.9,6,-1.4021,-1.9262,,,2.7976,-4.2718,True,0.0,25
+2026-07-02,CHALET,Chalet Hotels Limited,,vcp,85.0,85.0,False,True,False,837.1,2026-07-10,839.75,6,0.3166,-2.1563,,,1.541,-5.9969,True,0.0,25
+2026-07-02,TRENT,Trent Limited,,vcp,85.0,85.0,False,True,False,3317.8,2026-07-10,2902.8,6,-12.5083,-12.4691,,,2.4685,-12.8217,True,1.0,25
+2026-07-03,AADHARHFC,Aadhar Housing Finance Limited,,pocket_pivot,100.0,100.0,False,True,False,555.6,2026-07-10,534.55,5,-3.7887,-3.7887,,,1.3319,-6.3805,False,0.0,25
+2026-07-03,AEGISVOPAK,Aegis Vopak Terminals Limited,,pocket_pivot,100.0,100.0,False,True,False,257.43,2026-07-10,283.18,5,10.0027,10.0027,,,16.3423,-8.0799,False,0.0,25
+2026-07-03,ALKEM,Alkem Laboratories Limited,,pocket_pivot,100.0,100.0,False,True,False,5562.5,2026-07-10,5669.5,5,1.9236,1.9236,,,3.1011,-1.2315,True,1.0,25
+2026-07-03,BLSE,BLS E-Services Limited,,pocket_pivot,100.0,100.0,False,True,False,265.11,2026-07-10,263.25,5,-0.7016,-0.7016,,,7.842,-4.9451,False,0.0,25
+2026-07-03,CGCL,Capri Global Capital Limited,,inside_bar_cluster,100.0,100.0,False,True,False,233.87,2026-07-10,252.22,5,7.8462,7.8462,,,13.1098,-3.2796,False,0.0,25
+2026-07-03,CHOICEIN,Choice International Limited,,pocket_pivot,100.0,100.0,False,True,False,800.05,2026-07-10,835.0,5,4.3685,4.3685,,,5.7434,-4.7435,False,0.0,25
+2026-07-03,COMSYN,Commercial Syn Bags Limited,,pocket_pivot,100.0,100.0,True,True,False,200.31,2026-07-10,193.94,5,-3.1801,-3.1801,,,6.3352,-9.9296,False,0.0,25
+2026-07-03,CYIENTDLM,Cyient DLM Limited,,pocket_pivot,100.0,100.0,False,True,False,509.4,2026-07-10,545.65,5,7.1162,7.1162,,,11.808,-6.4389,False,0.0,25
+2026-07-03,EPL,EPL Limited,,pocket_pivot,100.0,100.0,False,True,False,237.17,2026-07-10,237.56,5,0.1644,0.1644,,,4.0857,-3.4406,False,0.0,25
+2026-07-03,FUSION,Fusion Finance Limited,,pocket_pivot,100.0,100.0,False,True,False,229.4,2026-07-10,234.04,5,2.0227,2.0227,,,5.4926,-5.667,False,0.0,25
+2026-07-03,GHCLTEXTIL,GHCL Textiles Limited,,pocket_pivot,100.0,100.0,True,True,False,106.75,2026-07-10,109.35,5,2.4356,2.4356,,,6.0328,-2.5761,False,0.0,25
+2026-07-03,INDIAGLYCO,India Glycols Limited,,pocket_pivot,100.0,100.0,True,True,False,1075.75,2026-07-10,1067.75,5,-0.7437,-0.7437,,,3.2257,-5.6472,False,0.0,25
+2026-07-03,IPCALAB,IPCA Laboratories Limited,,pocket_pivot,100.0,100.0,True,True,False,1778.9,2026-07-10,1787.9,5,0.5059,0.5059,,,1.8888,-3.3448,False,0.0,25
+2026-07-03,ONMOBILE,OnMobile Global Limited,,pocket_pivot,100.0,100.0,False,True,False,80.03,2026-07-10,68.54,5,-14.3571,-14.3571,,,4.9606,-18.7805,False,0.0,25
+2026-07-03,SUVEN,Suven Life Sciences Limited,,pocket_pivot,100.0,100.0,False,True,False,327.6,2026-07-10,357.85,5,9.2338,9.2338,,,13.1868,-6.8987,False,0.0,25
+2026-07-03,AZAD,Azad Engineering Limited,,pocket_pivot,97.9,97.9,True,True,False,2149.1,2026-07-10,2479.5,5,15.3739,15.3739,,,17.2584,-4.2809,False,0.0,25
+2026-07-03,GRAVITA,Gravita India Limited,,pocket_pivot,97.1,97.1,False,True,False,1724.4,2026-07-10,1854.6,5,7.5505,7.5505,,,8.1536,-2.5748,True,0.0,25
+2026-07-03,MMFL,MM Forgings Limited,,pocket_pivot,95.4,95.4,True,True,False,502.1,2026-07-10,523.4,5,4.2422,4.2422,,,4.9592,-3.1468,False,0.0,25
+2026-07-03,KIMS,Krishna Institute of Medical Sciences Limited,,vcp,92.9,92.9,False,True,False,850.65,2026-07-10,814.9,5,-4.2027,-4.2027,,,0.864,-7.1298,False,0.0,25
+2026-07-03,MAHLOG,Mahindra Logistics Limited,,pocket_pivot,90.0,90.0,True,True,False,394.6,2026-07-10,387.2,5,-1.8753,-1.8753,,,5.626,-3.8393,False,0.0,25
+2026-07-03,MANGLMCEM,Mangalam Cement Limited,,pocket_pivot,90.0,90.0,True,True,False,926.4,2026-07-10,964.55,5,4.1181,4.1181,,,4.3826,-2.9523,False,0.0,25
+2026-07-06,ABDL,Allied Blenders and Distillers Limited,,pocket_pivot,100.0,100.0,False,True,False,702.7,2026-07-10,648.75,4,-7.6775,,,,1.2808,-8.2041,False,0.0,25
+2026-07-06,AEGISVOPAK,Aegis Vopak Terminals Limited,,pocket_pivot,100.0,100.0,False,True,False,279.97,2026-07-10,283.18,4,1.1466,,,,6.9757,-8.3652,False,0.0,25
+2026-07-06,ANANDRATHI,Anand Rathi Wealth Limited,,vcp,100.0,100.0,True,True,False,2095.5,2026-07-10,2146.8,4,2.4481,,,,3.8511,-3.393,True,0.0,25
+2026-07-06,CHOLAFIN,Cholamandalam Investment and Finance Company Limited,,vcp,100.0,100.0,False,True,False,1850.5,2026-07-10,1807.8,4,-2.3075,,,,1.324,-5.1446,False,0.0,25
+2026-07-06,DALMIASUG,Dalmia Bharat Sugar and Industries Limited,,pocket_pivot,100.0,100.0,False,True,False,374.9,2026-07-10,357.0,4,-4.7746,,,,6.2683,-8.2422,False,0.0,25
+2026-07-06,FILATEX,Filatex India Limited,,pocket_pivot,100.0,100.0,False,True,False,58.78,2026-07-10,62.25,4,5.9034,,,,7.3494,-6.9922,False,0.0,25
+2026-07-06,GHCLTEXTIL,GHCL Textiles Limited,,pocket_pivot,100.0,100.0,True,True,False,110.57,2026-07-10,109.35,4,-1.1034,,,,2.3695,-5.9419,False,0.0,25
+2026-07-06,IBULLSLTD,Indiabulls Limited,,pocket_pivot,100.0,100.0,False,True,False,30.16,2026-07-10,29.63,4,-1.7573,,,,1.9894,-7.1618,False,0.0,25
+2026-07-06,MUNJALAU,Munjal Auto Industries Limited,,pocket_pivot,100.0,100.0,False,True,False,110.39,2026-07-10,101.33,4,-8.2073,,,,4.167,-11.5771,False,0.0,25
+2026-07-06,PSPPROJECT,PSP Projects Limited,,pocket_pivot,100.0,100.0,False,True,False,1099.0,2026-07-10,1069.2,4,-2.7116,,,,4.0036,-6.8244,False,0.0,25
+2026-07-06,RADICO,Radico Khaitan Limited,,pocket_pivot,100.0,100.0,True,True,False,4106.7,2026-07-10,4073.7,4,-0.8036,,,,1.3417,-4.9553,True,1.0,25
+2026-07-06,SPECTRUM,Spectrum Electrical Industries Limited,,pocket_pivot,100.0,100.0,False,True,False,2058.6,2026-07-10,1921.6,4,-6.655,,,,6.8687,-11.0318,True,0.0,25
+2026-07-06,TORNTPHARM,Torrent Pharmaceuticals Limited,,vcp,100.0,100.0,True,True,False,4822.7,2026-07-10,4901.5,4,1.6339,,,,2.5981,-1.6505,True,1.0,25
+2026-07-06,UNITDSPR,United Spirits Limited,,vcp,100.0,100.0,False,True,False,1427.3,2026-07-10,1385.7,4,-2.9146,,,,0.9599,-3.6152,True,0.0,25
+2026-07-06,VERANDA,Veranda Learning Solutions Limited,,pocket_pivot,100.0,100.0,False,True,False,259.53,2026-07-10,237.95,4,-8.315,,,,2.4776,-8.7736,False,0.0,25
+2026-07-06,WELCORP,Welspun Corp Limited,,pocket_pivot,100.0,100.0,True,True,False,1543.6,2026-07-10,1612.6,4,4.4701,,,,5.8564,-7.6833,True,0.0,25
+2026-07-06,ZENTEC,Zen Technologies Limited,,pocket_pivot,100.0,100.0,True,True,False,1852.8,2026-07-10,1880.4,4,1.4896,,,,2.7634,-5.1004,False,0.0,25
+2026-07-06,CUPID,Cupid Limited,,pocket_pivot,99.9,99.9,True,True,False,213.09,2026-07-10,212.24,4,-0.3989,,,,6.0585,-16.9881,True,0.0,25
+2026-07-06,DIACABS,Diamond Power Infrastructure Limited,,pocket_pivot,99.9,99.9,True,True,False,218.77,2026-07-10,229.01,4,4.6807,,,,15.098,-2.8203,False,0.0,25
+2026-07-06,THELEELA,Leela Palaces Hotels & Resorts Limited,,pocket_pivot,99.7,99.7,False,True,False,502.2,2026-07-10,501.0,4,-0.2389,,,,1.354,-5.675,False,0.0,25
+2026-07-06,AZAD,Azad Engineering Limited,,pocket_pivot,98.5,98.5,True,True,False,2246.5,2026-07-10,2479.5,4,10.3717,,,,12.1745,-4.6072,False,0.0,25
+2026-07-06,MANAPPURAM,Manappuram Finance Limited,,pocket_pivot,96.1,96.1,True,True,False,346.1,2026-07-10,341.3,4,-1.3869,,,,0.5201,-6.6166,False,0.0,25
+2026-07-06,TVSMOTOR,TVS Motor Company Limited,,vcp,94.7,94.7,False,True,False,3705.0,2026-07-10,3623.1,4,-2.2105,,,,1.8893,-2.6019,True,0.0,25
+2026-07-06,PHOENIXLTD,The Phoenix Mills Limited,,pocket_pivot,91.1,91.1,True,True,False,2105.8,2026-07-10,2138.9,4,1.5718,,,,2.0515,-4.3879,False,1.0,25
+2026-07-06,BLSE,BLS E-Services Limited,,pocket_pivot,90.0,90.0,False,True,False,268.73,2026-07-10,263.25,4,-2.0392,,,,6.3893,-4.2124,False,0.0,25
+2026-07-06,PRESTIGE,Prestige Estates Projects Limited,,pocket_pivot,90.0,90.0,False,True,False,1703.5,2026-07-10,1733.2,4,1.7435,,,,2.2307,-5.0308,False,1.0,25
+2026-07-07,AEGISVOPAK,Aegis Vopak Terminals Limited,,pocket_pivot,100.0,100.0,False,True,False,294.32,2026-07-10,283.18,3,-3.785,,,,1.76,-9.0276,False,0.0,25
+2026-07-07,BAJFINANCE,Bajaj Finance Limited,Financial Services,vcp,100.0,100.0,False,True,False,1042.5,2026-07-10,1020.5,3,-2.1103,,,,0.9976,-4.6427,False,0.0,25
+2026-07-07,CUPID,Cupid Limited,,pocket_pivot,100.0,100.0,True,True,False,221.11,2026-07-10,212.24,3,-4.0116,,,,2.2116,-19.9991,True,0.0,25
+2026-07-07,CYIENTDLM,Cyient DLM Limited,,pocket_pivot,100.0,100.0,False,True,False,536.8,2026-07-10,545.65,3,1.6487,,,,6.101,-5.8774,False,0.0,25
+2026-07-07,DHANBANK,Dhanlaxmi Bank Limited,,pocket_pivot,100.0,100.0,True,True,False,36.22,2026-07-10,34.75,3,-4.0585,,,,1.7394,-8.5588,False,0.0,25
+2026-07-07,DHANBANK,Dhanlaxmi Bank Limited,,inside_bar_cluster,100.0,100.0,True,True,False,36.22,2026-07-10,34.75,3,-4.0585,,,,1.7394,-8.5588,False,0.0,25
+2026-07-07,GMRAIRPORT,GMR AIRPORTS LIMITED,,vcp,100.0,100.0,True,True,False,114.98,2026-07-10,112.51,3,-2.1482,,,,0.574,-4.0616,False,1.0,25
+2026-07-07,IOLCP,IOL Chemicals and Pharmaceuticals Limited,,pocket_pivot,100.0,100.0,False,True,False,165.04,2026-07-10,171.06,3,3.6476,,,,7.7921,-11.991,False,0.0,25
+2026-07-07,ITDC,India Tourism Development Corporation Limited,,pocket_pivot,100.0,100.0,False,True,False,702.8,2026-07-10,716.8,3,1.992,,,,12.0589,-16.5623,True,0.0,25
+2026-07-07,TBZ,Tribhovandas Bhimji Zaveri Limited,,pocket_pivot,100.0,100.0,False,True,False,198.71,2026-07-10,228.34,3,14.9112,,,,21.8056,-5.0979,True,0.0,25
+2026-07-07,TITAN,Titan Company Limited,Consumer Durables,pocket_pivot,100.0,100.0,True,True,False,4604.2,2026-07-10,4584.4,3,-0.43,,,,1.642,-2.1546,True,1.0,25
+2026-07-07,UNITDSPR,United Spirits Limited,,vcp,100.0,100.0,False,True,False,1439.4,2026-07-10,1385.7,3,-3.7307,,,,0.1112,-4.4255,True,0.0,25
+2026-07-07,VINCOFE,Vintage Coffee And Beverages Limited,,pocket_pivot,100.0,100.0,False,True,False,161.16,2026-07-10,161.55,3,0.242,,,,2.6247,-5.0012,False,0.0,25
+2026-07-07,AKUMS,Akums Drugs and Pharmaceuticals Limited,,pocket_pivot,99.9,99.9,True,True,False,649.85,2026-07-10,701.95,3,8.0172,,,,8.8559,-4.1317,False,0.0,25
+2026-07-07,SBILIFE,SBI Life Insurance Company Limited,Financial Services,vcp,99.4,99.4,False,True,False,1832.3,2026-07-10,1862.9,3,1.67,,,,1.8392,-3.2364,False,1.0,25
+2026-07-07,TORNTPHARM,Torrent Pharmaceuticals Limited,,vcp,99.3,99.3,True,True,False,4852.6,2026-07-10,4901.5,3,1.0077,,,,1.966,-1.5208,True,1.0,25
+2026-07-07,AZAD,Azad Engineering Limited,,pocket_pivot,99.0,99.0,True,True,False,2275.3,2026-07-10,2479.5,3,8.9746,,,,10.7546,-3.1117,False,0.0,25
+2026-07-07,PNBHOUSING,PNB Housing Finance Limited,,pocket_pivot,95.6,95.6,True,True,False,1109.7,2026-07-10,1110.6,3,0.0811,,,,0.8381,-5.2356,False,1.0,25
+2026-07-07,JBCHEPHARM,JB Chemicals & Pharmaceuticals Limited,,pocket_pivot,95.4,95.4,True,True,False,2422.0,2026-07-10,2435.5,3,0.5574,,,,2.147,-1.4533,True,0.0,25
+2026-07-07,INDUSINDBK,IndusInd Bank Limited,Banking,pocket_pivot,92.3,92.3,True,True,False,1022.25,2026-07-10,1015.8,3,-0.631,,,,1.5407,-3.1744,False,1.0,25
+2026-07-07,HARDWYN,Hardwyn India Limited,,pocket_pivot,91.5,91.5,True,True,False,25.18,2026-07-10,24.72,3,-1.8268,,,,2.8594,-6.2351,False,0.0,25
+2026-07-07,WABAG,VA Tech Wabag Limited,,pocket_pivot,91.4,91.4,False,True,False,2203.2,2026-07-10,2221.2,3,0.817,,,,2.0334,-7.2622,False,0.0,25
+2026-07-07,DIACABS,Diamond Power Infrastructure Limited,,pocket_pivot,90.0,90.0,True,True,False,224.95,2026-07-10,229.01,3,1.8048,,,,11.936,-2.1916,False,0.0,25
+2026-07-07,SOUTHBANK,The South Indian Bank Limited,,pocket_pivot,90.0,90.0,True,True,False,47.67,2026-07-10,45.81,3,-3.9018,,,,4.678,-9.7755,False,0.0,25
+2026-07-07,COROMANDEL,Coromandel International Limited,,vcp,85.0,85.0,False,True,False,2074.4,2026-07-10,2067.8,3,-0.3182,,,,0.5496,-4.0349,True,0.0,25
+2026-07-07,SUNDARMFIN,Sundaram Finance Limited,,vcp,85.0,85.0,False,True,False,4784.0,2026-07-10,4574.9,3,-4.3708,,,,0.5477,-4.9645,False,0.0,25
+2026-07-08,BALAMINES,Balaji Amines Limited,,pocket_pivot,100.0,100.0,False,True,False,2196.7,2026-07-10,2414.9,2,9.9331,,,,10.1652,-6.223,False,0.0,25
+2026-07-08,DIACABS,Diamond Power Infrastructure Limited,,pocket_pivot,100.0,100.0,True,True,False,231.33,2026-07-10,229.01,2,-1.0029,,,,8.8488,-4.8891,False,0.0,25
+2026-07-08,JINDRILL,Jindal Drilling And Industries Limited,,pocket_pivot,100.0,100.0,False,True,False,601.05,2026-07-10,603.05,2,0.3328,,,,9.708,-9.342,False,0.0,25
+2026-07-08,ORCHPHARMA,Orchid Pharma Limited,,pocket_pivot,100.0,100.0,False,True,False,1002.25,2026-07-10,1012.55,2,1.0277,,,,7.3086,-4.6894,False,0.0,25
+2026-07-08,INOXINDIA,INOX India Limited,,pocket_pivot,98.9,98.9,True,True,False,1875.9,2026-07-10,1978.0,2,5.4427,,,,8.428,-4.5791,True,0.0,25
+2026-07-08,AETHER,Aether Industries Limited,,pocket_pivot,94.5,94.5,True,True,False,1413.4,2026-07-10,1500.8,2,6.1837,,,,8.851,-7.5209,False,0.0,25
+2026-07-08,SILVERTUC,Silver Touch Technologies Limited,,pocket_pivot,93.5,93.5,True,True,False,187.9,2026-07-10,179.19,2,-4.6354,,,,3.2464,-5.2155,True,0.0,25
+2026-07-08,ATHERENERG,Ather Energy Limited,,pocket_pivot,91.3,91.3,True,True,False,1200.0,2026-07-10,1225.8,2,2.15,,,,3.575,-5.5583,False,0.0,25
+2026-07-08,DLINKINDIA,D-Link (India) Limited,,pocket_pivot,90.0,90.0,False,True,False,538.25,2026-07-10,506.45,2,-5.908,,,,2.0344,-7.8495,True,0.0,25
+2026-07-08,INDSWFTLAB,Ind-Swift Laboratories Limited,,pocket_pivot,90.0,90.0,True,True,False,225.47,2026-07-10,246.44,2,9.3006,,,,9.9925,-4.5505,False,0.0,25
+2026-07-08,IOLCP,IOL Chemicals and Pharmaceuticals Limited,,pocket_pivot,90.0,90.0,False,True,False,167.11,2026-07-10,171.06,2,2.3637,,,,6.4568,-4.8112,False,0.0,25
+2026-07-08,ITDC,India Tourism Development Corporation Limited,,pocket_pivot,90.0,90.0,False,True,False,723.4,2026-07-10,716.8,2,-0.9124,,,,8.8678,-5.2046,True,0.0,25
+2026-07-08,TBZ,Tribhovandas Bhimji Zaveri Limited,,pocket_pivot,90.0,90.0,False,True,False,201.7,2026-07-10,228.34,2,13.2077,,,,20.0,-2.6822,True,0.0,25
+2026-07-08,WSTCSTPAPR,West Coast Paper Mills Limited,,pocket_pivot,90.0,90.0,False,True,False,541.95,2026-07-10,538.2,2,-0.6919,,,,4.8067,-2.6386,False,0.0,25
+2026-07-09,AETHER,Aether Industries Limited,,pocket_pivot,100.0,100.0,True,True,False,1485.8,2026-07-10,1500.8,1,1.0096,,,,3.5469,-4.0921,False,0.0,25
+2026-07-09,ASTERDM,Aster DM Healthcare Limited,,vcp,100.0,100.0,True,True,False,807.15,2026-07-10,808.9,1,0.2168,,,,1.338,-3.4876,False,0.0,25
+2026-07-09,AZAD,Azad Engineering Limited,,pocket_pivot,100.0,100.0,True,True,False,2476.1,2026-07-10,2479.5,1,0.1373,,,,1.7729,-9.5352,False,0.0,25
+2026-07-09,BAJAJCON,Bajaj Consumer Care Limited,,vcp,100.0,100.0,True,True,False,643.55,2026-07-10,670.25,1,4.1489,,,,5.6406,-4.4363,True,0.0,25
+2026-07-09,BORORENEW,BOROSIL RENEWABLES LIMITED,,pocket_pivot,100.0,100.0,False,True,False,651.65,2026-07-10,640.55,1,-1.7034,,,,2.8006,-8.1409,True,0.0,25
+2026-07-09,CHOICEIN,Choice International Limited,,pocket_pivot,100.0,100.0,False,True,False,830.45,2026-07-10,835.0,1,0.5479,,,,1.8725,-5.1659,False,0.0,25
+2026-07-09,DLINKINDIA,D-Link (India) Limited,,pocket_pivot,100.0,100.0,False,True,False,546.05,2026-07-10,506.45,1,-7.2521,,,,0.5769,-9.1658,True,0.0,25
+2026-07-09,GRAVITA,Gravita India Limited,,pocket_pivot,100.0,100.0,False,True,False,1811.4,2026-07-10,1854.6,1,2.3849,,,,2.959,-4.1956,True,0.0,25
+2026-07-09,INDNIPPON,India Nippon Electricals Limited,,pocket_pivot,100.0,100.0,False,True,False,1107.9,2026-07-10,1168.5,1,5.4698,,,,6.8689,-8.8365,False,0.0,25
+2026-07-09,KSL,Kalyani Steels Limited,,pocket_pivot,100.0,100.0,False,True,False,933.5,2026-07-10,959.2,1,2.7531,,,,3.91,-4.6599,False,0.0,25
+2026-07-09,ORCHPHARMA,Orchid Pharma Limited,,pocket_pivot,100.0,100.0,False,True,False,1050.95,2026-07-10,1012.55,1,-3.6538,,,,2.336,-6.437,False,0.0,25
+2026-07-09,SENCO,Senco Gold Limited,,pocket_pivot,100.0,100.0,False,True,False,348.65,2026-07-10,362.15,1,3.8721,,,,5.8368,-4.4887,True,0.0,25
+2026-07-09,TBZ,Tribhovandas Bhimji Zaveri Limited,,pocket_pivot,100.0,100.0,False,True,False,231.55,2026-07-10,228.34,1,-1.3863,,,,4.5303,-12.209,True,0.0,25
+2026-07-09,TIPSMUSIC,Tips Music Limited,,pocket_pivot,100.0,100.0,True,True,False,711.15,2026-07-10,711.55,1,0.0562,,,,1.2585,-6.4684,True,0.0,25
+2026-07-09,UNICHEMLAB,Unichem Laboratories Limited,,pocket_pivot,100.0,100.0,False,True,False,650.6,2026-07-10,638.75,1,-1.8214,,,,5.6256,-11.7737,False,0.0,25
+2026-07-09,VAIBHAVGBL,Vaibhav Global Limited,,pocket_pivot,100.0,100.0,False,True,False,255.78,2026-07-10,261.36,1,2.1816,,,,4.152,-4.4961,True,0.0,25
+2026-07-09,BETA,Beta Drugs Limited,,pocket_pivot,99.4,99.4,False,True,False,2190.3,2026-07-10,2366.8,1,8.0583,,,,9.3458,-8.3002,True,0.0,25
+2026-07-09,SKYGOLD,SKY GOLD AND DIAMONDS LIMITED,,pocket_pivot,98.6,98.6,True,True,False,623.3,2026-07-10,623.85,1,0.0882,,,,2.3584,-4.8853,True,0.0,25
+2026-07-09,OBEROIRLTY,Oberoi Realty Limited,,pocket_pivot,98.5,98.5,False,True,False,1873.2,2026-07-10,1924.8,1,2.7546,,,,3.2511,-2.8027,False,1.0,25
+2026-07-09,WELCORP,Welspun Corp Limited,,pocket_pivot,97.5,97.5,True,True,False,1601.9,2026-07-10,1612.6,1,0.668,,,,2.0039,-4.8005,True,0.0,25
+2026-07-09,CUPID,Cupid Limited,,pocket_pivot,93.4,93.4,True,True,False,210.01,2026-07-10,212.24,1,1.0619,,,,5.7093,-6.6711,True,0.0,25
+2026-07-09,SYRMA,Syrma SGS Technology Limited,,pocket_pivot,91.3,91.3,True,True,False,1441.0,2026-07-10,1451.9,1,0.7564,,,,1.1103,-3.8862,False,0.0,25
+2026-07-09,CNL,Creative Newtech Limited,,pocket_pivot,90.0,90.0,True,True,False,842.15,2026-07-10,847.5,1,0.6353,,,,6.7506,-6.6912,True,0.0,25
+2026-07-09,ITDC,India Tourism Development Corporation Limited,,pocket_pivot,90.0,90.0,False,True,False,728.1,2026-07-10,716.8,1,-1.552,,,,5.5762,-3.722,True,0.0,25
+2026-07-10,ANANDRATHI,Anand Rathi Wealth Limited,,pocket_pivot,100.0,100.0,True,True,False,2146.8,2026-07-10,2146.8,0,0.0,,,,1.3695,-3.978,True,0.0,25
+2026-07-10,ARMANFIN,Arman Financial Services Limited,,pocket_pivot,100.0,100.0,False,True,False,1813.0,2026-07-10,1813.0,0,0.0,,,,3.5797,-4.5891,False,0.0,25
+2026-07-10,BAJAJCON,Bajaj Consumer Care Limited,,pocket_pivot,100.0,100.0,True,True,False,670.25,2026-07-10,670.25,0,0.0,,,,1.4323,-4.4386,True,0.0,25
+2026-07-10,BETA,Beta Drugs Limited,,pocket_pivot,100.0,100.0,False,True,False,2366.8,2026-07-10,2366.8,0,0.0,,,,1.1915,-7.4573,True,0.0,25
+2026-07-10,BFINVEST,BF Investment Limited,,pocket_pivot,100.0,100.0,False,True,False,487.25,2026-07-10,487.25,0,0.0,,,,4.8743,-8.0554,False,0.0,25
+2026-07-10,CCAVENUE,AvenuesAI Limited,,pocket_pivot,100.0,100.0,False,True,False,18.1,2026-07-10,18.1,0,0.0,,,,2.6519,-4.3094,False,0.0,25
+2026-07-10,GODREJIND,Godrej Industries Limited,,pocket_pivot,100.0,100.0,False,True,False,1417.7,2026-07-10,1417.7,0,0.0,,,,1.7846,-14.6223,False,0.0,25
+2026-07-10,GREAVESCOT,Greaves Cotton Limited,,pocket_pivot,100.0,100.0,False,True,False,263.6,2026-07-10,263.6,0,0.0,,,,1.2898,-10.4325,False,0.0,25
+2026-07-10,INDNIPPON,India Nippon Electricals Limited,,pocket_pivot,100.0,100.0,False,True,False,1168.5,2026-07-10,1168.5,0,0.0,,,,1.3265,-3.7142,False,0.0,25
+2026-07-10,J&KBANK,The Jammu & Kashmir Bank Limited,,pocket_pivot,100.0,100.0,True,True,False,192.65,2026-07-10,192.65,0,0.0,,,,4.7236,-12.2346,False,0.0,25
+2026-07-10,JYOTICNC,Jyoti CNC Automation Limited,,inside_bar_cluster,100.0,100.0,False,True,False,796.55,2026-07-10,796.55,0,0.0,,,,1.1864,-3.0507,True,0.0,25
+2026-07-10,KSL,Kalyani Steels Limited,,pocket_pivot,100.0,100.0,False,True,False,959.2,2026-07-10,959.2,0,0.0,,,,1.1259,-2.6793,False,0.0,25
+2026-07-10,LICI,Life Insurance Corporation Of India,,vcp,100.0,100.0,False,True,False,443.05,2026-07-10,443.05,0,0.0,,,,0.6658,-1.3204,False,1.0,25
+2026-07-10,LMW,LMW Limited,,pocket_pivot,100.0,100.0,False,True,False,16134.0,2026-07-10,16134.0,0,0.0,,,,0.719,-2.0454,False,0.0,25
+2026-07-10,MAHLIFE,Mahindra Lifespace Developers Limited,,pocket_pivot,100.0,100.0,False,True,False,378.9,2026-07-10,378.9,0,0.0,,,,0.5542,-2.6128,False,0.0,25
+2026-07-10,MUTHOOTMF,Muthoot Microfin Limited,,pocket_pivot,100.0,100.0,True,True,False,235.26,2026-07-10,235.26,0,0.0,,,,4.1401,-6.2739,False,0.0,25
+2026-07-10,POLYPLEX,Polyplex Corporation Limited,,vcp,100.0,100.0,False,True,False,1060.55,2026-07-10,1060.55,0,0.0,,,,1.3814,-3.2766,False,0.0,25
+2026-07-10,PPAP,PPAP Automotive Limited,,pocket_pivot,100.0,100.0,False,True,False,323.37,2026-07-10,323.37,0,0.0,,,,2.6533,-15.8085,False,0.0,25
+2026-07-10,SENCO,Senco Gold Limited,,pocket_pivot,100.0,100.0,False,True,False,362.15,2026-07-10,362.15,0,0.0,,,,1.8915,-3.5206,True,0.0,25
+2026-07-10,VAIBHAVGBL,Vaibhav Global Limited,,pocket_pivot,100.0,100.0,False,True,False,261.36,2026-07-10,261.36,0,0.0,,,,1.9284,-3.918,True,0.0,25
+2026-07-10,CHOICEIN,Choice International Limited,,pocket_pivot,97.8,97.8,False,True,False,835.0,2026-07-10,835.0,0,0.0,,,,1.3174,-1.8623,False,0.0,25
+2026-07-10,INDIANB,Indian Bank,,pocket_pivot,96.8,96.8,False,True,False,870.7,2026-07-10,870.7,0,0.0,,,,0.4824,-8.7229,True,0.0,25
+2026-07-10,DELHIVERY,Delhivery Limited,,pocket_pivot,96.6,96.6,False,True,False,520.3,2026-07-10,520.3,0,0.0,,,,0.7111,-1.4319,False,1.0,25
+2026-07-10,PAYTM,One 97 Communications Limited,,pocket_pivot,93.9,93.9,False,True,False,1341.8,2026-07-10,1341.8,0,0.0,,,,1.2819,-5.433,False,1.0,25
+2026-07-10,UJJIVANSFB,Ujjivan Small Finance Bank Limited,,pocket_pivot,93.5,93.5,False,True,False,65.27,2026-07-10,65.27,0,0.0,,,,0.8733,-3.0948,False,0.0,25
+2026-07-10,SIGMAADV,SIGMA ADVANCED SYSTEMS LIMITED,,pocket_pivot,93.4,93.4,True,True,False,582.65,2026-07-10,582.65,0,0.0,,,,0.5664,-4.265,True,0.0,25
+2026-07-10,MAHABANK,Bank of Maharashtra,,pocket_pivot,90.0,90.0,True,True,False,84.25,2026-07-10,84.25,0,0.0,,,,3.8101,-3.1217,True,0.0,25
+2026-07-10,INDIASHLTR,India Shelter Finance Corporation Limited,,vcp,85.0,85.0,False,True,False,800.05,2026-07-10,800.05,0,0.0,,,,0.3687,-2.3936,False,0.0,25

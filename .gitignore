@@ -1,0 +1,16 @@
+node_modules/
+dist/
+.venv/
+__pycache__/
+*.pyc
+.env
+.cache/
+*.egg-info/
+.DS_Store
+data/trading.db
+data/trading.db-*
+data/telegram_news.session
+data/*.session
+data/dev-proxy-errors.log
+data/mtf_rsi_cache/
+data/timeline.db

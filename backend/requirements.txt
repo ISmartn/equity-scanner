@@ -1,0 +1,12 @@
+fastapi>=0.110.0
+uvicorn[standard]>=0.27.0
+aiohttp>=3.9.0
+python-dotenv>=1.0.0
+upstox-python-sdk>=2.21.0
+numpy>=1.24.0
+pandas>=2.0.0
+timesfm[torch]>=1.2.0
+torch>=2.1.0
+matplotlib>=3.8.0
+telethon>=1.36.0
+rapidfuzz>=3.9.0

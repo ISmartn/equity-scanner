@@ -1,0 +1,52 @@
+{
+  "generated_at": "2026-06-24T22:52:00Z",
+  "window": "2026-05-25 to 2026-06-24 (22 trading days)",
+  "filter": "score >= 80",
+  "baseline_path": "data/scanner_analysis/baseline",
+  "refined_path": "data/scanner_analysis",
+  "headline": {
+    "signals": { "baseline": 13212, "refined": 634, "change_pct": -95.2 },
+    "signals_per_day": { "baseline": 601, "refined": 29 },
+    "win_rate_to_last": { "baseline": 58.0, "refined": 53.6, "delta_pp": -4.4 },
+    "avg_return_to_last": { "baseline": 2.68, "refined": 2.76, "delta_pp": 0.08 },
+    "win_rate_day5": { "baseline": 53.6, "refined": 51.5, "delta_pp": -2.1 },
+    "avg_return_day5": { "baseline": 1.19, "refined": 1.28, "delta_pp": 0.09 },
+    "avg_return_20d": { "baseline": 4.17, "refined": 5.65, "delta_pp": 1.48 }
+  },
+  "pattern_mix": {
+    "baseline": {
+      "vcp": 9792,
+      "pocket_pivot": 3188,
+      "inside_bar_cluster": 136,
+      "power_gap": 60,
+      "high_tight_flag": 36
+    },
+    "refined": {
+      "vcp": 79,
+      "pocket_pivot": 538,
+      "inside_bar_cluster": 9,
+      "power_gap": 8,
+      "high_tight_flag": 0
+    }
+  },
+  "overlap": {
+    "kept_from_baseline": 634,
+    "kept_pct_of_baseline": 4.8,
+    "dropped": 12578,
+    "new_only_in_refined": 0,
+    "kept_avg_return_to_last": 2.76,
+    "dropped_avg_return_to_last": 2.67
+  },
+  "day5_by_pattern_refined": {
+    "pocket_pivot": { "n": 377, "win_rate": 49.9, "avg_return": 1.13 },
+    "vcp": { "n": 37, "win_rate": 56.8, "avg_return": 0.92 },
+    "power_gap": { "n": 8, "win_rate": 62.5, "avg_return": 4.52 },
+    "inside_bar_cluster": { "n": 7, "win_rate": 100.0, "avg_return": 6.98 }
+  },
+  "risk_profile": {
+    "avg_max_adverse": { "baseline": -5.32, "refined": -7.29 },
+    "avg_max_favorable": { "baseline": 8.78, "refined": 9.53 },
+    "hit_2pct_stop_5d": { "baseline": 63.7, "refined": 65.9 }
+  },
+  "unique_tickers": { "baseline": 1552, "refined": 347 }
+}

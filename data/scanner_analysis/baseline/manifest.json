@@ -1,0 +1,49 @@
+{
+  "generated_at": "2026-06-24T16:39:04.087695+00:00",
+  "description": "One-month momentum scanner backtest with forward returns to last known bar",
+  "filters": {
+    "min_score": 80.0,
+    "pattern": "all",
+    "sector": "all",
+    "trading_days_window": 22
+  },
+  "data_range": {
+    "scan_dates_from": "2026-05-25",
+    "scan_dates_to": "2026-06-24",
+    "scan_dates": [
+      "2026-05-25",
+      "2026-05-26",
+      "2026-05-27",
+      "2026-05-29",
+      "2026-06-01",
+      "2026-06-02",
+      "2026-06-03",
+      "2026-06-04",
+      "2026-06-05",
+      "2026-06-08",
+      "2026-06-09",
+      "2026-06-10",
+      "2026-06-11",
+      "2026-06-12",
+      "2026-06-15",
+      "2026-06-16",
+      "2026-06-17",
+      "2026-06-18",
+      "2026-06-19",
+      "2026-06-22",
+      "2026-06-23",
+      "2026-06-24"
+    ],
+    "db_max_trade_date": "2026-06-24",
+    "db_min_trade_date": "2021-06-24"
+  },
+  "summary": {
+    "scan_days": 22,
+    "signals_min_score": 13212,
+    "signals_before_dedup_note": "Multiple patterns per ticker-day allowed",
+    "with_forward_returns": 13212,
+    "win_rate_to_last_pct": 58.0,
+    "avg_return_to_last_pct": 2.6755,
+    "daily_path_rows": 144253
+  }
+}

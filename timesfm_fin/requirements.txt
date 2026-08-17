@@ -1,0 +1,7 @@
+# TimesFM 1.x JAX/PAX — Python 3.10 only
+# paxml 1.4.0 pins jax==0.4.26 — jaxlib MUST match jax exactly
+
+timesfm==1.2.0
+jax==0.4.26
+jaxlib==0.4.26
+paxml==1.4.0

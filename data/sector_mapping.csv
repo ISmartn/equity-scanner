@@ -1,0 +1,49 @@
+ticker,sector,industry
+RELIANCE,Energy,Oil & Gas
+TCS,IT,IT Services
+HDFCBANK,Banking,Private Bank
+INFY,IT,IT Services
+ICICIBANK,Banking,Private Bank
+SBIN,Banking,PSU Bank
+ITC,FMCG,Diversified FMCG
+BHARTIARTL,Telecom,Telecom Services
+KOTAKBANK,Banking,Private Bank
+LT,Infrastructure,Engineering
+AXISBANK,Banking,Private Bank
+WIPRO,IT,IT Services
+HCLTECH,IT,IT Services
+SUNPHARMA,Pharma,Pharmaceuticals
+MARUTI,Auto,Passenger Vehicles
+TATAMOTORS,Auto,Passenger Vehicles
+TATASTEEL,Metal,Steel
+JSWSTEEL,Metal,Steel
+HINDALCO,Metal,Aluminium
+COALINDIA,Energy,Coal
+NTPC,Energy,Power
+POWERGRID,Energy,Power
+ONGC,Energy,Oil & Gas
+BPCL,Energy,Oil & Gas
+ADANIENT,Conglomerate,Trading
+ADANIPORTS,Infrastructure,Ports
+ULTRACEMCO,Infrastructure,Cement
+TECHM,IT,IT Services
+INDUSINDBK,Banking,Private Bank
+DRREDDY,Pharma,Pharmaceuticals
+CIPLA,Pharma,Pharmaceuticals
+EICHERMOT,Auto,Two Wheelers
+DIVISLAB,Pharma,Pharmaceuticals
+GRASIM,Infrastructure,Cement
+APOLLOHOSP,Healthcare,Hospitals
+HEROMOTOCO,Auto,Two Wheelers
+TATACONSUM,FMCG,Food Products
+SBILIFE,Financial Services,Insurance
+HDFCLIFE,Financial Services,Insurance
+BAJFINANCE,Financial Services,NBFC
+BAJAJFINSV,Financial Services,Financial Services
+BAJAJ_AUTO,Auto,Two Wheelers
+NESTLEIND,FMCG,Food Products
+BRITANNIA,FMCG,Food Products
+HINDUNILVR,FMCG,FMCG
+ASIANPAINT,FMCG,Paints
+TITAN,Consumer Durables,Jewellery
+VEDL,Metal,Metals & Mining

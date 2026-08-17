@@ -1,0 +1,32 @@
+{
+  "name": "timesfm-nse-forecast",
+  "private": true,
+  "scripts": {
+    "dev": "npx concurrently -k -n backend,frontend -c blue,green \"npm run dev:backend\" \"npm run dev:frontend\"",
+    "dev:backend": "cd backend && .venv/bin/uvicorn app.main:app --reload --port 8000",
+    "dev:frontend": "cd frontend && npm run dev",
+    "setup:backend": "cd backend && python3 -m venv .venv && .venv/bin/pip install -r requirements.txt",
+    "setup:frontend": "cd frontend && npm install",
+    "timeline:sync-profiles": "cd backend && .venv/bin/python scripts/sync_profiles.py",
+    "timeline:reprofile-stale": "cd backend && .venv/bin/python scripts/reprofile_stale.py",
+    "timeline:ingest": "cd backend && .venv/bin/python scripts/ingest_candles.py",
+    "timeline:daily": "cd backend && .venv/bin/python scripts/ingest_daily.py",
+    "timeline:upto-date": "cd backend && .venv/bin/python scripts/ingest_daily.py",
+    "scanner:run": "cd backend && .venv/bin/python scripts/run_scanner.py",
+    "scanner:batch": "cd backend && .venv/bin/python scripts/run_scanner_batch.py --clear",
+    "scanner:batch:july": "cd backend && .venv/bin/python scripts/run_scanner_batch.py --from-date 2026-07-01 --to-date 2026-07-31 --skip-fo-sync --concurrency 3",
+    "scanner:analysis": "cd backend && .venv/bin/python scripts/build_scanner_analysis.py",
+    "scanner:analysis:llm": "cd backend && .venv/bin/python scripts/compact_scanner_for_llm.py",
+    "scanner:outcomes": "cd backend && .venv/bin/python scripts/evaluate_signal_outcomes.py",
+    "scanner:failures": "cd backend && .venv/bin/python scripts/analyze_scanner_failures.py",
+    "scanner:july20d": "cd backend && .venv/bin/python scripts/analyze_july_20d_exhaustion.py",
+    "breakout:run": "cd backend && .venv/bin/python scripts/run_multi_year_breakout.py",
+    "fundamentals:sync-all": "cd backend && .venv/bin/python scripts/sync_fundamentals.py",
+    "market-info:sync": "cd backend && .venv/bin/python scripts/sync_market_info.py",
+    "news:login": "cd backend && .venv/bin/python scripts/telegram_login.py",
+    "news:backfill": "cd backend && .venv/bin/python scripts/ingest_telegram_news.py --backfill --limit 500",
+    "news:sync": "cd backend && .venv/bin/python scripts/ingest_telegram_news.py",
+    "news:listen": "cd backend && .venv/bin/python scripts/listen_telegram_news.py",
+    "news:reactions": "cd backend && .venv/bin/python scripts/build_news_reactions.py"
+  }
+}
