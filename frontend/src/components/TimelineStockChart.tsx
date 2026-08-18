@@ -1,17 +1,21 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import {
   ColorType,
   CrosshairMode,
+  LineStyle,
   createChart,
   type CandlestickData,
   type HistogramData,
   type IChartApi,
+  type ISeriesApi,
+  type LineData,
   type SeriesMarker,
   type Time,
 } from "lightweight-charts";
 import { VcpOverlayPrimitive } from "@/components/VcpOverlayPrimitive";
 import type { TimelineCandlePoint } from "@/lib/api";
 import { applyChartVisibleRange, setChartVisibleRangeCentered, setDefaultChartVisibleRange } from "@/lib/chartTimeScale";
+import { wildersRsiSeries } from "@/lib/indicators";
 import type { VcpOverlayData } from "@/lib/vcpOverlay";
 
 export interface ChartNewsMarker {
@@ -37,6 +41,9 @@ interface TimelineStockChartProps {
   vcpOverlay?: VcpOverlayData | null;
   /** Extra news/event markers (in addition to highlight). */
   extraMarkers?: ChartNewsMarker[];
+  /** Wilder RSI pane under price/volume (default on). */
+  showRsi?: boolean;
+  rsiPeriod?: number;
 }
 
 function formatPrice(value: number) {
@@ -125,6 +132,44 @@ function toChartTime(dateStr: string): Time {
   return dateStr as Time;
 }
 
+function addRsiGuides(series: ISeriesApi<"Line">) {
+  series.createPriceLine({
+    price: 70,
+    color: "rgba(251, 113, 133, 0.55)",
+    lineWidth: 1,
+    lineStyle: LineStyle.Dashed,
+    axisLabelVisible: true,
+    title: "70",
+  });
+  series.createPriceLine({
+    price: 30,
+    color: "rgba(52, 211, 153, 0.55)",
+    lineWidth: 1,
+    lineStyle: LineStyle.Dashed,
+    axisLabelVisible: true,
+    title: "30",
+  });
+  series.createPriceLine({
+    price: 50,
+    color: "rgba(148, 163, 184, 0.3)",
+    lineWidth: 1,
+    lineStyle: LineStyle.Dotted,
+    axisLabelVisible: false,
+    title: "",
+  });
+}
+
+function buildRsiLineData(history: TimelineCandlePoint[], period: number): LineData[] {
+  const closes = history.map((c) => c.close);
+  const values = wildersRsiSeries(closes, period);
+  const offset = closes.length - values.length;
+  const points: LineData[] = [];
+  for (let i = 0; i < values.length; i += 1) {
+    points.push({ time: toChartTime(history[offset + i].date), value: values[i] });
+  }
+  return points;
+}
+
 export function TimelineStockChart({
   symbol,
   companyName,
@@ -139,6 +184,8 @@ export function TimelineStockChart({
   tailVisibleRange = false,
   vcpOverlay = null,
   extraMarkers = [],
+  showRsi = true,
+  rsiPeriod = 14,
 }: TimelineStockChartProps) {
   const wrapperRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -147,12 +194,24 @@ export function TimelineStockChart({
   const vcpPrimitiveRef = useRef<VcpOverlayPrimitive | null>(null);
 
   const highlightBar = history.find((c) => c.date === highlightDate);
+  const period = Math.max(1, Math.min(200, rsiPeriod));
+  const rsiPoints = useMemo(
+    () => (showRsi ? buildRsiLineData(history, period) : []),
+    [history, period, showRsi],
+  );
+  const latestRsi = rsiPoints.length ? rsiPoints[rsiPoints.length - 1].value : null;
+  const highlightRsi =
+    showRsi && highlightDate
+      ? (rsiPoints.find((p) => String(p.time) === highlightDate)?.value ?? null)
+      : null;
 
   useEffect(() => {
     if (!containerRef.current || !history.length) return;
 
     const selectedBar = history.find((c) => c.date === highlightDate);
     const barByDate = new Map(history.map((c) => [c.date, c]));
+    const rsiLine = showRsi ? buildRsiLineData(history, period) : [];
+    const rsiByDate = new Map(rsiLine.map((p) => [String(p.time), p.value]));
 
     if (chartRef.current) {
       chartRef.current.remove();
@@ -192,7 +251,7 @@ export function TimelineStockChart({
     });
 
     candleSeries.priceScale().applyOptions({
-      scaleMargins: { top: 0.06, bottom: 0.28 },
+      scaleMargins: showRsi ? { top: 0.05, bottom: 0.38 } : { top: 0.06, bottom: 0.28 },
     });
 
     const volumeSeries = chart.addHistogramSeries({
@@ -201,7 +260,7 @@ export function TimelineStockChart({
     });
 
     volumeSeries.priceScale().applyOptions({
-      scaleMargins: { top: 0.78, bottom: 0 },
+      scaleMargins: showRsi ? { top: 0.68, bottom: 0.22 } : { top: 0.78, bottom: 0 },
     });
 
     const candleData: CandlestickData[] = history.map((c) => ({
@@ -228,6 +287,30 @@ export function TimelineStockChart({
       buildHighlightMarker(highlightDate, selectedBar, highlightMovePct, extraMarkers),
     );
     vcpPrimitive.setOverlay(vcpOverlay);
+
+    if (showRsi && rsiLine.length) {
+      const rsiSeries = chart.addLineSeries({
+        color: "#a78bfa",
+        lineWidth: 2,
+        priceScaleId: "rsi",
+        title: `RSI(${period})`,
+        priceLineVisible: false,
+        lastValueVisible: true,
+      });
+      chart.priceScale("rsi").applyOptions({
+        borderColor: "#2a3544",
+        autoScale: false,
+        visible: true,
+        scaleMargins: { top: 0.78, bottom: 0.02 },
+      });
+      rsiSeries.applyOptions({
+        autoscaleInfoProvider: () => ({
+          priceRange: { minValue: 0, maxValue: 100 },
+        }),
+      });
+      addRsiGuides(rsiSeries);
+      rsiSeries.setData(rsiLine);
+    }
 
     const highlightIndex = history.findIndex((c) => c.date === highlightDate);
 
@@ -291,6 +374,11 @@ export function TimelineStockChart({
 
       const move = movePctForBar(bar);
       const moveColor = (move ?? 0) >= 0 ? "#4ade80" : "#f87171";
+      const rsiVal = rsiByDate.get(dateStr);
+      const rsiHtml =
+        rsiVal != null
+          ? `<div><span style="color:#64748b">RSI(${period}) </span><span style="font-family:monospace;color:#c4b5fd">${rsiVal.toFixed(1)}</span></div>`
+          : "";
 
       showTooltip(
         `<div style="font-size:10px;color:#94a3b8;margin-bottom:4px">${dateStr}</div>` +
@@ -298,6 +386,7 @@ export function TimelineStockChart({
           `<div><span style="color:#64748b">Close </span><span style="font-family:monospace;color:#f1f5f9">${formatPrice(bar.close)}</span></div>` +
           `<div><span style="color:#64748b">Move </span><span style="font-family:monospace;color:${moveColor}">${formatMovePct(move)}</span></div>` +
           `<div><span style="color:#64748b">Volume </span><span style="font-family:monospace;color:#38bdf8">${formatVolume(bar.volume)}</span></div>` +
+          rsiHtml +
           `</div>`,
         param.point.x,
         param.point.y,
@@ -328,7 +417,7 @@ export function TimelineStockChart({
       chart.remove();
       chartRef.current = null;
     };
-  }, [history, highlightDate, highlightMovePct, tailVisibleRange, extraMarkers]);
+  }, [history, highlightDate, highlightMovePct, tailVisibleRange, extraMarkers, showRsi, period]);
 
   useEffect(() => {
     vcpPrimitiveRef.current?.setOverlay(vcpOverlay ?? null);
@@ -384,6 +473,12 @@ export function TimelineStockChart({
             <div className="text-[10px] uppercase tracking-wide text-slate-500">Latest close</div>
             <div className="font-mono text-sm text-white">{formatPrice(latest.close)}</div>
           </div>
+          {latestRsi != null && (
+            <div>
+              <div className="text-[10px] uppercase tracking-wide text-slate-500">RSI({period})</div>
+              <div className="font-mono text-sm text-violet-300">{latestRsi.toFixed(1)}</div>
+            </div>
+          )}
           {highlightBar && (
             <div>
               <div className="text-[10px] uppercase tracking-wide text-slate-500">
@@ -436,6 +531,12 @@ export function TimelineStockChart({
                 : `${highlightMovePct >= 0 ? "+" : ""}${highlightMovePct.toFixed(2)}%`}
             </span>
           </span>
+          {highlightRsi != null && (
+            <span>
+              RSI({period}){" "}
+              <span className="font-mono text-violet-300">{highlightRsi.toFixed(1)}</span>
+            </span>
+          )}
           <span>
             Volume{" "}
             <span className="font-mono text-sky-400">{formatVolume(highlightBar.volume)}</span>

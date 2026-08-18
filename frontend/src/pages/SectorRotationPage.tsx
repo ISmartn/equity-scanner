@@ -4,6 +4,7 @@ import Alert from "@mui/material/Alert";
 import ToggleButton from "@mui/material/ToggleButton";
 import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
 import Typography from "@mui/material/Typography";
+import { TimelineStockChart } from "@/components/TimelineStockChart";
 import { RRGScatterChart } from "@/components/sectorRotation/RRGScatterChart";
 import { SectorConstituentsPanel } from "@/components/sectorRotation/SectorConstituentsPanel";
 import {
@@ -14,9 +15,12 @@ import { AppButton } from "@/components/mui/AppButton";
 import {
   fetchSectorRotation,
   fetchSectorRotationConstituents,
+  fetchTimelineCandles,
+  type SectorConstituentRow,
   type SectorConstituentsResponse,
   type SectorRotationResponse,
   type SectorRotationRow,
+  type TimelineCandlePoint,
 } from "@/lib/api";
 
 type SortKey = "surety_score" | "daily_change_pct" | "rs_ratio" | "name";
@@ -32,6 +36,11 @@ export function SectorRotationPage() {
   const [constituents, setConstituents] = useState<SectorConstituentsResponse | null>(null);
   const [constituentsLoading, setConstituentsLoading] = useState(false);
   const [constituentsError, setConstituentsError] = useState<string | null>(null);
+  const [selectedTicker, setSelectedTicker] = useState<string | null>(null);
+  const [chartHistory, setChartHistory] = useState<TimelineCandlePoint[]>([]);
+  const [chartSource, setChartSource] = useState("local");
+  const [chartLoading, setChartLoading] = useState(false);
+  const [chartError, setChartError] = useState<string | null>(null);
 
   const load = useCallback(async (refresh = false) => {
     setLoading(true);
@@ -58,14 +67,15 @@ export function SectorRotationPage() {
     if (!selectedName) {
       setConstituents(null);
       setConstituentsError(null);
+      setSelectedTicker(null);
       return;
     }
     const requestName = selectedName;
     let cancelled = false;
     setConstituentsLoading(true);
     setConstituentsError(null);
-    // Drop stale rows immediately so click always feels connected to the new sector
     setConstituents((prev) => (prev?.sector === requestName ? prev : null));
+    setSelectedTicker(null);
 
     void fetchSectorRotationConstituents(requestName)
       .then((payload) => {
@@ -87,10 +97,48 @@ export function SectorRotationPage() {
     };
   }, [selectedName]);
 
+  useEffect(() => {
+    if (!selectedTicker) {
+      setChartHistory([]);
+      setChartError(null);
+      return;
+    }
+    let cancelled = false;
+    setChartLoading(true);
+    setChartError(null);
+    void fetchTimelineCandles(selectedTicker)
+      .then((payload) => {
+        if (cancelled) return;
+        setChartHistory(payload.history);
+        setChartSource(payload.source);
+      })
+      .catch((err) => {
+        if (cancelled) return;
+        setChartHistory([]);
+        setChartError(err instanceof Error ? err.message : "Failed to load chart");
+      })
+      .finally(() => {
+        if (!cancelled) setChartLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [selectedTicker]);
+
   const selected: SectorRotationRow | null = useMemo(() => {
     if (!data || !selectedName) return null;
     return data.sectors.find((s) => s.name === selectedName) ?? null;
   }, [data, selectedName]);
+
+  const selectedStock: SectorConstituentRow | null = useMemo(() => {
+    if (!selectedTicker || !constituents) return null;
+    return constituents.constituents.find((c) => c.ticker === selectedTicker) ?? null;
+  }, [constituents, selectedTicker]);
+
+  const highlightDate =
+    constituents?.as_of ??
+    chartHistory[chartHistory.length - 1]?.date ??
+    "";
 
   const handleSort = (key: SortKey) => {
     if (key === sortKey) {
@@ -101,7 +149,12 @@ export function SectorRotationPage() {
     }
   };
 
+  const handleSelectSector = (name: string) => {
+    setSelectedName(name);
+  };
+
   const summary = data?.summary;
+  const showStockChart = Boolean(selectedTicker);
 
   return (
     <div className="mx-auto flex h-[calc(100dvh-6.5rem)] max-w-[1600px] flex-col gap-2 overflow-hidden px-2 py-2 sm:px-4">
@@ -173,11 +226,60 @@ export function SectorRotationPage() {
 
       <div className="grid min-h-0 flex-1 gap-2 lg:grid-cols-[minmax(0,0.95fr)_minmax(0,1.2fr)]">
         <div className="min-h-0">
-          <RRGScatterChart
-            sectors={data?.sectors ?? []}
-            selectedName={selectedName}
-            onSelect={setSelectedName}
-          />
+          {showStockChart ? (
+            <div className="flex h-full min-h-0 flex-col overflow-hidden rounded-xl border border-surface-border bg-surface-raised">
+              <div className="flex shrink-0 items-center gap-2 border-b border-surface-border px-3 py-1.5">
+                <button
+                  type="button"
+                  onClick={() => setSelectedTicker(null)}
+                  className="text-[10px] text-sky-300 hover:text-sky-200"
+                >
+                  ← RRG
+                </button>
+                <Typography className="text-[12px] font-medium text-slate-100">
+                  {selectedTicker}
+                  {selectedStock?.company_name ? (
+                    <span className="ml-2 text-[10px] font-normal text-slate-500">
+                      {selectedStock.company_name}
+                    </span>
+                  ) : null}
+                </Typography>
+                {selectedStock?.change_1d_pct != null ? (
+                  <span
+                    className={`ml-auto text-[11px] tabular-nums ${
+                      selectedStock.change_1d_pct >= 0 ? "text-emerald-300" : "text-rose-300"
+                    }`}
+                  >
+                    {selectedStock.change_1d_pct >= 0 ? "+" : ""}
+                    {selectedStock.change_1d_pct.toFixed(2)}%
+                  </span>
+                ) : null}
+              </div>
+              {chartError ? (
+                <div className="px-3 py-1.5 text-[11px] text-rose-300">{chartError}</div>
+              ) : null}
+              <div className="min-h-0 flex-1 p-1">
+                <TimelineStockChart
+                  symbol={selectedTicker ?? ""}
+                  companyName={selectedStock?.company_name}
+                  sector={selectedName}
+                  source={chartSource}
+                  history={chartHistory}
+                  highlightDate={highlightDate}
+                  highlightMovePct={selectedStock?.change_1d_pct ?? null}
+                  loading={chartLoading}
+                  fillHeight
+                  tailVisibleRange
+                />
+              </div>
+            </div>
+          ) : (
+            <RRGScatterChart
+              sectors={data?.sectors ?? []}
+              selectedName={selectedName}
+              onSelect={handleSelectSector}
+            />
+          )}
         </div>
         <div className="flex min-h-0 flex-col gap-2">
           <div className="min-h-0 flex-[0.95]">
@@ -187,7 +289,7 @@ export function SectorRotationPage() {
               sortKey={sortKey}
               sortDir={sortDir}
               selectedName={selectedName}
-              onSelect={setSelectedName}
+              onSelect={handleSelectSector}
               onSort={handleSort}
             />
           </div>
@@ -231,6 +333,8 @@ export function SectorRotationPage() {
               data={constituents}
               loading={constituentsLoading}
               error={constituentsError}
+              selectedTicker={selectedTicker}
+              onSelectTicker={setSelectedTicker}
             />
           </div>
         </div>

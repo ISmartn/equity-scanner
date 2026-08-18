@@ -5,6 +5,8 @@ type Props = {
   data: SectorConstituentsResponse | null;
   loading: boolean;
   error: string | null;
+  selectedTicker: string | null;
+  onSelectTicker: (ticker: string) => void;
 };
 
 function fmtPct(v: number | null | undefined): string {
@@ -20,9 +22,22 @@ function pctTone(v: number | null | undefined): string {
   return "text-slate-400";
 }
 
-function Row({ row }: { row: SectorConstituentRow }) {
+function Row({
+  row,
+  selected,
+  onSelect,
+}: {
+  row: SectorConstituentRow;
+  selected: boolean;
+  onSelect: () => void;
+}) {
   return (
-    <tr className="border-b border-surface-border/60 hover:bg-white/[0.03]">
+    <tr
+      onClick={onSelect}
+      className={`cursor-pointer border-b border-surface-border/60 transition ${
+        selected ? "bg-accent/10 hover:bg-accent/15" : "hover:bg-white/[0.04]"
+      }`}
+    >
       <td className="px-2 py-1.5">
         <div className="text-[11px] font-medium text-slate-100">{row.ticker}</div>
         {row.company_name ? (
@@ -57,7 +72,14 @@ function Row({ row }: { row: SectorConstituentRow }) {
   );
 }
 
-export function SectorConstituentsPanel({ sectorName, data, loading, error }: Props) {
+export function SectorConstituentsPanel({
+  sectorName,
+  data,
+  loading,
+  error,
+  selectedTicker,
+  onSelectTicker,
+}: Props) {
   if (!sectorName) {
     return (
       <div className="flex h-full min-h-[140px] items-center justify-center rounded-xl border border-dashed border-surface-border bg-surface-raised px-3 text-[11px] text-slate-500">
@@ -74,7 +96,7 @@ export function SectorConstituentsPanel({ sectorName, data, loading, error }: Pr
           {data
             ? `${data.count} stocks · sector 1d ${fmtPct(data.sector_change_1d_pct)}${
                 data.as_of ? ` · ${data.as_of}` : ""
-              }`
+              } · click a stock for chart`
             : loading
               ? "Loading stocks…"
               : "Constituents"}
@@ -112,7 +134,12 @@ export function SectorConstituentsPanel({ sectorName, data, loading, error }: Pr
             </thead>
             <tbody>
               {data.constituents.map((row) => (
-                <Row key={row.ticker} row={row} />
+                <Row
+                  key={row.ticker}
+                  row={row}
+                  selected={selectedTicker === row.ticker}
+                  onSelect={() => onSelectTicker(row.ticker)}
+                />
               ))}
             </tbody>
           </table>
