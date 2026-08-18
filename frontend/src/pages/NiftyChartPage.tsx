@@ -11,6 +11,7 @@ import {
   type NiftyTimeframe,
 } from "@/lib/api";
 import { rsiStatus, wildersRsiSeries } from "@/lib/indicators";
+import { loadUiPrefs, saveUiPrefs } from "@/lib/uiPrefs";
 
 const TIMEFRAMES: NiftyTimeframe[] = ["1m", "3m", "5m", "10m", "daily"];
 const DEFAULT_RSI_PERIOD = 19;
@@ -37,8 +38,26 @@ function formatPct(value: number | null | undefined): string {
   return `${sign}${value.toFixed(2)}%`;
 }
 
+const NIFTY_PREFS_KEY = "trading.nifty.prefs";
+type NiftyUiPrefs = {
+  timeframe: NiftyTimeframe;
+  rsiPeriod: number;
+  showBollinger: boolean;
+  showRsi: boolean;
+};
+const DEFAULT_NIFTY_PREFS: NiftyUiPrefs = {
+  timeframe: "5m",
+  rsiPeriod: DEFAULT_RSI_PERIOD,
+  showBollinger: false,
+  showRsi: true,
+};
+
 export function NiftyChartPage() {
-  const [timeframe, setTimeframe] = useState<NiftyTimeframe>("5m");
+  const initialPrefs = loadUiPrefs(NIFTY_PREFS_KEY, DEFAULT_NIFTY_PREFS);
+  const initialTf = (TIMEFRAMES as readonly string[]).includes(initialPrefs.timeframe)
+    ? initialPrefs.timeframe
+    : "5m";
+  const [timeframe, setTimeframe] = useState<NiftyTimeframe>(initialTf);
   const [candles, setCandles] = useState<NiftyCandlePoint[]>([]);
   const [stats, setStats] = useState<NiftyCandleStats | null>(null);
   const [coverage, setCoverage] = useState<NiftyCoverageRow[]>([]);
@@ -46,10 +65,19 @@ export function NiftyChartPage() {
   const [syncing, setSyncing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [label, setLabel] = useState("Nifty 50");
-  const [rsiPeriod, setRsiPeriod] = useState(DEFAULT_RSI_PERIOD);
-  const [rsiInput, setRsiInput] = useState(String(DEFAULT_RSI_PERIOD));
-  const [showBollinger, setShowBollinger] = useState(false);
-  const [showRsi, setShowRsi] = useState(true);
+  const [rsiPeriod, setRsiPeriod] = useState(Number(initialPrefs.rsiPeriod) || DEFAULT_RSI_PERIOD);
+  const [rsiInput, setRsiInput] = useState(String(Number(initialPrefs.rsiPeriod) || DEFAULT_RSI_PERIOD));
+  const [showBollinger, setShowBollinger] = useState(Boolean(initialPrefs.showBollinger));
+  const [showRsi, setShowRsi] = useState(initialPrefs.showRsi !== false);
+
+  useEffect(() => {
+    saveUiPrefs(NIFTY_PREFS_KEY, {
+      timeframe,
+      rsiPeriod,
+      showBollinger,
+      showRsi,
+    } satisfies NiftyUiPrefs);
+  }, [timeframe, rsiPeriod, showBollinger, showRsi]);
 
   const latestRsi = useMemo(() => {
     if (candles.length < rsiPeriod + 1) return null;

@@ -25,13 +25,56 @@ import {
 
 type SortKey = "surety_score" | "daily_change_pct" | "rs_ratio" | "name";
 
+const FILTER_KEY = "trading.sectorRotation.filter";
+const SORT_KEY = "trading.sectorRotation.sortKey";
+const SORT_DIR_KEY = "trading.sectorRotation.sortDir";
+
+const FILTERS: SectorTableFilter[] = [
+  "all",
+  "stealth",
+  "price_action",
+  "improving",
+  "leading",
+];
+const SORT_KEYS: SortKey[] = ["surety_score", "daily_change_pct", "rs_ratio", "name"];
+
+function readFilter(): SectorTableFilter {
+  try {
+    const v = localStorage.getItem(FILTER_KEY);
+    if (v && (FILTERS as string[]).includes(v)) return v as SectorTableFilter;
+  } catch {
+    /* ignore */
+  }
+  return "all";
+}
+
+function readSortKey(): SortKey {
+  try {
+    const v = localStorage.getItem(SORT_KEY);
+    if (v && (SORT_KEYS as string[]).includes(v)) return v as SortKey;
+  } catch {
+    /* ignore */
+  }
+  return "surety_score";
+}
+
+function readSortDir(): "asc" | "desc" {
+  try {
+    const v = localStorage.getItem(SORT_DIR_KEY);
+    if (v === "asc" || v === "desc") return v;
+  } catch {
+    /* ignore */
+  }
+  return "desc";
+}
+
 export function SectorRotationPage() {
   const [data, setData] = useState<SectorRotationResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [filter, setFilter] = useState<SectorTableFilter>("all");
-  const [sortKey, setSortKey] = useState<SortKey>("surety_score");
-  const [sortDir, setSortDir] = useState<"asc" | "desc">("desc");
+  const [filter, setFilter] = useState<SectorTableFilter>(readFilter);
+  const [sortKey, setSortKey] = useState<SortKey>(readSortKey);
+  const [sortDir, setSortDir] = useState<"asc" | "desc">(readSortDir);
   const [selectedName, setSelectedName] = useState<string | null>(null);
   const [constituents, setConstituents] = useState<SectorConstituentsResponse | null>(null);
   const [constituentsLoading, setConstituentsLoading] = useState(false);
@@ -62,6 +105,23 @@ export function SectorRotationPage() {
   useEffect(() => {
     void load(false);
   }, [load]);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(FILTER_KEY, filter);
+    } catch {
+      /* ignore */
+    }
+  }, [filter]);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(SORT_KEY, sortKey);
+      localStorage.setItem(SORT_DIR_KEY, sortDir);
+    } catch {
+      /* ignore */
+    }
+  }, [sortKey, sortDir]);
 
   useEffect(() => {
     if (!selectedName) {

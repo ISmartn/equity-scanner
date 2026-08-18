@@ -31,6 +31,7 @@ import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
 import Typography from "@mui/material/Typography";
 import { Newspaper, Sparkles } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { loadUiPrefs, saveUiPrefs } from "@/lib/uiPrefs";
 
 const HORIZON_LABELS: Record<string, string> = {
   t_m2: "T-2",
@@ -62,14 +63,29 @@ function reactionFor(event: NewsEvent, horizon: string): number | null {
 
 type FeedMode = "all" | "linked";
 
+const NEWS_PREFS_KEY = "trading.newsImpact.prefs";
+type NewsUiPrefs = {
+  feedMode: FeedMode;
+  ticker: string;
+  sentiment: string;
+  monitorTopic: string;
+};
+const DEFAULT_NEWS_PREFS: NewsUiPrefs = {
+  feedMode: "all",
+  ticker: "",
+  sentiment: "",
+  monitorTopic: "",
+};
+
 export function NewsImpactPage() {
-  const [feedMode, setFeedMode] = useState<FeedMode>("all");
+  const initialPrefs = loadUiPrefs(NEWS_PREFS_KEY, DEFAULT_NEWS_PREFS);
+  const [feedMode, setFeedMode] = useState<FeedMode>(initialPrefs.feedMode === "linked" ? "linked" : "all");
   const [stats, setStats] = useState<NewsStats | null>(null);
   const [events, setEvents] = useState<NewsEvent[]>([]);
   const [messages, setMessages] = useState<TelegramNewsMessage[]>([]);
   const [total, setTotal] = useState(0);
-  const [ticker, setTicker] = useState("");
-  const [sentiment, setSentiment] = useState("");
+  const [ticker, setTicker] = useState(initialPrefs.ticker);
+  const [sentiment, setSentiment] = useState(initialPrefs.sentiment);
   const [loading, setLoading] = useState(false);
   const [syncing, setSyncing] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -80,7 +96,16 @@ export function NewsImpactPage() {
   const [chartLoading, setChartLoading] = useState(false);
   const [outlookLoading, setOutlookLoading] = useState(false);
   const [liveBusy, setLiveBusy] = useState(false);
-  const [monitorTopic, setMonitorTopic] = useState<string>("");
+  const [monitorTopic, setMonitorTopic] = useState<string>(initialPrefs.monitorTopic);
+
+  useEffect(() => {
+    saveUiPrefs(NEWS_PREFS_KEY, {
+      feedMode,
+      ticker,
+      sentiment,
+      monitorTopic,
+    } satisfies NewsUiPrefs);
+  }, [feedMode, ticker, sentiment, monitorTopic]);
 
   const loadStats = useCallback(async () => {
     try {

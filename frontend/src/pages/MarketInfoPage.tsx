@@ -6,6 +6,7 @@ import {
   type InstitutionalFlowRow,
 } from "@/lib/api";
 import { localTodayIso } from "@/lib/dates";
+import { loadUiPrefs, saveUiPrefs } from "@/lib/uiPrefs";
 import { Activity, BarChart3, RefreshCw, TrendingUp } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
@@ -29,8 +30,13 @@ function segmentLabel(dataType: string): string {
   return dataType.replace("NSE_FO|", "").replace("NSE_EQ|", "").replace("NSE_EQ", "CASH");
 }
 
+const MARKET_PREFS_KEY = "trading.marketInfo.prefs";
+type MarketUiPrefs = { tradeDate: string };
+const DEFAULT_MARKET_PREFS: MarketUiPrefs = { tradeDate: "" };
+
 export function MarketInfoPage() {
-  const [tradeDate, setTradeDate] = useState(localTodayIso());
+  const initialPrefs = loadUiPrefs(MARKET_PREFS_KEY, DEFAULT_MARKET_PREFS);
+  const [tradeDate, setTradeDate] = useState(initialPrefs.tradeDate || localTodayIso());
   const [flows, setFlows] = useState<InstitutionalFlowRow[]>([]);
   const [derivatives, setDerivatives] = useState<DerivativeSnapshotSummary[]>([]);
   const [loading, setLoading] = useState(true);
@@ -53,6 +59,10 @@ export function MarketInfoPage() {
     } finally {
       setLoading(false);
     }
+  }, [tradeDate]);
+
+  useEffect(() => {
+    saveUiPrefs(MARKET_PREFS_KEY, { tradeDate } satisfies MarketUiPrefs);
   }, [tradeDate]);
 
   useEffect(() => {

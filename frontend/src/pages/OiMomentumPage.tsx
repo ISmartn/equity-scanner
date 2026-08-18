@@ -12,6 +12,7 @@ import {
   type OiMomentumResponse,
   type OiStreamStatus,
 } from "@/lib/api";
+import { loadUiPrefs, saveUiPrefs } from "@/lib/uiPrefs";
 import {
   notifyUserAlert,
   requestBrowserNotifyPermission,
@@ -103,14 +104,31 @@ function alertIcon(alert: OiMomentumEvaluation["alert"]) {
   }
 }
 
+const OI_PREFS_KEY = "trading.oiMomentum.prefs";
+type OiUiPrefs = {
+  symbol: string;
+  windowSec: number;
+  autoPoll: boolean;
+  pollIntervalSec: number;
+};
+const DEFAULT_OI_PREFS: OiUiPrefs = {
+  symbol: "NIFTY",
+  windowSec: 180,
+  autoPoll: true,
+  pollIntervalSec: 60,
+};
+
 export function OiMomentumPage() {
-  const [symbol, setSymbol] = useState<string>("NIFTY");
-  const [windowSec, setWindowSec] = useState(180);
+  const initialPrefs = loadUiPrefs(OI_PREFS_KEY, DEFAULT_OI_PREFS);
+  const [symbol, setSymbol] = useState<string>(
+    (SYMBOLS as readonly string[]).includes(initialPrefs.symbol) ? initialPrefs.symbol : "NIFTY",
+  );
+  const [windowSec, setWindowSec] = useState(Number(initialPrefs.windowSec) || 180);
   const [streamLive, setStreamLive] = useState(false);
   const [streamStatus, setStreamStatus] = useState<OiStreamStatus | null>(null);
   const [streamBusy, setStreamBusy] = useState(false);
-  const [autoPoll, setAutoPoll] = useState(true);
-  const [pollIntervalSec, setPollIntervalSec] = useState(60);
+  const [autoPoll, setAutoPoll] = useState(initialPrefs.autoPoll !== false);
+  const [pollIntervalSec, setPollIntervalSec] = useState(Number(initialPrefs.pollIntervalSec) || 60);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [payload, setPayload] = useState<OiMomentumResponse | null>(null);
@@ -160,6 +178,15 @@ export function OiMomentumPage() {
   useEffect(() => {
     localStorage.setItem(OI_ALERTS_KEY, alertsOn ? "1" : "0");
   }, [alertsOn]);
+
+  useEffect(() => {
+    saveUiPrefs(OI_PREFS_KEY, {
+      symbol,
+      windowSec,
+      autoPoll,
+      pollIntervalSec,
+    } satisfies OiUiPrefs);
+  }, [symbol, windowSec, autoPoll, pollIntervalSec]);
 
   useEffect(() => {
     loadAlertHistory();

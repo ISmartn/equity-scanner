@@ -41,6 +41,7 @@ import {
   type TimelineStats,
 } from "@/lib/api";
 import { clampWeekday, localTodayIso } from "@/lib/dates";
+import { loadUiPrefs, saveUiPrefs } from "@/lib/uiPrefs";
 import {
   FUNDAMENTALLY_STRONG_TOOLTIP,
   fundamentalStrongFromDetails,
@@ -49,6 +50,57 @@ import {
 const PAGE_SIZE = 80;
 const ALL = "all";
 type FnoGroupFilter = "all" | "fno" | "non_fno";
+
+const MYB_PREFS_KEY = "trading.myb.prefs";
+type MybUiPrefs = {
+  tradeDate: string;
+  strategy: MybStrategy;
+  lookbackYears: number;
+  pullbackPct: number;
+  matchMode: MybMatchMode;
+  bandWidthPct: number;
+  trendFilter: MybTrendFilter;
+  showAdvancedTrend: boolean;
+  shortMaPeriod: number;
+  longMaPeriod: number;
+  maType: MybMaType;
+  includeMultiYear: boolean;
+  includeAthPullback: boolean;
+  statusFilter: string;
+  minScore: string;
+  sector: string;
+  sizeTier: MybSizeTier;
+  fnoGroup: FnoGroupFilter;
+  fundamentallyStrongOnly: boolean;
+  minPrice: string;
+  maxPrice: string;
+  minRvol: string;
+};
+const DEFAULT_MYB_PREFS: MybUiPrefs = {
+  tradeDate: "",
+  strategy: "multi_year_breakout",
+  lookbackYears: 3,
+  pullbackPct: 15,
+  matchMode: "at_least",
+  bandWidthPct: 5,
+  trendFilter: "all",
+  showAdvancedTrend: false,
+  shortMaPeriod: 50,
+  longMaPeriod: 200,
+  maType: "sma",
+  includeMultiYear: true,
+  includeAthPullback: true,
+  statusFilter: ALL,
+  minScore: "40",
+  sector: ALL,
+  sizeTier: "all",
+  fnoGroup: "all",
+  fundamentallyStrongOnly: false,
+  minPrice: "",
+  maxPrice: "",
+  minRvol: "",
+};
+
 
 function mergeSortedDates(existing: string[], additions: string[]): string[] {
   if (!additions.length) return existing;
@@ -129,37 +181,42 @@ function detailNum(row: MybSignal, key: string): number | null {
 
 export function MultiYearBreakoutPage() {
   const today = localTodayIso();
+  const initialPrefs = loadUiPrefs(MYB_PREFS_KEY, DEFAULT_MYB_PREFS);
   const [stats, setStats] = useState<TimelineStats | null>(null);
   const [sectors, setSectors] = useState<string[]>([]);
   const [scanDates, setScanDates] = useState<string[]>([]);
-  const [tradeDate, setTradeDate] = useState("");
+  const [tradeDate, setTradeDate] = useState(initialPrefs.tradeDate);
 
-  const [strategy, setStrategy] = useState<MybStrategy>("multi_year_breakout");
-  const [lookbackYears, setLookbackYears] = useState(3);
-  const [pullbackPct, setPullbackPct] = useState(15);
-  const [matchMode, setMatchMode] = useState<MybMatchMode>("at_least");
-  const [bandWidthPct, setBandWidthPct] = useState(5);
-  const [trendFilter, setTrendFilter] = useState<MybTrendFilter>("all");
-  const [showAdvancedTrend, setShowAdvancedTrend] = useState(false);
-  const [shortMaPeriod, setShortMaPeriod] = useState(50);
-  const [longMaPeriod, setLongMaPeriod] = useState(200);
-  const [maType, setMaType] = useState<MybMaType>("sma");
-  const [includeMultiYear, setIncludeMultiYear] = useState(true);
-  const [includeAthPullback, setIncludeAthPullback] = useState(true);
+  const [strategy, setStrategy] = useState<MybStrategy>(initialPrefs.strategy);
+  const [lookbackYears, setLookbackYears] = useState(Number(initialPrefs.lookbackYears) || 3);
+  const [pullbackPct, setPullbackPct] = useState(Number(initialPrefs.pullbackPct) || 15);
+  const [matchMode, setMatchMode] = useState<MybMatchMode>(initialPrefs.matchMode);
+  const [bandWidthPct, setBandWidthPct] = useState(Number(initialPrefs.bandWidthPct) || 5);
+  const [trendFilter, setTrendFilter] = useState<MybTrendFilter>(initialPrefs.trendFilter);
+  const [showAdvancedTrend, setShowAdvancedTrend] = useState(Boolean(initialPrefs.showAdvancedTrend));
+  const [shortMaPeriod, setShortMaPeriod] = useState(Number(initialPrefs.shortMaPeriod) || 50);
+  const [longMaPeriod, setLongMaPeriod] = useState(Number(initialPrefs.longMaPeriod) || 200);
+  const [maType, setMaType] = useState<MybMaType>(initialPrefs.maType);
+  const [includeMultiYear, setIncludeMultiYear] = useState(initialPrefs.includeMultiYear !== false);
+  const [includeAthPullback, setIncludeAthPullback] = useState(initialPrefs.includeAthPullback !== false);
 
-  const [statusFilter, setStatusFilter] = useState<MybStatus | typeof ALL>(ALL);
-  const [minScore, setMinScore] = useState("40");
-  const [sector, setSector] = useState(ALL);
-  const [sizeTier, setSizeTier] = useState<MybSizeTier>("all");
-  const [fnoGroup, setFnoGroup] = useState<FnoGroupFilter>("all");
+  const [statusFilter, setStatusFilter] = useState<MybStatus | typeof ALL>(
+    (initialPrefs.statusFilter as MybStatus | typeof ALL) || ALL,
+  );
+  const [minScore, setMinScore] = useState(initialPrefs.minScore || "40");
+  const [sector, setSector] = useState(initialPrefs.sector || ALL);
+  const [sizeTier, setSizeTier] = useState<MybSizeTier>(initialPrefs.sizeTier || "all");
+  const [fnoGroup, setFnoGroup] = useState<FnoGroupFilter>(
+    initialPrefs.fnoGroup === "fno" || initialPrefs.fnoGroup === "non_fno" ? initialPrefs.fnoGroup : "all",
+  );
   const [fnoSymbols, setFnoSymbols] = useState<string[]>([]);
   const fnoSymbolSet = useMemo(() => new Set(fnoSymbols), [fnoSymbols]);
-  const [fundamentallyStrongOnly, setFundamentallyStrongOnly] = useState(false);
+  const [fundamentallyStrongOnly, setFundamentallyStrongOnly] = useState(Boolean(initialPrefs.fundamentallyStrongOnly));
   const [strongSymbols, setStrongSymbols] = useState<string[]>([]);
   const strongSymbolSet = useMemo(() => new Set(strongSymbols), [strongSymbols]);
-  const [minPrice, setMinPrice] = useState("");
-  const [maxPrice, setMaxPrice] = useState("");
-  const [minRvol, setMinRvol] = useState("");
+  const [minPrice, setMinPrice] = useState(initialPrefs.minPrice || "");
+  const [maxPrice, setMaxPrice] = useState(initialPrefs.maxPrice || "");
+  const [minRvol, setMinRvol] = useState(initialPrefs.minRvol || "");
   const [page, setPage] = useState(0);
 
   const [rows, setRows] = useState<MybSignal[]>([]);
@@ -210,6 +267,37 @@ export function MultiYearBreakoutPage() {
       return pick(datesRes.dates[0] || datesRes.latest_data_date || statsRes.max_trade_date || today);
     });
   }, [today, strategy]);
+
+  useEffect(() => {
+    saveUiPrefs(MYB_PREFS_KEY, {
+      tradeDate,
+      strategy,
+      lookbackYears,
+      pullbackPct,
+      matchMode,
+      bandWidthPct,
+      trendFilter,
+      showAdvancedTrend,
+      shortMaPeriod,
+      longMaPeriod,
+      maType,
+      includeMultiYear,
+      includeAthPullback,
+      statusFilter,
+      minScore,
+      sector,
+      sizeTier,
+      fnoGroup,
+      fundamentallyStrongOnly,
+      minPrice,
+      maxPrice,
+      minRvol,
+    } satisfies MybUiPrefs);
+  }, [
+    tradeDate, strategy, lookbackYears, pullbackPct, matchMode, bandWidthPct, trendFilter,
+    showAdvancedTrend, shortMaPeriod, longMaPeriod, maType, includeMultiYear, includeAthPullback,
+    statusFilter, minScore, sector, sizeTier, fnoGroup, fundamentallyStrongOnly, minPrice, maxPrice, minRvol,
+  ]);
 
   const applyClientFilters = useCallback(
     (items: MybSignal[]) => {

@@ -13,6 +13,7 @@ import {
   type MtfRsiSnapshot,
   type MtfRsiStatus,
 } from "@/lib/api";
+import { loadUiPrefs, saveUiPrefs } from "@/lib/uiPrefs";
 
 const RSI_PRESETS = [9, 14, 21, 50] as const;
 const ALL_TFS = [1, 3, 5, 10, 15] as const;
@@ -49,10 +50,19 @@ function formatTs(iso: string | null | undefined): string {
   }
 }
 
+const MTF_PREFS_KEY = "trading.mtfRsi.prefs";
+type MtfUiPrefs = { rsiPeriod: number; visibleTfs: number[] };
+const DEFAULT_MTF_PREFS: MtfUiPrefs = { rsiPeriod: 14, visibleTfs: [...ALL_TFS] };
+
 export function MtfRsiPage() {
-  const [rsiPeriod, setRsiPeriod] = useState(14);
-  const [customPeriod, setCustomPeriod] = useState("14");
-  const [visibleTfs, setVisibleTfs] = useState<number[]>([...ALL_TFS]);
+  const initialPrefs = loadUiPrefs(MTF_PREFS_KEY, DEFAULT_MTF_PREFS);
+  const [rsiPeriod, setRsiPeriod] = useState(Number(initialPrefs.rsiPeriod) || 14);
+  const [customPeriod, setCustomPeriod] = useState(String(Number(initialPrefs.rsiPeriod) || 14));
+  const [visibleTfs, setVisibleTfs] = useState<number[]>(
+    Array.isArray(initialPrefs.visibleTfs) && initialPrefs.visibleTfs.length
+      ? initialPrefs.visibleTfs.filter((n) => (ALL_TFS as readonly number[]).includes(n))
+      : [...ALL_TFS],
+  );
   const [live, setLive] = useState(false);
   const [busy, setBusy] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -89,6 +99,10 @@ export function MtfRsiPage() {
   useEffect(() => {
     refresh();
   }, [refresh]);
+
+  useEffect(() => {
+    saveUiPrefs(MTF_PREFS_KEY, { rsiPeriod, visibleTfs } satisfies MtfUiPrefs);
+  }, [rsiPeriod, visibleTfs]);
 
   const market = status?.market ?? snapshot?.market ?? chart?.market;
   const marketOpen = market?.is_open ?? true;

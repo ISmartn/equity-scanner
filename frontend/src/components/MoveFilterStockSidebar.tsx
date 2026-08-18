@@ -7,8 +7,11 @@ import {
   removeWatchlistStock,
   type WatchlistStock,
 } from "@/lib/storage";
+import { loadUiPrefs, saveUiPrefs } from "@/lib/uiPrefs";
 
 type StockTab = "nifty" | "fno" | "watchlist" | "search";
+const MOVE_SIDEBAR_PREFS = "trading.moveFilter.sidebar";
+const SIDEBAR_TABS: StockTab[] = ["nifty", "fno", "watchlist", "search"];
 
 interface MoveFilterStockSidebarProps {
   symbol: string;
@@ -27,7 +30,8 @@ export function MoveFilterStockSidebar({
   loadingSymbols = false,
   loadingFno = false,
 }: MoveFilterStockSidebarProps) {
-  const [tab, setTab] = useState<StockTab>("nifty");
+  const initialTab = loadUiPrefs(MOVE_SIDEBAR_PREFS, { tab: "nifty" as StockTab }).tab;
+  const [tab, setTab] = useState<StockTab>(SIDEBAR_TABS.includes(initialTab) ? initialTab : "nifty");
   const [query, setQuery] = useState("");
   const [watchlist, setWatchlist] = useState<WatchlistStock[]>(() => getWatchlist());
   const [searchResults, setSearchResults] = useState<SymbolSearchResult[]>([]);
@@ -40,6 +44,10 @@ export function MoveFilterStockSidebar({
     if (!q || tab === "search" || tab === "watchlist") return source;
     return source.filter((s) => s.includes(q));
   }, [tab, query, niftySymbols, fnoSymbols, watchlist]);
+
+  useEffect(() => {
+    saveUiPrefs(MOVE_SIDEBAR_PREFS, { tab });
+  }, [tab]);
 
   useEffect(() => {
     if (tab !== "search") return;

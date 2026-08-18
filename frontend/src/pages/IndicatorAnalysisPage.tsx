@@ -7,6 +7,7 @@ import {
   type IndicatorReading,
   type SymbolSearchResult,
 } from "@/lib/api";
+import { loadUiPrefs, saveUiPrefs } from "@/lib/uiPrefs";
 
 const NIFTY_TFS = ["daily", "10m", "5m", "3m", "1m"] as const;
 
@@ -67,12 +68,29 @@ function MetricChips({ metrics }: { metrics: IndicatorReading["metrics"] }) {
   );
 }
 
+const IA_PREFS_KEY = "trading.indicatorAnalysis.prefs";
+type IaUiPrefs = {
+  symbol: string;
+  timeframe: string;
+  rsiPeriod: number;
+  filter: "all" | "computable" | "manual";
+};
+const DEFAULT_IA_PREFS: IaUiPrefs = {
+  symbol: "NIFTY",
+  timeframe: "daily",
+  rsiPeriod: 14,
+  filter: "all",
+};
+
 export function IndicatorAnalysisPage() {
-  const [symbolInput, setSymbolInput] = useState("NIFTY");
-  const [symbol, setSymbol] = useState("NIFTY");
-  const [timeframe, setTimeframe] = useState<string>("daily");
-  const [rsiPeriod, setRsiPeriod] = useState(14);
-  const [filter, setFilter] = useState<"all" | "computable" | "manual">("all");
+  const initialPrefs = loadUiPrefs(IA_PREFS_KEY, DEFAULT_IA_PREFS);
+  const [symbolInput, setSymbolInput] = useState(initialPrefs.symbol || "NIFTY");
+  const [symbol, setSymbol] = useState((initialPrefs.symbol || "NIFTY").toUpperCase());
+  const [timeframe, setTimeframe] = useState<string>(initialPrefs.timeframe || "daily");
+  const [rsiPeriod, setRsiPeriod] = useState(Number(initialPrefs.rsiPeriod) || 14);
+  const [filter, setFilter] = useState<"all" | "computable" | "manual">(
+    initialPrefs.filter === "computable" || initialPrefs.filter === "manual" ? initialPrefs.filter : "all",
+  );
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [data, setData] = useState<IndicatorAnalysisPayload | null>(null);
@@ -102,6 +120,10 @@ export function IndicatorAnalysisPage() {
   useEffect(() => {
     void load();
   }, [load]);
+
+  useEffect(() => {
+    saveUiPrefs(IA_PREFS_KEY, { symbol, timeframe, rsiPeriod, filter } satisfies IaUiPrefs);
+  }, [symbol, timeframe, rsiPeriod, filter]);
 
   useEffect(() => {
     const q = symbolInput.trim();

@@ -53,6 +53,7 @@ import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
 import Typography from "@mui/material/Typography";
 import { needsCandleSync } from "@/lib/timelineCoverage";
 import { copyTextToClipboard, moversToExportJson } from "@/lib/timelineExport";
+import { loadUiPrefs, saveUiPrefs } from "@/lib/uiPrefs";
 
 const PAGE_SIZE = 50;
 
@@ -62,16 +63,35 @@ function formatPct(value: number | null | undefined): string {
   return `${sign}${value.toFixed(2)}%`;
 }
 
+const TIMELINE_PREFS_KEY = "trading.timeline.prefs";
+type TimelineUiPrefs = {
+  tradeDate: string;
+  sector: string;
+  minMovePct: string;
+  direction: "both" | "up" | "down";
+  ticker: string;
+  fundamentallyStrongOnly: boolean;
+};
+const DEFAULT_TIMELINE_PREFS: TimelineUiPrefs = {
+  tradeDate: "",
+  sector: "",
+  minMovePct: "5",
+  direction: "both",
+  ticker: "",
+  fundamentallyStrongOnly: false,
+};
+
 export function TimelineMoversPage() {
+  const initialPrefs = loadUiPrefs(TIMELINE_PREFS_KEY, DEFAULT_TIMELINE_PREFS);
   const [stats, setStats] = useState<TimelineStats | null>(null);
   const [sectors, setSectors] = useState<string[]>([]);
   const [dates, setDates] = useState<string[]>([]);
-  const [tradeDate, setTradeDate] = useState("");
-  const [sector, setSector] = useState("");
-  const [minMovePct, setMinMovePct] = useState("5");
-  const [direction, setDirection] = useState<"both" | "up" | "down">("both");
-  const [ticker, setTicker] = useState("");
-  const [fundamentallyStrongOnly, setFundamentallyStrongOnly] = useState(false);
+  const [tradeDate, setTradeDate] = useState(initialPrefs.tradeDate);
+  const [sector, setSector] = useState(initialPrefs.sector);
+  const [minMovePct, setMinMovePct] = useState(initialPrefs.minMovePct || "5");
+  const [direction, setDirection] = useState<"both" | "up" | "down">(initialPrefs.direction === "up" || initialPrefs.direction === "down" ? initialPrefs.direction : "both");
+  const [ticker, setTicker] = useState(initialPrefs.ticker);
+  const [fundamentallyStrongOnly, setFundamentallyStrongOnly] = useState(Boolean(initialPrefs.fundamentallyStrongOnly));
   const [strongSymbols, setStrongSymbols] = useState<string[]>([]);
   const strongSymbolSet = useMemo(() => new Set(strongSymbols), [strongSymbols]);
   const [page, setPage] = useState(0);
@@ -100,6 +120,17 @@ export function TimelineMoversPage() {
       return true;
     }
   });
+
+  useEffect(() => {
+    saveUiPrefs(TIMELINE_PREFS_KEY, {
+      tradeDate,
+      sector,
+      minMovePct,
+      direction,
+      ticker,
+      fundamentallyStrongOnly,
+    } satisfies TimelineUiPrefs);
+  }, [tradeDate, sector, minMovePct, direction, ticker, fundamentallyStrongOnly]);
 
   const toggleFundamentals = useCallback(() => {
     setShowFundamentals((prev) => {

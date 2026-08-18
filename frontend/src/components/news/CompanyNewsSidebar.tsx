@@ -9,6 +9,7 @@ import {
 } from "@/lib/newsSentiment";
 import { Newspaper } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
+import { loadUiPrefs, saveUiPrefs } from "@/lib/uiPrefs";
 
 interface CompanyNewsSidebarProps {
   ticker?: string | null;
@@ -26,11 +27,20 @@ export function CompanyNewsSidebar({
   className = "",
   widthClassName = "w-full max-w-full lg:w-[22rem] lg:max-w-[22rem] xl:w-[24rem] xl:max-w-[24rem]",
 }: CompanyNewsSidebarProps) {
-  const [filter, setFilter] = useState<NewsSentiment | "All">("All");
+  const initialFilter = loadUiPrefs("trading.companyNews.prefs", { filter: "All" as NewsSentiment | "All" }).filter;
+  const [filter, setFilter] = useState<NewsSentiment | "All">(
+    initialFilter === "All" || (NEWS_SENTIMENTS as readonly string[]).includes(initialFilter)
+      ? initialFilter
+      : "All",
+  );
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [dbItems, setDbItems] = useState<CompanyNewsItem[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    saveUiPrefs("trading.companyNews.prefs", { filter });
+  }, [filter]);
 
   const symbol = (ticker || "").trim().toUpperCase();
   const useProps = Boolean(items && items.length);

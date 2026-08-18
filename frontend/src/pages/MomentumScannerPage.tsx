@@ -25,6 +25,7 @@ import {
   type TimelineCandlePoint,
 } from "@/lib/api";
 import { clampWeekday, localTodayIso, nearestWeekday } from "@/lib/dates";
+import { loadUiPrefs, saveUiPrefs } from "@/lib/uiPrefs";
 import RefreshIcon from "@mui/icons-material/Refresh";
 import DocumentScannerIcon from "@mui/icons-material/DocumentScanner";
 import Alert from "@mui/material/Alert";
@@ -77,6 +78,34 @@ import {
 const PAGE_SIZE = 80;
 const ALL_FILTER = "all";
 type FnoGroupFilter = "all" | "fno" | "non_fno";
+
+const SCANNER_PREFS_KEY = "trading.scanner.prefs";
+type ScannerUiPrefs = {
+  tradeDate: string;
+  scanMode: ScannerScanMode;
+  pattern: string;
+  sector: string;
+  fnoGroup: FnoGroupFilter;
+  minScore: string;
+  triggeredOnly: boolean;
+  setupOnly: boolean;
+  macroPassOnly: boolean;
+  fundamentalPassOnly: boolean;
+  fundamentallyStrongOnly: boolean;
+};
+const DEFAULT_SCANNER_PREFS: ScannerUiPrefs = {
+  tradeDate: "",
+  scanMode: "confirmation",
+  pattern: ALL_FILTER,
+  sector: ALL_FILTER,
+  fnoGroup: "all",
+  minScore: "70",
+  triggeredOnly: false,
+  setupOnly: false,
+  macroPassOnly: false,
+  fundamentalPassOnly: false,
+  fundamentallyStrongOnly: false,
+};
 
 function mergeSortedDates(existing: string[], additions: string[]): string[] {
   if (!additions.length) return existing;
@@ -285,21 +314,34 @@ function MoveCell({ value }: { value: number | null }) {
 }
 
 export function MomentumScannerPage() {
+  const initialPrefs = loadUiPrefs(SCANNER_PREFS_KEY, DEFAULT_SCANNER_PREFS);
   const [stats, setStats] = useState<Awaited<ReturnType<typeof fetchTimelineStats>> | null>(null);
   const [sectors, setSectors] = useState<string[]>([]);
   const [scanDates, setScanDates] = useState<string[]>([]);
   const [refinedScanDates, setRefinedScanDates] = useState<string[]>([]);
-  const [tradeDate, setTradeDate] = useState("");
-  const [scanMode, setScanMode] = useState<ScannerScanMode>("confirmation");
-  const [pattern, setPattern] = useState<ScannerPatternId | typeof ALL_FILTER>(ALL_FILTER);
-  const [sector, setSector] = useState(ALL_FILTER);
-  const [fnoGroup, setFnoGroup] = useState<FnoGroupFilter>("all");
-  const [minScore, setMinScore] = useState("70");
-  const [triggeredOnly, setTriggeredOnly] = useState(false);
-  const [setupOnly, setSetupOnly] = useState(false);
-  const [macroPassOnly, setMacroPassOnly] = useState(false);
-  const [fundamentalPassOnly, setFundamentalPassOnly] = useState(false);
-  const [fundamentallyStrongOnly, setFundamentallyStrongOnly] = useState(false);
+  const [tradeDate, setTradeDate] = useState(initialPrefs.tradeDate);
+  const [scanMode, setScanMode] = useState<ScannerScanMode>(
+    initialPrefs.scanMode === "early_setup" ? "early_setup" : "confirmation",
+  );
+  const [pattern, setPattern] = useState<ScannerPatternId | typeof ALL_FILTER>(
+    (initialPrefs.pattern as ScannerPatternId | typeof ALL_FILTER) || ALL_FILTER,
+  );
+  const [sector, setSector] = useState(initialPrefs.sector || ALL_FILTER);
+  const [fnoGroup, setFnoGroup] = useState<FnoGroupFilter>(
+    initialPrefs.fnoGroup === "fno" || initialPrefs.fnoGroup === "non_fno"
+      ? initialPrefs.fnoGroup
+      : "all",
+  );
+  const [minScore, setMinScore] = useState(initialPrefs.minScore || "70");
+  const [triggeredOnly, setTriggeredOnly] = useState(Boolean(initialPrefs.triggeredOnly));
+  const [setupOnly, setSetupOnly] = useState(Boolean(initialPrefs.setupOnly));
+  const [macroPassOnly, setMacroPassOnly] = useState(Boolean(initialPrefs.macroPassOnly));
+  const [fundamentalPassOnly, setFundamentalPassOnly] = useState(
+    Boolean(initialPrefs.fundamentalPassOnly),
+  );
+  const [fundamentallyStrongOnly, setFundamentallyStrongOnly] = useState(
+    Boolean(initialPrefs.fundamentallyStrongOnly),
+  );
   const [strongSymbols, setStrongSymbols] = useState<string[]>([]);
   const strongSymbolSet = useMemo(() => new Set(strongSymbols), [strongSymbols]);
   const [page, setPage] = useState(0);
@@ -768,6 +810,34 @@ export function MomentumScannerPage() {
       .catch((err) => setError(err instanceof Error ? err.message : "Failed to load metadata"))
       .finally(() => setBootLoading(false));
   }, [loadMeta]);
+
+  useEffect(() => {
+    saveUiPrefs(SCANNER_PREFS_KEY, {
+      tradeDate,
+      scanMode,
+      pattern,
+      sector,
+      fnoGroup,
+      minScore,
+      triggeredOnly,
+      setupOnly,
+      macroPassOnly,
+      fundamentalPassOnly,
+      fundamentallyStrongOnly,
+    } satisfies ScannerUiPrefs);
+  }, [
+    tradeDate,
+    scanMode,
+    pattern,
+    sector,
+    fnoGroup,
+    minScore,
+    triggeredOnly,
+    setupOnly,
+    macroPassOnly,
+    fundamentalPassOnly,
+    fundamentallyStrongOnly,
+  ]);
 
   useEffect(() => {
     fetchFno()
