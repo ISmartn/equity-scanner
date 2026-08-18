@@ -11,6 +11,7 @@ from typing import Any, Callable
 import pandas as pd
 
 from ...db.store import TimelineStore, get_store
+from ..scanner.context import evaluate_fundamental_gate
 from .detector import (
     DEFAULT_ATH_PULLBACK_PCT,
     StrategyId,
@@ -22,8 +23,9 @@ logger = logging.getLogger(__name__)
 
 ProgressCallback = Callable[[dict[str, Any]], None]
 DEFAULT_LOOKBACK_YEARS = 3
-DEFAULT_CONCURRENCY = 4
+DEFAULT_CONCURRENCY = 8
 STRATEGIES: tuple[StrategyId, ...] = ("multi_year_breakout", "ath_pullback", "custom")
+PROGRESS_EVERY = 25
 
 
 def _default_trade_date(store: TimelineStore) -> str:
@@ -35,6 +37,14 @@ def _min_bars_for_strategy(strategy: str, years: int) -> int:
     if strategy == "ath_pullback":
         return 250
     return max(400, int(years * 200))
+
+
+def _candle_window_limit(strategy: str, years: int, long_ma_period: int) -> int:
+    min_bars = _min_bars_for_strategy(strategy, years)
+    if strategy in ("ath_pullback", "custom"):
+        # Need long history for ATH; local DB is ~5y so ~1300 bars covers it.
+        return max(min_bars + 80, int(long_ma_period) + 50, 1300)
+    return min_bars + 80
 
 
 def _passes_global_filters(
@@ -86,9 +96,12 @@ def _hit_to_row(
     lookback_years: int,
     run_id: int,
     strategy: str,
+    fundamental: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     details = dict(hit.details or {})
     details["strategy"] = strategy
+    if fundamental is not None:
+        details["fundamental"] = fundamental
     return {
         "run_id": run_id,
         "trade_date": scan_date,
@@ -112,14 +125,14 @@ def _hit_to_row(
     }
 
 
-def _scan_ticker(
+def _scan_ticker_rows(
     meta: dict[str, Any],
+    rows: list[dict[str, Any]],
     *,
     scan_date: str,
     strategy: str,
     lookback_years: int,
     run_id: int,
-    db: TimelineStore,
     pullback_pct: float,
     match_mode: str,
     band_width_pct: float,
@@ -129,11 +142,9 @@ def _scan_ticker(
     ma_type: str,
     custom_flags: dict[str, bool],
     filters: dict[str, Any],
+    fundamental: dict[str, Any] | None = None,
 ) -> list[dict[str, Any]]:
-    ticker = meta["ticker"]
     min_bars = _min_bars_for_strategy(strategy, lookback_years)
-    limit = 1500 if strategy in ("ath_pullback", "custom") else min_bars + 80
-    rows = db.get_recent_candles_for_scan(ticker, limit=limit, as_of_date=scan_date)
     if len(rows) < min_bars or str(rows[-1]["date"]) != scan_date:
         return []
 
@@ -175,6 +186,7 @@ def _scan_ticker(
             lookback_years=years,
             run_id=run_id,
             strategy=strat,
+            fundamental=fundamental,
         )
         out.append(row)
 
@@ -233,11 +245,25 @@ def run_multi_year_breakout_scan(
     years = max(2, min(int(lookback_years), 5))
     workers = max(1, concurrency)
     min_bars = _min_bars_for_strategy(strat, years)
+    candle_limit = _candle_window_limit(strat, years, int(long_ma_period))
     filt = dict(filters or {})
     flags = dict(custom_flags or {"include_multi_year": True, "include_ath_pullback": True})
     trend = (trend_filter or "all").lower()
 
     tickers_meta = db.list_scan_eligible_tickers(min_bars=min_bars, as_of_date=scan_date)
+    want_sector = filt.get("sector")
+    if want_sector:
+        tickers_meta = [m for m in tickers_meta if m.get("sector") == want_sector]
+
+    # One bulk read replaces ~2 SQLite round-trips per ticker.
+    candles_by_ticker = db.get_recent_candles_window_for_scan(
+        min_bars=min_bars,
+        limit=candle_limit,
+        as_of_date=scan_date,
+        instrument_tokens=[m["instrument_token"] for m in tickers_meta],
+    )
+    fundamentals_index = db.load_fundamentals_index()
+
     total = len(tickers_meta)
 
     db.delete_myb_data_for_date(scan_date, strategy=strat, lookback_years=years if strat != "ath_pullback" else 0)
@@ -262,8 +288,8 @@ def run_multi_year_breakout_scan(
     scanned = 0
     lock = Lock()
 
-    def emit(ticker: str | None = None) -> None:
-        if on_progress:
+    def emit(ticker: str | None = None, *, force: bool = False) -> None:
+        if on_progress and (force or scanned % PROGRESS_EVERY == 0 or scanned == total):
             on_progress(
                 {
                     "total": total,
@@ -276,14 +302,13 @@ def run_multi_year_breakout_scan(
                 }
             )
 
-    emit()
+    emit(force=True)
 
     scan_kwargs = {
         "scan_date": scan_date,
         "strategy": strat,
         "lookback_years": years,
         "run_id": run_id,
-        "db": db,
         "pullback_pct": pullback_pct,
         "match_mode": match_mode,
         "band_width_pct": band_width_pct,
@@ -302,16 +327,18 @@ def run_multi_year_breakout_scan(
             signals.extend(results)
             emit(ticker)
 
+    def work(meta: dict[str, Any]) -> list[dict[str, Any]]:
+        rows = candles_by_ticker.get(meta["ticker"]) or []
+        fundamental = evaluate_fundamental_gate(fundamentals_index.get(meta["ticker"]))
+        return _scan_ticker_rows(meta, rows, fundamental=fundamental, **scan_kwargs)
+
     try:
         if workers == 1:
             for meta in tickers_meta:
-                consume(_scan_ticker(meta, **scan_kwargs), meta["ticker"])
+                consume(work(meta), meta["ticker"])
         else:
             with ThreadPoolExecutor(max_workers=workers) as pool:
-                futures = {
-                    pool.submit(_scan_ticker, meta, **scan_kwargs): meta["ticker"]
-                    for meta in tickers_meta
-                }
+                futures = {pool.submit(work, meta): meta["ticker"] for meta in tickers_meta}
                 for future in as_completed(futures):
                     ticker = futures[future]
                     try:
@@ -331,7 +358,7 @@ def run_multi_year_breakout_scan(
         db.finish_myb_run(run_id, symbols_scanned=scanned, alerts_count=0, status="failed")
         raise
 
-    emit(None)
+    emit(None, force=True)
     by_status: dict[str, int] = {}
     by_trend: dict[str, int] = {}
     for s in signals:

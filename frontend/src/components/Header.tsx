@@ -33,10 +33,10 @@ export function Header({
           </Box>
           <Box>
             <Typography variant="h6" className="text-lg font-semibold tracking-tight sm:text-xl">
-              TimesFM Nifty 50
+              Equity Scan Lab
             </Typography>
             <Typography variant="body2" color="text.secondary" className="text-xs sm:text-sm">
-              Forecast & daily move analysis · Upstox candles
+              NSE scanners · forecast · sector rotation
             </Typography>
           </Box>
         </Stack>

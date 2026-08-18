@@ -16,12 +16,13 @@ from .routes.indicator_analysis import router as indicator_analysis_router
 from .routes.nifty import router as nifty_router
 from .routes.oi_momentum import router as oi_momentum_router
 from .routes.scanner import router as scanner_router
+from .routes.sector_rotation import router as sector_rotation_router
 from .routes.timeline import router as timeline_router
 
 setup_logging()
 logger = logging.getLogger(__name__)
 
-app = FastAPI(title="TimesFM NSE Forecast", version="1.0.0")
+app = FastAPI(title="Equity Scan Lab", version="1.0.0")
 
 app.add_middleware(
     CORSMiddleware,
@@ -34,6 +35,7 @@ app.add_middleware(
 app.include_router(forecast_router)
 app.include_router(timeline_router)
 app.include_router(scanner_router)
+app.include_router(sector_rotation_router)
 app.include_router(multi_year_breakout_router)
 app.include_router(market_info_router)
 app.include_router(oi_momentum_router)
@@ -74,4 +76,4 @@ async def on_startup() -> None:
 
 @app.get("/")
 async def root() -> dict[str, str]:
-    return {"service": "timesfm-nse-forecast", "docs": "/docs"}
+    return {"service": "equity-scan-lab", "docs": "/docs"}

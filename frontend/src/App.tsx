@@ -14,6 +14,7 @@ import { OiMomentumPage } from "@/pages/OiMomentumPage";
 import { MtfRsiPage } from "@/pages/MtfRsiPage";
 import { NiftyChartPage } from "@/pages/NiftyChartPage";
 import { IndicatorAnalysisPage } from "@/pages/IndicatorAnalysisPage";
+import { SectorRotationPage } from "@/pages/SectorRotationPage";
 import { TimelineMoversPage } from "@/pages/TimelineMoversPage";
 
 const NAV_TABS = [
@@ -28,6 +29,7 @@ const NAV_TABS = [
   { label: "Indicator Analysis", path: "/indicator-analysis" },
   { label: "Momentum Scanner", path: "/scanner" },
   { label: "Screener", path: "/multi-year-breakout" },
+  { label: "Sector Rotation", path: "/sector-rotation" },
 ] as const;
 
 function AppNav() {
@@ -112,6 +114,7 @@ export default function App() {
           <Route path="/indicator-analysis" element={<IndicatorAnalysisPage />} />
           <Route path="/scanner" element={<MomentumScannerPage />} />
           <Route path="/multi-year-breakout" element={<MultiYearBreakoutPage />} />
+          <Route path="/sector-rotation" element={<SectorRotationPage />} />
         </Routes>
       </div>
     </BrowserRouter>

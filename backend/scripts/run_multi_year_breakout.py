@@ -37,7 +37,7 @@ def main() -> int:
     parser.add_argument("--short-ma", type=int, default=50)
     parser.add_argument("--long-ma", type=int, default=200)
     parser.add_argument("--ma-type", default="sma", choices=["sma", "ema"])
-    parser.add_argument("--concurrency", type=int, default=4)
+    parser.add_argument("--concurrency", type=int, default=8)
     args = parser.parse_args()
 
     def on_progress(u: dict) -> None:

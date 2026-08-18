@@ -3,7 +3,7 @@ from __future__ import annotations
 import json
 import sqlite3
 from contextlib import contextmanager
-from datetime import date, datetime, timezone
+from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any, Iterator
 
@@ -43,6 +43,7 @@ CREATE TABLE IF NOT EXISTS daily_candles (
 CREATE INDEX IF NOT EXISTS idx_candles_date ON daily_candles(trade_date);
 CREATE INDEX IF NOT EXISTS idx_candles_return ON daily_candles(trade_date, daily_return_pct);
 CREATE INDEX IF NOT EXISTS idx_candles_token ON daily_candles(instrument_token);
+CREATE INDEX IF NOT EXISTS idx_candles_token_date ON daily_candles(instrument_token, trade_date);
 
 CREATE TABLE IF NOT EXISTS scanner_runs (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -828,12 +829,16 @@ class TimelineStore:
         *,
         limit: int = 280,
         as_of_date: str | None = None,
+        instrument_token: str | None = None,
     ) -> list[dict[str, Any]]:
-        profile = self.get_profile_by_ticker(ticker)
-        if not profile:
-            return []
+        token = instrument_token
+        if not token:
+            profile = self.get_profile_by_ticker(ticker)
+            if not profile:
+                return []
+            token = profile["instrument_token"]
 
-        params: list[Any] = [profile["instrument_token"]]
+        params: list[Any] = [token]
         date_clause = ""
         if as_of_date:
             date_clause = "AND c.trade_date <= ?"
@@ -928,6 +933,104 @@ class TimelineStore:
         with self.connection() as conn:
             rows = conn.execute(sql, params).fetchall()
         return [dict(row) for row in rows]
+
+    def get_recent_candles_window_for_scan(
+        self,
+        *,
+        min_bars: int = 250,
+        limit: int = 680,
+        as_of_date: str | None = None,
+        instrument_tokens: list[str] | None = None,
+    ) -> dict[str, list[dict[str, Any]]]:
+        """Load recent OHLCV bars for scan-eligible tickers in one (or few) queries.
+
+        Returns ``{ticker: [oldest ... newest candle dicts]}`` capped at ``limit``
+        bars per ticker. Prefer ``instrument_tokens`` from ``list_scan_eligible_tickers``
+        to avoid a second universe aggregation.
+        """
+        window = max(1, int(limit))
+        tokens = [t for t in (instrument_tokens or []) if t]
+        by_ticker: dict[str, list[dict[str, Any]]] = {}
+
+        # Calendar pad (~1.75x) so weekends/holidays still yield ``window`` sessions.
+        as_of = as_of_date or date.today().isoformat()
+        start_date = (date.fromisoformat(as_of[:10]) - timedelta(days=int(window * 1.75))).isoformat()
+
+        def _ingest(rows: list[Any]) -> None:
+            for row in rows:
+                item = dict(row)
+                ticker = item.pop("ticker")
+                bucket = by_ticker.setdefault(ticker, [])
+                bucket.append(item)
+
+        def _trim() -> None:
+            for ticker, rows in by_ticker.items():
+                if len(rows) > window:
+                    by_ticker[ticker] = rows[-window:]
+
+        if tokens:
+            # Chunk IN-lists to keep query plans lean on large universes.
+            chunk_size = 400
+            with self.connection() as conn:
+                conn.execute("PRAGMA temp_store=MEMORY")
+                for i in range(0, len(tokens), chunk_size):
+                    chunk = tokens[i : i + chunk_size]
+                    placeholders = ",".join("?" for _ in chunk)
+                    params: list[Any] = [*chunk, start_date, as_of]
+                    sql = f"""
+                        SELECT
+                            p.ticker,
+                            c.trade_date AS date,
+                            c.open_price AS open,
+                            c.high_price AS high,
+                            c.low_price AS low,
+                            c.close_price AS close,
+                            c.volume
+                        FROM daily_candles c
+                        JOIN security_profiles p ON c.instrument_token = p.instrument_token
+                        WHERE c.instrument_token IN ({placeholders})
+                          AND c.trade_date >= ?
+                          AND c.trade_date <= ?
+                        ORDER BY p.ticker ASC, c.trade_date ASC
+                    """
+                    _ingest(conn.execute(sql, params).fetchall())
+            _trim()
+            return by_ticker
+
+        if as_of_date:
+            params = [as_of_date, min_bars, start_date, as_of_date]
+            eligible_filter = "WHERE trade_date <= ?"
+        else:
+            params = [min_bars, start_date, as_of]
+            eligible_filter = ""
+        sql = f"""
+            WITH eligible AS (
+                SELECT instrument_token
+                FROM daily_candles
+                {eligible_filter}
+                GROUP BY instrument_token
+                HAVING COUNT(*) >= ?
+            )
+            SELECT
+                p.ticker,
+                c.trade_date AS date,
+                c.open_price AS open,
+                c.high_price AS high,
+                c.low_price AS low,
+                c.close_price AS close,
+                c.volume
+            FROM daily_candles c
+            JOIN security_profiles p ON c.instrument_token = p.instrument_token
+            JOIN eligible e ON c.instrument_token = e.instrument_token
+            WHERE c.trade_date >= ?
+              AND c.trade_date <= ?
+            ORDER BY p.ticker ASC, c.trade_date ASC
+        """
+        with self.connection() as conn:
+            conn.execute("PRAGMA temp_store=MEMORY")
+            _ingest(conn.execute(sql, params).fetchall())
+        _trim()
+        return by_ticker
 
     def create_scanner_run(self, trade_date: str, *, engine_version: str | None = None) -> int:
         with self.connection() as conn:

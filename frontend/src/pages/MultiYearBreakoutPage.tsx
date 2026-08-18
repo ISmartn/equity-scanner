@@ -13,11 +13,14 @@ import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
 import Typography from "@mui/material/Typography";
 import DocumentScannerIcon from "@mui/icons-material/DocumentScanner";
 import RefreshIcon from "@mui/icons-material/Refresh";
+import { Star } from "lucide-react";
 import { TimelineDataCoverage } from "@/components/TimelineDataCoverage";
 import { TimelineDatePicker, FieldLabel } from "@/components/TimelineDatePicker";
 import { TimelineStockChart } from "@/components/TimelineStockChart";
 import { AppButton } from "@/components/mui/AppButton";
 import {
+  fetchFno,
+  fetchFundamentallyStrong,
   fetchMybDates,
   fetchMybResults,
   fetchMybStatus,
@@ -25,6 +28,7 @@ import {
   fetchTimelineSectors,
   fetchTimelineStats,
   runMybScan,
+  type MybBatchMode,
   type MybMaType,
   type MybMatchMode,
   type MybScanStatus,
@@ -37,9 +41,30 @@ import {
   type TimelineStats,
 } from "@/lib/api";
 import { clampWeekday, localTodayIso } from "@/lib/dates";
+import {
+  FUNDAMENTALLY_STRONG_TOOLTIP,
+  fundamentalStrongFromDetails,
+} from "@/lib/fundamentalsMeta";
 
 const PAGE_SIZE = 80;
 const ALL = "all";
+type FnoGroupFilter = "all" | "fno" | "non_fno";
+
+function mergeSortedDates(existing: string[], additions: string[]): string[] {
+  if (!additions.length) return existing;
+  return [...new Set([...existing, ...additions.filter(Boolean)])].sort((a, b) =>
+    b.localeCompare(a),
+  );
+}
+
+function FnoStarMark({ show }: { show: boolean }) {
+  if (!show) return null;
+  return (
+    <span title="F&O stock" aria-label="F&O stock">
+      <Star className="h-3 w-3 shrink-0 fill-amber-400 text-amber-400" aria-hidden />
+    </span>
+  );
+}
 
 const STRATEGIES: { id: MybStrategy; label: string; blurb: string }[] = [
   {
@@ -126,6 +151,12 @@ export function MultiYearBreakoutPage() {
   const [minScore, setMinScore] = useState("40");
   const [sector, setSector] = useState(ALL);
   const [sizeTier, setSizeTier] = useState<MybSizeTier>("all");
+  const [fnoGroup, setFnoGroup] = useState<FnoGroupFilter>("all");
+  const [fnoSymbols, setFnoSymbols] = useState<string[]>([]);
+  const fnoSymbolSet = useMemo(() => new Set(fnoSymbols), [fnoSymbols]);
+  const [fundamentallyStrongOnly, setFundamentallyStrongOnly] = useState(false);
+  const [strongSymbols, setStrongSymbols] = useState<string[]>([]);
+  const strongSymbolSet = useMemo(() => new Set(strongSymbols), [strongSymbols]);
   const [minPrice, setMinPrice] = useState("");
   const [maxPrice, setMaxPrice] = useState("");
   const [minRvol, setMinRvol] = useState("");
@@ -180,40 +211,63 @@ export function MultiYearBreakoutPage() {
     });
   }, [today, strategy]);
 
-  const loadResults = useCallback(async () => {
-    if (!tradeDate || filterInvalid) return;
-    setLoading(true);
-    setError(null);
-    try {
-      const res = await fetchMybResults({
-        tradeDate,
-        strategy,
-        lookbackYears: effectiveLookback,
-        status: statusFilter,
-        minScore: minScoreNum,
-        sector: sector === ALL ? undefined : sector,
-        sizeTier,
-        trend: showPullbackControls ? trendFilter : undefined,
-        minPrice: minPriceNum,
-        maxPrice: maxPriceNum,
-        minRvol: minRvolNum,
+  const applyClientFilters = useCallback(
+    (items: MybSignal[]) => {
+      let next = items;
+      if (fnoGroup !== "all") {
+        next = next.filter((row) => {
+          const isFno = fnoSymbolSet.has(row.ticker.toUpperCase());
+          return fnoGroup === "fno" ? isFno : !isFno;
+        });
+      }
+      if (fundamentallyStrongOnly) {
+        next = next.filter((row) => {
+          const fromDetails = fundamentalStrongFromDetails(row.details);
+          if (fromDetails != null) return fromDetails;
+          return strongSymbolSet.has(row.ticker.toUpperCase());
+        });
+      }
+      return next;
+    },
+    [fnoGroup, fnoSymbolSet, fundamentallyStrongOnly, strongSymbolSet],
+  );
+
+  const fetchResultsPage = useCallback(async () => {
+    const base = {
+      tradeDate,
+      strategy,
+      lookbackYears: effectiveLookback,
+      status: statusFilter,
+      minScore: minScoreNum,
+      sector: sector === ALL ? undefined : sector,
+      sizeTier,
+      trend: showPullbackControls ? trendFilter : undefined,
+      minPrice: minPriceNum,
+      maxPrice: maxPriceNum,
+      minRvol: minRvolNum,
+    } as const;
+
+    const needsClientFilter = fnoGroup !== "all" || fundamentallyStrongOnly;
+    if (!needsClientFilter) {
+      return fetchMybResults({
+        ...base,
         limit: PAGE_SIZE,
         offset: page * PAGE_SIZE,
       });
-      setRows(res.results);
-      setTotal(res.total);
-      setScanAlertsCount(res.scan_alerts_count ?? null);
-      setHasLoaded(true);
-      setSelected((prev) => {
-        if (!res.results.length) return null;
-        if (prev && res.results.some((r) => r.id === prev.id)) return prev;
-        return res.results[0];
-      });
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to load results");
-    } finally {
-      setLoading(false);
     }
+
+    const full = await fetchMybResults({
+      ...base,
+      limit: 2000,
+      offset: 0,
+    });
+    const filtered = applyClientFilters(full.results);
+    const offset = page * PAGE_SIZE;
+    return {
+      ...full,
+      total: filtered.length,
+      results: filtered.slice(offset, offset + PAGE_SIZE),
+    };
   }, [
     tradeDate,
     strategy,
@@ -228,8 +282,32 @@ export function MultiYearBreakoutPage() {
     maxPriceNum,
     minRvolNum,
     page,
-    filterInvalid,
+    fnoGroup,
+    fundamentallyStrongOnly,
+    applyClientFilters,
   ]);
+
+  const loadResults = useCallback(async () => {
+    if (!tradeDate || filterInvalid) return;
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await fetchResultsPage();
+      setRows(res.results);
+      setTotal(res.total);
+      setScanAlertsCount(res.scan_alerts_count ?? null);
+      setHasLoaded(true);
+      setSelected((prev) => {
+        if (!res.results.length) return null;
+        if (prev && res.results.some((r) => r.id === prev.id)) return prev;
+        return res.results[0];
+      });
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to load results");
+    } finally {
+      setLoading(false);
+    }
+  }, [tradeDate, filterInvalid, fetchResultsPage]);
 
   const stopPoll = useCallback(() => {
     if (scanPollRef.current != null) {
@@ -241,6 +319,12 @@ export function MultiYearBreakoutPage() {
   const pollStatus = useCallback(async () => {
     const status = await fetchMybStatus();
     setScanStatus(status);
+
+    if (status.batch_dates?.length && status.batch_day_index && status.batch_day_index > 1) {
+      const done = status.batch_dates.slice(0, status.batch_day_index - 1);
+      setScanDates((prev) => mergeSortedDates(prev, done));
+    }
+
     if (!status.running) {
       stopPoll();
       setScanRunning(false);
@@ -248,6 +332,18 @@ export function MultiYearBreakoutPage() {
       if (status.trade_date) setTradeDate(status.trade_date);
       if (status.strategy && STRATEGIES.some((s) => s.id === status.strategy)) {
         setStrategy(status.strategy as MybStrategy);
+      }
+      const last = status.last_result;
+      if (last && typeof last === "object") {
+        const scanned = last.dates_scanned;
+        if (Array.isArray(scanned)) {
+          setScanDates((prev) =>
+            mergeSortedDates(
+              prev,
+              scanned.filter((d): d is string => typeof d === "string"),
+            ),
+          );
+        }
       }
       setPage(0);
       void loadResults();
@@ -267,6 +363,15 @@ export function MultiYearBreakoutPage() {
       .catch((err) => setError(err instanceof Error ? err.message : "Failed to load metadata"))
       .finally(() => setBootLoading(false));
   }, [loadMeta]);
+
+  useEffect(() => {
+    fetchFno()
+      .then((res) => setFnoSymbols(res.symbols))
+      .catch(() => setFnoSymbols([]));
+    fetchFundamentallyStrong()
+      .then((res) => setStrongSymbols(res.symbols))
+      .catch(() => setStrongSymbols([]));
+  }, []);
 
   useEffect(() => {
     fetchMybStatus()
@@ -296,6 +401,8 @@ export function MultiYearBreakoutPage() {
     minScore,
     sector,
     sizeTier,
+    fnoGroup,
+    fundamentallyStrongOnly,
     trendFilter,
     minPrice,
     maxPrice,
@@ -314,6 +421,10 @@ export function MultiYearBreakoutPage() {
     minScoreNum,
     sector,
     sizeTier,
+    fnoGroup,
+    fundamentallyStrongOnly,
+    fnoSymbols.length,
+    strongSymbols.length,
     trendFilter,
     minPriceNum,
     maxPriceNum,
@@ -346,48 +457,87 @@ export function MultiYearBreakoutPage() {
     };
   }, [selected?.ticker]);
 
-  const handleRun = async () => {
-    if (!tradeDate || scanRunning) return;
-    if (strategy === "custom" && !includeMultiYear && !includeAthPullback) {
-      setError("Custom mode needs at least one of Multi-Year or ATH Pullback enabled.");
-      return;
-    }
-    setError(null);
-    setScanRunning(true);
-    try {
-      await runMybScan({
-        tradeDate,
-        strategy,
-        lookbackYears,
-        pullbackPct,
-        matchMode,
-        bandWidthPct,
-        // Scan with all trends so UI trend toggle can filter without re-scan
-        trendFilter: "all",
-        shortMaPeriod,
-        longMaPeriod,
-        maType,
-        includeMultiYear,
-        includeAthPullback,
-        sector: sector === ALL ? undefined : sector,
-        sizeTier,
-        minPrice: minPriceNum,
-        maxPrice: maxPriceNum,
-        minRvol: minRvolNum,
-        backgroundRun: true,
-        concurrency: 4,
-      });
-      startPoll();
-    } catch (err) {
-      setScanRunning(false);
-      setError(err instanceof Error ? err.message : "Failed to start scan");
-    }
-  };
+  const startScan = useCallback(
+    async (batch: MybBatchMode) => {
+      if (!tradeDate || scanRunning) return;
+      if (strategy === "custom" && !includeMultiYear && !includeAthPullback) {
+        setError("Custom mode needs at least one of Multi-Year or ATH Pullback enabled.");
+        return;
+      }
+      setError(null);
+      setScanRunning(true);
+      try {
+        await runMybScan({
+          tradeDate,
+          strategy,
+          lookbackYears,
+          pullbackPct,
+          matchMode,
+          bandWidthPct,
+          // Scan with all trends so UI trend toggle can filter without re-scan
+          trendFilter: "all",
+          shortMaPeriod,
+          longMaPeriod,
+          maType,
+          includeMultiYear,
+          includeAthPullback,
+          sector: sector === ALL ? undefined : sector,
+          sizeTier,
+          minPrice: minPriceNum,
+          maxPrice: maxPriceNum,
+          minRvol: minRvolNum,
+          backgroundRun: true,
+          concurrency: 8,
+          batch,
+        });
+        startPoll();
+      } catch (err) {
+        setScanRunning(false);
+        setError(err instanceof Error ? err.message : "Failed to start scan");
+      }
+    },
+    [
+      tradeDate,
+      scanRunning,
+      strategy,
+      includeMultiYear,
+      includeAthPullback,
+      lookbackYears,
+      pullbackPct,
+      matchMode,
+      bandWidthPct,
+      shortMaPeriod,
+      longMaPeriod,
+      maType,
+      sector,
+      sizeTier,
+      minPriceNum,
+      maxPriceNum,
+      minRvolNum,
+      startPoll,
+    ],
+  );
+
+  const handleRunScan = () => void startScan("single");
+  const handleRunScanMonth = () => void startScan("month");
+  const handleRunScanLast7 = () => void startScan("last_7");
 
   const progressPct = useMemo(() => {
     if (!scanStatus?.total) return 0;
     return Math.min(100, Math.round((scanStatus.processed / scanStatus.total) * 100));
   }, [scanStatus]);
+
+  const batchProgressPct = useMemo(() => {
+    if (!scanStatus?.batch_day_total) return progressPct;
+    const dayIndex = Math.max(0, (scanStatus.batch_day_index ?? 1) - 1);
+    const dayFraction = (progressPct || 0) / 100;
+    return Math.min(
+      100,
+      Math.round(((dayIndex + dayFraction) / scanStatus.batch_day_total) * 100),
+    );
+  }, [scanStatus, progressPct]);
+
+  const activeProgressPct = scanStatus?.batch_day_total ? batchProgressPct : progressPct;
 
   const pageCount = Math.max(1, Math.ceil(total / PAGE_SIZE));
   const noScanYet = hasLoaded && !loading && scanAlertsCount == null && !scanDates.includes(tradeDate);
@@ -575,10 +725,32 @@ export function MultiYearBreakoutPage() {
                 className={scanRunning ? "animate-pulse" : undefined}
               />
             }
-            onClick={() => void handleRun()}
+            onClick={handleRunScan}
             disabled={scanRunning || bootLoading || !tradeDate}
           >
-            {scanRunning ? "Scanning…" : "Run scan"}
+            {scanRunning && !scanStatus?.batch_mode ? "Scanning…" : "Run scan"}
+          </AppButton>
+          <AppButton
+            size="small"
+            className="shrink-0"
+            onClick={handleRunScanMonth}
+            disabled={scanRunning || bootLoading || !tradeDate}
+            title={
+              tradeDate
+                ? `Scan every weekday in ${tradeDate.slice(0, 7)} through ${tradeDate}`
+                : "Scan whole month"
+            }
+          >
+            Month
+          </AppButton>
+          <AppButton
+            size="small"
+            className="shrink-0"
+            onClick={handleRunScanLast7}
+            disabled={scanRunning || bootLoading || !tradeDate}
+            title={tradeDate ? `Scan the 7 weekdays before ${tradeDate}` : "Scan last 7 days"}
+          >
+            −7d
           </AppButton>
 
           <AppButton
@@ -687,6 +859,34 @@ export function MultiYearBreakoutPage() {
             ))}
           </TextField>
           <TextField
+            select
+            size="small"
+            label="Listing"
+            value={fnoGroup}
+            onChange={(e) => setFnoGroup(e.target.value as FnoGroupFilter)}
+            sx={{ minWidth: 120, "& .MuiInputBase-root": { fontSize: "0.75rem", height: 30 } }}
+            slotProps={{ inputLabel: { sx: { fontSize: "0.7rem" } } }}
+          >
+            <MenuItem value="all">All</MenuItem>
+            <MenuItem value="fno">F&O ★</MenuItem>
+            <MenuItem value="non_fno">Non-F&O</MenuItem>
+          </TextField>
+          <FormControlLabel
+            className="!mr-0"
+            control={
+              <Checkbox
+                size="small"
+                checked={fundamentallyStrongOnly}
+                onChange={(e) => setFundamentallyStrongOnly(e.target.checked)}
+              />
+            }
+            label={
+              <span className="text-[10px] text-slate-300" title={FUNDAMENTALLY_STRONG_TOOLTIP}>
+                Strong Fund
+              </span>
+            }
+          />
+          <TextField
             size="small"
             label="Min ₹"
             value={minPrice}
@@ -751,14 +951,27 @@ export function MultiYearBreakoutPage() {
             : showBreakoutControls
               ? `Close vs prior ${lookbackYears}Y high (fresh = Breakout; within 3% below = Near).`
               : null}{" "}
-          Size tiers use 20d avg turnover.
+          Size tiers use 20d avg turnover. Listing filter uses the NSE F&O universe (★ = F&O).
+          Strong Fund: {FUNDAMENTALLY_STRONG_TOOLTIP}.
         </Typography>
 
         {scanRunning && scanStatus ? (
           <div className="mt-1.5 space-y-1 border-t border-surface-border pt-1.5">
             <div className="flex flex-wrap items-center justify-between gap-2 text-[9px] text-slate-400">
               <span>
-                Scanning
+                {scanStatus.batch_mode === "month"
+                  ? "Batch · month"
+                  : scanStatus.batch_mode === "last_7"
+                    ? "Batch · −7d"
+                    : "Scanning"}
+                {scanStatus.batch_day_total ? (
+                  <>
+                    {" · "}
+                    <span className="font-medium text-slate-200">
+                      {scanStatus.batch_day_index}/{scanStatus.batch_day_total}
+                    </span>
+                  </>
+                ) : null}
                 {scanStatus.strategy ? (
                   <>
                     {" · "}
@@ -780,14 +993,14 @@ export function MultiYearBreakoutPage() {
               </span>
               <span className="tabular-nums">
                 {scanStatus.processed.toLocaleString()}/{scanStatus.total.toLocaleString()}
-                {scanStatus.total > 0 ? ` (${progressPct}%)` : ""}
+                {scanStatus.total > 0 ? ` (${activeProgressPct}%)` : ""}
                 {" · "}
                 {scanStatus.alerts_count.toLocaleString()} alerts
               </span>
             </div>
             <LinearProgress
               variant="determinate"
-              value={progressPct}
+              value={activeProgressPct}
               className="h-1 rounded-full"
               sx={{ bgcolor: "background.default", borderRadius: 999 }}
             />
@@ -884,7 +1097,19 @@ export function MultiYearBreakoutPage() {
                         }`}
                       >
                         <td className="px-2 py-1.5">
-                          <div className="font-medium text-slate-100">{row.ticker}</div>
+                          <div className="flex items-center gap-1">
+                            <div className="font-medium text-slate-100">{row.ticker}</div>
+                            <FnoStarMark show={fnoSymbolSet.has(row.ticker)} />
+                            {(fundamentalStrongFromDetails(row.details) === true ||
+                              strongSymbolSet.has(row.ticker.toUpperCase())) && (
+                              <span
+                                className="rounded border border-emerald-500/40 bg-emerald-500/15 px-1 py-px text-[8px] font-medium text-emerald-300"
+                                title={FUNDAMENTALLY_STRONG_TOOLTIP}
+                              >
+                                Strong
+                              </span>
+                            )}
+                          </div>
                           <div className="text-[9px] text-slate-500">
                             {row.sector || row.company_name || "—"}
                           </div>
@@ -992,7 +1217,10 @@ export function MultiYearBreakoutPage() {
             <>
               <div className="border-b border-surface-border px-3 py-2">
                 <Typography className="text-[12px] font-medium text-slate-100">
-                  {selected.ticker}
+                  <span className="inline-flex items-center gap-1">
+                    {selected.ticker}
+                    <FnoStarMark show={fnoSymbolSet.has(selected.ticker)} />
+                  </span>
                   <span className="ml-2 text-[10px] font-normal text-slate-500">
                     {selected.company_name || selected.sector || ""}
                   </span>

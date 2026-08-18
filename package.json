@@ -1,5 +1,5 @@
 {
-  "name": "timesfm-nse-forecast",
+  "name": "equity-scan-lab",
   "private": true,
   "scripts": {
     "dev": "npx concurrently -k -n backend,frontend -c blue,green \"npm run dev:backend\" \"npm run dev:frontend\"",

@@ -1,0 +1,240 @@
+import { useCallback, useEffect, useMemo, useState } from "react";
+import RefreshIcon from "@mui/icons-material/Refresh";
+import Alert from "@mui/material/Alert";
+import ToggleButton from "@mui/material/ToggleButton";
+import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
+import Typography from "@mui/material/Typography";
+import { RRGScatterChart } from "@/components/sectorRotation/RRGScatterChart";
+import { SectorConstituentsPanel } from "@/components/sectorRotation/SectorConstituentsPanel";
+import {
+  SectorScanTable,
+  type SectorTableFilter,
+} from "@/components/sectorRotation/SectorScanTable";
+import { AppButton } from "@/components/mui/AppButton";
+import {
+  fetchSectorRotation,
+  fetchSectorRotationConstituents,
+  type SectorConstituentsResponse,
+  type SectorRotationResponse,
+  type SectorRotationRow,
+} from "@/lib/api";
+
+type SortKey = "surety_score" | "daily_change_pct" | "rs_ratio" | "name";
+
+export function SectorRotationPage() {
+  const [data, setData] = useState<SectorRotationResponse | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [filter, setFilter] = useState<SectorTableFilter>("all");
+  const [sortKey, setSortKey] = useState<SortKey>("surety_score");
+  const [sortDir, setSortDir] = useState<"asc" | "desc">("desc");
+  const [selectedName, setSelectedName] = useState<string | null>(null);
+  const [constituents, setConstituents] = useState<SectorConstituentsResponse | null>(null);
+  const [constituentsLoading, setConstituentsLoading] = useState(false);
+  const [constituentsError, setConstituentsError] = useState<string | null>(null);
+
+  const load = useCallback(async (refresh = false) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const payload = await fetchSectorRotation(refresh);
+      setData(payload);
+      setSelectedName((prev) => {
+        if (prev && payload.sectors.some((s) => s.name === prev)) return prev;
+        return payload.sectors[0]?.name ?? null;
+      });
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to load sector rotation");
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    void load(false);
+  }, [load]);
+
+  useEffect(() => {
+    if (!selectedName) {
+      setConstituents(null);
+      setConstituentsError(null);
+      return;
+    }
+    const requestName = selectedName;
+    let cancelled = false;
+    setConstituentsLoading(true);
+    setConstituentsError(null);
+    // Drop stale rows immediately so click always feels connected to the new sector
+    setConstituents((prev) => (prev?.sector === requestName ? prev : null));
+
+    void fetchSectorRotationConstituents(requestName)
+      .then((payload) => {
+        if (!cancelled) setConstituents(payload);
+      })
+      .catch((err) => {
+        if (!cancelled) {
+          setConstituents(null);
+          setConstituentsError(
+            err instanceof Error ? err.message : "Failed to load constituents",
+          );
+        }
+      })
+      .finally(() => {
+        if (!cancelled) setConstituentsLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [selectedName]);
+
+  const selected: SectorRotationRow | null = useMemo(() => {
+    if (!data || !selectedName) return null;
+    return data.sectors.find((s) => s.name === selectedName) ?? null;
+  }, [data, selectedName]);
+
+  const handleSort = (key: SortKey) => {
+    if (key === sortKey) {
+      setSortDir((d) => (d === "desc" ? "asc" : "desc"));
+    } else {
+      setSortKey(key);
+      setSortDir(key === "name" ? "asc" : "desc");
+    }
+  };
+
+  const summary = data?.summary;
+
+  return (
+    <div className="mx-auto flex h-[calc(100dvh-6.5rem)] max-w-[1600px] flex-col gap-2 overflow-hidden px-2 py-2 sm:px-4">
+      {error ? (
+        <Alert severity="error" onClose={() => setError(null)} className="shrink-0">
+          {error}
+        </Alert>
+      ) : null}
+
+      <div className="shrink-0 rounded-xl border border-surface-border bg-surface-raised px-3 py-2">
+        <div className="flex flex-wrap items-center gap-2">
+          <div>
+            <Typography className="text-[13px] font-semibold text-slate-100">
+              Sector Rotation & Themes
+            </Typography>
+            <Typography className="text-[10px] text-slate-500">
+              Benchmark {data?.benchmark ?? "Nifty 50"}
+              {data?.benchmark_as_of ? ` · as of ${data.benchmark_as_of}` : ""}
+              {loading ? " · Updating…" : ""}
+              {" · "}
+              <span className="text-amber-200/90">◆ Official index</span>
+              {" · "}
+              <span className="text-slate-400">● Theme</span>
+            </Typography>
+          </div>
+
+          <div className="ml-auto flex flex-wrap items-center gap-3 text-[10px] text-slate-400">
+            {summary ? (
+              <>
+                <span>
+                  <span className="font-medium text-slate-200">{summary.total}</span> sectors
+                </span>
+                <span className="text-emerald-300">Leading {summary.leading}</span>
+                <span className="text-sky-300">Improving {summary.improving}</span>
+                <span className="text-violet-300">Stealth {summary.stealth_accumulation}</span>
+                <span className="text-amber-300">PA {summary.price_action_confirmed}</span>
+              </>
+            ) : null}
+            <AppButton
+              size="small"
+              startIcon={
+                <RefreshIcon fontSize="small" className={loading ? "animate-spin" : undefined} />
+              }
+              onClick={() => void load(true)}
+              disabled={loading}
+            >
+              Refresh
+            </AppButton>
+          </div>
+        </div>
+
+        <ToggleButtonGroup
+          exclusive
+          size="small"
+          value={filter}
+          onChange={(_e, value: SectorTableFilter | null) => {
+            if (value) setFilter(value);
+          }}
+          className="mt-2 flex flex-wrap"
+          sx={{ "& .MuiToggleButton-root": { textTransform: "none", fontSize: "0.7rem", px: 1.25 } }}
+        >
+          <ToggleButton value="all">All</ToggleButton>
+          <ToggleButton value="stealth">Stealth Accumulation</ToggleButton>
+          <ToggleButton value="price_action">Price Action</ToggleButton>
+          <ToggleButton value="improving">Next Bullish</ToggleButton>
+          <ToggleButton value="leading">Leading</ToggleButton>
+        </ToggleButtonGroup>
+      </div>
+
+      <div className="grid min-h-0 flex-1 gap-2 lg:grid-cols-[minmax(0,0.95fr)_minmax(0,1.2fr)]">
+        <div className="min-h-0">
+          <RRGScatterChart
+            sectors={data?.sectors ?? []}
+            selectedName={selectedName}
+            onSelect={setSelectedName}
+          />
+        </div>
+        <div className="flex min-h-0 flex-col gap-2">
+          <div className="min-h-0 flex-[0.95]">
+            <SectorScanTable
+              sectors={data?.sectors ?? []}
+              filter={filter}
+              sortKey={sortKey}
+              sortDir={sortDir}
+              selectedName={selectedName}
+              onSelect={setSelectedName}
+              onSort={handleSort}
+            />
+          </div>
+          {selected ? (
+            <div className="shrink-0 rounded-xl border border-surface-border bg-surface-raised px-3 py-1.5">
+              <Typography className="text-[11px] font-medium text-slate-100">
+                {selected.name}
+                {selected.category === "Official" ? (
+                  <span className="ml-1.5 rounded border border-amber-400/50 bg-amber-500/15 px-1 py-px text-[8px] font-semibold uppercase tracking-wide text-amber-200">
+                    Index
+                  </span>
+                ) : (
+                  <span className="ml-1.5 rounded border border-slate-500/40 bg-slate-500/10 px-1 py-px text-[8px] uppercase tracking-wide text-slate-400">
+                    Theme
+                  </span>
+                )}
+                <span className="ml-2 text-[10px] font-normal text-slate-500">
+                  surety {selected.surety_score} · {selected.quadrant}
+                  {selected.rotation_path ? ` · ${selected.rotation_path}` : ""}
+                </span>
+              </Typography>
+              <Typography className="mt-0.5 text-[10px] text-slate-400">
+                {selected.rotation_note}
+                {selected.rs_momentum_delta_5d != null || selected.rs_ratio_delta_5d != null ? (
+                  <span className="ml-1 text-slate-500">
+                    (RS{" "}
+                    {selected.rs_ratio_delta_5d != null && selected.rs_ratio_delta_5d >= 0 ? "+" : ""}
+                    {selected.rs_ratio_delta_5d?.toFixed(1) ?? "—"} · Mom{" "}
+                    {selected.rs_momentum_delta_5d != null && selected.rs_momentum_delta_5d >= 0
+                      ? "+"
+                      : ""}
+                    {selected.rs_momentum_delta_5d?.toFixed(1) ?? "—"} / 5d)
+                  </span>
+                ) : null}
+              </Typography>
+            </div>
+          ) : null}
+          <div className="min-h-[220px] flex-[1.15]">
+            <SectorConstituentsPanel
+              sectorName={selectedName}
+              data={constituents}
+              loading={constituentsLoading}
+              error={constituentsError}
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}

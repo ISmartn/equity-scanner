@@ -214,3 +214,5 @@
 2026-08-17T23:09:54.421310+00:00	error	SUMEET-RE	NSE returned HTML instead of JSON for SUMEET-RE (session expired or rate limited). Preview: '\n<!DOCTYPE html>\n<html lang="en">\n<head>\n<meta content="noindex, nofollow" name="robots"/>\n    <meta charset="UTF-8">\n  '
 2026-08-17T23:10:24.396583+00:00	error	TEMBO	NSE returned HTML instead of JSON for TEMBO (session expired or rate limited). Preview: '\n<!DOCTYPE html>\n<html lang="en">\n<head>\n<meta content="noindex, nofollow" name="robots"/>\n    <meta charset="UTF-8">\n  '
 2026-08-17T23:11:08.334067+00:00	error	WINSOME	NSE returned HTML instead of JSON for WINSOME (session expired or rate limited). Preview: '\n<!DOCTYPE html>\n<html lang="en">\n<head>\n<meta content="noindex, nofollow" name="robots"/>\n    <meta charset="UTF-8">\n  '
+
+# ingest started 2026-08-18T18:45:15.797670+00:00 since_last=True concurrency=3 profiles=2553

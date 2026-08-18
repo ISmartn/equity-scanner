@@ -97,6 +97,18 @@ export async function fetchFno(): Promise<FnoResponse> {
   return parseJson(res);
 }
 
+export interface FundamentallyStrongResponse {
+  symbols: string[];
+  count: number;
+  evaluated: number;
+  thresholds: Record<string, number>;
+}
+
+export async function fetchFundamentallyStrong(): Promise<FundamentallyStrongResponse> {
+  const res = await fetch("/api/timeline/fundamentals/strong");
+  return parseJson(res);
+}
+
 export async function fetchModels(): Promise<ModelsResponse> {
   const res = await fetch("/api/models");
   return parseJson(res);
@@ -1165,7 +1177,13 @@ export interface MybScanStatus {
   alerts_count: number;
   current_ticker?: string | null;
   last_result: Record<string, unknown> | null;
+  batch_mode?: "month" | "last_7" | null;
+  batch_dates?: string[] | null;
+  batch_day_index?: number;
+  batch_day_total?: number;
 }
+
+export type MybBatchMode = "single" | "month" | "last_7";
 
 export async function fetchMybDates(strategy?: MybStrategy): Promise<{
   dates: string[];
@@ -1203,6 +1221,7 @@ export async function runMybScan(body: {
   minRvol?: number;
   concurrency?: number;
   backgroundRun?: boolean;
+  batch?: MybBatchMode;
 }): Promise<Record<string, unknown>> {
   const params = new URLSearchParams();
   if (body.backgroundRun !== undefined) {
@@ -1229,7 +1248,8 @@ export async function runMybScan(body: {
       min_price: body.minPrice ?? null,
       max_price: body.maxPrice ?? null,
       min_rvol: body.minRvol ?? null,
-      concurrency: body.concurrency ?? 4,
+      concurrency: body.concurrency ?? 8,
+      batch: body.batch ?? "single",
     }),
   });
   return parseJson(res);
@@ -1550,6 +1570,97 @@ export async function fetchIndicatorAnalysis(params: {
   if (params.limit != null) search.set("limit", String(params.limit));
   if (params.rsiPeriod != null) search.set("rsi_period", String(params.rsiPeriod));
   const res = await fetch(`/api/indicator-analysis?${search}`);
+  return parseJson(res);
+}
+
+/* ── Sector rotation / thematic scanner ──────────────────────────────── */
+
+export type SectorQuadrant = "Leading" | "Weakening" | "Lagging" | "Improving";
+export type SectorCategory = "Official" | "Synthetic";
+
+export interface SectorRotationTrailPoint {
+  rs_ratio: number;
+  rs_momentum: number;
+}
+
+export interface SectorRotationRow {
+  name: string;
+  category: SectorCategory;
+  source: string;
+  current_close: number;
+  daily_change_pct: number;
+  rs_ratio: number;
+  rs_momentum: number;
+  quadrant: SectorQuadrant;
+  next_probable_trend: string;
+  heading_deg: number | null;
+  rotation_path: string | null;
+  rotation_bias: "clockwise" | "counter" | "flat" | string;
+  rotation_note: string;
+  rs_ratio_delta_5d: number | null;
+  rs_momentum_delta_5d: number | null;
+  is_stealth_accumulation: boolean;
+  is_price_action_confirmed: boolean;
+  surety_score: number;
+  breadth_pct_above_50sma: number | null;
+  sparkline_5d: number[];
+  trail_5d: SectorRotationTrailPoint[];
+  constituents_summary: {
+    count: number | null;
+    top_gainer: string | null;
+    top_laggard: string | null;
+  };
+  as_of: string;
+}
+
+export interface SectorRotationResponse {
+  timestamp: string;
+  benchmark: string;
+  benchmark_as_of: string;
+  sectors: SectorRotationRow[];
+  summary: {
+    total: number;
+    leading: number;
+    improving: number;
+    stealth_accumulation: number;
+    price_action_confirmed: number;
+  };
+}
+
+export async function fetchSectorRotation(refresh = false): Promise<SectorRotationResponse> {
+  const search = new URLSearchParams();
+  if (refresh) search.set("refresh", "true");
+  const q = search.toString();
+  const res = await fetch(`/api/sector-rotation${q ? `?${q}` : ""}`);
+  return parseJson(res);
+}
+
+export interface SectorConstituentRow {
+  ticker: string;
+  company_name: string | null;
+  close: number;
+  change_1d_pct: number | null;
+  change_5d_pct: number | null;
+  change_20d_pct: number | null;
+  vs_sector_1d_pct: number | null;
+  above_50sma: boolean | null;
+}
+
+export interface SectorConstituentsResponse {
+  sector: string;
+  category: SectorCategory;
+  source: string | null;
+  as_of: string | null;
+  sector_change_1d_pct: number | null;
+  count: number;
+  constituents: SectorConstituentRow[];
+}
+
+export async function fetchSectorRotationConstituents(
+  name: string,
+): Promise<SectorConstituentsResponse> {
+  const search = new URLSearchParams({ name });
+  const res = await fetch(`/api/sector-rotation/constituents?${search}`);
   return parseJson(res);
 }
 

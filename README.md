@@ -1,13 +1,13 @@
-# TimesFM Nifty 50 Forecast
+# Equity Scan Lab
 
-Zero-shot stock price forecasting for Nifty 50 constituents. Supports two forecast engines:
+NSE equity scanners, sector rotation, timeline movers, and zero-shot forecasting. Forecast engines:
 
 | Model | ID | Description |
 |-------|-----|-------------|
 | **TimesFM 2.5** (default) | `timesfm-2.5` | Google PyTorch zero-shot foundation model |
 | **TimesFM-Fin** | `timesfm-fin` | [PFN financial fine-tune](https://tech.preferred.jp/en/blog/timesfm/) on TimesFM 1.0 |
 
-Historical OHLCV is fetched from **Upstox** (primary) with automatic **NSE API fallback**. The React UI lets you pick any Nifty 50 stock, switch **daily / weekly / monthly** intervals, and choose the forecast model — each showing **5 years of candlestick history** plus forecast overlay.
+Historical OHLCV is fetched from **Upstox** (primary) with automatic **NSE API fallback**. The React UI covers momentum/screener workflows plus forecast on **daily / weekly / monthly** intervals with **candlestick history** and forecast overlay.
 
 ## Architecture
 

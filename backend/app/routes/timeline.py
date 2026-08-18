@@ -469,6 +469,26 @@ async def get_fundamentals(
     return payload
 
 
+@router.get("/fundamentals/strong")
+async def list_fundamentally_strong() -> dict:
+    """Tickers that pass the fundamentally-strong baseline over cached financials."""
+    from ..services.fundamentals_quality import (
+        DEFAULT_STRONG_THRESHOLDS,
+        list_fundamentally_strong_tickers,
+    )
+    from dataclasses import asdict
+
+    store = get_store()
+    index = store.load_fundamentals_index()
+    symbols = list_fundamentally_strong_tickers(index)
+    return {
+        "symbols": symbols,
+        "count": len(symbols),
+        "evaluated": len(index),
+        "thresholds": asdict(DEFAULT_STRONG_THRESHOLDS),
+    }
+
+
 @router.post("/sync-fundamentals")
 async def sync_fundamentals_endpoint(
     body: SyncFundamentalsRequest,

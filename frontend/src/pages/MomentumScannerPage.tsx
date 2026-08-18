@@ -10,6 +10,7 @@ import {
   fetchScannerStatus,
   ensureScannerDerivatives,
   fetchFno,
+  fetchFundamentallyStrong,
   fetchStockFundamentals,
   fetchTimelineCandles,
   fetchTimelineSectors,
@@ -59,7 +60,7 @@ import {
   type ScannerSignalStatus,
   type TimingClass,
 } from "@/lib/scannerExport";
-import { extractProfileMarketCap, extractProfileSector } from "@/lib/fundamentalsMeta";
+import { extractProfileMarketCap, extractProfileSector, FUNDAMENTALLY_STRONG_TOOLTIP, fundamentalStrongFromDetails } from "@/lib/fundamentalsMeta";
 import { computeVcpOverlay } from "@/lib/vcpOverlay";
 import {
   AlertTriangle,
@@ -298,6 +299,9 @@ export function MomentumScannerPage() {
   const [setupOnly, setSetupOnly] = useState(false);
   const [macroPassOnly, setMacroPassOnly] = useState(false);
   const [fundamentalPassOnly, setFundamentalPassOnly] = useState(false);
+  const [fundamentallyStrongOnly, setFundamentallyStrongOnly] = useState(false);
+  const [strongSymbols, setStrongSymbols] = useState<string[]>([]);
+  const strongSymbolSet = useMemo(() => new Set(strongSymbols), [strongSymbols]);
   const [page, setPage] = useState(0);
 
   const [rows, setRows] = useState<ScannerPatternSignal[]>([]);
@@ -403,7 +407,8 @@ export function MomentumScannerPage() {
     triggeredOnly ||
     setupOnly ||
     macroPassOnly ||
-    fundamentalPassOnly;
+    fundamentalPassOnly ||
+    fundamentallyStrongOnly;
 
   const resultsQuery = useMemo(() => {
     const shared = {
@@ -560,40 +565,51 @@ export function MomentumScannerPage() {
     page,
   ]);
 
-  const applyFnoGroupFilter = useCallback(
+  const applyClientFilters = useCallback(
     (items: ScannerPatternSignal[]) => {
-      if (fnoGroup === "all") return items;
-      return items.filter((row) => {
-        const isFno = fnoSymbolSet.has(row.ticker.toUpperCase());
-        return fnoGroup === "fno" ? isFno : !isFno;
-      });
+      let next = items;
+      if (fnoGroup !== "all") {
+        next = next.filter((row) => {
+          const isFno = fnoSymbolSet.has(row.ticker.toUpperCase());
+          return fnoGroup === "fno" ? isFno : !isFno;
+        });
+      }
+      if (fundamentallyStrongOnly) {
+        next = next.filter((row) => {
+          const fromDetails = fundamentalStrongFromDetails(row.details);
+          if (fromDetails != null) return fromDetails;
+          return strongSymbolSet.has(row.ticker.toUpperCase());
+        });
+      }
+      return next;
     },
-    [fnoGroup, fnoSymbolSet],
+    [fnoGroup, fnoSymbolSet, fundamentallyStrongOnly, strongSymbolSet],
   );
 
   const fetchResultsPage = useCallback(async (pageOverride?: number) => {
     const activePage = pageOverride ?? page;
-    if (fnoGroup === "all") {
+    const needsClientFilter = fnoGroup !== "all" || fundamentallyStrongOnly;
+    if (!needsClientFilter) {
       return fetchScannerResults({
         ...resultsQuery,
         limit: PAGE_SIZE,
         offset: activePage * PAGE_SIZE,
       });
     }
-    // F&O membership is known client-side — fetch the matching window then group/paginate.
+    // F&O / strong membership is known client-side — fetch a wide window then filter/paginate.
     const full = await fetchScannerResults({
       ...resultsQuery,
       limit: 2000,
       offset: 0,
     });
-    const filtered = applyFnoGroupFilter(full.results);
+    const filtered = applyClientFilters(full.results);
     const offset = activePage * PAGE_SIZE;
     return {
       ...full,
       total: filtered.length,
       results: filtered.slice(offset, offset + PAGE_SIZE),
     };
-  }, [resultsQuery, page, fnoGroup, applyFnoGroupFilter]);
+  }, [resultsQuery, page, fnoGroup, fundamentallyStrongOnly, applyClientFilters]);
 
   const handleSyncFundamentals = useCallback(async () => {
     if (!selectedRow) return;
@@ -640,14 +656,14 @@ export function MomentumScannerPage() {
         }
       }
 
-      if (fnoGroup !== "all") {
+      if (fnoGroup !== "all" || fundamentallyStrongOnly) {
         const full = await fetchScannerResults({
           ...resultsQuery,
           limit: 2000,
           offset: 0,
         });
         if (requestId !== loadRequestRef.current) return;
-        setExportRows(applyFnoGroupFilter(full.results));
+        setExportRows(applyClientFilters(full.results));
       } else {
         const exportLimit = Math.min(result.total, 2000);
         if (exportLimit <= PAGE_SIZE && activePage === 0) {
@@ -696,13 +712,14 @@ export function MomentumScannerPage() {
     setupOnly,
     macroPassOnly,
     fundamentalPassOnly,
+    fundamentallyStrongOnly,
     page,
     filterInvalid,
     loadChart,
     fetchResultsPage,
     fnoSymbolSet,
     fnoGroup,
-    applyFnoGroupFilter,
+    applyClientFilters,
     ensureFoDerivatives,
     resultsQuery,
   ]);
@@ -756,6 +773,9 @@ export function MomentumScannerPage() {
     fetchFno()
       .then((res) => setFnoSymbols(res.symbols))
       .catch(() => setFnoSymbols([]));
+    fetchFundamentallyStrong()
+      .then((res) => setStrongSymbols(res.symbols))
+      .catch(() => setStrongSymbols([]));
   }, []);
 
   useEffect(() => {
@@ -789,6 +809,7 @@ export function MomentumScannerPage() {
     setupOnly,
     macroPassOnly,
     fundamentalPassOnly,
+    fundamentallyStrongOnly,
     scanMode,
   ]);
 
@@ -796,7 +817,17 @@ export function MomentumScannerPage() {
     if (bootLoading || !tradeDate || filterInvalid) return;
     void loadResults();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [bootLoading, tradeDate, page, scanMode, resultsQuery, fnoGroup, fnoSymbols.length]);
+  }, [
+    bootLoading,
+    tradeDate,
+    page,
+    scanMode,
+    resultsQuery,
+    fnoGroup,
+    fundamentallyStrongOnly,
+    fnoSymbols.length,
+    strongSymbols.length,
+  ]);
 
   const totalPages = useMemo(() => Math.max(1, Math.ceil(total / PAGE_SIZE)), [total]);
   const exportJson = useMemo(
@@ -1249,11 +1280,33 @@ export function MomentumScannerPage() {
                   control={
                     <Checkbox
                       size="small"
+                      checked={fundamentallyStrongOnly}
+                      onChange={(e) => setFundamentallyStrongOnly(e.target.checked)}
+                    />
+                  }
+                  label={
+                    <Typography
+                      variant="caption"
+                      title={FUNDAMENTALLY_STRONG_TOOLTIP}
+                      className="whitespace-nowrap"
+                    >
+                      Strong
+                    </Typography>
+                  }
+                />
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      size="small"
                       checked={fundamentalPassOnly}
                       onChange={(e) => setFundamentalPassOnly(e.target.checked)}
                     />
                   }
-                  label={<Typography variant="caption">Fund</Typography>}
+                  label={
+                    <Typography variant="caption" title="Legacy ROE ≥ 15% and ROCE ≥ 12% gate">
+                      Fund
+                    </Typography>
+                  }
                 />
               </FormGroup>
               </Stack>
@@ -1344,6 +1397,15 @@ export function MomentumScannerPage() {
                           <div className="flex items-center gap-1">
                             <div className="text-xs font-medium text-slate-100">{row.ticker}</div>
                             <FnoStarMark show={fnoSymbolSet.has(row.ticker)} />
+                            {(fundamentalStrongFromDetails(row.details) === true ||
+                              strongSymbolSet.has(row.ticker.toUpperCase())) && (
+                              <span
+                                className="rounded border border-emerald-500/40 bg-emerald-500/15 px-1 py-px text-[8px] font-medium text-emerald-300"
+                                title={FUNDAMENTALLY_STRONG_TOOLTIP}
+                              >
+                                Strong
+                              </span>
+                            )}
                           </div>
                           {row.sector && (
                             <div className="truncate text-[10px] text-slate-500">{row.sector}</div>

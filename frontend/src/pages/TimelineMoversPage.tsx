@@ -7,6 +7,7 @@ import { StockTickerSearch } from "@/components/StockTickerSearch";
 import { AppButton, FieldLabel } from "@/components/mui";
 import {
   cancelTimelineIngest,
+  fetchFundamentallyStrong,
   fetchStockFundamentals,
   fetchTimelineCandles,
   fetchTimelineDates,
@@ -37,8 +38,11 @@ import {
 } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { clampWeekday, localTodayIso, nearestWeekday } from "@/lib/dates";
+import { FUNDAMENTALLY_STRONG_TOOLTIP } from "@/lib/fundamentalsMeta";
 import RefreshIcon from "@mui/icons-material/Refresh";
+import Checkbox from "@mui/material/Checkbox";
 import FormControl from "@mui/material/FormControl";
+import FormControlLabel from "@mui/material/FormControlLabel";
 import InputLabel from "@mui/material/InputLabel";
 import MenuItem from "@mui/material/MenuItem";
 import Select, { type SelectChangeEvent } from "@mui/material/Select";
@@ -67,6 +71,9 @@ export function TimelineMoversPage() {
   const [minMovePct, setMinMovePct] = useState("5");
   const [direction, setDirection] = useState<"both" | "up" | "down">("both");
   const [ticker, setTicker] = useState("");
+  const [fundamentallyStrongOnly, setFundamentallyStrongOnly] = useState(false);
+  const [strongSymbols, setStrongSymbols] = useState<string[]>([]);
+  const strongSymbolSet = useMemo(() => new Set(strongSymbols), [strongSymbols]);
   const [page, setPage] = useState(0);
   const [hasSearched, setHasSearched] = useState(false);
 
@@ -216,36 +223,70 @@ export function TimelineMoversPage() {
     setFundamentals(null);
     setFundamentalsError(null);
     try {
-      const result = await fetchTimelineMovers({
+      const base = {
         tradeDate,
         ticker: activeTicker || undefined,
         sector: activeTicker ? undefined : sector || undefined,
         minMovePct: activeTicker ? 0 : minMove,
-        direction: activeTicker ? "both" : direction,
-        limit: PAGE_SIZE,
-        offset: page * PAGE_SIZE,
-      });
-      setRows(result.results);
-      setTotal(result.total);
+        direction: (activeTicker ? "both" : direction) as typeof direction,
+      };
 
-      const exportLimit = Math.min(result.total, 2000);
-      if (exportLimit <= PAGE_SIZE && page === 0) {
-        setExportRows(result.results);
-      } else {
+      let pageRows: TimelineMoverRow[];
+      let pageTotal: number;
+      let exportSource: TimelineMoverRow[];
+
+      if (fundamentallyStrongOnly && !activeTicker) {
         const full = await fetchTimelineMovers({
-          tradeDate,
-          ticker: activeTicker || undefined,
-          sector: activeTicker ? undefined : sector || undefined,
-          minMovePct: activeTicker ? 0 : minMove,
-          direction: activeTicker ? "both" : direction,
-          limit: exportLimit,
+          ...base,
+          limit: 2000,
           offset: 0,
         });
-        setExportRows(full.results);
+        const filtered = full.results.filter((row) => {
+          if (!strongSymbolSet.has(row.ticker.toUpperCase())) return false;
+          const move = row.daily_return_pct;
+          if (move == null || Number.isNaN(move)) return false;
+          if (direction === "up") return move >= minMove;
+          if (direction === "down") return move <= -minMove;
+          return Math.abs(move) >= minMove;
+        });
+        const offset = page * PAGE_SIZE;
+        pageRows = filtered.slice(offset, offset + PAGE_SIZE);
+        pageTotal = filtered.length;
+        exportSource = filtered;
+      } else {
+        const result = await fetchTimelineMovers({
+          ...base,
+          limit: PAGE_SIZE,
+          offset: page * PAGE_SIZE,
+        });
+        pageRows = result.results;
+        pageTotal = result.total;
+
+        const exportLimit = Math.min(result.total, 2000);
+        if (exportLimit <= PAGE_SIZE && page === 0) {
+          exportSource = result.results;
+        } else {
+          const full = await fetchTimelineMovers({
+            ...base,
+            limit: exportLimit,
+            offset: 0,
+          });
+          exportSource = full.results;
+        }
+        if (fundamentallyStrongOnly && activeTicker) {
+          const keep = strongSymbolSet.has(activeTicker.toUpperCase());
+          pageRows = keep ? pageRows : [];
+          pageTotal = keep ? pageTotal : 0;
+          exportSource = keep ? exportSource : [];
+        }
       }
 
-      if (result.results.length > 0) {
-        void loadChart(result.results[0]);
+      setRows(pageRows);
+      setTotal(pageTotal);
+      setExportRows(exportSource);
+
+      if (pageRows.length > 0) {
+        void loadChart(pageRows[0]);
       }
     } catch (err) {
       setRows([]);
@@ -254,7 +295,18 @@ export function TimelineMoversPage() {
     } finally {
       setLoading(false);
     }
-  }, [tradeDate, sector, ticker, minMove, direction, page, filterInvalid, loadChart]);
+  }, [
+    tradeDate,
+    sector,
+    ticker,
+    minMove,
+    direction,
+    page,
+    filterInvalid,
+    loadChart,
+    fundamentallyStrongOnly,
+    strongSymbolSet,
+  ]);
 
   useEffect(() => {
     loadMeta()
@@ -263,15 +315,29 @@ export function TimelineMoversPage() {
   }, [loadMeta]);
 
   useEffect(() => {
+    fetchFundamentallyStrong()
+      .then((res) => setStrongSymbols(res.symbols))
+      .catch(() => setStrongSymbols([]));
+  }, []);
+
+  useEffect(() => {
     setPage(0);
-  }, [tradeDate, sector, ticker, minMovePct, direction]);
+  }, [tradeDate, sector, ticker, minMovePct, direction, fundamentallyStrongOnly]);
 
   useEffect(() => {
     if (hasSearched && tradeDate && !filterInvalid) {
       loadMovers();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- reload when page changes
-  }, [page]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- reload when page / filters change
+  }, [
+    page,
+    fundamentallyStrongOnly,
+    strongSymbols.length,
+    direction,
+    sector,
+    minMove,
+    tradeDate,
+  ]);
 
   const totalPages = useMemo(() => Math.max(1, Math.ceil(total / PAGE_SIZE)), [total]);
 
@@ -585,6 +651,24 @@ export function TimelineMoversPage() {
             </ToggleButtonGroup>
           </Stack>
 
+          <FormControlLabel
+            className="!mr-0 self-end"
+            sx={{ opacity: ticker ? 0.5 : 1, height: 40 }}
+            control={
+              <Checkbox
+                size="small"
+                checked={fundamentallyStrongOnly}
+                onChange={(e) => setFundamentallyStrongOnly(e.target.checked)}
+                disabled={Boolean(ticker)}
+              />
+            }
+            label={
+              <span className="text-[10px] text-slate-300" title={FUNDAMENTALLY_STRONG_TOOLTIP}>
+                Strong Fund
+              </span>
+            }
+          />
+
           <AppButton
             variant="contained"
             size="small"
@@ -847,7 +931,17 @@ export function TimelineMoversPage() {
                         }`}
                       >
                         <td className="px-2 py-1 text-[11px] font-medium text-slate-100">
-                          {row.ticker}
+                          <div className="flex items-center gap-1">
+                            <span>{row.ticker}</span>
+                            {strongSymbolSet.has(row.ticker.toUpperCase()) && (
+                              <span
+                                className="rounded border border-emerald-500/40 bg-emerald-500/15 px-1 py-px text-[8px] font-medium text-emerald-300"
+                                title={FUNDAMENTALLY_STRONG_TOOLTIP}
+                              >
+                                Strong
+                              </span>
+                            )}
+                          </div>
                         </td>
                         <td
                           className={`px-2 py-1 text-right tabular-nums text-[10px] font-medium ${
