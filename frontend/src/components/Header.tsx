@@ -36,7 +36,7 @@ export function Header({
               TimesFM Nifty 50
             </Typography>
             <Typography variant="body2" color="text.secondary" className="text-xs sm:text-sm">
-              Forecast & daily move analysis · Upstox primary · NSE fallback
+              Forecast & daily move analysis · Upstox candles
             </Typography>
           </Box>
         </Stack>

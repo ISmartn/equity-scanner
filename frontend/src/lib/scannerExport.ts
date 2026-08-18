@@ -9,6 +9,7 @@ export const SCANNER_PATTERN_LABELS: Record<ScannerPatternId, string> = {
   inside_bar_cluster: "Inside Bar Cluster",
   power_gap: "Power Gap",
   tight_range_near_pivot: "Tight Range Near Pivot",
+  darvas_pre_setup: "Darvas Pre-Setup",
 };
 
 export type ScannerSignalStatus = "trigger" | "setup" | "structure";
@@ -20,6 +21,7 @@ export const EARLY_SETUP_PATTERNS: ScannerPatternId[] = [
   "high_tight_flag",
   "pocket_pivot_setup",
   "tight_range_near_pivot",
+  "darvas_pre_setup",
 ];
 
 export function signalStatus(row: ScannerPatternSignal): ScannerSignalStatus {

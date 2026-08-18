@@ -1,8 +1,6 @@
 import { useEffect, useState } from "react";
 import { BrowserRouter, Route, Routes, useLocation, useNavigate } from "react-router-dom";
 import Box from "@mui/material/Box";
-import Tab from "@mui/material/Tab";
-import Tabs from "@mui/material/Tabs";
 import { Header } from "@/components/Header";
 import { SettingsPanel } from "@/components/SettingsPanel";
 import { fetchHealth } from "@/lib/api";
@@ -14,6 +12,8 @@ import { MultiYearBreakoutPage } from "@/pages/MultiYearBreakoutPage";
 import { NewsImpactPage } from "@/pages/NewsImpactPage";
 import { OiMomentumPage } from "@/pages/OiMomentumPage";
 import { MtfRsiPage } from "@/pages/MtfRsiPage";
+import { NiftyChartPage } from "@/pages/NiftyChartPage";
+import { IndicatorAnalysisPage } from "@/pages/IndicatorAnalysisPage";
 import { TimelineMoversPage } from "@/pages/TimelineMoversPage";
 
 const NAV_TABS = [
@@ -24,6 +24,8 @@ const NAV_TABS = [
   { label: "Market Info", path: "/market-info" },
   { label: "OI Momentum", path: "/oi-momentum" },
   { label: "MTF RSI", path: "/mtf-rsi" },
+  { label: "Nifty Chart", path: "/nifty" },
+  { label: "Indicator Analysis", path: "/indicator-analysis" },
   { label: "Momentum Scanner", path: "/scanner" },
   { label: "Screener", path: "/multi-year-breakout" },
 ] as const;
@@ -39,22 +41,28 @@ function AppNav() {
 
   return (
     <Box className="border-b border-surface-border bg-surface/50">
-      <Tabs
-        value={activeIndex >= 0 ? activeIndex : false}
-        onChange={(_, index) => navigate(NAV_TABS[index].path)}
-        variant="scrollable"
-        scrollButtons="auto"
-        allowScrollButtonsMobile
-        className="mx-auto max-w-7xl px-2 sm:px-4"
-        sx={{
-          minHeight: 48,
-          "& .MuiTab-root": { minHeight: 48, px: 2 },
-        }}
+      <nav
+        className="mx-auto flex max-w-[1920px] items-stretch gap-0.5 overflow-x-auto px-2 sm:px-4 [scrollbar-width:thin] [&::-webkit-scrollbar]:h-1.5"
+        aria-label="Primary"
       >
-        {NAV_TABS.map((tab) => (
-          <Tab key={tab.path} label={tab.label} />
-        ))}
-      </Tabs>
+        {NAV_TABS.map((tab, index) => {
+          const active = index === activeIndex;
+          return (
+            <button
+              key={tab.path}
+              type="button"
+              onClick={() => navigate(tab.path)}
+              className={`shrink-0 whitespace-nowrap border-b-2 px-2 py-2 text-[11px] font-medium transition sm:px-2.5 sm:text-xs ${
+                active
+                  ? "border-accent text-accent"
+                  : "border-transparent text-slate-400 hover:border-surface-border hover:text-slate-200"
+              }`}
+            >
+              {tab.label}
+            </button>
+          );
+        })}
+      </nav>
     </Box>
   );
 }
@@ -100,6 +108,8 @@ export default function App() {
           <Route path="/market-info" element={<MarketInfoPage />} />
           <Route path="/oi-momentum" element={<OiMomentumPage />} />
           <Route path="/mtf-rsi" element={<MtfRsiPage />} />
+          <Route path="/nifty" element={<NiftyChartPage />} />
+          <Route path="/indicator-analysis" element={<IndicatorAnalysisPage />} />
           <Route path="/scanner" element={<MomentumScannerPage />} />
           <Route path="/multi-year-breakout" element={<MultiYearBreakoutPage />} />
         </Routes>

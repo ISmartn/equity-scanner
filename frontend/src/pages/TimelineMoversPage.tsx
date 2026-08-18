@@ -811,8 +811,8 @@ export function TimelineMoversPage() {
                             ) : null}
                           </p>
                           <p className="text-[10px] text-slate-600">
-                            Run Up-to-date to fetch missing days from Upstox/NSE (~30–60 min for all
-                            stocks).
+                            Run Up-to-date to fetch missing days from Upstox (~30–60 min for all
+                            stocks). Failures are logged per symbol.
                           </p>
                           <button
                             type="button"

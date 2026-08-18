@@ -25,8 +25,8 @@ export function SettingsPanel({ open, onClose }: SettingsPanelProps) {
       <DialogTitle>Upstox API Token</DialogTitle>
       <DialogContent>
         <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-          Historical data is fetched from Upstox first. If the token is missing or the
-          request fails, the backend falls back to NSE public APIs automatically.
+          Historical candles are fetched from Upstox. If the token is missing or a
+          request fails, that symbol is recorded as an error (no NSE fallback).
         </Typography>
         <TextField
           fullWidth

@@ -8,7 +8,7 @@ import pandas as pd
 
 from ..cache import get_cached, set_cache
 from ..config import normalize_symbol, resolve_instrument_key
-from . import nse_client, upstox_client
+from . import upstox_client
 
 Interval = Literal["daily", "weekly", "monthly"]
 
@@ -118,18 +118,6 @@ async def _fetch_upstox_daily(
     return candles
 
 
-async def _fetch_nse_daily(
-    session: aiohttp.ClientSession,
-    symbol: str,
-    from_date: date,
-    to_date: date,
-) -> list[dict[str, Any]]:
-    normalized = normalize_symbol(symbol)
-    if normalized == "NIFTY":
-        return await nse_client.fetch_index_historical_range(session, "NIFTY 50", from_date, to_date)
-    return await nse_client.fetch_equity_historical_range(session, normalized, from_date, to_date)
-
-
 async def fetch_candles(
     session: aiohttp.ClientSession,
     symbol: str,
@@ -137,22 +125,12 @@ async def fetch_candles(
     access_token: str | None = None,
 ) -> tuple[list[dict[str, Any]], str]:
     normalized = normalize_symbol(symbol)
-    try:
-        await nse_client.fetch_equity_master(session)
-    except Exception:
-        pass
     to_date = date.today()
     from_date = to_date - timedelta(days=LOOKBACK_DAYS)
 
-    source = "nse"
-    daily: list[dict[str, Any]] = []
-
-    try:
-        daily = await _fetch_upstox_daily(session, normalized, from_date, to_date, access_token)
-        source = "upstox"
-    except Exception:
-        daily = await _fetch_nse_daily(session, normalized, from_date, to_date)
-        source = "nse"
+    # Upstox only — do not fall back to NSE (session/HTML failures pollute ingest).
+    daily = await _fetch_upstox_daily(session, normalized, from_date, to_date, access_token)
+    source = "upstox"
 
     candles = _resample_candles(daily, interval)
     if len(candles) < 32:

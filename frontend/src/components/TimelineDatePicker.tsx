@@ -25,13 +25,13 @@ const MARK_COLOR = {
   field: "#34d399",
 };
 
-/** Amber — rescanned with quality_v1 engine (new fakeout filters). */
+/** Sky — rescanned with current engine (includes Darvas Setup). */
 const ACCENT_COLOR = {
-  border: "rgba(245, 158, 11, 0.9)",
-  borderSelected: "rgba(245, 158, 11, 1)",
-  hover: "rgba(245, 158, 11, 0.12)",
-  field: "#f59e0b",
-  fill: "rgba(245, 158, 11, 0.22)",
+  border: "rgba(56, 189, 248, 0.95)",
+  borderSelected: "rgba(14, 165, 233, 1)",
+  hover: "rgba(56, 189, 248, 0.14)",
+  field: "#38bdf8",
+  fill: "rgba(56, 189, 248, 0.28)",
 };
 
 interface TimelineDatePickerProps {
@@ -41,12 +41,14 @@ interface TimelineDatePickerProps {
   /** Dates to highlight in the calendar popover (e.g. completed scans). */
   markedDates?: string[];
   markedLabel?: string;
-  /** Secondary highlight — e.g. quality-gate rescans (amber). */
+  /** Secondary highlight — e.g. engine rescans with Darvas (sky). */
   accentMarkedDates?: string[];
   accentMarkedLabel?: string;
   minDate?: string | null;
   maxDate?: string | null;
   disabled?: boolean;
+  /** When false, skip the color legend under the picker (toolbar can show it inline). */
+  showLegend?: boolean;
   compact?: boolean;
 }
 
@@ -100,11 +102,12 @@ export function TimelineDatePicker({
   markedDates,
   markedLabel = "Scan done",
   accentMarkedDates,
-  accentMarkedLabel = "Quality re-scan",
+  accentMarkedLabel = "Rescanned · Darvas included",
   minDate,
   maxDate,
   disabled,
   compact = false,
+  showLegend = true,
 }: TimelineDatePickerProps) {
   const sortedDates = useMemo(
     () => [...availableDates].sort((a, b) => b.localeCompare(a)),
@@ -250,11 +253,11 @@ export function TimelineDatePicker({
     return (
       <Box className="overflow-visible">
         {pickerRow}
-        {hasMarkedDates ? (
+        {showLegend && hasMarkedDates ? (
           <Stack
             direction="row"
             spacing={1}
-            className="mt-1 flex-wrap text-[9px] text-slate-500"
+            className="mt-1 flex-nowrap whitespace-nowrap text-[9px] text-slate-500"
           >
             <span className="inline-flex items-center gap-1">
               <span

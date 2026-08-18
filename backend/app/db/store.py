@@ -251,6 +251,23 @@ CREATE TABLE IF NOT EXISTS myb_signals (
 
 CREATE INDEX IF NOT EXISTS idx_myb_signals_date ON myb_signals(trade_date, strategy, score DESC);
 CREATE INDEX IF NOT EXISTS idx_myb_signals_run ON myb_signals(run_id);
+
+CREATE TABLE IF NOT EXISTS index_candles (
+    instrument_token TEXT NOT NULL,
+    timeframe TEXT NOT NULL,
+    ts TEXT NOT NULL,
+    open_price REAL,
+    high_price REAL,
+    low_price REAL,
+    close_price REAL,
+    volume INTEGER,
+    oi INTEGER,
+    source TEXT,
+    PRIMARY KEY (instrument_token, timeframe, ts)
+);
+
+CREATE INDEX IF NOT EXISTS idx_index_candles_tf_ts
+    ON index_candles(instrument_token, timeframe, ts);
 """
 
 
@@ -453,6 +470,114 @@ class TimelineStore:
                 rows,
             )
         return len(rows)
+
+    def upsert_index_candles(self, candles: list[dict[str, Any]]) -> int:
+        if not candles:
+            return 0
+        rows = [
+            (
+                c["instrument_token"],
+                c["timeframe"],
+                c["ts"],
+                c.get("open_price"),
+                c.get("high_price"),
+                c.get("low_price"),
+                c.get("close_price"),
+                c.get("volume"),
+                c.get("oi"),
+                c.get("source"),
+            )
+            for c in candles
+        ]
+        with self.connection() as conn:
+            conn.executemany(
+                """
+                INSERT INTO index_candles (
+                    instrument_token, timeframe, ts, open_price, high_price,
+                    low_price, close_price, volume, oi, source
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                ON CONFLICT(instrument_token, timeframe, ts) DO UPDATE SET
+                    open_price = excluded.open_price,
+                    high_price = excluded.high_price,
+                    low_price = excluded.low_price,
+                    close_price = excluded.close_price,
+                    volume = excluded.volume,
+                    oi = excluded.oi,
+                    source = excluded.source
+                """,
+                rows,
+            )
+        return len(rows)
+
+    def get_index_candles(
+        self,
+        instrument_token: str,
+        timeframe: str,
+        *,
+        from_ts: str | None = None,
+        to_ts: str | None = None,
+        limit: int | None = None,
+    ) -> list[dict[str, Any]]:
+        clauses = ["instrument_token = ?", "timeframe = ?"]
+        params: list[Any] = [instrument_token, timeframe]
+        if from_ts:
+            clauses.append("ts >= ?")
+            params.append(from_ts)
+        if to_ts:
+            clauses.append("ts <= ?")
+            params.append(to_ts)
+
+        # When limited, return the most recent N bars in ascending order.
+        if limit is not None and limit > 0:
+            sql = f"""
+                SELECT ts, open_price AS open, high_price AS high, low_price AS low,
+                       close_price AS close, volume, oi, source
+                FROM (
+                    SELECT ts, open_price, high_price, low_price, close_price, volume, oi, source
+                    FROM index_candles
+                    WHERE {' AND '.join(clauses)}
+                    ORDER BY ts DESC
+                    LIMIT ?
+                ) AS recent
+                ORDER BY ts ASC
+            """
+            params.append(limit)
+        else:
+            sql = f"""
+                SELECT ts, open_price AS open, high_price AS high, low_price AS low,
+                       close_price AS close, volume, oi, source
+                FROM index_candles
+                WHERE {' AND '.join(clauses)}
+                ORDER BY ts ASC
+            """
+        with self.connection() as conn:
+            rows = conn.execute(sql, params).fetchall()
+        return [dict(row) for row in rows]
+
+    def index_candle_stats(
+        self,
+        instrument_token: str,
+        *,
+        timeframe: str | None = None,
+    ) -> list[dict[str, Any]]:
+        clauses = ["instrument_token = ?"]
+        params: list[Any] = [instrument_token]
+        if timeframe:
+            clauses.append("timeframe = ?")
+            params.append(timeframe)
+        sql = f"""
+            SELECT timeframe,
+                   COUNT(*) AS count,
+                   MIN(ts) AS min_ts,
+                   MAX(ts) AS max_ts
+            FROM index_candles
+            WHERE {' AND '.join(clauses)}
+            GROUP BY timeframe
+            ORDER BY timeframe
+        """
+        with self.connection() as conn:
+            rows = conn.execute(sql, params).fetchall()
+        return [dict(row) for row in rows]
 
     def list_profiles(
         self,

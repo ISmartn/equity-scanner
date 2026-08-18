@@ -21,6 +21,7 @@
     "scanner:failures": "cd backend && .venv/bin/python scripts/analyze_scanner_failures.py",
     "scanner:july20d": "cd backend && .venv/bin/python scripts/analyze_july_20d_exhaustion.py",
     "breakout:run": "cd backend && .venv/bin/python scripts/run_multi_year_breakout.py",
+    "nifty:sync": "cd backend && .venv/bin/python scripts/sync_nifty_candles.py",
     "fundamentals:sync-all": "cd backend && .venv/bin/python scripts/sync_fundamentals.py",
     "market-info:sync": "cd backend && .venv/bin/python scripts/sync_market_info.py",
     "news:login": "cd backend && .venv/bin/python scripts/telegram_login.py",

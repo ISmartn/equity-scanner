@@ -296,6 +296,42 @@ async def get_historical_candles(
     )
 
 
+def _get_intra_day_candles_sync(
+    access_token: str | None,
+    instrument_key: str,
+    unit: str,
+    interval: str | int,
+) -> dict[str, Any]:
+    history_api = _get_history_api(access_token)
+    try:
+        response = history_api.get_intra_day_candle_data(
+            instrument_key,
+            unit,
+            int(interval),
+        )
+    except ApiException as exc:
+        status = getattr(exc, "status", None) or "unknown"
+        body = getattr(exc, "body", None) or str(exc)
+        body_text = body.decode("utf-8", errors="replace") if isinstance(body, bytes) else str(body)
+        raise RuntimeError(f"Upstox API error [{status}]: {body_text}") from exc
+    return _sdk_to_dict(response)
+
+
+async def get_intra_day_candles(
+    access_token: str | None,
+    instrument_key: str,
+    unit: str,
+    interval: str | int,
+) -> dict[str, Any]:
+    return await asyncio.to_thread(
+        _get_intra_day_candles_sync,
+        access_token,
+        instrument_key,
+        unit,
+        interval,
+    )
+
+
 def _get_fii_data_sync(
     access_token: str | None,
     data_type: str,

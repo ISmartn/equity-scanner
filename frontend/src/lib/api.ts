@@ -437,7 +437,8 @@ export type ScannerPatternId =
   | "pocket_pivot_setup"
   | "inside_bar_cluster"
   | "power_gap"
-  | "tight_range_near_pivot";
+  | "tight_range_near_pivot"
+  | "darvas_pre_setup";
 
 export interface ScannerPatternSignal {
   ticker: string;
@@ -1405,3 +1406,150 @@ export async function seedMtfRsi(params?: {
   });
   return parseJson(res);
 }
+
+// --- Nifty multi-timeframe OHLC --------------------------------------------
+
+export type NiftyTimeframe = "1m" | "3m" | "5m" | "10m" | "daily";
+
+export interface NiftyCoverageRow {
+  timeframe: string;
+  count: number;
+  min_ts: string | null;
+  max_ts: string | null;
+}
+
+export interface NiftyStatus {
+  instrument_token: string;
+  instrument_label: string;
+  timeframes: NiftyTimeframe[];
+  coverage: NiftyCoverageRow[];
+}
+
+export interface NiftyCandlePoint {
+  ts: string;
+  open: number;
+  high: number;
+  low: number;
+  close: number;
+  volume?: number | null;
+  oi?: number | null;
+  source?: string | null;
+}
+
+export interface NiftyCandleStats {
+  count: number;
+  first_ts?: string | null;
+  last_ts?: string | null;
+  last_close?: number | null;
+  period_high?: number | null;
+  period_low?: number | null;
+  range_return_pct?: number | null;
+}
+
+export interface NiftyCandlesPayload {
+  instrument_token: string;
+  instrument_label: string;
+  timeframe: NiftyTimeframe | string;
+  candles: NiftyCandlePoint[];
+  stats: NiftyCandleStats;
+}
+
+export interface NiftySyncResult {
+  instrument_token: string;
+  timeframes: string[];
+  results: Array<{
+    timeframe: string;
+    upserted: number;
+    coverage?: NiftyCoverageRow;
+    errors?: string[];
+  }>;
+  total_upserted: number;
+}
+
+export async function fetchNiftyStatus(): Promise<NiftyStatus> {
+  const res = await fetch("/api/nifty/status");
+  return parseJson(res);
+}
+
+export async function fetchNiftyCandles(params: {
+  timeframe: NiftyTimeframe | string;
+  fromTs?: string;
+  toTs?: string;
+  limit?: number;
+}): Promise<NiftyCandlesPayload> {
+  const search = new URLSearchParams({ timeframe: params.timeframe });
+  if (params.fromTs) search.set("from_ts", params.fromTs);
+  if (params.toTs) search.set("to_ts", params.toTs);
+  if (params.limit != null) search.set("limit", String(params.limit));
+  const res = await fetch(`/api/nifty/candles?${search}`);
+  return parseJson(res);
+}
+
+export async function syncNiftyCandles(params?: {
+  timeframes?: Array<NiftyTimeframe | string>;
+  fromDate?: string;
+  toDate?: string;
+}): Promise<NiftySyncResult> {
+  const res = await fetch("/api/nifty/sync", {
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...authHeaders() },
+    body: JSON.stringify({
+      timeframes: params?.timeframes ?? null,
+      from_date: params?.fromDate ?? null,
+      to_date: params?.toDate ?? null,
+    }),
+  });
+  return parseJson(res);
+}
+
+// --- Indicator analysis (kyalashish tweet-ranked toolkit) --------------------
+
+export interface IndicatorReading {
+  id: string;
+  name: string;
+  rank: number;
+  tweet_count: number;
+  computable: boolean;
+  bias: string;
+  detail: string;
+  metrics: Record<string, number | string | string[] | Record<string, number> | null | undefined>;
+}
+
+export interface IndicatorAnalysisPayload {
+  symbol: string;
+  label: string;
+  instrument_token: string;
+  timeframe: string;
+  source: string;
+  bar_count: number;
+  last_bar: {
+    ts?: string | null;
+    open: number;
+    high: number;
+    low: number;
+    close: number;
+    volume?: number | null;
+  };
+  overall_bias: string;
+  bias_score: number;
+  rsi_period: number;
+  catalog_source: string;
+  indicators: IndicatorReading[];
+}
+
+export async function fetchIndicatorAnalysis(params: {
+  symbol?: string;
+  timeframe?: string;
+  limit?: number;
+  rsiPeriod?: number;
+}): Promise<IndicatorAnalysisPayload> {
+  const search = new URLSearchParams({
+    symbol: params.symbol ?? "NIFTY",
+    timeframe: params.timeframe ?? "daily",
+  });
+  if (params.limit != null) search.set("limit", String(params.limit));
+  if (params.rsiPeriod != null) search.set("rsi_period", String(params.rsiPeriod));
+  const res = await fetch(`/api/indicator-analysis?${search}`);
+  return parseJson(res);
+}
+

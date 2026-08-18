@@ -33,6 +33,8 @@ A **pattern** is a named chart setup detected on the **scan date’s daily bar**
 | `pocket_pivot` | Pocket Pivot | Micro trigger | Up-day with volume exceeding any recent down-day volume |
 | `inside_bar_cluster` | Inside Bar Cluster | Micro setup/trigger | Wide “mother” bar, then nested inside bars; breakout optional |
 | `power_gap` | Power Gap | Micro trigger | Large gap-up on heavy volume with a strong close (not earnings-verified) |
+| `tight_range_near_pivot` | Tight Range Near Pivot | Micro setup | Tight 5–10d range near local pivot |
+| `darvas_pre_setup` | Darvas Pre-Setup | Micro setup/trigger | Uptrend + coil near 20d high (Darvas-style); trigger on pivot break |
 
 **Category**
 
@@ -130,6 +132,25 @@ Logic lives in `backend/app/services/scanner/patterns.py`. Minimum scores below 
 **Key `details` fields:** `gap_pct`, `volume_ratio`, `volume_zscore`, `peg_confirmed: false`.
 
 **Status on scan day:** always **trigger**.
+
+---
+
+### Darvas Pre-Setup
+
+**Idea:** Recurring pre-breakout structure from Darvas-style / influencer calibration — stock already in an uptrend (higher lows, above rising SMA20), coiling with contracting ranges near the 20-day high. Setup while coiled under the pivot; trigger when close breaks the prior 20d high.
+
+| Rule | Threshold |
+|------|-----------|
+| Structure | Higher lows (10d vs prior 10d) |
+| Trend | Close &gt; SMA20 (prefer rising SMA20) |
+| Coil | 20d &gt; 10d &gt; 5d range, **or** box-like (10d ≤12%, 5d ≤8%) |
+| Location | Within ~3% of prior 20d high (or breakout today) |
+| Extension | Prior 20d return ≤ 25% (hard gate) |
+| Min score to save | **80** |
+
+**Key `details` fields:** `stage` (`coil` \| `breakout`), `volatility_contraction`, `darvas_box_like`, `pivot_high_20d`, `distance_to_pivot_pct`, `volume_dry`, `pre_20d_return_pct`.
+
+**Status:** **setup** while coiling under pivot; **trigger** on breakout day.
 
 ---
 

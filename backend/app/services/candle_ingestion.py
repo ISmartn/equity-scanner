@@ -207,6 +207,11 @@ async def fetch_candles_for_profile(
     access_token: str | None,
     source_preference: SourcePreference = "auto",
 ) -> tuple[list[dict[str, Any]], str]:
+    """Fetch daily candles for one profile.
+
+    ``auto`` / ``upstox`` use Upstox only — on failure the error is recorded (no NSE fallback).
+    ``nse`` remains an explicit opt-in source.
+    """
     instrument_token = profile["instrument_token"]
     ticker = profile["ticker"]
 
@@ -214,21 +219,14 @@ async def fetch_candles_for_profile(
         candles = await _fetch_nse_range(session, ticker, from_date, to_date)
         return candles, "nse"
 
-    if source_preference == "upstox":
-        candles = await _fetch_upstox_range(session, instrument_token, from_date, to_date, access_token)
-        return candles, "upstox"
-
-    try:
-        candles = await _fetch_upstox_range(session, instrument_token, from_date, to_date, access_token)
-        return candles, "upstox"
-    except Exception as exc:
-        if _upstox_invalid_instrument(exc):
-            logger.info("Upstox invalid instrument for %s, falling back to NSE", ticker)
-            candles = await _fetch_nse_range(session, ticker, from_date, to_date)
-            return candles, "nse"
-        logger.debug("Upstox failed for %s, falling back to NSE: %s", ticker, exc)
-        candles = await _fetch_nse_range(session, ticker, from_date, to_date)
-        return candles, "nse"
+    candles = await _fetch_upstox_range(
+        session,
+        instrument_token,
+        from_date,
+        to_date,
+        access_token,
+    )
+    return candles, "upstox"
 
 
 def _is_non_retryable_ingest_error(exc: Exception) -> bool:
@@ -446,7 +444,9 @@ async def ingest_candles(
     ingest_skip_marked = 0
 
     async with aiohttp.ClientSession() as session:
-        await nse_client.fetch_equity_master(session)
+        # Equity master is only needed when explicitly ingesting from NSE.
+        if source_preference == "nse":
+            await nse_client.fetch_equity_master(session)
 
         with log_path.open("a", encoding="utf-8") as error_log:
             error_log.write(

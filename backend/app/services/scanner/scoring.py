@@ -25,6 +25,7 @@ DEFAULT_MIN_SCORES: dict[str, float] = {
     "inside_bar_cluster": 90.0,
     "power_gap": 85.0,
     "tight_range_near_pivot": 80.0,
+    "darvas_pre_setup": 80.0,
 }
 
 # Pattern quality gates (Phase 3 + failure-pattern recalibration).

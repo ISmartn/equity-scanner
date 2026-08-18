@@ -29,6 +29,7 @@ PATTERN_TYPES = (
     "inside_bar_cluster",
     "power_gap",
     "tight_range_near_pivot",
+    "darvas_pre_setup",
 )
 
 ScannerBatchMode = Literal["single", "month", "last_7"]
@@ -480,6 +481,7 @@ async def scanner_patterns() -> dict:
             {"id": "inside_bar_cluster", "label": "Inside Bar Cluster", "type": "micro"},
             {"id": "power_gap", "label": "Power Gap", "type": "micro"},
             {"id": "tight_range_near_pivot", "label": "Tight Range Near Pivot", "type": "micro"},
+            {"id": "darvas_pre_setup", "label": "Darvas Pre-Setup", "type": "micro"},
         ]
     }
 

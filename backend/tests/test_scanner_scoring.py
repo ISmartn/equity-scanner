@@ -4,7 +4,12 @@ from __future__ import annotations
 
 import pandas as pd
 
-from app.services.scanner.patterns import score_pocket_pivot_setup, score_tight_range_near_pivot, score_vcp
+from app.services.scanner.patterns import (
+    score_darvas_pre_setup,
+    score_pocket_pivot_setup,
+    score_tight_range_near_pivot,
+    score_vcp,
+)
 from app.services.scanner.scoring import (
     compose_signal_scores,
     extension_penalty,
@@ -143,6 +148,83 @@ def test_tight_range_near_pivot_emits_setup() -> None:
     assert hit is not None
     assert hit.setup_ready is True
     assert hit.pattern_type == "tight_range_near_pivot"
+
+
+def test_darvas_pre_setup_emits_coil_setup() -> None:
+    """Uptrend + contracting ranges + near prior 20d high → setup_ready."""
+    rows = []
+    price = 80.0
+    for i in range(60):
+        # Gentle uptrend with shrinking swings into the last 20 bars
+        price += 0.35
+        if i < 30:
+            amp = 4.0
+        elif i < 45:
+            amp = 2.2
+        elif i < 55:
+            amp = 1.1
+        else:
+            amp = 0.45
+        vol = 1_200_000 if i < 50 else 700_000
+        rows.append(
+            {
+                "date": f"2024-05-{(i % 28) + 1:02d}",
+                "open": price,
+                "high": price + amp,
+                "low": price - amp * 0.6,
+                "close": price + amp * 0.15,
+                "volume": vol,
+            }
+        )
+    # Ensure last close sits just under a clear prior pivot high
+    pivot = max(float(r["high"]) for r in rows[-21:-1])
+    rows[-1]["close"] = pivot * 0.985
+    rows[-1]["high"] = rows[-1]["close"] + 0.2
+    rows[-1]["low"] = rows[-1]["close"] - 0.3
+    rows[-1]["open"] = rows[-1]["close"] - 0.1
+    hit = score_darvas_pre_setup(_make_df(rows))
+    assert hit is not None
+    assert hit.pattern_type == "darvas_pre_setup"
+    assert hit.setup_ready is True
+    assert hit.triggered_today is False
+    assert hit.details.get("higher_lows") is True
+
+
+def test_darvas_pre_setup_breakout_is_trigger() -> None:
+    rows = []
+    price = 80.0
+    for i in range(60):
+        price += 0.35
+        if i < 30:
+            amp = 4.0
+        elif i < 45:
+            amp = 2.2
+        elif i < 55:
+            amp = 1.1
+        else:
+            amp = 0.45
+        vol = 1_200_000 if i < 50 else 700_000
+        rows.append(
+            {
+                "date": f"2024-05-{(i % 28) + 1:02d}",
+                "open": price,
+                "high": price + amp,
+                "low": price - amp * 0.6,
+                "close": price + amp * 0.15,
+                "volume": vol,
+            }
+        )
+    pivot = max(float(r["high"]) for r in rows[-21:-1])
+    rows[-1]["close"] = pivot * 1.01
+    rows[-1]["high"] = rows[-1]["close"] + 0.5
+    rows[-1]["low"] = pivot * 0.99
+    rows[-1]["open"] = pivot
+    rows[-1]["volume"] = 2_000_000
+    hit = score_darvas_pre_setup(_make_df(rows))
+    assert hit is not None
+    assert hit.triggered_today is True
+    assert hit.setup_ready is False
+    assert hit.details.get("stage") == "breakout"
 
 
 def test_pocket_pivot_setup_requires_building_not_max() -> None:

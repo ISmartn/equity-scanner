@@ -3,7 +3,7 @@ import { TimelineDataCoverage } from "@/components/TimelineDataCoverage";
 import { TimelineStockChart } from "@/components/TimelineStockChart";
 import { CompanyNewsSidebar } from "@/components/news/CompanyNewsSidebar";
 import { StockFundamentalsPanel } from "@/components/StockFundamentalsPanel";
-import { AppButton, FieldLabel } from "@/components/mui";
+import { AppButton } from "@/components/mui";
 import {
   fetchScannerDates,
   fetchScannerResults,
@@ -65,6 +65,7 @@ import {
   AlertTriangle,
   ClipboardCopy,
   Layers,
+  Newspaper,
   PanelRightClose,
   PanelRightOpen,
   RefreshCw,
@@ -74,6 +75,7 @@ import {
 
 const PAGE_SIZE = 80;
 const ALL_FILTER = "all";
+type FnoGroupFilter = "all" | "fno" | "non_fno";
 
 function mergeSortedDates(existing: string[], additions: string[]): string[] {
   if (!additions.length) return existing;
@@ -116,6 +118,7 @@ const PATTERN_FILTER_LABELS: Record<ScannerPatternId, string> = {
   inside_bar_cluster: "Inside Bar",
   power_gap: "Power Gap",
   tight_range_near_pivot: "Tight Range",
+  darvas_pre_setup: "Darvas Setup",
 };
 
 function formatScore(value: number): string {
@@ -289,6 +292,7 @@ export function MomentumScannerPage() {
   const [scanMode, setScanMode] = useState<ScannerScanMode>("confirmation");
   const [pattern, setPattern] = useState<ScannerPatternId | typeof ALL_FILTER>(ALL_FILTER);
   const [sector, setSector] = useState(ALL_FILTER);
+  const [fnoGroup, setFnoGroup] = useState<FnoGroupFilter>("all");
   const [minScore, setMinScore] = useState("70");
   const [triggeredOnly, setTriggeredOnly] = useState(false);
   const [setupOnly, setSetupOnly] = useState(false);
@@ -327,6 +331,13 @@ export function MomentumScannerPage() {
       return true;
     }
   });
+  const [showCompanyNews, setShowCompanyNews] = useState(() => {
+    try {
+      return localStorage.getItem("trading.showCompanyNews") !== "false";
+    } catch {
+      return true;
+    }
+  });
   const [fnoSymbols, setFnoSymbols] = useState<string[]>([]);
   const fnoSymbolSet = useMemo(() => new Set(fnoSymbols), [fnoSymbols]);
 
@@ -335,6 +346,18 @@ export function MomentumScannerPage() {
       const next = !prev;
       try {
         localStorage.setItem("trading.showFundamentals", String(next));
+      } catch {
+        /* ignore */
+      }
+      return next;
+    });
+  }, []);
+
+  const toggleCompanyNews = useCallback(() => {
+    setShowCompanyNews((prev) => {
+      const next = !prev;
+      try {
+        localStorage.setItem("trading.showCompanyNews", String(next));
       } catch {
         /* ignore */
       }
@@ -375,6 +398,7 @@ export function MomentumScannerPage() {
     earlySetupMode ||
     pattern !== ALL_FILTER ||
     sector !== ALL_FILTER ||
+    fnoGroup !== "all" ||
     minScoreNum > 0 ||
     triggeredOnly ||
     setupOnly ||
@@ -536,14 +560,40 @@ export function MomentumScannerPage() {
     page,
   ]);
 
+  const applyFnoGroupFilter = useCallback(
+    (items: ScannerPatternSignal[]) => {
+      if (fnoGroup === "all") return items;
+      return items.filter((row) => {
+        const isFno = fnoSymbolSet.has(row.ticker.toUpperCase());
+        return fnoGroup === "fno" ? isFno : !isFno;
+      });
+    },
+    [fnoGroup, fnoSymbolSet],
+  );
+
   const fetchResultsPage = useCallback(async (pageOverride?: number) => {
     const activePage = pageOverride ?? page;
-    return fetchScannerResults({
+    if (fnoGroup === "all") {
+      return fetchScannerResults({
+        ...resultsQuery,
+        limit: PAGE_SIZE,
+        offset: activePage * PAGE_SIZE,
+      });
+    }
+    // F&O membership is known client-side — fetch the matching window then group/paginate.
+    const full = await fetchScannerResults({
       ...resultsQuery,
-      limit: PAGE_SIZE,
-      offset: activePage * PAGE_SIZE,
+      limit: 2000,
+      offset: 0,
     });
-  }, [resultsQuery, page]);
+    const filtered = applyFnoGroupFilter(full.results);
+    const offset = activePage * PAGE_SIZE;
+    return {
+      ...full,
+      total: filtered.length,
+      results: filtered.slice(offset, offset + PAGE_SIZE),
+    };
+  }, [resultsQuery, page, fnoGroup, applyFnoGroupFilter]);
 
   const handleSyncFundamentals = useCallback(async () => {
     if (!selectedRow) return;
@@ -590,16 +640,27 @@ export function MomentumScannerPage() {
         }
       }
 
-      const exportLimit = Math.min(result.total, 2000);
-      if (exportLimit <= PAGE_SIZE && activePage === 0) {
-        setExportRows(result.results);
-      } else {
+      if (fnoGroup !== "all") {
         const full = await fetchScannerResults({
           ...resultsQuery,
-          limit: exportLimit,
+          limit: 2000,
           offset: 0,
         });
-        setExportRows(full.results);
+        if (requestId !== loadRequestRef.current) return;
+        setExportRows(applyFnoGroupFilter(full.results));
+      } else {
+        const exportLimit = Math.min(result.total, 2000);
+        if (exportLimit <= PAGE_SIZE && activePage === 0) {
+          setExportRows(result.results);
+        } else {
+          const full = await fetchScannerResults({
+            ...resultsQuery,
+            limit: exportLimit,
+            offset: 0,
+          });
+          if (requestId !== loadRequestRef.current) return;
+          setExportRows(full.results);
+        }
       }
       if (result.results.length > 0) {
         const first = result.results[0];
@@ -640,7 +701,10 @@ export function MomentumScannerPage() {
     loadChart,
     fetchResultsPage,
     fnoSymbolSet,
+    fnoGroup,
+    applyFnoGroupFilter,
     ensureFoDerivatives,
+    resultsQuery,
   ]);
 
   const stopScanPoll = useCallback(() => {
@@ -715,13 +779,24 @@ export function MomentumScannerPage() {
 
   useEffect(() => {
     setPage(0);
-  }, [tradeDate, pattern, sector, minScore, triggeredOnly, setupOnly, macroPassOnly, fundamentalPassOnly, scanMode]);
+  }, [
+    tradeDate,
+    pattern,
+    sector,
+    fnoGroup,
+    minScore,
+    triggeredOnly,
+    setupOnly,
+    macroPassOnly,
+    fundamentalPassOnly,
+    scanMode,
+  ]);
 
   useEffect(() => {
     if (bootLoading || !tradeDate || filterInvalid) return;
     void loadResults();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [bootLoading, tradeDate, page, scanMode, resultsQuery]);
+  }, [bootLoading, tradeDate, page, scanMode, resultsQuery, fnoGroup, fnoSymbols.length]);
 
   const totalPages = useMemo(() => Math.max(1, Math.ceil(total / PAGE_SIZE)), [total]);
   const exportJson = useMemo(
@@ -842,30 +917,43 @@ export function MomentumScannerPage() {
         </Alert>
       )}
 
-      <div className="shrink-0 overflow-visible rounded-xl border border-surface-border bg-surface-raised px-2 py-1.5">
-        <Stack direction="row" spacing={1} useFlexGap className="flex-wrap items-center">
+      <div className="shrink-0 overflow-x-auto rounded-xl border border-surface-border bg-surface-raised px-2 py-1.5 [scrollbar-width:thin] [&::-webkit-scrollbar]:h-1.5">
+        <div className="flex w-max max-w-none flex-nowrap items-center gap-2">
           <TimelineDataCoverage stats={stats} compact />
-          <div className="hidden h-5 w-px shrink-0 bg-surface-border sm:block" />
-          <Stack spacing={0.25} className="overflow-visible">
-            <FieldLabel className="!text-[9px]">Scan date</FieldLabel>
-            <TimelineDatePicker
-              compact
-              value={tradeDate}
-              onChange={setTradeDate}
-              availableDates={scanDates.length ? scanDates : stats ? [stats.max_trade_date].filter(Boolean) as string[] : []}
-              markedDates={scanDates}
-              markedLabel="Scan done"
-              accentMarkedDates={refinedScanDates}
-              accentMarkedLabel="Quality v2 re-scan"
-              minDate={stats?.min_trade_date}
-              maxDate={today}
-              disabled={bootLoading}
-            />
-          </Stack>
+          <div className="h-5 w-px shrink-0 bg-surface-border" />
+          <TimelineDatePicker
+            compact
+            showLegend={false}
+            value={tradeDate}
+            onChange={setTradeDate}
+            availableDates={scanDates.length ? scanDates : stats ? [stats.max_trade_date].filter(Boolean) as string[] : []}
+            markedDates={scanDates}
+            markedLabel="Scan done"
+            accentMarkedDates={refinedScanDates}
+            accentMarkedLabel="Rescanned · Darvas included"
+            minDate={stats?.min_trade_date}
+            maxDate={today}
+            disabled={bootLoading}
+          />
+          {(scanDates.length > 0 || refinedScanDates.length > 0) && (
+            <span className="inline-flex shrink-0 flex-nowrap items-center gap-2 whitespace-nowrap text-[9px] text-slate-500">
+              <span className="inline-flex items-center gap-1">
+                <span className="inline-block h-2 w-2 rounded-sm bg-emerald-400" />
+                Scan done
+              </span>
+              {refinedScanDates.length > 0 ? (
+                <span className="inline-flex items-center gap-1">
+                  <span className="inline-block h-2 w-2 rounded-sm bg-sky-400" />
+                  Rescanned · Darvas
+                </span>
+              ) : null}
+            </span>
+          )}
 
           <AppButton
             variant="contained"
             size="small"
+            className="shrink-0"
             startIcon={
               <DocumentScannerIcon
                 fontSize="small"
@@ -879,6 +967,7 @@ export function MomentumScannerPage() {
           </AppButton>
           <AppButton
             size="small"
+            className="shrink-0"
             onClick={handleRunScanMonth}
             disabled={scanRunning || bootLoading || !tradeDate}
             title={`Scan every weekday in ${tradeDate.slice(0, 7)} through ${tradeDate}`}
@@ -887,6 +976,7 @@ export function MomentumScannerPage() {
           </AppButton>
           <AppButton
             size="small"
+            className="shrink-0"
             onClick={handleRunScanLast7}
             disabled={scanRunning || bootLoading || !tradeDate}
             title={`Scan the 7 weekdays before ${tradeDate}`}
@@ -894,7 +984,7 @@ export function MomentumScannerPage() {
             −7d
           </AppButton>
 
-          <div className="hidden h-5 w-px shrink-0 bg-surface-border md:block" />
+          <div className="h-5 w-px shrink-0 bg-surface-border" />
 
           <ToggleButtonGroup
             exclusive
@@ -903,7 +993,7 @@ export function MomentumScannerPage() {
             onChange={(_e, value: ScannerScanMode | null) => {
               if (value) setScanMode(value);
             }}
-            sx={{ height: 30 }}
+            sx={{ height: 30, flexShrink: 0 }}
           >
             <ToggleButton value="confirmation" className="!px-2 !text-[10px] !normal-case">
               Confirmation
@@ -916,6 +1006,7 @@ export function MomentumScannerPage() {
           <AppButton
             variant="outlined"
             size="small"
+            className="shrink-0"
             startIcon={
               <RefreshIcon fontSize="small" className={loading ? "animate-spin" : undefined} />
             }
@@ -926,11 +1017,11 @@ export function MomentumScannerPage() {
           </AppButton>
 
           {earlySetupMode && (
-            <Typography variant="caption" className="text-[9px] text-sky-300/90">
+            <Typography variant="caption" className="shrink-0 whitespace-nowrap text-[9px] text-sky-300/90">
               Early: setup · ≤20% 20d · ≤2% day
             </Typography>
           )}
-        </Stack>
+        </div>
 
         {scanRunning && scanStatus && (
           <div className="mt-1.5 space-y-1 border-t border-surface-border pt-1.5">
@@ -1034,8 +1125,14 @@ export function MomentumScannerPage() {
               )}
             </div>
 
-            <Stack direction="row" spacing={1} useFlexGap className="flex-wrap items-end">
-              <FormControl size="small" sx={{ minWidth: 108 }} disabled={earlySetupMode}>
+            <div className="overflow-x-auto">
+              <Stack
+                direction="row"
+                spacing={1}
+                useFlexGap
+                className="min-w-max flex-nowrap items-end"
+              >
+              <FormControl size="small" sx={{ minWidth: 108, flexShrink: 0 }} disabled={earlySetupMode}>
                 <InputLabel id="scanner-pattern-label">Pattern</InputLabel>
                 <Select
                   labelId="scanner-pattern-label"
@@ -1062,10 +1159,10 @@ export function MomentumScannerPage() {
                 onChange={(e) => setMinScore(e.target.value)}
                 disabled={earlySetupMode}
                 slotProps={{ htmlInput: { min: 0, max: 100, step: 5 } }}
-                sx={{ width: 88 }}
+                sx={{ width: 88, flexShrink: 0 }}
               />
 
-              <FormControl size="small" sx={{ minWidth: 96 }} disabled={earlySetupMode}>
+              <FormControl size="small" sx={{ minWidth: 96, flexShrink: 0 }} disabled={earlySetupMode}>
                 <InputLabel id="scanner-sector-label">Sector</InputLabel>
                 <Select
                   labelId="scanner-sector-label"
@@ -1082,7 +1179,40 @@ export function MomentumScannerPage() {
                 </Select>
               </FormControl>
 
-              <FormGroup row sx={{ gap: 0, mr: 0.5, opacity: earlySetupMode ? 0.5 : 1 }}>
+              <Stack spacing={0.25} className="shrink-0">
+                <Typography variant="caption" className="!text-[9px] text-slate-500">
+                  Listing
+                </Typography>
+                <ToggleButtonGroup
+                  exclusive
+                  size="small"
+                  value={fnoGroup}
+                  onChange={(_e, value: FnoGroupFilter | null) => {
+                    if (value) setFnoGroup(value);
+                  }}
+                  sx={{ height: 30, flexShrink: 0 }}
+                >
+                  <ToggleButton value="all" className="!px-2 !text-[10px] !normal-case">
+                    All
+                  </ToggleButton>
+                  <ToggleButton
+                    value="fno"
+                    className="!px-2 !text-[10px] !normal-case"
+                    title="NSE F&O stocks only"
+                  >
+                    F&O ★
+                  </ToggleButton>
+                  <ToggleButton
+                    value="non_fno"
+                    className="!px-2 !text-[10px] !normal-case"
+                    title="Cash / non-F&O stocks only"
+                  >
+                    Non-F&O
+                  </ToggleButton>
+                </ToggleButtonGroup>
+              </Stack>
+
+              <FormGroup row sx={{ gap: 0, mr: 0.5, flexShrink: 0, flexWrap: "nowrap", opacity: earlySetupMode ? 0.5 : 1 }}>
                 <FormControlLabel
                   control={
                     <Checkbox
@@ -1126,7 +1256,8 @@ export function MomentumScannerPage() {
                   label={<Typography variant="caption">Fund</Typography>}
                 />
               </FormGroup>
-            </Stack>
+              </Stack>
+            </div>
           </div>
 
           <div className="min-h-0 flex-1 overflow-auto">
@@ -1350,6 +1481,19 @@ export function MomentumScannerPage() {
               )}
               Fundamentals
             </button>
+            <button
+              type="button"
+              onClick={toggleCompanyNews}
+              title={showCompanyNews ? "Hide company news" : "Show company news"}
+              className={`inline-flex items-center gap-1 rounded border px-2 py-0.5 text-[10px] transition ${
+                showCompanyNews
+                  ? "border-sky-500/40 bg-sky-500/10 text-sky-200"
+                  : "border-surface-border text-slate-400 hover:border-sky-500/30 hover:text-slate-200"
+              }`}
+            >
+              <Newspaper className="h-3 w-3" />
+              News
+            </button>
           </div>
           {selectedRow && (
             <div className="flex shrink-0 flex-wrap items-center gap-1.5 rounded-lg border border-surface-border bg-surface-raised/60 px-2 py-1 text-[10px] text-slate-300">
@@ -1431,11 +1575,13 @@ export function MomentumScannerPage() {
         )}
       </div>
     </main>
-    <CompanyNewsSidebar
-      ticker={selectedRow?.ticker}
-      companyName={selectedRow?.company_name}
-      className="h-[min(45vh,26rem)] shrink-0 border-t lg:h-full lg:border-t-0"
-    />
+    {showCompanyNews ? (
+      <CompanyNewsSidebar
+        ticker={selectedRow?.ticker}
+        companyName={selectedRow?.company_name}
+        className="h-[min(45vh,26rem)] shrink-0 border-t lg:h-full lg:border-t-0"
+      />
+    ) : null}
     </div>
   );
 }

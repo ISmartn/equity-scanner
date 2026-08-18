@@ -14,3 +14,6 @@ data/*.session
 data/dev-proxy-errors.log
 data/mtf_rsi_cache/
 data/timeline.db
+experiments/x-tweet-fetcher-test/.venv/
+experiments/x-tweet-fetcher-test/out/
+experiments/x-tweet-fetcher-test/src/

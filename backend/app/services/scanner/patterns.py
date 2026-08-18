@@ -509,6 +509,127 @@ def score_tight_range_near_pivot(df: pd.DataFrame) -> PatternHit | None:
     return best
 
 
+def score_darvas_pre_setup(df: pd.DataFrame) -> PatternHit | None:
+    """Darvas-style pre-setup: uptrend + coil near highs (influencer-calibrated).
+
+    Matches the recurring pre-mention structure from @darvasboxtrader analysis:
+    higher lows, above rising SMA20, volatility contraction / box near 20d high.
+    Setup when coiling under pivot; trigger when today's close breaks the prior 20d high.
+    """
+    if len(df) < 40:
+        return None
+
+    pre_20d = compute_pre_20d_return_pct(df)
+    if pre_20d is not None and pre_20d > HARD_EXTENSION_PRE_20D_PCT:
+        return None
+
+    close = df["close"]
+    high = df["high"]
+    low = df["low"]
+    price = float(close.iloc[-1])
+    if price <= 0:
+        return None
+
+    prior = df.iloc[:-1]
+    if len(prior) < 25:
+        return None
+
+    # Higher lows (10 vs prior 10)
+    recent_low = float(low.iloc[-10:].min())
+    prior_low = float(low.iloc[-20:-10].min())
+    higher_lows = recent_low > prior_low
+    if not higher_lows:
+        return None
+
+    sma20 = sma(close, 20)
+    sma20_last = float(sma20.iloc[-1]) if pd.notna(sma20.iloc[-1]) else None
+    sma20_prev = float(sma20.iloc[-6]) if len(df) >= 26 and pd.notna(sma20.iloc[-6]) else None
+    if sma20_last is None or price < sma20_last:
+        return None
+    sma20_rising = sma20_prev is not None and sma20_last > sma20_prev
+
+    high20_prior = float(prior["high"].iloc[-20:].max())
+    low20_prior = float(prior["low"].iloc[-20:].min())
+    high10_prior = float(prior["high"].iloc[-10:].max())
+    low10_prior = float(prior["low"].iloc[-10:].min())
+    high5_prior = float(prior["high"].iloc[-5:].max())
+    low5_prior = float(prior["low"].iloc[-5:].min())
+
+    if high20_prior <= 0:
+        return None
+
+    range20 = (high20_prior - low20_prior) / price * 100.0
+    range10 = (high10_prior - low10_prior) / price * 100.0
+    range5 = (high5_prior - low5_prior) / price * 100.0
+    contracting = range20 > range10 > range5 > 0
+    box_like = range10 <= 12.0 and range5 <= 8.0
+    if not (contracting or box_like):
+        return None
+
+    # Near highs: within 3% of prior 20d high (or mild breakout today)
+    dist_below_pct = (high20_prior - price) / high20_prior * 100.0
+    near_high = price >= high20_prior * 0.97
+    breakout_today = price > high20_prior
+    if not (near_high or breakout_today):
+        return None
+    # Too extended above pivot already — late for a pre-setup
+    if price > high20_prior * 1.04:
+        return None
+
+    vol20 = float(df["volume"].iloc[-21:-1].mean())
+    vol5 = float(df["volume"].iloc[-6:-1].mean()) if len(df) >= 6 else vol20
+    vol_dry = vol20 > 0 and vol5 < vol20 * 0.85
+    today_vol = float(df["volume"].iloc[-1])
+    vol_surge = vol20 > 0 and today_vol >= vol20 * 1.5
+
+    score = 45.0
+    if contracting:
+        score += min(20.0, (range20 - range5) * 0.8)
+    elif box_like:
+        score += 12.0
+    # Closer to pivot = better
+    if breakout_today:
+        score += 12.0
+    else:
+        score += min(15.0, max(0.0, (3.0 - max(dist_below_pct, 0.0)) * 5.0))
+    score += 10.0  # higher lows already required
+    score += 8.0 if sma20_rising else 3.0
+    score += 10.0 if vol_dry else 0.0
+    if breakout_today and vol_surge:
+        score += 5.0
+    if box_like and near_high:
+        score += 5.0
+
+    if not _meets_min("darvas_pre_setup", score):
+        return None
+
+    triggered_today = bool(breakout_today)
+    setup_ready = not triggered_today
+
+    return PatternHit(
+        pattern_type="darvas_pre_setup",
+        score=round(min(score, 100.0), 1),
+        triggered_today=triggered_today,
+        setup_ready=setup_ready,
+        details={
+            "stage": "breakout" if triggered_today else "coil",
+            "higher_lows": True,
+            "sma20_rising": sma20_rising,
+            "volatility_contraction": contracting,
+            "darvas_box_like": box_like,
+            "range_20d_pct": round(range20, 2),
+            "range_10d_pct": round(range10, 2),
+            "range_5d_pct": round(range5, 2),
+            "pivot_high_20d": round(high20_prior, 2),
+            "distance_to_pivot_pct": round(dist_below_pct, 2),
+            "volume_dry": vol_dry,
+            "volume_surge": vol_surge,
+            "pre_20d_return_pct": pre_20d,
+            "source": "darvasboxtrader_pre_setup_calibration",
+        },
+    )
+
+
 PATTERN_SCORERS = (
     score_vcp,
     score_high_tight_flag,
@@ -517,6 +638,7 @@ PATTERN_SCORERS = (
     score_inside_bar_cluster,
     score_power_gap,
     score_tight_range_near_pivot,
+    score_darvas_pre_setup,
 )
 
 PATTERN_TYPES = tuple(s.__name__.removeprefix("score_") for s in PATTERN_SCORERS)

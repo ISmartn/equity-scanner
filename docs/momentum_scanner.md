@@ -169,7 +169,7 @@ Applied in `backend/app/services/scanner/quality.py` after pattern detection (ha
 | VCP depth | Hard reject `base_depth_pct > 25%` (preferred ≤ 20%) | Deep bases showed ~28% 5d win rate |
 | **20d run-up cap** | Triggered: reject `pre_20d > 18%` unless higher-low base and `≤ 25%` | July study: 20–25% bucket collapsed (T+10 WR ~33%) |
 
-Configurable in `data/scanner_score_weights.json` under `quality.max_20d_runup_pct`. Engine tag: `quality_v2` (amber calendar).
+Configurable in `data/scanner_score_weights.json` under `quality.max_20d_runup_pct`. Engine tag: `darvas_v1` (sky calendar = rescanned with Darvas Setup).
 
 ## Fundamentals and scan quality
 

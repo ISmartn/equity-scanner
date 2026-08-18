@@ -36,8 +36,8 @@ ScanProgressCallback = Callable[[dict[str, Any]], None]
 MIN_BARS = 250
 HISTORY_BARS = 280
 DEFAULT_SCANNER_CONCURRENCY = 3
-# Bumped when Day-T quality gates + 20d exhaustion cap shipped; calendar accents re-scans.
-SCANNER_ENGINE_VERSION = "quality_v2"
+# Bumped when darvas_pre_setup shipped; calendar accents dates rescanned on this engine.
+SCANNER_ENGINE_VERSION = "darvas_v1"
 
 
 @dataclass

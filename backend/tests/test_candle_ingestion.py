@@ -1,4 +1,4 @@
-"""Tests for candle ingest fallback and auto-skip logic."""
+"""Tests for candle ingest error recording and auto-skip logic."""
 
 from __future__ import annotations
 
@@ -17,10 +17,20 @@ def test_upstox_invalid_instrument_detection() -> None:
 
 
 def test_should_not_auto_skip_on_nse_session_error() -> None:
+    # Explicit NSE mode can still hit HTML/session errors; treat as transient (no auto-skip).
     msg = "NSE returned HTML instead of JSON for JBCHEPHARM (session expired or rate limited)."
     assert _is_transient_ingest_error(msg) is True
     assert _should_auto_skip(msg, prior_error_count=0) is False
     assert _should_auto_skip(msg, prior_error_count=2) is False
+
+
+def test_upstox_failure_is_recorded_not_nse_fallback_message() -> None:
+    """Auto ingest no longer falls back to NSE; Upstox errors stay Upstox errors."""
+    msg = 'Upstox API error [400]: {"errorCode":"UDAPI100011","message":"Invalid Instrument key"}'
+    assert _upstox_invalid_instrument(Exception(msg)) is True
+    assert _is_transient_ingest_error(msg) is False
+    # First failure: do not auto-skip yet; second failure marks skip.
+    assert _should_auto_skip(msg, prior_error_count=0) is True  # invalid instrument → skip immediately
 
 
 def test_should_auto_skip_on_repeat_failure() -> None:
