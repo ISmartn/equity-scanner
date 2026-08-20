@@ -673,7 +673,11 @@ function FinancialsTab({ data }: { data: StockFundamentals }) {
     balanceHistory.length > 0 || incomeCategories.length > 0 || cashFlowCategories.length > 0;
 
   if (!hasContent) {
-    return <p className="text-xs text-slate-500">No financial statement data.</p>;
+    return (
+      <p className="text-xs text-slate-500">
+        No income, balance sheet, or cash flow history in cache. Key ratios may still be available on Overview.
+      </p>
+    );
   }
 
   const incomeColors = ["#34d399", "#a78bfa", "#f472b6"];

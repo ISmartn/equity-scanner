@@ -15,12 +15,15 @@ import { MtfRsiPage } from "@/pages/MtfRsiPage";
 import { NiftyChartPage } from "@/pages/NiftyChartPage";
 import { IndicatorAnalysisPage } from "@/pages/IndicatorAnalysisPage";
 import { SectorRotationPage } from "@/pages/SectorRotationPage";
+import { ElliottWaveLabPage } from "@/pages/experimental-labs/ElliottWave/ElliottWaveLabPage";
 import { TimelineMoversPage } from "@/pages/TimelineMoversPage";
+import { StockResearchPage } from "@/pages/StockResearchPage";
 
 const NAV_TABS = [
   { label: "Forecast", path: "/" },
   { label: "Daily Move Filter", path: "/move-filter" },
   { label: "Timeline Movers", path: "/timeline" },
+  { label: "Stock Research", path: "/stock-research" },
   { label: "News Impact", path: "/news-impact" },
   { label: "Market Info", path: "/market-info" },
   { label: "OI Momentum", path: "/oi-momentum" },
@@ -30,6 +33,7 @@ const NAV_TABS = [
   { label: "Momentum Scanner", path: "/scanner" },
   { label: "Screener", path: "/multi-year-breakout" },
   { label: "Sector Rotation", path: "/sector-rotation" },
+  { label: "EW Lab", path: "/experimental/elliott-wave-lab" },
 ] as const;
 
 function AppNav() {
@@ -106,6 +110,7 @@ export default function App() {
           <Route path="/" element={<ForecastPage />} />
           <Route path="/move-filter" element={<MoveFilterPage />} />
           <Route path="/timeline" element={<TimelineMoversPage />} />
+          <Route path="/stock-research" element={<StockResearchPage />} />
           <Route path="/news-impact" element={<NewsImpactPage />} />
           <Route path="/market-info" element={<MarketInfoPage />} />
           <Route path="/oi-momentum" element={<OiMomentumPage />} />
@@ -115,6 +120,7 @@ export default function App() {
           <Route path="/scanner" element={<MomentumScannerPage />} />
           <Route path="/multi-year-breakout" element={<MultiYearBreakoutPage />} />
           <Route path="/sector-rotation" element={<SectorRotationPage />} />
+          <Route path="/experimental/elliott-wave-lab" element={<ElliottWaveLabPage />} />
         </Routes>
       </div>
     </BrowserRouter>

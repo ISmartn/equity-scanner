@@ -8,6 +8,7 @@ from typing import Deque
 
 from .models import Candle, candle_bucket_start, ensure_ist
 from .rsi import rsi_status, wilders_rsi, wilders_rsi_series
+from .history import CHART_MAX_POINTS, trim_points
 
 
 @dataclass
@@ -38,19 +39,24 @@ class TimeframeState:
     minutes: int
     closes: Deque[float]
     open_times: Deque[datetime]
+    ohlc: Deque[Candle]
     active: ActiveCandle | None = None
     last_closed_ts: datetime | None = None
 
+    def _append_closed(self, candle: Candle) -> None:
+        self.closes.append(float(candle.close))
+        self.open_times.append(candle.ts)
+        self.ohlc.append(candle)
+        self.last_closed_ts = candle.ts
+
     def seed_closed(self, candles: list[Candle], *, drop_forming: bool = True) -> None:
-        """Load historical closed closes into the rolling buffer."""
+        """Load historical closed candles into the rolling buffer."""
         if not candles:
             return
         ordered = sorted(candles, key=lambda c: c.ts)
         closed = ordered[:-1] if drop_forming and len(ordered) > 1 else ordered
         for candle in closed:
-            self.closes.append(float(candle.close))
-            self.open_times.append(candle.ts)
-            self.last_closed_ts = candle.ts
+            self._append_closed(candle)
         if drop_forming and ordered:
             last = ordered[-1]
             self.active = ActiveCandle(
@@ -79,6 +85,7 @@ class MultiTimeframeEngine:
                 minutes=tf,
                 closes=deque(maxlen=buffer_maxlen),
                 open_times=deque(maxlen=buffer_maxlen),
+                ohlc=deque(maxlen=buffer_maxlen),
             )
             for tf in timeframes
         }
@@ -105,6 +112,7 @@ class MultiTimeframeEngine:
             state = self._states[minutes]
             state.closes.clear()
             state.open_times.clear()
+            state.ohlc.clear()
             state.active = None
             state.last_closed_ts = None
             state.seed_closed(candles, drop_forming=True)
@@ -146,9 +154,7 @@ class MultiTimeframeEngine:
             return
 
         if state.last_closed_ts is None or active.open_ts > state.last_closed_ts:
-            state.closes.append(float(active.close))
-            state.open_times.append(active.open_ts)
-            state.last_closed_ts = active.open_ts
+            state._append_closed(active.to_candle())
 
         state.active = ActiveCandle(
             open_ts=bucket, open=price, high=price, low=price, close=price
@@ -169,6 +175,12 @@ class MultiTimeframeEngine:
             _, prices = self._price_series_unlocked(state, include_live=include_live)
             out[tf] = wilders_rsi(prices, period)
         return out
+
+    def _ohlc_series_unlocked(self, state: TimeframeState, *, include_live: bool) -> list[Candle]:
+        candles = list(state.ohlc)
+        if include_live and state.active is not None:
+            candles = candles + [state.active.to_candle()]
+        return candles
 
     def chart_series(self, timeframe: int | None = None) -> dict:
         """RSI history points for charting (one or all timeframes)."""
@@ -194,10 +206,38 @@ class MultiTimeframeEngine:
                             "v": round(float(value), 4),
                         }
                     )
-                series[str(tf)] = points
+                series[str(tf)] = trim_points(points, CHART_MAX_POINTS)
             return {
                 "rsi_period": period,
                 "series": series,
+                "ltp": self.ltp,
+                "ts": self.last_tick_ts.isoformat() if self.last_tick_ts else None,
+            }
+
+    def ohlc_series(self, timeframe: int) -> dict:
+        """Closed + forming OHLC bars for a single timeframe (Nifty price chart)."""
+        with self._lock:
+            state = self._states.get(int(timeframe))
+            if state is None:
+                raise ValueError(f"Unsupported timeframe: {timeframe}")
+            candles = self._ohlc_series_unlocked(state, include_live=True)
+            rows = [
+                {
+                    "ts": c.ts.isoformat(),
+                    "open": float(c.open),
+                    "high": float(c.high),
+                    "low": float(c.low),
+                    "close": float(c.close),
+                    "volume": float(c.volume),
+                }
+                for c in candles
+            ]
+            return {
+                "timeframe": int(timeframe),
+                "instrument_label": "Nifty 50",
+                "candles": trim_points(rows, CHART_MAX_POINTS),
+                "candle_count_total": len(rows),
+                "candle_count_returned": min(len(rows), CHART_MAX_POINTS),
                 "ltp": self.ltp,
                 "ts": self.last_tick_ts.isoformat() if self.last_tick_ts else None,
             }

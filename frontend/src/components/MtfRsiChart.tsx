@@ -11,6 +11,7 @@ import {
   type UTCTimestamp,
 } from "lightweight-charts";
 import type { MtfRsiChartPoint } from "@/lib/api";
+import { istChartLocalization, istTimeScaleOptions } from "@/lib/chartTime";
 
 const TF_COLORS: Record<string, string> = {
   "1": "#38bdf8",
@@ -49,6 +50,7 @@ export function MtfRsiChart({ series, visibleTfs, height = 320 }: MtfRsiChartPro
         background: { type: ColorType.Solid, color: "transparent" },
         textColor: "#94a3b8",
       },
+      localization: istChartLocalization(),
       grid: {
         vertLines: { color: "rgba(42, 53, 68, 0.7)" },
         horzLines: { color: "rgba(42, 53, 68, 0.7)" },
@@ -60,8 +62,7 @@ export function MtfRsiChart({ series, visibleTfs, height = 320 }: MtfRsiChartPro
       },
       timeScale: {
         borderColor: "#2a3544",
-        timeVisible: true,
-        secondsVisible: false,
+        ...istTimeScaleOptions(true),
       },
       width: containerRef.current.clientWidth,
       height,

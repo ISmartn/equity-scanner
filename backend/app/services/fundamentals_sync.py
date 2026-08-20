@@ -43,6 +43,30 @@ def _extract_data(response: dict[str, Any] | None) -> Any:
     return response
 
 
+def _statement_has_numeric_history(section: Any, *, kind: str) -> bool:
+    """True when income/cash/balance payloads include usable period values."""
+    if not isinstance(section, dict):
+        return False
+    full = section.get("full_statement")
+    if isinstance(full, list) and full:
+        return True
+    if kind == "balance":
+        hist = section.get("history")
+        return isinstance(hist, list) and bool(hist)
+
+    rows_key = "income_statement" if kind == "income" else "cash_flow"
+    rows = section.get(rows_key)
+    if not isinstance(rows, list):
+        return False
+    for row in rows:
+        if not isinstance(row, dict):
+            continue
+        hist = row.get("history")
+        if isinstance(hist, list) and hist:
+            return True
+    return False
+
+
 def _utc_now_iso() -> str:
     return datetime.now(timezone.utc).isoformat()
 
@@ -175,6 +199,97 @@ async def fetch_fundamentals_for_ticker(
             errors.append(f"{key}: {exc}")
             logger.debug("Fundamentals %s fetch failed for %s: %s", key, ticker_norm, exc)
         await asyncio.sleep(section_delay_sec)
+
+    # Many NSE names (e.g. IRFC) publish usable statements only as standalone.
+    # Consolidated responses can be empty shells — fall back when histories are blank.
+    statement_kinds = (
+        ("balance_sheet", "balance", upstox_client.get_balance_sheet),
+        ("cash_flow", "cash", upstox_client.get_cash_flow),
+        ("income_statement", "income", upstox_client.get_income_statement),
+    )
+    for key, kind, fetcher in statement_kinds:
+        if _statement_has_numeric_history(payload.get(key), kind=kind):
+            continue
+        try:
+            response = await _fetch_with_retry(
+                lambda f=fetcher: f(token, isin, type="standalone"),
+                section_delay_sec=section_delay_sec,
+            )
+            standalone = _extract_data(response)
+            if _statement_has_numeric_history(standalone, kind=kind):
+                payload[key] = standalone
+                payload.setdefault("_meta", {})
+                if isinstance(payload["_meta"], dict):
+                    payload["_meta"][f"{key}_type"] = "standalone"
+                logger.info(
+                    "Fundamentals %s for %s: using standalone (consolidated empty)",
+                    key,
+                    ticker_norm,
+                )
+        except Exception as exc:
+            errors.append(f"{key}_standalone: {exc}")
+            logger.debug(
+                "Fundamentals %s standalone fallback failed for %s: %s",
+                key,
+                ticker_norm,
+                exc,
+            )
+        await asyncio.sleep(section_delay_sec)
+
+    # Quarterly income for QoQ / YoY momentum (prefer same filing type as yearly).
+    income_type = "consolidated"
+    meta = payload.get("_meta")
+    if isinstance(meta, dict) and meta.get("income_statement_type") == "standalone":
+        income_type = "standalone"
+    elif isinstance(payload.get("income_statement"), dict):
+        # Heuristic: if yearly only filled after standalone fallback, meta is set;
+        # otherwise try consolidated first then standalone.
+        pass
+
+    quarterly_types = [income_type]
+    if "standalone" not in quarterly_types:
+        quarterly_types.append("standalone")
+    if "consolidated" not in quarterly_types:
+        quarterly_types.append("consolidated")
+
+    quarterly_data: Any = None
+    for qtype in quarterly_types:
+        try:
+            response = await _fetch_with_retry(
+                lambda t=qtype: upstox_client.get_income_statement(
+                    token,
+                    isin,
+                    type=t,
+                    time_period="quarterly",
+                ),
+                section_delay_sec=section_delay_sec,
+            )
+            candidate = _extract_data(response)
+            if _statement_has_numeric_history(candidate, kind="income"):
+                quarterly_data = candidate
+                payload.setdefault("_meta", {})
+                if isinstance(payload["_meta"], dict):
+                    payload["_meta"]["income_statement_quarterly_type"] = qtype
+                logger.info(
+                    "Fundamentals income_statement_quarterly for %s: type=%s",
+                    ticker_norm,
+                    qtype,
+                )
+                break
+            if quarterly_data is None:
+                quarterly_data = candidate
+        except Exception as exc:
+            errors.append(f"income_statement_quarterly_{qtype}: {exc}")
+            logger.debug(
+                "Fundamentals quarterly income (%s) failed for %s: %s",
+                qtype,
+                ticker_norm,
+                exc,
+            )
+        await asyncio.sleep(section_delay_sec)
+
+    if quarterly_data is not None:
+        payload["income_statement_quarterly"] = quarterly_data
 
     if not instrument_key:
         errors.append("competitors: no instrument_key in profile")

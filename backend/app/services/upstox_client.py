@@ -214,16 +214,46 @@ async def get_share_holdings(access_token: str | None, isin: str) -> dict[str, A
     return await asyncio.to_thread(_get_share_holdings_sync, access_token, isin)
 
 
-async def get_balance_sheet(access_token: str | None, isin: str) -> dict[str, Any]:
-    return await asyncio.to_thread(_get_balance_sheet_sync, access_token, isin)
+async def get_balance_sheet(
+    access_token: str | None,
+    isin: str,
+    *,
+    type: str = "consolidated",
+    fs: bool = True,
+) -> dict[str, Any]:
+    return await asyncio.to_thread(
+        _get_balance_sheet_sync, access_token, isin, type=type, fs=fs
+    )
 
 
-async def get_cash_flow(access_token: str | None, isin: str) -> dict[str, Any]:
-    return await asyncio.to_thread(_get_cash_flow_sync, access_token, isin)
+async def get_cash_flow(
+    access_token: str | None,
+    isin: str,
+    *,
+    type: str = "consolidated",
+    fs: bool = True,
+) -> dict[str, Any]:
+    return await asyncio.to_thread(
+        _get_cash_flow_sync, access_token, isin, type=type, fs=fs
+    )
 
 
-async def get_income_statement(access_token: str | None, isin: str) -> dict[str, Any]:
-    return await asyncio.to_thread(_get_income_statement_sync, access_token, isin)
+async def get_income_statement(
+    access_token: str | None,
+    isin: str,
+    *,
+    type: str = "consolidated",
+    time_period: str = "yearly",
+    fs: bool = True,
+) -> dict[str, Any]:
+    return await asyncio.to_thread(
+        _get_income_statement_sync,
+        access_token,
+        isin,
+        type=type,
+        time_period=time_period,
+        fs=fs,
+    )
 
 
 async def get_corporate_actions(access_token: str | None, isin: str) -> dict[str, Any]:

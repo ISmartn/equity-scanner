@@ -389,6 +389,52 @@ export async function cancelTimelineIngest(): Promise<{ status: string; message:
   return parseJson(res);
 }
 
+export interface FundamentalQualityReason {
+  id: string;
+  ok: boolean;
+  title: string;
+  message: string;
+  actual?: number | null;
+  threshold?: number | null;
+  unit?: string;
+}
+
+export interface FundamentalQualityVerdict {
+  available: boolean;
+  pass: boolean | null;
+  strong: boolean | null;
+  label?: string | null;
+  summary?: string | null;
+  sector?: string | null;
+  metrics?: Record<string, number | null | undefined>;
+  checks?: Record<string, boolean>;
+  reasons?: FundamentalQualityReason[];
+  skipped?: Record<string, string>;
+  thresholds?: Record<string, number | string | boolean>;
+}
+
+export interface MomentumQuarterRow {
+  period: string;
+  revenue?: number | null;
+  operating_profit?: number | null;
+  net_profit?: number | null;
+  revenue_qoq_pct?: number | null;
+  operating_profit_qoq_pct?: number | null;
+  net_profit_qoq_pct?: number | null;
+}
+
+export interface MomentumVerdict {
+  available: boolean;
+  pass: boolean | null;
+  strong: boolean | null;
+  label?: string | null;
+  summary?: string | null;
+  metrics?: Record<string, number | string | null | undefined>;
+  quarters?: MomentumQuarterRow[];
+  reasons?: FundamentalQualityReason[];
+  thresholds?: Record<string, number | string | boolean>;
+}
+
 export interface StockFundamentals {
   ticker: string;
   isin: string | null;
@@ -398,11 +444,14 @@ export interface StockFundamentals {
   balance_sheet: Record<string, unknown> | unknown[] | null;
   cash_flow: Record<string, unknown> | unknown[] | null;
   income_statement: Record<string, unknown> | unknown[] | null;
+  income_statement_quarterly?: Record<string, unknown> | unknown[] | null;
   share_holdings: Record<string, unknown> | unknown[] | null;
   key_ratios: Record<string, unknown> | unknown[] | null;
   corporate_actions: Record<string, unknown> | unknown[] | null;
   competitors: Record<string, unknown> | unknown[] | null;
   partial_errors?: string[];
+  quality_verdict?: FundamentalQualityVerdict | null;
+  momentum_verdict?: MomentumVerdict | null;
 }
 
 export interface SyncFundamentalsResult {
@@ -1345,6 +1394,8 @@ export interface MtfRsiStatus {
   snapshot?: MtfRsiSnapshot | null;
   market?: MtfRsiMarketInfo;
   mode_note?: string;
+  lookback_years?: number;
+  lookback_days?: number;
 }
 
 export async function fetchMtfRsiStatus(): Promise<MtfRsiStatus> {
@@ -1409,6 +1460,33 @@ export interface MtfRsiChartPayload {
 export async function fetchMtfRsiChart(timeframe?: number): Promise<MtfRsiChartPayload> {
   const search = timeframe != null ? `?timeframe=${timeframe}` : "";
   const res = await fetch(`/api/mtf-rsi/chart${search}`);
+  return parseJson(res);
+}
+
+export interface MtfRsiCandlePoint {
+  ts: string;
+  open: number;
+  high: number;
+  low: number;
+  close: number;
+  volume?: number | null;
+}
+
+export interface MtfRsiCandlesPayload {
+  timeframe: number;
+  instrument_key?: string;
+  instrument_label?: string;
+  candles: MtfRsiCandlePoint[];
+  ltp?: number | null;
+  ts?: string | null;
+  market?: MtfRsiMarketInfo;
+  mode_note?: string;
+  seeded?: boolean;
+  feed_status?: string;
+}
+
+export async function fetchMtfRsiCandles(timeframe: number): Promise<MtfRsiCandlesPayload> {
+  const res = await fetch(`/api/mtf-rsi/candles?timeframe=${timeframe}`);
   return parseJson(res);
 }
 
@@ -1663,4 +1741,105 @@ export async function fetchSectorRotationConstituents(
   const res = await fetch(`/api/sector-rotation/constituents?${search}`);
   return parseJson(res);
 }
+
+/* ── Experimental Labs: Elliott Wave ─────────────────────────────────── */
+
+export type ElliottWaveFilter = "all" | "wave3" | "wave4" | "high_surety";
+
+export interface ElliottWaveRow {
+  ticker: string;
+  instrument_key: string;
+  kind: string;
+  phase: string;
+  surety_score: number;
+  invalidation_price: number | null;
+  invalidation_risk_pct: number | null;
+  price: number;
+  pattern: string | null;
+  direction: string | null;
+  as_of: string;
+  pivot_count: number;
+  current_wave?: string;
+  trend?: string;
+  what_next?: string;
+}
+
+export interface ElliottWaveGuideLevel {
+  label: string;
+  price: number;
+  role: string;
+  note: string;
+}
+
+export interface ElliottWaveGuide {
+  current_wave: string;
+  trend: string;
+  trend_plain: string;
+  what_next: string;
+  plain_summary: string;
+  levels: ElliottWaveGuideLevel[];
+  glossary: string[];
+}
+
+export interface ElliottWaveSummaryResponse {
+  timestamp: string;
+  universe_size: number;
+  analyzed: number;
+  workers: number;
+  summary: {
+    high_surety: number;
+    wave_3_breakouts: number;
+    wave_4_dips: number;
+  };
+  results: ElliottWaveRow[];
+}
+
+export interface ElliottWaveChartCandle {
+  date: string;
+  open: number;
+  high: number;
+  low: number;
+  close: number;
+  volume: number;
+}
+
+export interface ElliottWaveChartPayload {
+  ticker: string;
+  instrument_key: string;
+  kind: string;
+  as_of: string;
+  phase: string;
+  surety_score: number;
+  invalidation_price: number | null;
+  candles: ElliottWaveChartCandle[];
+  pivots: Array<{ index: number; timestamp: string; price: number; type: string }>;
+  zigzag_path: Array<{ time: string; price: number; type: string }>;
+  wave_path: Array<{ label: string; time: string; price: number; type: string }>;
+  pattern: string | null;
+  direction: string | null;
+  fib: Record<string, number> | null;
+  current_wave?: string;
+  trend?: string;
+  what_next?: string;
+  guide?: ElliottWaveGuide | null;
+}
+
+export async function fetchElliottWaveSummary(
+  refresh = false,
+): Promise<ElliottWaveSummaryResponse> {
+  const search = new URLSearchParams();
+  if (refresh) search.set("refresh", "true");
+  const q = search.toString();
+  const res = await fetch(`/api/labs/elliott-wave/summary${q ? `?${q}` : ""}`);
+  return parseJson(res);
+}
+
+export async function fetchElliottWaveChart(
+  instrumentKey: string,
+): Promise<ElliottWaveChartPayload> {
+  const encoded = encodeURIComponent(instrumentKey);
+  const res = await fetch(`/api/labs/elliott-wave/chart/${encoded}`);
+  return parseJson(res);
+}
+
 

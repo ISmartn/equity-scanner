@@ -39,6 +39,16 @@ async def mtf_rsi_chart(
     return get_mtf_rsi_manager().chart(timeframe)
 
 
+@router.get("/candles")
+async def mtf_rsi_candles(
+    timeframe: int = Query(5, description="Candle timeframe minutes: 1, 3, 5, 10, or 15"),
+) -> dict[str, Any]:
+    try:
+        return get_mtf_rsi_manager().candles(timeframe)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+
 @router.post("/seed")
 async def mtf_rsi_seed(
     body: StreamStartRequest | None = None,

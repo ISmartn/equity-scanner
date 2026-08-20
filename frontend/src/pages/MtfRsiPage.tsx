@@ -1,7 +1,8 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Activity, Database, Radio, RefreshCw } from "lucide-react";
-import { MtfRsiChart } from "@/components/MtfRsiChart";
+import { NiftyChart } from "@/components/NiftyChart";
 import {
+  fetchMtfRsiCandles,
   fetchMtfRsiChart,
   fetchMtfRsiSnapshot,
   fetchMtfRsiStatus,
@@ -9,11 +10,20 @@ import {
   setMtfRsiPeriod,
   startMtfRsiStream,
   stopMtfRsiStream,
+  type MtfRsiCandlePoint,
   type MtfRsiChartPayload,
   type MtfRsiSnapshot,
   type MtfRsiStatus,
 } from "@/lib/api";
 import { loadUiPrefs, saveUiPrefs } from "@/lib/uiPrefs";
+
+const RSI_TF_COLORS: Record<number, string> = {
+  1: "#38bdf8",
+  3: "#a78bfa",
+  5: "#34d399",
+  10: "#fbbf24",
+  15: "#fb7185",
+};
 
 const RSI_PRESETS = [9, 14, 21, 50] as const;
 const ALL_TFS = [1, 3, 5, 10, 15] as const;
@@ -21,6 +31,8 @@ const POLL_MS_LIVE = 1000;
 const POLL_MS_IDLE = 5000;
 /** Rare check while closed — mainly to notice session open / stream state. */
 const POLL_MS_CLOSED = 60_000;
+/** Heavy OHLC/RSI series — avoid refetching multi-year payloads every tick. */
+const CHART_POLL_MS_LIVE = 30_000;
 
 function statusClass(status: string): string {
   switch (status) {
@@ -39,6 +51,7 @@ function formatTs(iso: string | null | undefined): string {
   if (!iso) return "—";
   try {
     return new Date(iso).toLocaleString("en-IN", {
+      timeZone: "Asia/Kolkata",
       hour: "2-digit",
       minute: "2-digit",
       second: "2-digit",
@@ -51,42 +64,65 @@ function formatTs(iso: string | null | undefined): string {
 }
 
 const MTF_PREFS_KEY = "trading.mtfRsi.prefs";
-type MtfUiPrefs = { rsiPeriod: number; visibleTfs: number[] };
-const DEFAULT_MTF_PREFS: MtfUiPrefs = { rsiPeriod: 14, visibleTfs: [...ALL_TFS] };
+type MtfUiPrefs = { rsiPeriod: number; priceTf: number; visibleRsiTfs: number[] };
+const DEFAULT_MTF_PREFS: MtfUiPrefs = {
+  rsiPeriod: 14,
+  priceTf: 5,
+  visibleRsiTfs: [...ALL_TFS],
+};
 
 export function MtfRsiPage() {
   const initialPrefs = loadUiPrefs(MTF_PREFS_KEY, DEFAULT_MTF_PREFS);
   const [rsiPeriod, setRsiPeriod] = useState(Number(initialPrefs.rsiPeriod) || 14);
   const [customPeriod, setCustomPeriod] = useState(String(Number(initialPrefs.rsiPeriod) || 14));
-  const [visibleTfs, setVisibleTfs] = useState<number[]>(
-    Array.isArray(initialPrefs.visibleTfs) && initialPrefs.visibleTfs.length
-      ? initialPrefs.visibleTfs.filter((n) => (ALL_TFS as readonly number[]).includes(n))
+  const initialPriceTf = (ALL_TFS as readonly number[]).includes(Number(initialPrefs.priceTf))
+    ? Number(initialPrefs.priceTf)
+    : 5;
+  const [priceTf, setPriceTf] = useState(initialPriceTf);
+  const [visibleRsiTfs, setVisibleRsiTfs] = useState<number[]>(
+    Array.isArray(initialPrefs.visibleRsiTfs) && initialPrefs.visibleRsiTfs.length
+      ? initialPrefs.visibleRsiTfs.filter((n) => (ALL_TFS as readonly number[]).includes(n))
       : [...ALL_TFS],
   );
+  const [priceCandles, setPriceCandles] = useState<MtfRsiCandlePoint[]>([]);
+  const [rsiChart, setRsiChart] = useState<MtfRsiChartPayload | null>(null);
   const [live, setLive] = useState(false);
   const [busy, setBusy] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [status, setStatus] = useState<MtfRsiStatus | null>(null);
   const [snapshot, setSnapshot] = useState<MtfRsiSnapshot | null>(null);
-  const [chart, setChart] = useState<MtfRsiChartPayload | null>(null);
   const timerRef = useRef<number | null>(null);
+  const chartTimerRef = useRef<number | null>(null);
+  const priceTfRef = useRef(priceTf);
+  priceTfRef.current = priceTf;
 
-  const refresh = useCallback(async () => {
+  const refreshCharts = useCallback(async () => {
     try {
-      const [st, snap, chartPayload] = await Promise.all([
-        fetchMtfRsiStatus(),
-        fetchMtfRsiSnapshot(),
+      const [candlesPayload, chartPayload] = await Promise.all([
+        fetchMtfRsiCandles(priceTfRef.current),
         fetchMtfRsiChart(),
       ]);
+      setPriceCandles(candlesPayload.candles ?? []);
+      setRsiChart(chartPayload);
+    } catch (exc) {
+      setError(exc instanceof Error ? exc.message : String(exc));
+    }
+  }, []);
+
+  const refresh = useCallback(async (opts?: { charts?: boolean }) => {
+    try {
+      const [st, snap] = await Promise.all([fetchMtfRsiStatus(), fetchMtfRsiSnapshot()]);
       setStatus(st);
       setSnapshot(snap);
-      setChart(chartPayload);
       const connected = st.status === "connected" || st.status === "connecting";
       setLive(connected);
       if (typeof st.rsi_period === "number") {
         setRsiPeriod(st.rsi_period);
         setCustomPeriod(String(st.rsi_period));
+      }
+      if (opts?.charts !== false) {
+        await refreshCharts();
       }
       setError(null);
     } catch (exc) {
@@ -94,33 +130,84 @@ export function MtfRsiPage() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [refreshCharts]);
 
   useEffect(() => {
-    refresh();
+    void refresh({ charts: true });
   }, [refresh]);
 
   useEffect(() => {
-    saveUiPrefs(MTF_PREFS_KEY, { rsiPeriod, visibleTfs } satisfies MtfUiPrefs);
-  }, [rsiPeriod, visibleTfs]);
+    saveUiPrefs(MTF_PREFS_KEY, { rsiPeriod, priceTf, visibleRsiTfs } satisfies MtfUiPrefs);
+  }, [rsiPeriod, priceTf, visibleRsiTfs]);
 
-  const market = status?.market ?? snapshot?.market ?? chart?.market;
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const payload = await fetchMtfRsiCandles(priceTf);
+        if (!cancelled) setPriceCandles(payload.candles ?? []);
+      } catch {
+        if (!cancelled) setPriceCandles([]);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [priceTf]);
+
+  const toggleRsiTf = (tf: number) => {
+    setVisibleRsiTfs((prev) => {
+      if (prev.includes(tf)) {
+        if (prev.length === 1) return prev;
+        return prev.filter((x) => x !== tf);
+      }
+      return [...prev, tf].sort((a, b) => a - b);
+    });
+  };
+
+  const rsiOverlays = useMemo(() => {
+    const series = rsiChart?.series ?? {};
+    return visibleRsiTfs.map((tf) => ({
+      key: `${tf}m`,
+      title: `${tf}m`,
+      color: RSI_TF_COLORS[tf] ?? "#94a3b8",
+      points: series[String(tf)] ?? [],
+    }));
+  }, [rsiChart, visibleRsiTfs]);
+
+  const market = status?.market ?? snapshot?.market;
   const marketOpen = market?.is_open ?? true;
 
   useEffect(() => {
-    // Closed session: no live ticks — poll rarely (mainly to notice open).
-    // Open / unknown: 1s while streaming, 5s when idle.
     const ms =
       market?.is_open === false
         ? POLL_MS_CLOSED
         : live
           ? POLL_MS_LIVE
           : POLL_MS_IDLE;
-    timerRef.current = window.setInterval(refresh, ms);
+    timerRef.current = window.setInterval(() => {
+      void refresh({ charts: false });
+    }, ms);
     return () => {
       if (timerRef.current != null) window.clearInterval(timerRef.current);
     };
   }, [live, market?.is_open, refresh]);
+
+  useEffect(() => {
+    if (!live || market?.is_open === false) {
+      if (chartTimerRef.current != null) {
+        window.clearInterval(chartTimerRef.current);
+        chartTimerRef.current = null;
+      }
+      return;
+    }
+    chartTimerRef.current = window.setInterval(() => {
+      void refreshCharts();
+    }, CHART_POLL_MS_LIVE);
+    return () => {
+      if (chartTimerRef.current != null) window.clearInterval(chartTimerRef.current);
+    };
+  }, [live, market?.is_open, refreshCharts]);
 
   const toggleStream = async () => {
     setBusy(true);
@@ -136,7 +223,7 @@ export function MtfRsiPage() {
         setLive(st.status === "connected" || st.status === "connecting");
         if (st.snapshot) setSnapshot(st.snapshot);
       }
-      await refresh();
+      await refresh({ charts: true });
     } catch (exc) {
       setError(exc instanceof Error ? exc.message : String(exc));
     } finally {
@@ -144,14 +231,14 @@ export function MtfRsiPage() {
     }
   };
 
-  const loadSeed = async () => {
+  const loadSeed = async (forceRefresh = false) => {
     setBusy(true);
     setError(null);
     try {
-      const st = await seedMtfRsi({ rsiPeriod });
+      const st = await seedMtfRsi({ rsiPeriod, forceRefresh });
       setStatus(st);
       if (st.snapshot) setSnapshot(st.snapshot);
-      await refresh();
+      await refresh({ charts: true });
     } catch (exc) {
       setError(exc instanceof Error ? exc.message : String(exc));
     } finally {
@@ -172,24 +259,18 @@ export function MtfRsiPage() {
       if (live || status?.seeded) {
         const snap = await setMtfRsiPeriod(period);
         setSnapshot(snap);
-        const chartPayload = await fetchMtfRsiChart();
-        setChart(chartPayload);
+        const [candlesPayload, chartPayload] = await Promise.all([
+          fetchMtfRsiCandles(priceTfRef.current),
+          fetchMtfRsiChart(),
+        ]);
+        setPriceCandles(candlesPayload.candles ?? []);
+        setRsiChart(chartPayload);
       }
     } catch (exc) {
       setError(exc instanceof Error ? exc.message : String(exc));
     } finally {
       setBusy(false);
     }
-  };
-
-  const toggleTf = (tf: number) => {
-    setVisibleTfs((prev) => {
-      if (prev.includes(tf)) {
-        if (prev.length === 1) return prev;
-        return prev.filter((x) => x !== tf);
-      }
-      return [...prev, tf].sort((a, b) => a - b);
-    });
   };
 
   const frames = snapshot?.timeframes ?? {};
@@ -200,7 +281,7 @@ export function MtfRsiPage() {
 
   const feedStatus = status?.status ?? snapshot?.feed_status ?? "stopped";
   const ltp = snapshot?.ltp;
-  const modeNote = status?.mode_note ?? snapshot?.mode_note ?? chart?.mode_note;
+  const modeNote = status?.mode_note ?? snapshot?.mode_note;
 
   return (
     <main className="mx-auto max-w-5xl space-y-4 px-4 py-4 sm:px-6">
@@ -208,14 +289,19 @@ export function MtfRsiPage() {
         <div>
           <h1 className="text-lg font-semibold text-slate-100">Multi-TF RSI</h1>
           <p className="max-w-2xl text-xs text-slate-500">
-            Live Nifty 50 RSI across 1m / 3m / 5m / 10m / 15m from Upstox WebSocket ticks.
-            Historical seed is cached; switch RSI period without reseeding.
+            Live Nifty 50 RSI across 1m / 3m / 5m / 10m / 15m. Candles are stored in
+            SQLite <code className="text-slate-500">index_candles</code>. First seed
+            pulls ~3 years; later updates only fetch from the last saved bar forward.
           </p>
           <p className="mt-1 text-[10px] text-slate-600">
             Feed: <span className="text-slate-400">{feedStatus}</span>
             {status?.seeded ? " · seed ready" : " · not seeded"}
+            {status?.lookback_years != null
+              ? ` · ~${status.lookback_years}y history`
+              : " · ~3y history"}
             {status?.reconnect_attempts ? ` · reconnects ${status.reconnect_attempts}` : ""}
             {market ? ` · ${market.label}` : ""}
+            {priceCandles.length ? ` · chart bars ${priceCandles.length.toLocaleString("en-IN")}` : ""}
           </p>
         </div>
 
@@ -262,7 +348,7 @@ export function MtfRsiPage() {
 
           <button
             type="button"
-            onClick={() => refresh()}
+            onClick={() => refresh({ charts: true })}
             className="inline-flex items-center gap-1.5 rounded-md border border-surface-border bg-surface px-3 py-1.5 text-xs text-slate-300 hover:border-accent/40"
           >
             <RefreshCw className="h-3.5 w-3.5" />
@@ -271,13 +357,22 @@ export function MtfRsiPage() {
 
           <button
             type="button"
-            onClick={loadSeed}
+            onClick={() => loadSeed(false)}
             disabled={busy}
             className="inline-flex items-center gap-1.5 rounded-md border border-surface-border bg-surface px-3 py-1.5 text-xs text-slate-200 hover:border-accent/40"
-            title="Load historical candles without WebSocket (works when market is closed)"
+            title="First run downloads ~3y into SQLite index_candles. Later runs only fetch from the last DB bar forward."
           >
             <Database className="h-3.5 w-3.5" />
-            {busy ? "…" : "Load seed"}
+            {busy ? "Updating…" : "Update seed"}
+          </button>
+          <button
+            type="button"
+            onClick={() => loadSeed(true)}
+            disabled={busy}
+            className="inline-flex items-center gap-1.5 rounded-md border border-surface-border bg-surface px-3 py-1.5 text-xs text-slate-400 hover:border-accent/40"
+            title="Re-download the full ~3y history from Upstox and upsert into index_candles"
+          >
+            {busy ? "…" : "Full 3y refresh"}
           </button>
 
           <button
@@ -347,29 +442,77 @@ export function MtfRsiPage() {
       </section>
 
       <section className="rounded-lg border border-surface-border bg-surface/40 p-3">
-        <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
-          <div className="text-xs font-medium text-slate-200">RSI chart</div>
-          <div className="flex flex-wrap gap-1">
-            {ALL_TFS.map((tf) => {
-              const on = visibleTfs.includes(tf);
-              return (
-                <button
-                  key={tf}
-                  type="button"
-                  onClick={() => toggleTf(tf)}
-                  className={`rounded-md border px-2 py-1 text-[10px] ${
-                    on
-                      ? "border-accent/40 bg-accent/10 text-accent"
-                      : "border-surface-border bg-surface text-slate-500"
-                  }`}
-                >
-                  {tf}m
-                </button>
-              );
-            })}
+        <div className="mb-3 flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
+          <div className="text-xs font-medium text-slate-200">
+            Nifty · multi-TF RSI({snapshot?.rsi_period ?? rsiPeriod})
+          </div>
+          <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center sm:gap-4">
+            <div className="flex flex-wrap items-center gap-1.5">
+              <span className="text-[10px] uppercase tracking-wide text-slate-500">Nifty TF</span>
+              {ALL_TFS.map((tf) => {
+                const on = priceTf === tf;
+                return (
+                  <button
+                    key={`price-${tf}`}
+                    type="button"
+                    onClick={() => setPriceTf(tf)}
+                    className={`rounded-md border px-2 py-1 text-[10px] ${
+                      on
+                        ? "border-accent/40 bg-accent/10 text-accent"
+                        : "border-surface-border bg-surface text-slate-500"
+                    }`}
+                  >
+                    {tf}m
+                  </button>
+                );
+              })}
+            </div>
+            <div className="flex flex-wrap items-center gap-1.5">
+              <span className="text-[10px] uppercase tracking-wide text-slate-500">RSI TFs</span>
+              {ALL_TFS.map((tf) => {
+                const on = visibleRsiTfs.includes(tf);
+                return (
+                  <button
+                    key={`rsi-${tf}`}
+                    type="button"
+                    onClick={() => toggleRsiTf(tf)}
+                    className={`rounded-md border px-2 py-1 text-[10px] ${
+                      on
+                        ? "border-transparent text-slate-900"
+                        : "border-surface-border bg-surface text-slate-500"
+                    }`}
+                    style={
+                      on
+                        ? {
+                            backgroundColor: RSI_TF_COLORS[tf] ?? "#94a3b8",
+                            color: "#0f172a",
+                          }
+                        : undefined
+                    }
+                    title={on ? `Hide ${tf}m RSI` : `Show ${tf}m RSI`}
+                  >
+                    {tf}m
+                  </button>
+                );
+              })}
+            </div>
           </div>
         </div>
-        <MtfRsiChart series={chart?.series ?? {}} visibleTfs={visibleTfs} height={320} />
+        {priceCandles.length > 0 ? (
+          <NiftyChart
+            candles={priceCandles}
+            timeframe={`${priceTf}m`}
+            height={520}
+            rsiPeriod={snapshot?.rsi_period ?? rsiPeriod}
+            showRsi={visibleRsiTfs.length > 0}
+            rsiOverlays={rsiOverlays}
+            showBollinger={false}
+          />
+        ) : (
+          <div className="flex h-[520px] items-center justify-center text-xs text-slate-500">
+            No candles yet — load seed or start the stream.
+          </div>
+        )}
       </section>
 
       <section className="overflow-hidden rounded-lg border border-surface-border">
@@ -427,8 +570,10 @@ export function MtfRsiPage() {
       </section>
 
       <p className="text-[10px] text-slate-600">
-        Chart lines: 70 overbought / 30 oversold. Seed cache:
-        <code className="ml-1 text-slate-500">data/mtf_rsi_cache/</code>
+        Chart times are IST. History is stored in SQLite{" "}
+        <code className="text-slate-500">index_candles</code> (UI may show last ~100k bars).
+        Existing JSON under <code className="text-slate-500">data/mtf_rsi_cache/</code> is
+        imported once if the DB is empty.
       </p>
     </main>
   );

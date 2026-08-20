@@ -190,9 +190,15 @@ def evaluate_fundamentally_strong(
         "available": False,
         "pass": None,
         "strong": None,
+        "label": "Insufficient data",
+        "summary": (
+            "No fundamentals payload available yet. Sync fundamentals for this ticker, "
+            "then re-open the research view."
+        ),
         "sector": None,
         "metrics": {},
         "checks": {},
+        "reasons": [],
         "skipped": {},
         "thresholds": asdict(thr),
     }
@@ -242,24 +248,121 @@ def evaluate_fundamentally_strong(
 
     checks: dict[str, bool] = {}
     skipped: dict[str, str] = {}
+    reasons: list[dict[str, Any]] = []
+
+    def _add_reason(
+        check_id: str,
+        *,
+        ok: bool,
+        title: str,
+        message: str,
+        actual: float | None = None,
+        threshold: float | None = None,
+        unit: str = "",
+    ) -> None:
+        checks[check_id] = ok
+        reasons.append(
+            {
+                "id": check_id,
+                "ok": ok,
+                "title": title,
+                "message": message,
+                "actual": actual,
+                "threshold": threshold,
+                "unit": unit,
+            }
+        )
 
     # Profitability & growth
     if pat_growth is not None:
-        checks["pat_growth"] = pat_growth > thr.min_pat_growth_pct
+        ok = pat_growth > thr.min_pat_growth_pct
+        if ok:
+            msg = (
+                f"Latest PAT grew {pat_growth:.1f}% YoY — earnings are expanding "
+                f"(needs > {thr.min_pat_growth_pct:.0f}%)."
+            )
+        elif pat_growth == 0:
+            msg = "Latest PAT was flat YoY — no earnings growth."
+        else:
+            msg = (
+                f"Latest PAT fell {abs(pat_growth):.1f}% YoY — profits are shrinking "
+                f"(needs growth above {thr.min_pat_growth_pct:.0f}%)."
+            )
+        _add_reason(
+            "pat_growth",
+            ok=ok,
+            title="Profit growth (PAT)",
+            message=msg,
+            actual=round(pat_growth, 2),
+            threshold=thr.min_pat_growth_pct,
+            unit="%",
+        )
     elif net_profit is not None:
-        checks["pat_positive"] = net_profit > 0
+        ok = net_profit > 0
+        _add_reason(
+            "pat_positive",
+            ok=ok,
+            title="Profitability (PAT)",
+            message=(
+                "Company reported a positive net profit in the latest period."
+                if ok
+                else "Latest net profit is negative — the business is loss-making on PAT."
+            ),
+            actual=round(net_profit, 2),
+            threshold=0.0,
+        )
     else:
         skipped["pat_growth"] = "unavailable"
 
     if opm is not None:
-        checks["opm"] = opm >= thr.min_opm_pct
+        ok = opm >= thr.min_opm_pct
+        _add_reason(
+            "opm",
+            ok=ok,
+            title="Operating margin",
+            message=(
+                f"Operating margin is {opm:.1f}% — healthy conversion of sales to operating profit "
+                f"(baseline ≥ {thr.min_opm_pct:.0f}%)."
+                if ok
+                else (
+                    f"Operating margin is only {opm:.1f}% — thin operating leverage "
+                    f"(baseline ≥ {thr.min_opm_pct:.0f}%)."
+                )
+            ),
+            actual=round(opm, 2),
+            threshold=thr.min_opm_pct,
+            unit="%",
+        )
     else:
         skipped["opm"] = "unavailable"
 
     if roe is not None or roce is not None:
         roe_ok = roe is not None and roe >= thr.min_roe_pct
         roce_ok = roce is not None and roce >= thr.min_roce_pct
-        checks["roe_or_roce"] = bool(roe_ok or roce_ok)
+        ok = bool(roe_ok or roce_ok)
+        bits: list[str] = []
+        if roe is not None:
+            bits.append(f"ROE {roe:.1f}%")
+        if roce is not None:
+            bits.append(f"ROCE {roce:.1f}%")
+        metric_txt = " / ".join(bits)
+        _add_reason(
+            "roe_or_roce",
+            ok=ok,
+            title="Return on capital",
+            message=(
+                f"{metric_txt} clears the capital-efficiency bar "
+                f"(need ROE ≥ {thr.min_roe_pct:.0f}% or ROCE ≥ {thr.min_roce_pct:.0f}%)."
+                if ok
+                else (
+                    f"{metric_txt} is soft — capital is not earning enough "
+                    f"(need ROE ≥ {thr.min_roe_pct:.0f}% or ROCE ≥ {thr.min_roce_pct:.0f}%)."
+                )
+            ),
+            actual=roe if roe is not None else roce,
+            threshold=thr.min_roe_pct,
+            unit="%",
+        )
     else:
         skipped["roe_or_roce"] = "unavailable"
 
@@ -267,23 +370,81 @@ def evaluate_fundamentally_strong(
     if _skip_debt_equity(sector):
         skipped["debt_to_equity"] = f"skipped_for_sector:{sector}"
     elif debt_equity is not None:
-        checks["debt_to_equity"] = debt_equity < thr.max_debt_to_equity
+        ok = debt_equity < thr.max_debt_to_equity
+        _add_reason(
+            "debt_to_equity",
+            ok=ok,
+            title="Leverage (D/E)",
+            message=(
+                f"Debt-to-equity is {debt_equity:.2f}x — balance sheet leverage looks contained "
+                f"(baseline < {thr.max_debt_to_equity:.1f}x)."
+                if ok
+                else (
+                    f"Debt-to-equity is {debt_equity:.2f}x — relatively leveraged "
+                    f"(baseline < {thr.max_debt_to_equity:.1f}x)."
+                )
+            ),
+            actual=round(debt_equity, 3),
+            threshold=thr.max_debt_to_equity,
+            unit="x",
+        )
     else:
         skipped["debt_to_equity"] = "unavailable"
 
     if interest_coverage is not None:
-        checks["interest_coverage"] = interest_coverage > thr.min_interest_coverage
+        ok = interest_coverage > thr.min_interest_coverage
+        _add_reason(
+            "interest_coverage",
+            ok=ok,
+            title="Interest coverage",
+            message=(
+                f"Interest coverage is {interest_coverage:.1f}x — earnings comfortably cover interest "
+                f"(baseline > {thr.min_interest_coverage:.0f}x)."
+                if ok
+                else (
+                    f"Interest coverage is only {interest_coverage:.1f}x — debt servicing looks tight "
+                    f"(baseline > {thr.min_interest_coverage:.0f}x)."
+                )
+            ),
+            actual=round(interest_coverage, 2),
+            threshold=thr.min_interest_coverage,
+            unit="x",
+        )
     else:
         skipped["interest_coverage"] = "unavailable"
 
     # Consistency
     if cfo is not None:
-        checks["cfo_positive"] = cfo > thr.min_cfo
+        ok = cfo > thr.min_cfo
+        _add_reason(
+            "cfo_positive",
+            ok=ok,
+            title="Operating cash flow",
+            message=(
+                "Operating cash flow is positive — profits are converting into cash."
+                if ok
+                else "Operating cash flow is negative — reported profits are not backed by cash generation."
+            ),
+            actual=round(cfo, 2),
+            threshold=thr.min_cfo,
+        )
     else:
         skipped["cfo_positive"] = "unavailable"
 
     if eps is not None:
-        checks["eps_positive"] = eps > thr.min_eps
+        ok = eps > thr.min_eps
+        _add_reason(
+            "eps_positive",
+            ok=ok,
+            title="Earnings per share",
+            message=(
+                f"EPS is positive ({eps:.2f}) — shareholders have a profitable bottom line."
+                if ok
+                else f"EPS is {eps:.2f} — earnings per share are not positive."
+            ),
+            actual=round(eps, 2),
+            threshold=thr.min_eps,
+        )
     else:
         skipped["eps_positive"] = "unavailable"
 
@@ -292,13 +453,45 @@ def evaluate_fundamentally_strong(
     else:
         gate_pass = all(checks.values())
 
+    failed = [r for r in reasons if not r["ok"]]
+    passed = [r for r in reasons if r["ok"]]
+    if gate_pass is None:
+        summary = (
+            "Too few reported metrics to form a view. Sync fundamentals or pick a stock "
+            "with fuller filings, then re-check."
+        )
+        label = "Insufficient data"
+    elif gate_pass:
+        summary = (
+            f"Clears all {len(passed)} available quality checks spanning profitability, "
+            "returns, cash generation, and leverage."
+        )
+        label = "Fundamentally strong"
+    else:
+        weak = ", ".join(r["title"] for r in failed[:3])
+        if len(failed) > 3:
+            weak += f" (+{len(failed) - 3} more)"
+        lead = failed[0]["message"] if failed else "Key quality checks failed."
+        summary = (
+            f"Below the quality bar on {weak}. {lead}"
+            + (
+                f" Also watch: {failed[1]['title'].lower()}."
+                if len(failed) > 1
+                else ""
+            )
+        )
+        label = "Weak fundamentals"
+
     return {
         "available": True,
         "pass": gate_pass,
         "strong": gate_pass,
+        "label": label,
+        "summary": summary,
         "sector": sector,
         "metrics": metrics,
         "checks": checks,
+        "reasons": reasons,
         "skipped": skipped,
         "thresholds": asdict(thr),
     }

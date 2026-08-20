@@ -414,16 +414,29 @@ class FundamentalsResponse(BaseModel):
     balance_sheet: dict[str, Any] | list[Any] | None = None
     cash_flow: dict[str, Any] | list[Any] | None = None
     income_statement: dict[str, Any] | list[Any] | None = None
+    income_statement_quarterly: dict[str, Any] | list[Any] | None = None
     share_holdings: dict[str, Any] | list[Any] | None = None
     key_ratios: dict[str, Any] | list[Any] | None = None
     corporate_actions: dict[str, Any] | list[Any] | None = None
     competitors: dict[str, Any] | list[Any] | None = None
     partial_errors: list[str] | None = None
+    quality_verdict: dict[str, Any] | None = None
+    momentum_verdict: dict[str, Any] | None = None
 
 
 class SyncFundamentalsRequest(BaseModel):
     tickers: list[str] = Field(..., min_length=1, max_length=50)
     force: bool = False
+
+
+def _attach_quality_verdict(payload: FundamentalsResponse) -> FundamentalsResponse:
+    from ..services.fundamentals_momentum import evaluate_earnings_momentum
+    from ..services.fundamentals_quality import evaluate_fundamentally_strong
+
+    data = payload.model_dump()
+    data["quality_verdict"] = evaluate_fundamentally_strong(data)
+    data["momentum_verdict"] = evaluate_earnings_momentum(data)
+    return FundamentalsResponse(**data)
 
 
 @router.get("/fundamentals", response_model=FundamentalsResponse)
@@ -436,14 +449,14 @@ async def get_fundamentals(
     cache_key = f"fundamentals:{ticker_norm}"
     cached_mem = get_cached(cache_key)
     if cached_mem:
-        return FundamentalsResponse(**cached_mem)
+        return _attach_quality_verdict(FundamentalsResponse(**cached_mem))
 
     store = get_store()
     row = store.get_fundamentals(ticker_norm)
     if row:
         payload = FundamentalsResponse(cached=True, **row)
         set_cache(cache_key, payload.model_dump(), 3600)
-        return payload
+        return _attach_quality_verdict(payload)
 
     if not fetch_if_missing:
         raise HTTPException(
@@ -466,8 +479,7 @@ async def get_fundamentals(
 
     payload = FundamentalsResponse(cached=False, **row)
     set_cache(cache_key, payload.model_dump(), 3600)
-    return payload
-
+    return _attach_quality_verdict(payload)
 
 @router.get("/fundamentals/strong")
 async def list_fundamentally_strong() -> dict:

@@ -18,8 +18,10 @@ TIMEFRAMES: list[int] = [1, 3, 5, 10, 15]
 DEFAULT_RSI_PERIOD = 14
 INSTRUMENT_KEY = "NSE_INDEX|Nifty 50"
 INSTRUMENT_LABEL = "Nifty 50"
-BUFFER_MAXLEN = 200
-HISTORY_CANDLE_LIMIT = 100
+# Hold ~3y of 1m bars in memory (RSI accuracy); UI payloads are trimmed separately.
+BUFFER_MAXLEN = 500_000
+HISTORY_CANDLE_LIMIT = 0  # 0 = no trim on seed (full lookback)
+HISTORY_LOOKBACK_YEARS = 3
 CACHE_DIR = ROOT_DIR / "data" / "mtf_rsi_cache"
 
 OVERBOUGHT = 70.0
@@ -41,6 +43,7 @@ class RuntimeConfig:
     force_refresh: bool = False
     history_limit: int = HISTORY_CANDLE_LIMIT
     buffer_maxlen: int = BUFFER_MAXLEN
+    lookback_years: int = HISTORY_LOOKBACK_YEARS
 
     def set_rsi_period(self, period: int) -> None:
         if period < 1:

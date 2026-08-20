@@ -12,8 +12,14 @@ data/trading.db-*
 data/telegram_news.session
 data/*.session
 data/dev-proxy-errors.log
+data/fundamentals_sync_errors.log
 data/mtf_rsi_cache/
 data/timeline.db
+backend/data/oi_momentum_alerts.jsonl
+backend/data/fundamentals_sync_errors.log
+backend/data/logs/
+**/fundamentals_sync_all.log
+**/fundamentals_sync_errors.log
 experiments/x-tweet-fetcher-test/.venv/
 experiments/x-tweet-fetcher-test/out/
 experiments/x-tweet-fetcher-test/src/

@@ -46,6 +46,7 @@ class MtfRsiService:
             self.config.cache_dir,
             limit=self.config.history_limit,
             force_refresh=self.config.force_refresh,
+            lookback_days=365 * int(self.config.lookback_years),
         )
         for tf, candles in seeds.items():
             self.engine.seed_timeframe(tf, candles)

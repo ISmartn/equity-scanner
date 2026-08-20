@@ -13,11 +13,13 @@ _backend_dir = str(Path(__file__).resolve().parents[2])
 if _backend_dir not in sys.path:
     sys.path.insert(0, _backend_dir)
 
-from mtf_rsi.config import CACHE_DIR, TIMEFRAMES  # noqa: E402
+from mtf_rsi.config import BUFFER_MAXLEN, CACHE_DIR, HISTORY_LOOKBACK_YEARS, TIMEFRAMES  # noqa: E402
 from mtf_rsi.engine import MultiTimeframeEngine  # noqa: E402
-from mtf_rsi.history import seed_all_timeframes  # noqa: E402
+from mtf_rsi.history import HISTORY_LOOKBACK_DAYS  # noqa: E402
 from mtf_rsi.market_hours import market_session_info  # noqa: E402
 from mtf_rsi.websocket_feed import MarketDataFeed  # noqa: E402
+
+from .mtf_rsi_seed import seed_all_timeframes_to_db  # noqa: E402
 
 logger = logging.getLogger(__name__)
 
@@ -70,6 +72,8 @@ class MtfRsiLiveManager:
                 "reconnect_attempts": self._feed.reconnect_attempts if self._feed else 0,
                 "market": session,
                 "mode_note": self._mode_note(feed_status),
+                "lookback_years": HISTORY_LOOKBACK_YEARS,
+                "lookback_days": HISTORY_LOOKBACK_DAYS,
                 "snapshot": snap,
             }
 
@@ -124,6 +128,36 @@ class MtfRsiLiveManager:
             out["instrument_label"] = self._instrument_label
             return out
 
+    def candles(self, timeframe: int) -> dict[str, Any]:
+        with self._lock:
+            session = market_session_info()
+            feed_status = self._feed.status if self._feed else "stopped"
+            if not self._engine:
+                return {
+                    "timeframe": int(timeframe),
+                    "instrument_key": self._instrument_key,
+                    "instrument_label": self._instrument_label,
+                    "candles": [],
+                    "ltp": None,
+                    "ts": None,
+                    "market": session,
+                    "mode_note": self._mode_note(feed_status),
+                    "seeded": False,
+                    "feed_status": feed_status,
+                }
+            if int(timeframe) not in self._timeframes:
+                raise ValueError(
+                    f"Unsupported timeframe {timeframe}. Use one of: {self._timeframes}"
+                )
+            out = self._engine.ohlc_series(int(timeframe))
+            out["instrument_key"] = self._instrument_key
+            out["instrument_label"] = self._instrument_label
+            out["market"] = session
+            out["mode_note"] = self._mode_note(feed_status)
+            out["seeded"] = self._seeded
+            out["feed_status"] = feed_status
+            return out
+
     def set_rsi_period(self, period: int) -> dict[str, Any]:
         if period < 1 or period > 200:
             raise ValueError("RSI period must be between 1 and 200")
@@ -133,27 +167,53 @@ class MtfRsiLiveManager:
                 self._engine.set_rsi_period(self._rsi_period)
         return self.snapshot()
 
-    def _ensure_seeded(self, access_token: str, *, force_refresh: bool = False) -> None:
+    def _ensure_seeded(
+        self,
+        access_token: str,
+        *,
+        force_refresh: bool = False,
+        allow_skip_if_warm: bool = True,
+    ) -> None:
         with self._lock:
-            if self._seeded and self._engine and not force_refresh:
-                logger.info("MTF RSI seed already in memory; skipping refetch")
-                return
+            if (
+                allow_skip_if_warm
+                and self._seeded
+                and self._engine
+                and not force_refresh
+            ):
+                min_buf = min(
+                    (self._engine.buffer_len(tf) for tf in self._timeframes),
+                    default=0,
+                )
+                if min_buf >= 1000:
+                    logger.info(
+                        "MTF RSI already warm in memory (min buffer=%d); skip network seed",
+                        min_buf,
+                    )
+                    return
 
-            seeds = seed_all_timeframes(
+            seeds = seed_all_timeframes_to_db(
                 access_token,
                 self._instrument_key,
                 self._timeframes,
-                self._cache_dir,
-                limit=100,
+                cache_dir=self._cache_dir,
                 force_refresh=force_refresh,
+                lookback_days=HISTORY_LOOKBACK_DAYS,
             )
             engine = MultiTimeframeEngine(
                 self._timeframes,
                 rsi_period=self._rsi_period,
-                buffer_maxlen=200,
+                buffer_maxlen=BUFFER_MAXLEN,
             )
             for tf, candles in seeds.items():
                 engine.seed_timeframe(tf, candles)
+                logger.info(
+                    "Seeded %dm with %d candles from index_candles (~%dy%s)",
+                    tf,
+                    len(candles),
+                    HISTORY_LOOKBACK_YEARS,
+                    ", force" if force_refresh else ", incremental",
+                )
             self._engine = engine
             self._seeded = True
 
@@ -174,7 +234,12 @@ class MtfRsiLiveManager:
                 if rsi_period < 1 or rsi_period > 200:
                     raise ValueError("RSI period must be between 1 and 200")
                 self._rsi_period = int(rsi_period)
-            self._ensure_seeded(token, force_refresh=force_refresh)
+            # Explicit seed always runs (incremental from last cache, or full if forced).
+            self._ensure_seeded(
+                token,
+                force_refresh=force_refresh,
+                allow_skip_if_warm=False,
+            )
             assert self._engine is not None
             self._engine.set_rsi_period(self._rsi_period)
         return self.status()
