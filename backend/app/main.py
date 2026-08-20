@@ -51,16 +51,20 @@ app.include_router(news_router)
 async def on_startup() -> None:
     import os
 
+    from .config import warm_instrument_keys_from_profiles
     from .services import forecast_registry
 
     store = get_store()
     stats = store.stats()
+    warmed = warm_instrument_keys_from_profiles()
     logger.info(
-        "Timeline DB ready at %s — %d/%d stocks with candle data (%d rows)",
+        "Timeline DB ready at %s — %d/%d stocks with candle data (%d rows); "
+        "warmed %d instrument keys",
         stats["db_path"],
         stats["symbols_with_data"],
         stats["profile_count"],
         stats["candle_count"],
+        warmed,
     )
 
     model = os.getenv("FORECAST_MODEL", "timesfm-2.5")

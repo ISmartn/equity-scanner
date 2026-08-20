@@ -127,8 +127,16 @@ def register_instrument_key(symbol: str, instrument_key: str) -> None:
     DYNAMIC_INSTRUMENT_KEYS[normalized] = instrument_key
 
 
+def _strip_exchange_suffix(symbol: str) -> str:
+    upper = symbol.strip().upper()
+    for suffix in (".NS", ".NSE", ".BSE", "-EQ", ":EQ"):
+        if upper.endswith(suffix):
+            return upper[: -len(suffix)]
+    return upper
+
+
 def resolve_instrument_key(symbol: str) -> str | None:
-    normalized = normalize_symbol(symbol)
+    normalized = normalize_symbol(_strip_exchange_suffix(symbol))
     static = INDEX_INSTRUMENT_KEYS.get(normalized) or EQUITY_INSTRUMENT_KEYS.get(normalized)
     if static:
         return static
@@ -138,7 +146,51 @@ def resolve_instrument_key(symbol: str) -> str | None:
     isin = EQUITY_ISIN_BY_SYMBOL.get(normalized)
     if isin:
         return f"NSE_EQ|{isin}"
+
+    # Persisted security profiles cover the full mainboard (beyond the static Nifty map).
+    try:
+        from .db.store import get_store
+
+        profile = get_store().get_profile_by_ticker(normalized)
+    except Exception:
+        profile = None
+    if profile:
+        token = profile.get("instrument_token")
+        if isinstance(token, str) and token.strip():
+            key = token.strip()
+            register_instrument_key(normalized, key)
+            return key
+        isin_db = profile.get("isin")
+        if isinstance(isin_db, str) and isin_db.strip():
+            key = f"NSE_EQ|{isin_db.strip()}"
+            register_instrument_key(normalized, key)
+            return key
     return None
+
+
+def warm_instrument_keys_from_profiles() -> int:
+    """Load instrument keys from SQLite into the in-memory resolver cache."""
+    try:
+        from .db.store import get_store
+
+        profiles = get_store().list_profiles_with_isin()
+    except Exception:
+        return 0
+    loaded = 0
+    for profile in profiles:
+        ticker = profile.get("ticker")
+        token = profile.get("instrument_token")
+        if not isinstance(ticker, str) or not ticker.strip():
+            continue
+        if isinstance(token, str) and token.strip():
+            register_instrument_key(ticker, token.strip())
+            loaded += 1
+            continue
+        isin = profile.get("isin")
+        if isinstance(isin, str) and isin.strip():
+            register_instrument_key(ticker, f"NSE_EQ|{isin.strip()}")
+            loaded += 1
+    return loaded
 
 
 def get_access_token(custom_token: str | None = None) -> str | None:
