@@ -59,7 +59,8 @@ export const muiTheme = createTheme({
         },
         sizeSmall: {
           fontSize: "0.6875rem",
-          padding: "6px 10px",
+          padding: "4px 10px",
+          lineHeight: 1.5,
         },
       },
     },
@@ -91,7 +92,93 @@ export const muiTheme = createTheme({
       styleOverrides: {
         root: {
           textTransform: "none",
-          minHeight: 48,
+          minHeight: 32,
+          paddingTop: 4,
+          paddingBottom: 4,
+        },
+      },
+    },
+    MuiTabs: {
+      styleOverrides: {
+        root: {
+          minHeight: 32,
+        },
+      },
+    },
+    MuiTextField: {
+      defaultProps: {
+        size: "small",
+      },
+    },
+    MuiFormControl: {
+      defaultProps: {
+        size: "small",
+      },
+    },
+    MuiSelect: {
+      defaultProps: {
+        size: "small",
+      },
+    },
+    MuiInputBase: {
+      styleOverrides: {
+        sizeSmall: {
+          fontSize: "0.75rem",
+          "& .MuiInputBase-input": {
+            paddingTop: 5,
+            paddingBottom: 5,
+          },
+        },
+      },
+    },
+    MuiInputLabel: {
+      styleOverrides: {
+        sizeSmall: {
+          fontSize: "0.75rem",
+          "&:not(.MuiInputLabel-shrink)": {
+            transform: "translate(14px, 6px) scale(1)",
+          },
+        },
+      },
+    },
+    MuiToggleButtonGroup: {
+      defaultProps: {
+        size: "small",
+      },
+    },
+    MuiToggleButton: {
+      styleOverrides: {
+        sizeSmall: {
+          paddingTop: 3,
+          paddingBottom: 3,
+          fontSize: "0.6875rem",
+          textTransform: "none",
+        },
+      },
+    },
+    MuiCheckbox: {
+      defaultProps: {
+        size: "small",
+      },
+      styleOverrides: {
+        sizeSmall: {
+          padding: 4,
+        },
+      },
+    },
+    MuiFormControlLabel: {
+      styleOverrides: {
+        root: {
+          marginLeft: -4,
+          marginRight: 8,
+        },
+      },
+    },
+    MuiDrawer: {
+      styleOverrides: {
+        paper: {
+          backgroundColor: "#141c28",
+          borderLeft: "1px solid #2a3544",
         },
       },
     },

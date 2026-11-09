@@ -1,6 +1,19 @@
 import { TimelineDatePicker } from "@/components/TimelineDatePicker";
-import { TimelineDataCoverage } from "@/components/TimelineDataCoverage";
 import { TimelineStockChart } from "@/components/TimelineStockChart";
+import {
+  AdvancedButton,
+  Clip,
+  PageToolbar,
+  PctCell,
+  ToolbarDivider,
+  pctTone,
+} from "@/components/dense";
+import {
+  MomentumScannerAdvanced,
+  SCANNER_ALL_FILTER,
+  type FnoGroupFilter,
+} from "@/pages/scanner/MomentumScannerAdvanced";
+import { MomentumScannerFilters } from "@/pages/scanner/MomentumScannerFilters";
 import { CompanyNewsSidebar } from "@/components/news/CompanyNewsSidebar";
 import { StockFundamentalsPanel } from "@/components/StockFundamentalsPanel";
 import { AppButton } from "@/components/mui";
@@ -29,19 +42,14 @@ import { loadUiPrefs, saveUiPrefs } from "@/lib/uiPrefs";
 import RefreshIcon from "@mui/icons-material/Refresh";
 import DocumentScannerIcon from "@mui/icons-material/DocumentScanner";
 import Alert from "@mui/material/Alert";
-import Checkbox from "@mui/material/Checkbox";
 import FormControl from "@mui/material/FormControl";
-import FormControlLabel from "@mui/material/FormControlLabel";
-import FormGroup from "@mui/material/FormGroup";
 import InputLabel from "@mui/material/InputLabel";
 import LinearProgress from "@mui/material/LinearProgress";
 import MenuItem from "@mui/material/MenuItem";
 import Select, { type SelectChangeEvent } from "@mui/material/Select";
 import ToggleButton from "@mui/material/ToggleButton";
 import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
-import Stack from "@mui/material/Stack";
 import TextField from "@mui/material/TextField";
-import Typography from "@mui/material/Typography";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   copyTextToClipboard,
@@ -63,21 +71,10 @@ import {
 } from "@/lib/scannerExport";
 import { extractProfileMarketCap, extractProfileSector, FUNDAMENTALLY_STRONG_TOOLTIP, fundamentalStrongFromDetails } from "@/lib/fundamentalsMeta";
 import { computeVcpOverlay } from "@/lib/vcpOverlay";
-import {
-  AlertTriangle,
-  ClipboardCopy,
-  Layers,
-  Newspaper,
-  PanelRightClose,
-  PanelRightOpen,
-  RefreshCw,
-  Star,
-  TrendingUp,
-} from "lucide-react";
+import { AlertTriangle, RefreshCw, Star, TrendingUp } from "lucide-react";
 
 const PAGE_SIZE = 80;
-const ALL_FILTER = "all";
-type FnoGroupFilter = "all" | "fno" | "non_fno";
+const ALL_FILTER = SCANNER_ALL_FILTER;
 
 const SCANNER_PREFS_KEY = "trading.scanner.prefs";
 type ScannerUiPrefs = {
@@ -172,7 +169,7 @@ function StatusBadge({ status }: { status: ScannerSignalStatus }) {
         ? "border-amber-500/40 bg-amber-500/15 text-amber-300"
         : "border-slate-500/40 bg-slate-500/10 text-slate-400";
   return (
-    <span className={`inline-block rounded px-1.5 py-0.5 text-[9px] font-medium ${tone}`}>
+    <span className={`inline-block whitespace-nowrap rounded border px-1.5 py-px text-[10px] font-semibold ${tone}`}>
       {statusLabel(status)}
     </span>
   );
@@ -180,7 +177,7 @@ function StatusBadge({ status }: { status: ScannerSignalStatus }) {
 
 function TimingBadge({ timing }: { timing: TimingClass | null }) {
   if (!timing) {
-    return <span className="text-[9px] text-slate-600">—</span>;
+    return <span className="text-[10px] text-slate-500">—</span>;
   }
   const tone =
     timing === "early"
@@ -189,7 +186,7 @@ function TimingBadge({ timing }: { timing: TimingClass | null }) {
         ? "border-red-500/40 bg-red-500/15 text-red-300"
         : "border-emerald-500/40 bg-emerald-500/15 text-emerald-300";
   return (
-    <span className={`inline-block rounded px-1.5 py-0.5 text-[9px] font-medium ${tone}`}>
+    <span className={`inline-block whitespace-nowrap rounded border px-1.5 py-px text-[10px] font-semibold ${tone}`}>
       {timingClassLabel(timing)}
     </span>
   );
@@ -238,10 +235,10 @@ function GatePill({
         ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-300"
         : pass === false
           ? "border-red-500/30 bg-red-500/10 text-red-300"
-          : "border-surface-border bg-surface/50 text-slate-500";
+          : "border-surface-border bg-surface/50 text-slate-400";
   return (
     <span
-      className={`inline-block rounded border px-1 py-px text-[8px] leading-tight ${tone}`}
+      className={`inline-block whitespace-nowrap rounded border px-1 text-[10px] leading-[14px] ${tone}`}
       title={title}
     >
       {short} {state}
@@ -300,19 +297,6 @@ function foGateDisplay(row: ScannerPatternSignal): {
   };
 }
 
-function MoveCell({ value }: { value: number | null }) {
-  if (value == null || Number.isNaN(value)) {
-    return <span className="text-slate-500">—</span>;
-  }
-  const tone = value >= 0 ? "text-emerald-400" : "text-red-400";
-  return (
-    <span className={`tabular-nums font-medium ${tone}`}>
-      {value > 0 ? "+" : ""}
-      {value.toFixed(2)}%
-    </span>
-  );
-}
-
 export function MomentumScannerPage() {
   const initialPrefs = loadUiPrefs(SCANNER_PREFS_KEY, DEFAULT_SCANNER_PREFS);
   const [stats, setStats] = useState<Awaited<ReturnType<typeof fetchTimelineStats>> | null>(null);
@@ -357,6 +341,7 @@ export function MomentumScannerPage() {
   const [copyingJson, setCopyingJson] = useState(false);
   const [copyMessage, setCopyMessage] = useState<string | null>(null);
   const [exportJsonOpen, setExportJsonOpen] = useState(false);
+  const [advancedOpen, setAdvancedOpen] = useState(false);
 
   const [selectedRow, setSelectedRow] = useState<ScannerPatternSignal | null>(null);
   const [chartHistory, setChartHistory] = useState<TimelineCandlePoint[]>([]);
@@ -1009,414 +994,283 @@ export function MomentumScannerPage() {
     return computeVcpOverlay(chartHistory, asOf, selectedRow.details);
   }, [showVcpOverlay, selectedRow, chartHistory]);
 
+  const activeFilterCount = [
+    sector !== ALL_FILTER,
+    fnoGroup !== "all",
+    !earlySetupMode && triggeredOnly,
+    !earlySetupMode && setupOnly,
+    macroPassOnly,
+    fundamentallyStrongOnly,
+    fundamentalPassOnly,
+  ].filter(Boolean).length;
+
+  const resetFilters = () => {
+    setSector(ALL_FILTER);
+    setFnoGroup("all");
+    setTriggeredOnly(false);
+    setSetupOnly(false);
+    setMacroPassOnly(false);
+    setFundamentallyStrongOnly(false);
+    setFundamentalPassOnly(false);
+  };
+
   return (
-    <div className="flex h-[calc(100dvh-6.5rem)] min-h-0 flex-col lg:flex-row">
-    <main className="mx-auto flex min-h-0 min-w-0 max-w-[1920px] flex-1 flex-col gap-1.5 overflow-hidden px-3 py-1.5 sm:px-4">
+    <div className="page-shell flex flex-col lg:flex-row">
+    <main className="flex min-h-0 min-w-0 flex-1 flex-col gap-1 overflow-hidden px-1.5 py-1 sm:px-2">
       {error && (
-        <Alert severity="error" className="shrink-0 text-xs">
+        <Alert severity="error" className="shrink-0 py-0 text-data-sm">
           {error}
         </Alert>
       )}
 
-      <div className="shrink-0 overflow-x-auto rounded-xl border border-surface-border bg-surface-raised px-2 py-1.5 [scrollbar-width:thin] [&::-webkit-scrollbar]:h-1.5">
-        <div className="flex w-max max-w-none flex-nowrap items-center gap-2">
-          <TimelineDataCoverage stats={stats} compact />
-          <div className="h-5 w-px shrink-0 bg-surface-border" />
-          <TimelineDatePicker
-            compact
-            showLegend={false}
-            value={tradeDate}
-            onChange={setTradeDate}
-            availableDates={scanDates.length ? scanDates : stats ? [stats.max_trade_date].filter(Boolean) as string[] : []}
-            markedDates={scanDates}
-            markedLabel="Scan done"
-            accentMarkedDates={refinedScanDates}
-            accentMarkedLabel="Rescanned · Darvas included"
-            minDate={stats?.min_trade_date}
-            maxDate={today}
-            disabled={bootLoading}
-          />
-          {(scanDates.length > 0 || refinedScanDates.length > 0) && (
-            <span className="inline-flex shrink-0 flex-nowrap items-center gap-2 whitespace-nowrap text-[9px] text-slate-500">
-              <span className="inline-flex items-center gap-1">
-                <span className="inline-block h-2 w-2 rounded-sm bg-emerald-400" />
-                Scan done
-              </span>
-              {refinedScanDates.length > 0 ? (
-                <span className="inline-flex items-center gap-1">
-                  <span className="inline-block h-2 w-2 rounded-sm bg-sky-400" />
-                  Rescanned · Darvas
-                </span>
-              ) : null}
-            </span>
-          )}
-
-          <AppButton
-            variant="contained"
-            size="small"
-            className="shrink-0"
-            startIcon={
-              <DocumentScannerIcon
-                fontSize="small"
-                className={scanRunning ? "animate-pulse" : undefined}
-              />
-            }
-            onClick={handleRunScan}
-            disabled={scanRunning || bootLoading || !tradeDate}
-          >
-            {scanRunning && !scanStatus?.batch_mode ? "Scanning…" : "Run scan"}
-          </AppButton>
-          <AppButton
-            size="small"
-            className="shrink-0"
-            onClick={handleRunScanMonth}
-            disabled={scanRunning || bootLoading || !tradeDate}
-            title={`Scan every weekday in ${tradeDate.slice(0, 7)} through ${tradeDate}`}
-          >
-            Month
-          </AppButton>
-          <AppButton
-            size="small"
-            className="shrink-0"
-            onClick={handleRunScanLast7}
-            disabled={scanRunning || bootLoading || !tradeDate}
-            title={`Scan the 7 weekdays before ${tradeDate}`}
-          >
-            −7d
-          </AppButton>
-
-          <div className="h-5 w-px shrink-0 bg-surface-border" />
-
-          <ToggleButtonGroup
-            exclusive
-            size="small"
-            value={scanMode}
-            onChange={(_e, value: ScannerScanMode | null) => {
-              if (value) setScanMode(value);
-            }}
-            sx={{ height: 30, flexShrink: 0 }}
-          >
-            <ToggleButton value="confirmation" className="!px-2 !text-[10px] !normal-case">
-              Confirmation
-            </ToggleButton>
-            <ToggleButton value="early_setup" className="!px-2 !text-[10px] !normal-case">
-              Early setup
-            </ToggleButton>
-          </ToggleButtonGroup>
-
-          <AppButton
-            variant="outlined"
-            size="small"
-            className="shrink-0"
-            startIcon={
-              <RefreshIcon fontSize="small" className={loading ? "animate-spin" : undefined} />
-            }
-            onClick={handleSearch}
-            disabled={loading || !tradeDate || filterInvalid}
-          >
-            Load
-          </AppButton>
-
-          {earlySetupMode && (
-            <Typography variant="caption" className="shrink-0 whitespace-nowrap text-[9px] text-sky-300/90">
-              Early: setup · ≤20% 20d · ≤2% day
-            </Typography>
-          )}
-        </div>
-
-        {scanRunning && scanStatus && (
-          <div className="mt-1.5 space-y-1 border-t border-surface-border pt-1.5">
-            <div className="flex flex-wrap items-center justify-between gap-2 text-[9px] text-slate-400">
-              <span>
-                {scanStatus.batch_mode === "month"
-                  ? "Batch · month"
-                  : scanStatus.batch_mode === "last_7"
-                    ? "Batch · −7d"
-                    : "Scanning"}
-                {scanStatus.batch_day_total ? (
-                  <>
-                    {" · "}
-                    <span className="font-medium text-slate-200">
-                      {scanStatus.batch_day_index}/{scanStatus.batch_day_total}
-                    </span>
-                  </>
-                ) : null}
-                {scanStatus.trade_date ? (
-                  <>
-                    {" · "}
-                    <span className="font-medium text-slate-200">{scanStatus.trade_date}</span>
-                  </>
-                ) : null}
-                {scanStatus.current_ticker ? (
-                  <>
-                    {" · "}
-                    <span className="font-medium text-slate-200">{scanStatus.current_ticker}</span>
-                  </>
-                ) : null}
-              </span>
-              <span className="tabular-nums">
-                {scanStatus.processed.toLocaleString()}/{scanStatus.total.toLocaleString()}
-                {scanStatus.total > 0 ? ` (${activeProgressPct}%)` : ""}
-                {" · "}
-                {scanStatus.alerts_count.toLocaleString()} alerts
-              </span>
-            </div>
-            <LinearProgress
-              variant="determinate"
-              value={activeProgressPct}
-              className="h-1 rounded-full"
-              sx={{ bgcolor: "background.default", borderRadius: 999 }}
+      <PageToolbar
+        right={<AdvancedButton onClick={() => setAdvancedOpen(true)} label="Scan options" />}
+        below={
+          <div className="space-y-1">
+            <MomentumScannerFilters
+              earlySetupMode={earlySetupMode}
+              sectors={sectors}
+              sector={sector}
+              setSector={setSector}
+              fnoGroup={fnoGroup}
+              setFnoGroup={setFnoGroup}
+              triggeredOnly={triggeredOnly}
+              setTriggeredOnly={setTriggeredOnly}
+              setupOnly={setupOnly}
+              setSetupOnly={setSetupOnly}
+              macroPassOnly={macroPassOnly}
+              setMacroPassOnly={setMacroPassOnly}
+              fundamentallyStrongOnly={fundamentallyStrongOnly}
+              setFundamentallyStrongOnly={setFundamentallyStrongOnly}
+              fundamentalPassOnly={fundamentalPassOnly}
+              setFundamentalPassOnly={setFundamentalPassOnly}
+              activeCount={activeFilterCount}
+              onReset={resetFilters}
             />
-          </div>
-        )}
-      </div>
-
-      <div
-        className={`grid min-h-0 flex-1 grid-cols-1 gap-1.5 ${
-          showFundamentals
-            ? "lg:grid-cols-[minmax(30rem,2.4fr)_minmax(0,2.6fr)_minmax(15rem,1fr)] xl:grid-cols-[minmax(34rem,2.5fr)_minmax(0,2.5fr)_minmax(17rem,1fr)]"
-            : "lg:grid-cols-[minmax(32rem,2.3fr)_minmax(0,2.7fr)] xl:grid-cols-[minmax(38rem,2.4fr)_minmax(0,2.6fr)]"
-        }`}
-      >
-        <section className="flex min-h-0 min-w-0 flex-col rounded-xl border border-surface-border bg-surface-raised/60">
-          <div className="shrink-0 border-b border-surface-border px-2.5 py-2">
-            <div className="mb-2 flex items-start justify-between gap-2">
-              <div className="min-w-0">
-                <h2 className="text-sm font-semibold text-slate-100">Pattern alerts</h2>
-                <p className="truncate text-[10px] text-slate-500">
-                  {!hasLoaded && !loading
-                    ? "Loading…"
-                    : !hasLoaded
-                      ? "Load results or run a scan"
-                      : `${total.toLocaleString()} matches · ${tradeDate}`}
-                </p>
-              </div>
-              {hasLoaded && (
-                <div className="flex shrink-0 items-center gap-1 text-[10px] text-slate-400">
-                  <button
-                    type="button"
-                    disabled={!exportRows.length || copyingJson}
-                    onClick={handleCopyJson}
-                    title="Copy all matching results as JSON"
-                    className="inline-flex items-center gap-1 rounded border border-surface-border px-2 py-1 text-slate-300 transition hover:border-accent/40 hover:text-slate-100 disabled:opacity-40"
-                  >
-                    <ClipboardCopy className={`h-3.5 w-3.5 ${copyingJson ? "animate-pulse" : ""}`} />
-                    JSON
-                  </button>
-                  <span className="tabular-nums">
-                    {page + 1}/{totalPages}
-                  </span>
-                  <button
-                    type="button"
-                    disabled={page <= 0 || loading}
-                    onClick={() => setPage((p) => Math.max(0, p - 1))}
-                    className="rounded border border-surface-border px-2 py-1 disabled:opacity-40"
-                  >
-                    ‹
-                  </button>
-                  <button
-                    type="button"
-                    disabled={page + 1 >= totalPages || loading}
-                    onClick={() => setPage((p) => p + 1)}
-                    className="rounded border border-surface-border px-2 py-1 disabled:opacity-40"
-                  >
-                    ›
-                  </button>
+            {scanRunning && scanStatus && (
+                <div className="space-y-1">
+                  <div className="flex flex-wrap items-center justify-between gap-2 text-data-xs text-slate-300">
+                    <span>
+                      {scanStatus.batch_mode === "month"
+                        ? "Batch · month"
+                        : scanStatus.batch_mode === "last_7"
+                          ? "Batch · −7d"
+                          : "Scanning"}
+                      {scanStatus.batch_day_total ? (
+                        <>
+                          {" · "}
+                          <span className="font-semibold text-slate-100">
+                            {scanStatus.batch_day_index}/{scanStatus.batch_day_total}
+                          </span>
+                        </>
+                      ) : null}
+                      {scanStatus.trade_date ? (
+                        <>
+                          {" · "}
+                          <span className="font-semibold text-slate-100">{scanStatus.trade_date}</span>
+                        </>
+                      ) : null}
+                      {scanStatus.current_ticker ? (
+                        <>
+                          {" · "}
+                          <span className="font-semibold text-slate-100">{scanStatus.current_ticker}</span>
+                        </>
+                      ) : null}
+                    </span>
+                    <span className="tabular-nums">
+                      {scanStatus.processed.toLocaleString()}/{scanStatus.total.toLocaleString()}
+                      {scanStatus.total > 0 ? ` (${activeProgressPct}%)` : ""}
+                      {" · "}
+                      {scanStatus.alerts_count.toLocaleString()} alerts
+                    </span>
+                  </div>
+                  <LinearProgress
+                    variant="determinate"
+                    value={activeProgressPct}
+                    className="h-1 rounded-full"
+                    sx={{ bgcolor: "background.default", borderRadius: 999 }}
+                  />
                 </div>
               )}
+          </div>
+        }
+      >
+        <TimelineDatePicker
+          compact
+          showLegend={false}
+          value={tradeDate}
+          onChange={setTradeDate}
+          availableDates={scanDates.length ? scanDates : stats ? [stats.max_trade_date].filter(Boolean) as string[] : []}
+          markedDates={scanDates}
+          markedLabel="Scan done"
+          accentMarkedDates={refinedScanDates}
+          accentMarkedLabel="Rescanned · Darvas included"
+          minDate={stats?.min_trade_date}
+          maxDate={today}
+          disabled={bootLoading}
+        />
+        <AppButton
+          variant="contained"
+          size="small"
+          className="shrink-0"
+          startIcon={
+            <DocumentScannerIcon
+              fontSize="small"
+              className={scanRunning ? "animate-pulse" : undefined}
+            />
+          }
+          onClick={handleRunScan}
+          disabled={scanRunning || bootLoading || !tradeDate}
+        >
+          {scanRunning && !scanStatus?.batch_mode ? "Scanning…" : "Run scan"}
+        </AppButton>
+
+        <ToolbarDivider />
+
+        <ToggleButtonGroup
+          exclusive
+          value={scanMode}
+          onChange={(_e, value: ScannerScanMode | null) => {
+            if (value) setScanMode(value);
+          }}
+          sx={{ flexShrink: 0 }}
+        >
+          <ToggleButton value="confirmation">Confirmation</ToggleButton>
+          <ToggleButton value="early_setup">Early setup</ToggleButton>
+        </ToggleButtonGroup>
+
+        <FormControl sx={{ minWidth: 112, flexShrink: 0 }} disabled={earlySetupMode}>
+          <InputLabel id="scanner-pattern-label">Pattern</InputLabel>
+          <Select
+            labelId="scanner-pattern-label"
+            label="Pattern"
+            value={pattern}
+            onChange={(e: SelectChangeEvent) =>
+              setPattern(e.target.value as ScannerPatternId | typeof ALL_FILTER)
+            }
+          >
+            <MenuItem value={ALL_FILTER}>All</MenuItem>
+            {Object.entries(PATTERN_FILTER_LABELS).map(([id, label]) => (
+              <MenuItem key={id} value={id}>
+                {label}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+
+        <TextField
+          type="number"
+          label="Min score"
+          value={earlySetupMode ? "75" : minScore}
+          onChange={(e) => setMinScore(e.target.value)}
+          disabled={earlySetupMode}
+          slotProps={{ htmlInput: { min: 0, max: 100, step: 5 } }}
+          sx={{ width: 84, flexShrink: 0 }}
+        />
+
+        <AppButton
+          variant="outlined"
+          size="small"
+          className="shrink-0"
+          startIcon={
+            <RefreshIcon fontSize="small" className={loading ? "animate-spin" : undefined} />
+          }
+          onClick={handleSearch}
+          disabled={loading || !tradeDate || filterInvalid}
+        >
+          Load
+        </AppButton>
+
+        {earlySetupMode && (
+          <span className="shrink-0 whitespace-nowrap text-data-xs text-sky-300">
+            Early: setup · ≤20% 20d · ≤2% day
+          </span>
+        )}
+      </PageToolbar>
+
+      {/* Below 2xl the fundamentals panel sits under the chart so the table keeps all its columns. */}
+      <div
+        className={`grid min-h-0 flex-1 grid-cols-1 gap-1 ${
+          showFundamentals
+            ? "lg:grid-cols-[minmax(34rem,1fr)_minmax(0,1.25fr)] lg:grid-rows-[minmax(0,1.5fr)_minmax(0,1fr)] 2xl:grid-cols-[minmax(36rem,2fr)_minmax(0,3fr)_minmax(19rem,1fr)] 2xl:grid-rows-1"
+            : "lg:grid-cols-[minmax(34rem,1fr)_minmax(0,1.35fr)] 2xl:grid-cols-[minmax(36rem,2fr)_minmax(0,3fr)]"
+        }`}
+      >
+        <section
+          className={`panel mobile-pane flex min-h-0 min-w-0 flex-col ${
+            showFundamentals ? "lg:row-span-2 2xl:row-span-1" : ""
+          }`}
+        >
+          <div className="flex shrink-0 items-center justify-between gap-2 border-b border-surface-border px-2 py-1">
+            <div className="flex min-w-0 items-baseline gap-2">
+              <h2 className="shrink-0 text-data-md font-semibold text-slate-100">Pattern alerts</h2>
+              <span className="truncate text-data-xs tabular-nums text-slate-300">
+                {!hasLoaded && !loading
+                  ? "Loading…"
+                  : !hasLoaded
+                    ? "Load results or run a scan"
+                    : `${total.toLocaleString()} matches · ${tradeDate}`}
+              </span>
             </div>
-
-            <div className="overflow-x-auto">
-              <Stack
-                direction="row"
-                spacing={1}
-                useFlexGap
-                className="min-w-max flex-nowrap items-end"
-              >
-              <FormControl size="small" sx={{ minWidth: 108, flexShrink: 0 }} disabled={earlySetupMode}>
-                <InputLabel id="scanner-pattern-label">Pattern</InputLabel>
-                <Select
-                  labelId="scanner-pattern-label"
-                  label="Pattern"
-                  value={pattern}
-                  onChange={(e: SelectChangeEvent) =>
-                    setPattern(e.target.value as ScannerPatternId | typeof ALL_FILTER)
-                  }
+            {hasLoaded && totalPages > 1 && (
+              <div className="flex shrink-0 items-center gap-1 text-data-xs text-slate-300">
+                <button
+                  type="button"
+                  disabled={page <= 0 || loading}
+                  onClick={() => setPage((p) => Math.max(0, p - 1))}
+                  className="rounded border border-surface-border px-1.5 leading-5 disabled:opacity-40"
+                  aria-label="Previous page"
                 >
-                  <MenuItem value={ALL_FILTER}>All</MenuItem>
-                  {Object.entries(PATTERN_FILTER_LABELS).map(([id, label]) => (
-                    <MenuItem key={id} value={id}>
-                      {label}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-
-              <TextField
-                size="small"
-                type="number"
-                label="Min score"
-                value={earlySetupMode ? "75" : minScore}
-                onChange={(e) => setMinScore(e.target.value)}
-                disabled={earlySetupMode}
-                slotProps={{ htmlInput: { min: 0, max: 100, step: 5 } }}
-                sx={{ width: 88, flexShrink: 0 }}
-              />
-
-              <FormControl size="small" sx={{ minWidth: 96, flexShrink: 0 }} disabled={earlySetupMode}>
-                <InputLabel id="scanner-sector-label">Sector</InputLabel>
-                <Select
-                  labelId="scanner-sector-label"
-                  label="Sector"
-                  value={sector}
-                  onChange={(e: SelectChangeEvent) => setSector(e.target.value)}
+                  ‹
+                </button>
+                <span className="tabular-nums">
+                  {page + 1}/{totalPages}
+                </span>
+                <button
+                  type="button"
+                  disabled={page + 1 >= totalPages || loading}
+                  onClick={() => setPage((p) => p + 1)}
+                  className="rounded border border-surface-border px-1.5 leading-5 disabled:opacity-40"
+                  aria-label="Next page"
                 >
-                  <MenuItem value={ALL_FILTER}>All</MenuItem>
-                  {sectors.map((s) => (
-                    <MenuItem key={s} value={s}>
-                      {s}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-
-              <Stack spacing={0.25} className="shrink-0">
-                <Typography variant="caption" className="!text-[9px] text-slate-500">
-                  Listing
-                </Typography>
-                <ToggleButtonGroup
-                  exclusive
-                  size="small"
-                  value={fnoGroup}
-                  onChange={(_e, value: FnoGroupFilter | null) => {
-                    if (value) setFnoGroup(value);
-                  }}
-                  sx={{ height: 30, flexShrink: 0 }}
-                >
-                  <ToggleButton value="all" className="!px-2 !text-[10px] !normal-case">
-                    All
-                  </ToggleButton>
-                  <ToggleButton
-                    value="fno"
-                    className="!px-2 !text-[10px] !normal-case"
-                    title="NSE F&O stocks only"
-                  >
-                    F&O ★
-                  </ToggleButton>
-                  <ToggleButton
-                    value="non_fno"
-                    className="!px-2 !text-[10px] !normal-case"
-                    title="Cash / non-F&O stocks only"
-                  >
-                    Non-F&O
-                  </ToggleButton>
-                </ToggleButtonGroup>
-              </Stack>
-
-              <FormGroup row sx={{ gap: 0, mr: 0.5, flexShrink: 0, flexWrap: "nowrap", opacity: earlySetupMode ? 0.5 : 1 }}>
-                <FormControlLabel
-                  control={
-                    <Checkbox
-                      size="small"
-                      checked={earlySetupMode || triggeredOnly}
-                      disabled={earlySetupMode}
-                      onChange={(e) => setTriggeredOnly(e.target.checked)}
-                    />
-                  }
-                  label={<Typography variant="caption">Trigger</Typography>}
-                />
-                <FormControlLabel
-                  control={
-                    <Checkbox
-                      size="small"
-                      checked={earlySetupMode || setupOnly}
-                      disabled={earlySetupMode}
-                      onChange={(e) => setSetupOnly(e.target.checked)}
-                    />
-                  }
-                  label={<Typography variant="caption">Setup</Typography>}
-                />
-                <FormControlLabel
-                  control={
-                    <Checkbox
-                      size="small"
-                      checked={macroPassOnly}
-                      onChange={(e) => setMacroPassOnly(e.target.checked)}
-                    />
-                  }
-                  label={<Typography variant="caption">Macro</Typography>}
-                />
-                <FormControlLabel
-                  control={
-                    <Checkbox
-                      size="small"
-                      checked={fundamentallyStrongOnly}
-                      onChange={(e) => setFundamentallyStrongOnly(e.target.checked)}
-                    />
-                  }
-                  label={
-                    <Typography
-                      variant="caption"
-                      title={FUNDAMENTALLY_STRONG_TOOLTIP}
-                      className="whitespace-nowrap"
-                    >
-                      Strong
-                    </Typography>
-                  }
-                />
-                <FormControlLabel
-                  control={
-                    <Checkbox
-                      size="small"
-                      checked={fundamentalPassOnly}
-                      onChange={(e) => setFundamentalPassOnly(e.target.checked)}
-                    />
-                  }
-                  label={
-                    <Typography variant="caption" title="Legacy ROE ≥ 15% and ROCE ≥ 12% gate">
-                      Fund
-                    </Typography>
-                  }
-                />
-              </FormGroup>
-              </Stack>
-            </div>
+                  ›
+                </button>
+              </div>
+            )}
           </div>
 
           <div className="min-h-0 flex-1 overflow-auto">
-            <table className="w-full text-left">
-              <thead className="sticky top-0 z-10 bg-surface-raised text-[10px] uppercase tracking-wide text-slate-500">
+            <table className="dt">
+              <thead>
                 <tr>
-                  <th className="px-2.5 py-2">
+                  <th>
                     Ticker
-                    <span className="ml-1 font-normal normal-case text-slate-600" title="F&O stocks marked with ★">
+                    <span className="ml-1 font-normal normal-case" title="F&O stocks marked with ★">
                       ★
                     </span>
                   </th>
-                  <th className="px-2 py-2">Pattern</th>
-                  <th className="px-2 py-2">Status</th>
-                  <th className="px-2 py-2">Timing</th>
-                  <th className="px-2 py-2 text-right">20d</th>
-                  <th className="px-2 py-2 text-right">Move</th>
-                  <th className="px-2 py-2 text-right">Score</th>
+                  <th title="Pattern · status · timing">Pattern / signal</th>
+                  <th className="text-right" title="Return over the 20 sessions before the signal">20d</th>
+                  <th className="text-right" title="Signal-day move">Move</th>
+                  <th className="text-right">Score</th>
                 </tr>
               </thead>
               <tbody>
                 {loading && rows.length === 0 ? (
                   <tr>
-                    <td colSpan={7} className="px-2 py-4 text-center text-[11px] text-slate-500">
+                    <td colSpan={5} className="py-4 text-center text-slate-400">
                       Loading…
                     </td>
                   </tr>
                 ) : !hasLoaded && !loading ? (
                   <tr>
-                    <td colSpan={7} className="px-2 py-4 text-center text-[11px] text-slate-500">
+                    <td colSpan={5} className="py-4 text-center text-slate-400">
                       Loading scan results…
                     </td>
                   </tr>
                 ) : rows.length === 0 ? (
                   <tr>
-                    <td colSpan={7} className="px-2 py-3 text-center text-[11px] text-slate-500">
+                    <td colSpan={5} className="py-3 text-center text-slate-300">
                       {noScanForDate ? (
                         <div className="space-y-2">
                           <p>No scan for {tradeDate}. Click Run scan first.</p>
@@ -1424,7 +1278,7 @@ export function MomentumScannerPage() {
                             type="button"
                             onClick={handleRunScan}
                             disabled={scanRunning}
-                            className="inline-flex items-center gap-1 rounded-md border border-accent/40 bg-accent/10 px-2.5 py-1 text-[11px] font-medium text-accent"
+                            className="inline-flex items-center gap-1 rounded-md border border-accent/40 bg-accent/10 px-2.5 py-1 font-medium text-sky-200"
                           >
                             <DocumentScannerIcon sx={{ fontSize: 12 }} />
                             Run scan
@@ -1438,7 +1292,7 @@ export function MomentumScannerPage() {
                       ) : filteredOutAllAlerts ? (
                         <p>
                           Scan found {scanAlertsCount.toLocaleString()} alerts on {tradeDate}, but
-                          none match these filters. Lower min score or clear pattern/sector filters.
+                          none match these filters. Lower min score or clear filters in Advanced.
                         </p>
                       ) : (
                         "No matches for these filters"
@@ -1453,65 +1307,62 @@ export function MomentumScannerPage() {
                     const pre20d = pre20dReturnFromRow(row);
                     const fundPass = fundamentalPassFromRow(row);
                     const movePct = signalDayMovePct(row);
+                    const isFno = fnoSymbolSet.has(row.ticker);
                     return (
                       <tr
                         key={`${row.ticker}-${row.pattern_type}`}
                         onClick={() => loadChart(row)}
-                        className={`cursor-pointer border-t border-surface-border/60 transition ${
-                          isSelected
-                            ? "bg-accent/10 hover:bg-accent/15"
-                            : "hover:bg-surface/40"
-                        }`}
+                        className={`dt-row ${isSelected ? "dt-selected" : ""}`}
                       >
-                        <td className="px-2.5 py-2 align-top">
+                        <td className="max-w-[14rem]">
                           <div className="flex items-center gap-1">
-                            <div className="text-xs font-medium text-slate-100">{row.ticker}</div>
-                            <FnoStarMark show={fnoSymbolSet.has(row.ticker)} />
+                            <span className="ticker">{row.ticker}</span>
+                            <FnoStarMark show={isFno} />
                             {(fundamentalStrongFromDetails(row.details) === true ||
                               strongSymbolSet.has(row.ticker.toUpperCase())) && (
                               <span
-                                className="rounded border border-emerald-500/40 bg-emerald-500/15 px-1 py-px text-[8px] font-medium text-emerald-300"
+                                className="rounded border border-emerald-500/40 bg-emerald-500/15 px-1 text-[10px] font-semibold leading-[14px] text-emerald-200"
                                 title={FUNDAMENTALLY_STRONG_TOOLTIP}
                               >
                                 Strong
                               </span>
                             )}
                           </div>
-                          {row.sector && (
-                            <div className="truncate text-[10px] text-slate-500">{row.sector}</div>
-                          )}
-                          <div className="mt-0.5 flex flex-wrap gap-1">
-                            <GatePill kind="macro" pass={row.macro_pass} />
-                            <GatePill kind="fund" pass={fundPass} />
-                            {fnoSymbolSet.has(row.ticker) && (() => {
-                              const fo = foGateDisplay(row);
-                              return (
-                                <GatePill
-                                  kind="fo"
-                                  pass={fo.pass}
-                                  stateOverride={fo.state}
-                                  titleOverride={fo.title}
-                                />
-                              );
-                            })()}
+                          <div className="mt-0.5 flex min-w-0 items-center gap-1">
+                            {row.sector && (
+                              <Clip className="min-w-0 flex-1 text-data-xs text-slate-400">{row.sector}</Clip>
+                            )}
+                            <span className="flex shrink-0 gap-0.5">
+                              <GatePill kind="macro" pass={row.macro_pass} />
+                              <GatePill kind="fund" pass={fundPass} />
+                              {isFno && (() => {
+                                const fo = foGateDisplay(row);
+                                return (
+                                  <GatePill
+                                    kind="fo"
+                                    pass={fo.pass}
+                                    stateOverride={fo.state}
+                                    titleOverride={fo.title}
+                                  />
+                                );
+                              })()}
+                            </span>
                           </div>
                         </td>
-                        <td className="px-2 py-2 align-top text-[11px] leading-snug text-slate-300">
-                          {SCANNER_PATTERN_LABELS[row.pattern_type]}
+                        <td className="max-w-[10rem] text-slate-200">
+                          <Clip>{SCANNER_PATTERN_LABELS[row.pattern_type]}</Clip>
+                          <div className="mt-0.5 flex flex-nowrap gap-0.5">
+                            <StatusBadge status={status} />
+                            <TimingBadge timing={timing} />
+                          </div>
                         </td>
-                        <td className="px-2 py-2 align-top">
-                          <StatusBadge status={status} />
+                        <td className="text-right">
+                          <PctCell value={pre20d} />
                         </td>
-                        <td className="px-2 py-2 align-top">
-                          <TimingBadge timing={timing} />
+                        <td className="text-right">
+                          <PctCell value={movePct} />
                         </td>
-                        <td className="px-2 py-2 align-top text-right text-[11px]">
-                          <MoveCell value={pre20d} />
-                        </td>
-                        <td className="px-2 py-2 align-top text-right text-[11px]">
-                          <MoveCell value={movePct} />
-                        </td>
-                        <td className="px-2 py-2 align-top text-right tabular-nums text-xs font-medium text-slate-200">
+                        <td className="num text-right text-data-md text-slate-100">
                           {formatScore(row.score)}
                         </td>
                       </tr>
@@ -1521,153 +1372,54 @@ export function MomentumScannerPage() {
               </tbody>
             </table>
           </div>
+        </section>
 
-          {selectedRow && selectedWhy && (
-            <div className="shrink-0 border-t border-surface-border bg-surface/40 px-2.5 py-2">
-              <div className="mb-1 flex flex-wrap items-center gap-1.5">
-                <span className="inline-flex items-center gap-1 text-[11px] font-medium text-slate-100">
-                  {selectedRow.ticker}
+        <section className="panel mobile-pane flex min-h-0 min-w-0 flex-1 flex-col gap-1 p-1 lg:col-start-2 lg:row-start-1">
+          {selectedRow ? (
+            <details className="group shrink-0 rounded-md border border-surface-border bg-surface/40">
+              <summary className="flex cursor-pointer list-none flex-wrap items-center gap-1.5 px-2 py-1 text-data-sm text-slate-200 [&::-webkit-details-marker]:hidden">
+                <TrendingUp className="h-3.5 w-3.5 text-accent" />
+                <span className="inline-flex items-center gap-1">
+                  <span className="ticker">{selectedRow.ticker}</span>
                   <FnoStarMark show={fnoSymbolSet.has(selectedRow.ticker)} />
-                </span>
-                <span className="text-[10px] text-slate-500">
-                  {SCANNER_PATTERN_LABELS[selectedRow.pattern_type]}
                 </span>
                 <StatusBadge status={signalStatus(selectedRow)} />
                 <TimingBadge timing={timingClassFromRow(selectedRow)} />
-                <span className={`text-[10px] tabular-nums ${selectedMovePct != null && selectedMovePct >= 0 ? "text-emerald-400" : selectedMovePct != null ? "text-red-400" : "text-slate-400"}`}>
+                <span className="text-slate-300">{SCANNER_PATTERN_LABELS[selectedRow.pattern_type]}</span>
+                <span className={`num ${pctTone(selectedMovePct)}`}>
                   {formatSignalMovePct(selectedMovePct)}
                 </span>
-                <span className="text-[10px] tabular-nums text-slate-400">{formatScore(selectedRow.score)}</span>
-              </div>
-              <p className="text-[10px] font-medium uppercase tracking-wide text-slate-500">Why</p>
-              <p className="mt-0.5 max-h-24 overflow-y-auto text-[10px] leading-relaxed text-slate-300">
-                {selectedWhy}
-              </p>
-            </div>
-          )}
-
-          {copyMessage && (
-            <p className="shrink-0 border-t border-surface-border px-3 py-1 text-[10px] text-emerald-400">
-              {copyMessage}
-            </p>
-          )}
-
-          {hasLoaded && exportRows.length > 0 && (
-            <div className="shrink-0 border-t border-surface-border">
-              <button
-                type="button"
-                onClick={() => setExportJsonOpen((v) => !v)}
-                className="flex w-full items-center justify-between px-3 py-1.5 text-[10px] text-slate-400 hover:text-slate-200"
-              >
-                <span>Export JSON ({exportRows.length} rows)</span>
-                <span>{exportJsonOpen ? "Hide" : "Show"}</span>
-              </button>
-              {exportJsonOpen && (
-                <textarea
-                  readOnly
-                  value={exportJson}
-                  onFocus={(e) => e.target.select()}
-                  className="h-28 w-full resize-none border-t border-surface-border bg-surface px-3 py-2 font-mono text-[10px] leading-relaxed text-slate-300 outline-none"
-                />
-              )}
-            </div>
-          )}
-        </section>
-
-        <section className="flex min-h-0 min-w-0 flex-1 flex-col gap-1 rounded-xl border border-surface-border bg-surface-raised/30 p-1">
-          <div className="flex shrink-0 items-center justify-end gap-1 px-1">
-            <button
-              type="button"
-              onClick={toggleVcpOverlay}
-              disabled={selectedRow?.pattern_type !== "vcp"}
-              title={
-                selectedRow?.pattern_type !== "vcp"
-                  ? "Select a VCP signal to show contraction bands"
-                  : showVcpOverlay
-                    ? "Hide VCP overlay"
-                    : "Show VCP overlay (20d / 10d / 5d ranges + pivot)"
-              }
-              className={`inline-flex items-center gap-1 rounded border px-2 py-0.5 text-[10px] transition disabled:cursor-not-allowed disabled:opacity-40 ${
-                showVcpOverlay && selectedRow?.pattern_type === "vcp"
-                  ? "border-amber-500/40 bg-amber-500/10 text-amber-200"
-                  : "border-surface-border text-slate-400 hover:border-amber-500/30 hover:text-slate-200"
-              }`}
-            >
-              <Layers className="h-3 w-3" />
-              VCP overlay
-            </button>
-            <button
-              type="button"
-              onClick={toggleFundamentals}
-              title={showFundamentals ? "Hide fundamentals panel" : "Show fundamentals panel"}
-              className={`inline-flex items-center gap-1 rounded border px-2 py-0.5 text-[10px] transition ${
-                showFundamentals
-                  ? "border-accent/40 bg-accent/10 text-accent"
-                  : "border-surface-border text-slate-400 hover:border-accent/30 hover:text-slate-200"
-              }`}
-            >
-              {showFundamentals ? (
-                <PanelRightClose className="h-3 w-3" />
-              ) : (
-                <PanelRightOpen className="h-3 w-3" />
-              )}
-              Fundamentals
-            </button>
-            <button
-              type="button"
-              onClick={toggleCompanyNews}
-              title={showCompanyNews ? "Hide company news" : "Show company news"}
-              className={`inline-flex items-center gap-1 rounded border px-2 py-0.5 text-[10px] transition ${
-                showCompanyNews
-                  ? "border-sky-500/40 bg-sky-500/10 text-sky-200"
-                  : "border-surface-border text-slate-400 hover:border-sky-500/30 hover:text-slate-200"
-              }`}
-            >
-              <Newspaper className="h-3 w-3" />
-              News
-            </button>
-          </div>
-          {selectedRow && (
-            <div className="flex shrink-0 flex-wrap items-center gap-1.5 rounded-lg border border-surface-border bg-surface-raised/60 px-2 py-1 text-[10px] text-slate-300">
-              <TrendingUp className="h-3 w-3 text-accent" />
-              <span className="inline-flex items-center gap-1 font-medium text-slate-100">
-                {selectedRow.ticker}
-                <FnoStarMark show={fnoSymbolSet.has(selectedRow.ticker)} />
-              </span>
-              <StatusBadge status={signalStatus(selectedRow)} />
-              <TimingBadge timing={timingClassFromRow(selectedRow)} />
-              <span className="text-slate-500">·</span>
-              <span className="truncate">{SCANNER_PATTERN_LABELS[selectedRow.pattern_type]}</span>
-              <span className="text-slate-500">·</span>
-              <span className={selectedMovePct != null && selectedMovePct >= 0 ? "text-emerald-400" : selectedMovePct != null ? "text-red-400" : ""}>
-                {formatSignalMovePct(selectedMovePct)}
-              </span>
-              <span className="text-slate-500">·</span>
-              <span>{formatScore(selectedRow.score)}</span>
-            </div>
-          )}
-          {(foSyncing || foSyncNote) && (
-            <div
-              className={`flex shrink-0 items-start gap-2 rounded-lg border px-2 py-1 text-[11px] ${
-                foSyncing
-                  ? "border-sky-500/30 bg-sky-500/10 text-sky-200"
-                  : "border-surface-border bg-surface/40 text-slate-400"
-              }`}
-            >
-              {foSyncing ? (
-                <RefreshCw className="mt-0.5 h-3 w-3 shrink-0 animate-spin" />
+                <span className="num text-slate-100" title="Score">
+                  {formatScore(selectedRow.score)}
+                </span>
+                {foSyncing ? (
+                  <span className="inline-flex items-center gap-1 text-data-xs text-sky-200">
+                    <RefreshCw className="h-3 w-3 animate-spin" />
+                    F&O sync
+                  </span>
+                ) : null}
+                {selectedWhy ? (
+                  <span className="ml-auto text-data-xs text-sky-300 group-open:hidden">Why ▸</span>
+                ) : null}
+                {selectedWhy ? (
+                  <span className="ml-auto hidden text-data-xs text-sky-300 group-open:inline">Why ▾</span>
+                ) : null}
+              </summary>
+              {selectedWhy ? (
+                <p className="max-h-28 overflow-y-auto border-t border-surface-border px-2 py-1.5 text-data-sm leading-relaxed text-slate-200">
+                  {selectedWhy}
+                </p>
               ) : null}
-              <span>{foSyncing ? "Fetching F&O derivative data from Upstox…" : foSyncNote}</span>
-            </div>
-          )}
+            </details>
+          ) : null}
           {chartError && (
-            <div className="flex shrink-0 items-start gap-2 rounded-lg border border-amber-500/30 bg-amber-500/10 px-2 py-1 text-[11px] text-amber-200">
+            <div className="flex shrink-0 items-start gap-2 rounded-md border border-amber-500/30 bg-amber-500/10 px-2 py-1 text-data-sm text-amber-100">
               <AlertTriangle className="mt-0.5 h-3 w-3 shrink-0" />
               <span>{chartError}</span>
             </div>
           )}
           <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
-            <div className="min-h-[160px] min-h-0 flex-1">
+            <div className="min-h-[220px] flex-1">
               <TimelineStockChart
                 symbol={selectedRow?.ticker ?? ""}
                 companyName={selectedRow?.company_name}
@@ -1687,7 +1439,7 @@ export function MomentumScannerPage() {
         </section>
 
         {showFundamentals && (
-          <section className="flex min-h-0 min-w-0 flex-col lg:max-w-[24rem]">
+          <section className="mobile-pane flex min-h-0 min-w-0 flex-col lg:col-start-2 lg:row-start-2 2xl:col-start-3 2xl:row-start-1">
             {selectedRow ? (
               <StockFundamentalsPanel
                 data={fundamentals}
@@ -1699,7 +1451,7 @@ export function MomentumScannerPage() {
                 sidebar
               />
             ) : (
-              <div className="flex h-full min-h-[12rem] items-center justify-center rounded-lg border border-dashed border-surface-border px-3 text-center text-xs text-slate-500">
+              <div className="flex h-full min-h-[12rem] items-center justify-center rounded-lg border border-dashed border-surface-border px-3 text-center text-data-sm text-slate-400">
                 Select a stock to view fundamentals
               </div>
             )}
@@ -1714,6 +1466,36 @@ export function MomentumScannerPage() {
         className="h-[min(45vh,26rem)] shrink-0 border-t lg:h-full lg:border-t-0"
       />
     ) : null}
+
+    <MomentumScannerAdvanced
+      open={advancedOpen}
+      onClose={() => setAdvancedOpen(false)}
+      stats={stats}
+      tradeDate={tradeDate}
+      scanDatesCount={scanDates.length}
+      refinedScanDatesCount={refinedScanDates.length}
+      scanRunning={scanRunning}
+      bootLoading={bootLoading}
+      onRunScanMonth={handleRunScanMonth}
+      onRunScanLast7={handleRunScanLast7}
+      vcpAvailable={selectedRow?.pattern_type === "vcp"}
+      showVcpOverlay={showVcpOverlay}
+      onToggleVcpOverlay={toggleVcpOverlay}
+      showFundamentals={showFundamentals}
+      onToggleFundamentals={toggleFundamentals}
+      showCompanyNews={showCompanyNews}
+      onToggleCompanyNews={toggleCompanyNews}
+      hasLoaded={hasLoaded}
+      exportRowsCount={exportRows.length}
+      exportJson={exportJson}
+      copyingJson={copyingJson}
+      copyMessage={copyMessage}
+      onCopyJson={handleCopyJson}
+      exportJsonOpen={exportJsonOpen}
+      setExportJsonOpen={setExportJsonOpen}
+      foSyncing={foSyncing}
+      foSyncNote={foSyncNote}
+    />
     </div>
   );
 }

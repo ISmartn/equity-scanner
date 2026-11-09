@@ -66,11 +66,11 @@ async def nifty50() -> dict:
 
 @router.get("/fno")
 async def fno() -> dict:
-    async with aiohttp.ClientSession() as session:
-        try:
-            symbols = await nse_client.fetch_fno_symbols(session)
-        except Exception as exc:
-            raise HTTPException(status_code=502, detail=str(exc)) from exc
+    from ..services.scanner.fo_sync import load_fno_symbol_set_sync
+
+    symbols = sorted(load_fno_symbol_set_sync())
+    if not symbols:
+        raise HTTPException(status_code=502, detail="F&O symbol list unavailable (NSE and local DB)")
     return {"symbols": symbols, "count": len(symbols)}
 
 

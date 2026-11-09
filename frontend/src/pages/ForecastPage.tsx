@@ -1,6 +1,14 @@
 import { AlertTriangle, Cpu, Database, RefreshCw, ShieldAlert } from "lucide-react";
-import { useCallback, useEffect, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { CompanyNewsSidebar } from "@/components/news/CompanyNewsSidebar";
+import {
+  AdvancedButton,
+  AdvancedDrawer,
+  AdvancedSection,
+  PageToolbar,
+  StatChip,
+  ToolbarDivider,
+} from "@/components/dense";
 import { ModelPicker } from "@/components/ModelPicker";
 import { ForecastChart } from "@/components/ForecastChart";
 import { IntervalPicker } from "@/components/IntervalPicker";
@@ -30,6 +38,7 @@ export function ForecastPage() {
   const [loadingSymbols, setLoadingSymbols] = useState(true);
   const [loadingForecast, setLoadingForecast] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [advancedOpen, setAdvancedOpen] = useState(false);
 
   useEffect(() => {
     const saved = getForecastSettings();
@@ -79,80 +88,62 @@ export function ForecastPage() {
   }, [symbol, interval, model]);
 
   return (
-    <div className="flex h-[calc(100dvh-7.25rem)] min-h-0 flex-col lg:flex-row">
-      <main className="mx-auto grid min-h-0 min-w-0 flex-1 gap-6 overflow-y-auto px-4 py-6 sm:px-6 lg:max-w-none lg:grid-cols-[280px_1fr]">
-        <aside className="space-y-4">
+    <div className="page-shell flex flex-col lg:flex-row">
+      <main className="flex min-h-0 min-w-0 flex-1 flex-col gap-1 overflow-hidden px-1.5 py-1 sm:px-2">
+        <PageToolbar right={<AdvancedButton onClick={() => setAdvancedOpen(true)} label="Model info" />}>
           <StockSelector
+            compact
             symbols={symbols}
             value={symbol}
             onChange={setSymbol}
             loading={loadingSymbols}
           />
-
-          <div className="rounded-2xl border border-surface-border bg-surface-raised p-4">
-            <h3 className="mb-3 text-sm font-semibold uppercase tracking-wide text-slate-400">
-              Forecast model
-            </h3>
-            <ModelPicker models={models} value={model} onChange={setModel} />
-          </div>
-
-          <div className="rounded-2xl border border-surface-border bg-surface-raised p-4">
-            <h3 className="mb-3 text-sm font-semibold uppercase tracking-wide text-slate-400">
-              Timeframe
-            </h3>
-            <IntervalPicker value={interval} onChange={setInterval} />
-          </div>
-
+          <ModelPicker compact models={models} value={model} onChange={setModel} />
+          <IntervalPicker compact value={interval} onChange={setInterval} />
           <button
             type="button"
             onClick={runForecast}
             disabled={loadingForecast || loadingSymbols}
-            className="flex w-full items-center justify-center gap-2 rounded-xl bg-accent px-4 py-3 text-sm font-semibold text-white transition hover:bg-accent-muted disabled:opacity-60"
+            className="inline-flex h-7 shrink-0 items-center justify-center gap-1.5 rounded-md bg-accent px-3 text-data-sm font-semibold text-white transition hover:bg-accent-muted disabled:opacity-60"
           >
-            <RefreshCw className={`h-4 w-4 ${loadingForecast ? "animate-spin" : ""}`} />
+            <RefreshCw className={`h-3.5 w-3.5 ${loadingForecast ? "animate-spin" : ""}`} />
             Run Forecast
           </button>
-        </aside>
-
-        <section className="space-y-4">
-          {error && (
-            <div className="flex items-start gap-3 rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-200">
-              <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
-              <span>{error}</span>
-            </div>
-          )}
-
-          <ForecastChart data={forecast} loading={loadingForecast} />
-
           {forecast && (
-            <div className="grid gap-4 sm:grid-cols-3">
-              <MetricCard
-                icon={<Database className="h-4 w-4 text-sky-400" />}
+            <>
+              <ToolbarDivider />
+              <StatChip
+                icon={<Database className="h-3.5 w-3.5 text-sky-400" />}
                 label="History"
-                value={`${forecast.history_bars} ${forecast.interval} bars`}
+                value={`${forecast.history_bars} ${forecast.interval}`}
                 hint={`${forecast.lookback_years} years from ${forecast.source.toUpperCase()}`}
               />
-              <MetricCard
-                icon={<Cpu className="h-4 w-4 text-violet-400" />}
-                label="Context window"
+              <StatChip
+                icon={<Cpu className="h-3.5 w-3.5 text-violet-400" />}
+                label="Context"
                 value={`${forecast.context_length} bars`}
                 hint={`${forecast.horizon}-step horizon`}
               />
-              <MetricCard
-                icon={<ShieldAlert className="h-4 w-4 text-amber-400" />}
-                label="Uncertainty spread"
+              <StatChip
+                icon={<ShieldAlert className="h-3.5 w-3.5 text-amber-400" />}
+                label="Spread"
                 value={`${forecast.spread_pct.toFixed(1)}%`}
                 hint="Avg 80% band width vs last close"
+                valueClassName="text-amber-200"
               />
-            </div>
+            </>
           )}
+        </PageToolbar>
 
-          <div className="rounded-2xl border border-surface-border bg-surface-raised/60 p-4 text-sm leading-relaxed text-slate-400">
-            <strong className="text-slate-200">Risk note:</strong> TimesFM outputs a median path
-            plus quantile bands — not a guaranteed price target. A wider 80% interval usually
-            signals higher uncertainty (volatility, events, or regime change). Always treat
-            forecasts as scenario guidance, not trade signals.
+        {error && (
+          <div className="flex shrink-0 items-start gap-2 rounded-md border border-red-500/30 bg-red-500/10 px-2 py-1 text-data-sm text-red-100">
+            <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+            <span>{error}</span>
           </div>
+        )}
+
+        <section className="min-h-[320px] flex-1">
+          <ForecastChart data={forecast} loading={loadingForecast} fillHeight />
         </section>
       </main>
 
@@ -161,29 +152,28 @@ export function ForecastPage() {
         companyName={symbol}
         className="h-[min(50vh,28rem)] shrink-0 border-t lg:h-full lg:border-t-0"
       />
-    </div>
-  );
-}
 
-function MetricCard({
-  icon,
-  label,
-  value,
-  hint,
-}: {
-  icon: ReactNode;
-  label: string;
-  value: string;
-  hint: string;
-}) {
-  return (
-    <div className="rounded-xl border border-surface-border bg-surface-raised p-4">
-      <div className="mb-2 flex items-center gap-2 text-xs uppercase tracking-wide text-slate-500">
-        {icon}
-        {label}
-      </div>
-      <div className="text-lg font-semibold text-white">{value}</div>
-      <div className="mt-1 text-xs text-slate-500">{hint}</div>
+      <AdvancedDrawer
+        open={advancedOpen}
+        onClose={() => setAdvancedOpen(false)}
+        title="Forecast details"
+        subtitle={symbol}
+      >
+        <AdvancedSection title="Models">
+          <ModelPicker models={models} value={model} onChange={setModel} />
+        </AdvancedSection>
+        <AdvancedSection title="Timeframes">
+          <IntervalPicker value={interval} onChange={setInterval} />
+        </AdvancedSection>
+        <AdvancedSection title="Risk note">
+          <p className="leading-relaxed text-slate-300">
+            <strong className="text-slate-100">Risk note:</strong> TimesFM outputs a median path
+            plus quantile bands — not a guaranteed price target. A wider 80% interval usually
+            signals higher uncertainty (volatility, events, or regime change). Always treat
+            forecasts as scenario guidance, not trade signals.
+          </p>
+        </AdvancedSection>
+      </AdvancedDrawer>
     </div>
   );
 }

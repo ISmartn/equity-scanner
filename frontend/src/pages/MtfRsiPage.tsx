@@ -2,6 +2,14 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Activity, Database, Radio, RefreshCw } from "lucide-react";
 import { NiftyChart } from "@/components/NiftyChart";
 import {
+  AdvancedButton,
+  AdvancedDrawer,
+  AdvancedSection,
+  PageToolbar,
+  StatChip,
+  ToolbarDivider,
+} from "@/components/dense";
+import {
   fetchMtfRsiCandles,
   fetchMtfRsiChart,
   fetchMtfRsiSnapshot,
@@ -92,6 +100,7 @@ export function MtfRsiPage() {
   const [error, setError] = useState<string | null>(null);
   const [status, setStatus] = useState<MtfRsiStatus | null>(null);
   const [snapshot, setSnapshot] = useState<MtfRsiSnapshot | null>(null);
+  const [advancedOpen, setAdvancedOpen] = useState(false);
   const timerRef = useRef<number | null>(null);
   const chartTimerRef = useRef<number | null>(null);
   const priceTfRef = useRef(priceTf);
@@ -284,116 +293,63 @@ export function MtfRsiPage() {
   const modeNote = status?.mode_note ?? snapshot?.mode_note;
 
   return (
-    <main className="mx-auto max-w-5xl space-y-4 px-4 py-4 sm:px-6">
-      <div className="flex flex-wrap items-end justify-between gap-3">
-        <div>
-          <h1 className="text-lg font-semibold text-slate-100">Multi-TF RSI</h1>
-          <p className="max-w-2xl text-xs text-slate-500">
-            Live Nifty 50 RSI across 1m / 3m / 5m / 10m / 15m. Candles are stored in
-            SQLite <code className="text-slate-500">index_candles</code>. First seed
-            pulls ~3 years; later updates only fetch from the last saved bar forward.
-          </p>
-          <p className="mt-1 text-[10px] text-slate-600">
-            Feed: <span className="text-slate-400">{feedStatus}</span>
-            {status?.seeded ? " · seed ready" : " · not seeded"}
-            {status?.lookback_years != null
-              ? ` · ~${status.lookback_years}y history`
-              : " · ~3y history"}
-            {status?.reconnect_attempts ? ` · reconnects ${status.reconnect_attempts}` : ""}
-            {market ? ` · ${market.label}` : ""}
-            {priceCandles.length ? ` · chart bars ${priceCandles.length.toLocaleString("en-IN")}` : ""}
-          </p>
-        </div>
-
-        <div className="flex flex-wrap items-end gap-2">
-          <div className="flex flex-col gap-0.5 text-[10px] text-slate-500">
-            RSI period
-            <div className="flex items-center gap-1">
-              {RSI_PRESETS.map((p) => (
-                <button
-                  key={p}
-                  type="button"
-                  disabled={busy}
-                  onClick={() => applyPeriod(p)}
-                  className={`rounded-md border px-2 py-1.5 text-xs ${
-                    rsiPeriod === p
-                      ? "border-accent/50 bg-accent/10 text-accent"
-                      : "border-surface-border bg-surface text-slate-300 hover:border-accent/40"
-                  }`}
-                >
-                  {p}
-                </button>
-              ))}
-              <input
-                type="number"
-                min={1}
-                max={200}
-                value={customPeriod}
-                onChange={(e) => setCustomPeriod(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") applyPeriod(Number(customPeriod));
-                }}
-                className="w-16 rounded-md border border-surface-border bg-surface px-2 py-1.5 text-xs text-slate-200"
-              />
-              <button
-                type="button"
-                disabled={busy}
-                onClick={() => applyPeriod(Number(customPeriod))}
-                className="rounded-md border border-surface-border bg-surface px-2 py-1.5 text-xs text-slate-300 hover:border-accent/40"
-              >
-                Apply
-              </button>
-            </div>
-          </div>
-
-          <button
-            type="button"
-            onClick={() => refresh({ charts: true })}
-            className="inline-flex items-center gap-1.5 rounded-md border border-surface-border bg-surface px-3 py-1.5 text-xs text-slate-300 hover:border-accent/40"
-          >
-            <RefreshCw className="h-3.5 w-3.5" />
-            Refresh
-          </button>
-
-          <button
-            type="button"
-            onClick={() => loadSeed(false)}
-            disabled={busy}
-            className="inline-flex items-center gap-1.5 rounded-md border border-surface-border bg-surface px-3 py-1.5 text-xs text-slate-200 hover:border-accent/40"
-            title="First run downloads ~3y into SQLite index_candles. Later runs only fetch from the last DB bar forward."
-          >
-            <Database className="h-3.5 w-3.5" />
-            {busy ? "Updating…" : "Update seed"}
-          </button>
-          <button
-            type="button"
-            onClick={() => loadSeed(true)}
-            disabled={busy}
-            className="inline-flex items-center gap-1.5 rounded-md border border-surface-border bg-surface px-3 py-1.5 text-xs text-slate-400 hover:border-accent/40"
-            title="Re-download the full ~3y history from Upstox and upsert into index_candles"
-          >
-            {busy ? "…" : "Full 3y refresh"}
-          </button>
-
-          <button
-            type="button"
-            onClick={toggleStream}
-            disabled={busy}
-            className={`inline-flex items-center gap-1.5 rounded-md border px-3 py-1.5 text-xs ${
-              live
-                ? "border-emerald-500/40 bg-emerald-500/10 text-emerald-300"
-                : "border-surface-border bg-surface text-slate-200 hover:border-accent/40"
-            }`}
-          >
-            <Radio className="h-3.5 w-3.5" />
-            {busy ? "…" : live ? "Stop stream" : "Start stream"}
-          </button>
-        </div>
-      </div>
+    <div className="page-shell flex flex-col gap-1 px-1.5 py-1 sm:px-2">
+      <PageToolbar
+        right={<AdvancedButton onClick={() => setAdvancedOpen(true)} label="Settings" />}
+      >
+        <h1 className="shrink-0 text-data-md font-semibold text-slate-100">Multi-TF RSI</h1>
+        <ToolbarDivider />
+        <button
+          type="button"
+          onClick={() => refresh({ charts: true })}
+          className="inline-flex h-7 shrink-0 items-center gap-1.5 rounded-md border border-surface-border bg-surface px-2.5 text-data-sm text-slate-200 hover:border-accent/40"
+        >
+          <RefreshCw className="h-3.5 w-3.5" />
+          Refresh
+        </button>
+        <button
+          type="button"
+          onClick={toggleStream}
+          disabled={busy}
+          className={`inline-flex h-7 shrink-0 items-center gap-1.5 rounded-md border px-2.5 text-data-sm font-semibold ${
+            live
+              ? "border-emerald-500/40 bg-emerald-500/10 text-emerald-300"
+              : "border-surface-border bg-surface text-slate-200 hover:border-accent/40"
+          }`}
+        >
+          <Radio className="h-3.5 w-3.5" />
+          {busy ? "…" : live ? "Stop stream" : "Start stream"}
+        </button>
+        <ToolbarDivider />
+        <StatChip
+          label="Instrument"
+          value={status?.instrument_label ?? snapshot?.instrument_label ?? "Nifty 50"}
+        />
+        <StatChip
+          label="LTP"
+          value={typeof ltp === "number" ? ltp.toLocaleString("en-IN", { maximumFractionDigits: 2 }) : "—"}
+          hint={
+            !snapshot?.live_ticks && snapshot?.seed_ts
+              ? `from seed ${formatTs(snapshot.seed_ts)}`
+              : undefined
+          }
+        />
+        <StatChip
+          icon={<Activity className="h-3.5 w-3.5 text-accent" />}
+          label="RSI period"
+          value={snapshot?.rsi_period ?? rsiPeriod}
+        />
+        <StatChip
+          label="Feed"
+          value={feedStatus}
+          valueClassName={live ? "text-emerald-300" : "text-slate-300"}
+        />
+        <StatChip label="Updated" value={formatTs(snapshot?.ts)} valueClassName="text-slate-300" />
+      </PageToolbar>
 
       {modeNote && (
         <div
-          className={`rounded-md border px-3 py-2 text-xs ${
+          className={`shrink-0 rounded-md border px-2 py-1 text-data-sm ${
             marketOpen
               ? "border-sky-500/30 bg-sky-500/10 text-sky-200"
               : "border-amber-500/30 bg-amber-500/10 text-amber-100"
@@ -401,7 +357,7 @@ export function MtfRsiPage() {
         >
           {modeNote}
           {!marketOpen && (
-            <span className="mt-1 block text-[11px] text-amber-200/80">
+            <span className="ml-1 text-data-xs text-amber-200/80">
               Use <strong>Load seed</strong> for the last session chart/table. Stream may connect but
               values stay static until ticks resume (NSE ~09:15–15:30 IST).
             </span>
@@ -410,171 +366,259 @@ export function MtfRsiPage() {
       )}
 
       {error && (
-        <div className="rounded-md border border-rose-500/30 bg-rose-500/10 px-3 py-2 text-xs text-rose-200">
+        <div className="shrink-0 rounded-md border border-rose-500/30 bg-rose-500/10 px-2 py-1 text-data-sm text-rose-200">
           {error}
         </div>
       )}
 
-      <section className="grid gap-3 sm:grid-cols-3">
-        <div className="rounded-lg border border-surface-border bg-surface/60 px-4 py-3">
-          <div className="text-[10px] uppercase tracking-wide text-slate-500">Instrument</div>
-          <div className="mt-1 text-sm text-slate-100">
-            {status?.instrument_label ?? snapshot?.instrument_label ?? "Nifty 50"}
+      <div className="grid min-h-0 flex-1 gap-1.5 overflow-y-auto lg:grid-cols-[minmax(0,1fr)_22rem] lg:grid-rows-[minmax(0,1fr)] lg:overflow-hidden">
+        <section className="panel flex h-[480px] min-h-0 flex-col p-1.5 lg:h-auto">
+          <div className="mb-1 flex shrink-0 items-center justify-between gap-2 text-data-xs text-slate-300">
+            <span className="font-semibold text-slate-200">
+              Nifty {priceTf}m · multi-TF RSI({snapshot?.rsi_period ?? rsiPeriod})
+            </span>
+            <span className="flex items-center gap-1.5">
+              {visibleRsiTfs.map((tf) => (
+                <span key={`legend-${tf}`} className="inline-flex items-center gap-1">
+                  <span
+                    className="h-2 w-2 rounded-full"
+                    style={{ backgroundColor: RSI_TF_COLORS[tf] ?? "#94a3b8" }}
+                  />
+                  {tf}m
+                </span>
+              ))}
+            </span>
           </div>
-        </div>
-        <div className="rounded-lg border border-surface-border bg-surface/60 px-4 py-3">
-          <div className="text-[10px] uppercase tracking-wide text-slate-500">LTP</div>
-          <div className="mt-1 font-mono text-lg text-slate-100">
-            {typeof ltp === "number" ? ltp.toLocaleString("en-IN", { maximumFractionDigits: 2 }) : "—"}
-          </div>
-          {!snapshot?.live_ticks && snapshot?.seed_ts && (
-            <div className="mt-0.5 text-[10px] text-slate-500">from seed {formatTs(snapshot.seed_ts)}</div>
-          )}
-        </div>
-        <div className="rounded-lg border border-surface-border bg-surface/60 px-4 py-3">
-          <div className="text-[10px] uppercase tracking-wide text-slate-500">Active RSI</div>
-          <div className="mt-1 flex items-center gap-2 text-sm text-slate-100">
-            <Activity className="h-4 w-4 text-accent" />
-            RSI({snapshot?.rsi_period ?? rsiPeriod})
-          </div>
-          <div className="mt-0.5 text-[10px] text-slate-500">{formatTs(snapshot?.ts)}</div>
-        </div>
-      </section>
-
-      <section className="rounded-lg border border-surface-border bg-surface/40 p-3">
-        <div className="mb-3 flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
-          <div className="text-xs font-medium text-slate-200">
-            Nifty · multi-TF RSI({snapshot?.rsi_period ?? rsiPeriod})
-          </div>
-          <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center sm:gap-4">
-            <div className="flex flex-wrap items-center gap-1.5">
-              <span className="text-[10px] uppercase tracking-wide text-slate-500">Nifty TF</span>
-              {ALL_TFS.map((tf) => {
-                const on = priceTf === tf;
-                return (
-                  <button
-                    key={`price-${tf}`}
-                    type="button"
-                    onClick={() => setPriceTf(tf)}
-                    className={`rounded-md border px-2 py-1 text-[10px] ${
-                      on
-                        ? "border-accent/40 bg-accent/10 text-accent"
-                        : "border-surface-border bg-surface text-slate-500"
-                    }`}
-                  >
-                    {tf}m
-                  </button>
-                );
-              })}
-            </div>
-            <div className="flex flex-wrap items-center gap-1.5">
-              <span className="text-[10px] uppercase tracking-wide text-slate-500">RSI TFs</span>
-              {ALL_TFS.map((tf) => {
-                const on = visibleRsiTfs.includes(tf);
-                return (
-                  <button
-                    key={`rsi-${tf}`}
-                    type="button"
-                    onClick={() => toggleRsiTf(tf)}
-                    className={`rounded-md border px-2 py-1 text-[10px] ${
-                      on
-                        ? "border-transparent text-slate-900"
-                        : "border-surface-border bg-surface text-slate-500"
-                    }`}
-                    style={
-                      on
-                        ? {
-                            backgroundColor: RSI_TF_COLORS[tf] ?? "#94a3b8",
-                            color: "#0f172a",
-                          }
-                        : undefined
-                    }
-                    title={on ? `Hide ${tf}m RSI` : `Show ${tf}m RSI`}
-                  >
-                    {tf}m
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-        </div>
-        {priceCandles.length > 0 ? (
-          <NiftyChart
-            candles={priceCandles}
-            timeframe={`${priceTf}m`}
-            height={520}
-            rsiPeriod={snapshot?.rsi_period ?? rsiPeriod}
-            showRsi={visibleRsiTfs.length > 0}
-            rsiOverlays={rsiOverlays}
-            showBollinger={false}
-          />
-        ) : (
-          <div className="flex h-[520px] items-center justify-center text-xs text-slate-500">
-            No candles yet — load seed or start the stream.
-          </div>
-        )}
-      </section>
-
-      <section className="overflow-hidden rounded-lg border border-surface-border">
-        <table className="w-full text-left text-sm">
-          <thead className="bg-surface/80 text-[10px] uppercase tracking-wide text-slate-500">
-            <tr>
-              <th className="px-4 py-2 font-medium">Timeframe</th>
-              <th className="px-4 py-2 font-medium text-right">RSI</th>
-              <th className="px-4 py-2 font-medium">Status</th>
-              <th className="px-4 py-2 font-medium text-right">Buffer</th>
-              <th className="px-4 py-2 font-medium text-right">Active close</th>
-            </tr>
-          </thead>
-          <tbody>
-            {loading && tfKeys.length === 0 ? (
-              <tr>
-                <td colSpan={5} className="px-4 py-8 text-center text-xs text-slate-500">
-                  Loading…
-                </td>
-              </tr>
-            ) : tfKeys.length === 0 ? (
-              <tr>
-                <td colSpan={5} className="px-4 py-8 text-center text-xs text-slate-500">
-                  Load seed or start the stream to populate RSI.
-                </td>
-              </tr>
+          <div className="min-h-0 flex-1">
+            {priceCandles.length > 0 ? (
+              <NiftyChart
+                candles={priceCandles}
+                timeframe={`${priceTf}m`}
+                fillHeight
+                rsiPeriod={snapshot?.rsi_period ?? rsiPeriod}
+                showRsi={visibleRsiTfs.length > 0}
+                rsiOverlays={rsiOverlays}
+                showBollinger={false}
+              />
             ) : (
-              tfKeys.map((tf) => {
-                const row = frames[String(tf)];
-                const rsi = row?.rsi;
-                const st = row?.status ?? "Warming";
-                return (
-                  <tr key={tf} className="border-t border-surface-border/80">
-                    <td className="px-4 py-3 font-medium text-slate-200">{tf}m</td>
-                    <td className="px-4 py-3 text-right font-mono text-slate-100">
-                      {typeof rsi === "number" ? rsi.toFixed(2) : "n/a"}
-                    </td>
-                    <td className="px-4 py-3">
-                      <span className={`inline-flex rounded-md border px-2 py-0.5 text-xs ${statusClass(st)}`}>
-                        {st}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3 text-right font-mono text-slate-400">{row?.buffer ?? 0}</td>
-                    <td className="px-4 py-3 text-right font-mono text-slate-400">
-                      {typeof row?.active_close === "number"
-                        ? row.active_close.toLocaleString("en-IN", { maximumFractionDigits: 2 })
-                        : "—"}
-                    </td>
-                  </tr>
-                );
-              })
+              <div className="flex h-full items-center justify-center text-data-sm text-slate-400">
+                No candles yet — load seed or start the stream.
+              </div>
             )}
-          </tbody>
-        </table>
-      </section>
+          </div>
+        </section>
 
-      <p className="text-[10px] text-slate-600">
-        Chart times are IST. History is stored in SQLite{" "}
-        <code className="text-slate-500">index_candles</code> (UI may show last ~100k bars).
-        Existing JSON under <code className="text-slate-500">data/mtf_rsi_cache/</code> is
-        imported once if the DB is empty.
-      </p>
-    </main>
+        <section className="panel min-h-0 overflow-auto">
+          <table className="dt w-full text-left">
+            <thead>
+              <tr>
+                <th>TF</th>
+                <th className="text-right">RSI</th>
+                <th>Status</th>
+                <th className="text-right">Buffer</th>
+                <th className="text-right">Active close</th>
+              </tr>
+            </thead>
+            <tbody>
+              {loading && tfKeys.length === 0 ? (
+                <tr>
+                  <td colSpan={5} className="py-6 text-center text-slate-400">
+                    Loading…
+                  </td>
+                </tr>
+              ) : tfKeys.length === 0 ? (
+                <tr>
+                  <td colSpan={5} className="py-6 text-center text-slate-400">
+                    Load seed or start the stream to populate RSI.
+                  </td>
+                </tr>
+              ) : (
+                tfKeys.map((tf) => {
+                  const row = frames[String(tf)];
+                  const rsi = row?.rsi;
+                  const st = row?.status ?? "Warming";
+                  return (
+                    <tr key={tf}>
+                      <td className="font-semibold text-slate-200">
+                        <span className="inline-flex items-center gap-1.5">
+                          <span
+                            className="h-2 w-2 rounded-full"
+                            style={{ backgroundColor: RSI_TF_COLORS[tf] ?? "#94a3b8" }}
+                          />
+                          {tf}m
+                        </span>
+                      </td>
+                      <td className="num text-right text-slate-100">
+                        {typeof rsi === "number" ? rsi.toFixed(2) : "n/a"}
+                      </td>
+                      <td>
+                        <span className={`inline-flex rounded border px-1.5 text-[10px] leading-4 ${statusClass(st)}`}>
+                          {st}
+                        </span>
+                      </td>
+                      <td className="text-right text-slate-300">{row?.buffer ?? 0}</td>
+                      <td className="text-right text-slate-300">
+                        {typeof row?.active_close === "number"
+                          ? row.active_close.toLocaleString("en-IN", { maximumFractionDigits: 2 })
+                          : "—"}
+                      </td>
+                    </tr>
+                  );
+                })
+              )}
+            </tbody>
+          </table>
+        </section>
+      </div>
+
+      <AdvancedDrawer
+        open={advancedOpen}
+        onClose={() => setAdvancedOpen(false)}
+        title="Multi-TF RSI settings"
+        subtitle={status?.instrument_label ?? snapshot?.instrument_label ?? "Nifty 50"}
+      >
+        <AdvancedSection title="Feed">
+          <p className="leading-relaxed text-slate-300">
+            Live Nifty 50 RSI across 1m / 3m / 5m / 10m / 15m. Candles are stored in
+            SQLite <code className="text-slate-200">index_candles</code>. First seed
+            pulls ~3 years; later updates only fetch from the last saved bar forward.
+          </p>
+          <p className="text-data-xs text-slate-400">
+            Feed: <span className="text-slate-200">{feedStatus}</span>
+            {status?.seeded ? " · seed ready" : " · not seeded"}
+            {status?.lookback_years != null
+              ? ` · ~${status.lookback_years}y history`
+              : " · ~3y history"}
+            {status?.reconnect_attempts ? ` · reconnects ${status.reconnect_attempts}` : ""}
+            {market ? ` · ${market.label}` : ""}
+            {priceCandles.length ? ` · chart bars ${priceCandles.length.toLocaleString("en-IN")}` : ""}
+          </p>
+        </AdvancedSection>
+
+        <AdvancedSection title="RSI period">
+          <div className="flex flex-wrap items-center gap-1">
+            {RSI_PRESETS.map((p) => (
+              <button
+                key={p}
+                type="button"
+                disabled={busy}
+                onClick={() => applyPeriod(p)}
+                className={`h-7 rounded-md border px-2 text-data-sm ${
+                  rsiPeriod === p
+                    ? "border-accent/50 bg-accent/10 text-accent"
+                    : "border-surface-border bg-surface text-slate-300 hover:border-accent/40"
+                }`}
+              >
+                {p}
+              </button>
+            ))}
+            <input
+              type="number"
+              min={1}
+              max={200}
+              value={customPeriod}
+              onChange={(e) => setCustomPeriod(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") applyPeriod(Number(customPeriod));
+              }}
+              className="h-7 w-16 rounded-md border border-surface-border bg-surface px-2 text-data-sm text-slate-200"
+            />
+            <button
+              type="button"
+              disabled={busy}
+              onClick={() => applyPeriod(Number(customPeriod))}
+              className="h-7 rounded-md border border-surface-border bg-surface px-2 text-data-sm text-slate-300 hover:border-accent/40"
+            >
+              Apply
+            </button>
+          </div>
+        </AdvancedSection>
+
+        <AdvancedSection title="Seed">
+          <div className="flex flex-wrap gap-1.5">
+            <button
+              type="button"
+              onClick={() => loadSeed(false)}
+              disabled={busy}
+              className="inline-flex h-7 items-center gap-1.5 rounded-md border border-surface-border bg-surface px-2.5 text-data-sm text-slate-200 hover:border-accent/40"
+              title="First run downloads ~3y into SQLite index_candles. Later runs only fetch from the last DB bar forward."
+            >
+              <Database className="h-3.5 w-3.5" />
+              {busy ? "Updating…" : "Update seed"}
+            </button>
+            <button
+              type="button"
+              onClick={() => loadSeed(true)}
+              disabled={busy}
+              className="inline-flex h-7 items-center gap-1.5 rounded-md border border-surface-border bg-surface px-2.5 text-data-sm text-slate-300 hover:border-accent/40"
+              title="Re-download the full ~3y history from Upstox and upsert into index_candles"
+            >
+              {busy ? "…" : "Full 3y refresh"}
+            </button>
+          </div>
+        </AdvancedSection>
+
+        <AdvancedSection title="Chart overlays & panels">
+          <div className="flex flex-wrap items-center gap-1.5">
+            <span className="w-14 text-[10px] uppercase tracking-wide text-slate-400">Nifty TF</span>
+            {ALL_TFS.map((tf) => {
+              const on = priceTf === tf;
+              return (
+                <button
+                  key={`price-${tf}`}
+                  type="button"
+                  onClick={() => setPriceTf(tf)}
+                  className={`rounded-md border px-2 py-0.5 text-data-xs ${
+                    on
+                      ? "border-accent/40 bg-accent/10 text-accent"
+                      : "border-surface-border bg-surface text-slate-300"
+                  }`}
+                >
+                  {tf}m
+                </button>
+              );
+            })}
+          </div>
+          <div className="flex flex-wrap items-center gap-1.5">
+            <span className="w-14 text-[10px] uppercase tracking-wide text-slate-400">RSI TFs</span>
+            {ALL_TFS.map((tf) => {
+              const on = visibleRsiTfs.includes(tf);
+              return (
+                <button
+                  key={`rsi-${tf}`}
+                  type="button"
+                  onClick={() => toggleRsiTf(tf)}
+                  className={`rounded-md border px-2 py-0.5 text-data-xs ${
+                    on
+                      ? "border-transparent text-slate-900"
+                      : "border-surface-border bg-surface text-slate-300"
+                  }`}
+                  style={
+                    on
+                      ? {
+                          backgroundColor: RSI_TF_COLORS[tf] ?? "#94a3b8",
+                          color: "#0f172a",
+                        }
+                      : undefined
+                  }
+                  title={on ? `Hide ${tf}m RSI` : `Show ${tf}m RSI`}
+                >
+                  {tf}m
+                </button>
+              );
+            })}
+          </div>
+        </AdvancedSection>
+
+        <AdvancedSection title="Help" defaultOpen={false}>
+          <p className="text-data-xs leading-relaxed text-slate-400">
+            Chart times are IST. History is stored in SQLite{" "}
+            <code className="text-slate-300">index_candles</code> (UI may show last ~100k bars).
+            Existing JSON under <code className="text-slate-300">data/mtf_rsi_cache/</code> is
+            imported once if the DB is empty.
+          </p>
+        </AdvancedSection>
+      </AdvancedDrawer>
+    </div>
   );
 }

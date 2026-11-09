@@ -501,6 +501,27 @@ async def list_fundamentally_strong() -> dict:
     }
 
 
+@router.get("/fundamentals/momentum-pass")
+async def list_earnings_momentum_pass() -> dict:
+    """Tickers with constructive quarterly earnings momentum (pass=True) over cached filings."""
+    from dataclasses import asdict
+
+    from ..services.fundamentals_momentum import (
+        DEFAULT_MOMENTUM_THRESHOLDS,
+        list_earnings_momentum_pass_tickers,
+    )
+
+    store = get_store()
+    index = store.load_fundamentals_index()
+    symbols = list_earnings_momentum_pass_tickers(index)
+    return {
+        "symbols": symbols,
+        "count": len(symbols),
+        "evaluated": len(index),
+        "thresholds": asdict(DEFAULT_MOMENTUM_THRESHOLDS),
+    }
+
+
 @router.post("/sync-fundamentals")
 async def sync_fundamentals_endpoint(
     body: SyncFundamentalsRequest,

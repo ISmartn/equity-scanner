@@ -1,3 +1,5 @@
+import Autocomplete from "@mui/material/Autocomplete";
+import TextField from "@mui/material/TextField";
 import { Search } from "lucide-react";
 import { useMemo, useState } from "react";
 
@@ -7,6 +9,8 @@ interface StockSelectorProps {
   value: string;
   onChange: (symbol: string) => void;
   loading?: boolean;
+  /** Single-line searchable select for toolbars. */
+  compact?: boolean;
 }
 
 export function StockSelector({
@@ -15,6 +19,7 @@ export function StockSelector({
   value,
   onChange,
   loading,
+  compact = false,
 }: StockSelectorProps) {
   const [query, setQuery] = useState("");
 
@@ -23,6 +28,26 @@ export function StockSelector({
     if (!q) return symbols;
     return symbols.filter((s) => s.includes(q));
   }, [query, symbols]);
+
+  if (compact) {
+    return (
+      <Autocomplete
+        size="small"
+        options={symbols}
+        value={symbols.includes(value) ? value : null}
+        onChange={(_e, next) => {
+          if (next) onChange(next);
+        }}
+        loading={loading}
+        disableClearable={symbols.includes(value)}
+        autoHighlight
+        sx={{ width: 168, flexShrink: 0 }}
+        renderInput={(params) => (
+          <TextField {...params} label={`${title} · ${symbols.length}`} placeholder="Symbol" />
+        )}
+      />
+    );
+  }
 
   return (
     <div className="rounded-2xl border border-surface-border bg-surface-raised p-4">

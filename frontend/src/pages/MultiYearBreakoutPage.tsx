@@ -1,23 +1,24 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Alert from "@mui/material/Alert";
-import Checkbox from "@mui/material/Checkbox";
-import Collapse from "@mui/material/Collapse";
-import FormControlLabel from "@mui/material/FormControlLabel";
 import LinearProgress from "@mui/material/LinearProgress";
-import MenuItem from "@mui/material/MenuItem";
-import Slider from "@mui/material/Slider";
-import Stack from "@mui/material/Stack";
-import TextField from "@mui/material/TextField";
 import ToggleButton from "@mui/material/ToggleButton";
 import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
-import Typography from "@mui/material/Typography";
 import DocumentScannerIcon from "@mui/icons-material/DocumentScanner";
 import RefreshIcon from "@mui/icons-material/Refresh";
 import { Star } from "lucide-react";
-import { TimelineDataCoverage } from "@/components/TimelineDataCoverage";
-import { TimelineDatePicker, FieldLabel } from "@/components/TimelineDatePicker";
+import { TimelineDatePicker } from "@/components/TimelineDatePicker";
 import { TimelineStockChart } from "@/components/TimelineStockChart";
 import { AppButton } from "@/components/mui/AppButton";
+import {
+  AdvancedButton,
+  Clip,
+  PageToolbar,
+  PctCell,
+  ToolbarDivider,
+  pctTone,
+} from "@/components/dense";
+import { MultiYearBreakoutAdvanced, type FnoGroupFilter } from "@/pages/breakout/MultiYearBreakoutAdvanced";
+import { MultiYearBreakoutFilters } from "@/pages/breakout/MultiYearBreakoutFilters";
 import {
   fetchFno,
   fetchFundamentallyStrong,
@@ -49,7 +50,6 @@ import {
 
 const PAGE_SIZE = 80;
 const ALL = "all";
-type FnoGroupFilter = "all" | "fno" | "non_fno";
 
 const MYB_PREFS_KEY = "trading.myb.prefs";
 type MybUiPrefs = {
@@ -632,525 +632,271 @@ export function MultiYearBreakoutPage() {
   const strategyMeta = STRATEGIES.find((s) => s.id === strategy);
   const colSpan = isPullbackView ? 9 : 7;
 
+  const [advancedOpen, setAdvancedOpen] = useState(false);
+  const activeFilterCount = [
+    statusFilter !== ALL,
+    minScore !== DEFAULT_MYB_PREFS.minScore,
+    sector !== ALL,
+    sizeTier !== "all",
+    fnoGroup !== "all",
+    fundamentallyStrongOnly,
+    Boolean(minPrice.trim()),
+    Boolean(maxPrice.trim()),
+    Boolean(minRvol.trim()),
+  ].filter(Boolean).length;
+
+  const resetFilters = () => {
+    setStatusFilter(ALL);
+    setMinScore(DEFAULT_MYB_PREFS.minScore);
+    setSector(ALL);
+    setSizeTier("all");
+    setFnoGroup("all");
+    setFundamentallyStrongOnly(false);
+    setMinPrice("");
+    setMaxPrice("");
+    setMinRvol("");
+  };
+
+  const showProgress = scanRunning && scanStatus;
+
   return (
-    <div className="mx-auto flex h-[calc(100dvh-6.5rem)] max-w-[1600px] flex-col gap-2 overflow-hidden px-2 py-2 sm:px-4">
+    <div className="page-shell flex flex-col gap-1 overflow-hidden px-1.5 py-1 sm:px-2">
       {error ? (
-        <Alert severity="error" onClose={() => setError(null)} className="shrink-0">
+        <Alert severity="error" onClose={() => setError(null)} className="shrink-0 py-0 text-data-sm">
           {error}
         </Alert>
       ) : null}
 
-      <div className="shrink-0 overflow-visible rounded-xl border border-surface-border bg-surface-raised px-2 py-1.5">
+      <PageToolbar
+        right={<AdvancedButton onClick={() => setAdvancedOpen(true)} label="Scan options" />}
+        below={
+          <div className="space-y-1">
+            <MultiYearBreakoutFilters
+              showBreakoutControls={showBreakoutControls}
+              showPullbackControls={showPullbackControls}
+              sectors={sectors}
+              statusFilter={statusFilter}
+              setStatusFilter={setStatusFilter}
+              minScore={minScore}
+              setMinScore={setMinScore}
+              sector={sector}
+              setSector={setSector}
+              sizeTier={sizeTier}
+              setSizeTier={setSizeTier}
+              fnoGroup={fnoGroup}
+              setFnoGroup={setFnoGroup}
+              fundamentallyStrongOnly={fundamentallyStrongOnly}
+              setFundamentallyStrongOnly={setFundamentallyStrongOnly}
+              minPrice={minPrice}
+              setMinPrice={setMinPrice}
+              maxPrice={maxPrice}
+              setMaxPrice={setMaxPrice}
+              minRvol={minRvol}
+              setMinRvol={setMinRvol}
+              activeCount={activeFilterCount}
+              onReset={resetFilters}
+            />
+            {showProgress ? (
+                <div className="flex items-center gap-2 text-data-xs text-slate-300">
+                  <span className="shrink-0">
+                    {scanStatus.batch_mode === "month"
+                      ? "Batch · month"
+                      : scanStatus.batch_mode === "last_7"
+                        ? "Batch · −7d"
+                        : "Scanning"}
+                    {scanStatus.batch_day_total ? (
+                      <span className="num ml-1 text-slate-100">
+                        {scanStatus.batch_day_index}/{scanStatus.batch_day_total}
+                      </span>
+                    ) : null}
+                  </span>
+                  <LinearProgress
+                    variant="determinate"
+                    value={activeProgressPct}
+                    className="h-1 min-w-0 flex-1 rounded-full"
+                    sx={{ bgcolor: "background.default", borderRadius: 999 }}
+                  />
+                  <span className="num shrink-0 text-slate-100">{activeProgressPct}%</span>
+                </div>
+              ) : null}
+          </div>
+        }
+      >
         <ToggleButtonGroup
           exclusive
-          size="small"
           value={strategy}
           onChange={(_e, value: MybStrategy | null) => {
             if (value) setStrategy(value);
           }}
-          className="mb-1.5 flex flex-wrap"
-          sx={{ "& .MuiToggleButton-root": { textTransform: "none", fontSize: "0.7rem", px: 1.25 } }}
+          sx={{ flexShrink: 0, "& .MuiToggleButton-root": { textTransform: "none" } }}
         >
           {STRATEGIES.map((s) => (
-            <ToggleButton key={s.id} value={s.id} disabled={scanRunning}>
+            <ToggleButton key={s.id} value={s.id} disabled={scanRunning} title={s.blurb}>
               {s.label}
             </ToggleButton>
           ))}
         </ToggleButtonGroup>
 
-        <Stack direction="row" spacing={1} useFlexGap className="flex-wrap items-center">
-          <TimelineDataCoverage stats={stats} compact />
-          <div className="hidden h-5 w-px shrink-0 bg-surface-border sm:block" />
-          <Stack spacing={0.25} className="overflow-visible">
-            <FieldLabel className="!text-[9px]">Scan date</FieldLabel>
-            <TimelineDatePicker
-              compact
-              value={tradeDate}
-              onChange={setTradeDate}
-              availableDates={
-                scanDates.length
-                  ? scanDates
-                  : stats
-                    ? ([stats.max_trade_date].filter(Boolean) as string[])
-                    : []
-              }
-              markedDates={scanDates}
-              markedLabel="Scan done"
-              minDate={stats?.min_trade_date}
-              maxDate={today}
-              disabled={bootLoading}
-            />
-          </Stack>
+        <ToolbarDivider />
 
-          {showBreakoutControls ? (
-            <Stack spacing={0.25}>
-              <FieldLabel className="!text-[9px]">Lookback</FieldLabel>
-              <ToggleButtonGroup
-                exclusive
-                size="small"
-                value={lookbackYears}
-                onChange={(_e, value: number | null) => {
-                  if (value) setLookbackYears(value);
-                }}
-                sx={{ height: 30 }}
-              >
-                {[2, 3, 5].map((y) => (
-                  <ToggleButton key={y} value={y} className="!px-2 !text-[10px] !normal-case">
-                    {y}Y
-                  </ToggleButton>
-                ))}
-              </ToggleButtonGroup>
-            </Stack>
-          ) : null}
+        <TimelineDatePicker
+          compact
+          showLegend={false}
+          value={tradeDate}
+          onChange={setTradeDate}
+          availableDates={
+            scanDates.length
+              ? scanDates
+              : stats
+                ? ([stats.max_trade_date].filter(Boolean) as string[])
+                : []
+          }
+          markedDates={scanDates}
+          markedLabel="Scan done"
+          minDate={stats?.min_trade_date}
+          maxDate={today}
+          disabled={bootLoading}
+        />
 
-          {showPullbackControls ? (
-            <>
-              <Stack spacing={0.25} className="min-w-[170px] max-w-[240px] flex-1">
-                <FieldLabel className="!text-[9px]">
-                  Min pullback ≥ {pullbackPct}% from ATH
-                </FieldLabel>
-                <Slider
-                  size="small"
-                  value={pullbackPct}
-                  min={5}
-                  max={90}
-                  step={1}
-                  valueLabelDisplay="auto"
-                  onChange={(_e, v) => setPullbackPct(v as number)}
-                  sx={{ py: 0.5 }}
-                />
-              </Stack>
-              <TextField
-                select
-                size="small"
-                label="Match"
-                value={matchMode}
-                onChange={(e) => setMatchMode(e.target.value as MybMatchMode)}
-                sx={{ minWidth: 120, "& .MuiInputBase-root": { fontSize: "0.75rem", height: 30 } }}
-                slotProps={{ inputLabel: { sx: { fontSize: "0.7rem" } } }}
-              >
-                <MenuItem value="at_least">At least X%</MenuItem>
-                <MenuItem value="at_most">At most X%</MenuItem>
-                <MenuItem value="band">X% ± band</MenuItem>
-              </TextField>
-              {matchMode === "band" ? (
-                <TextField
-                  size="small"
-                  label="Band ±%"
-                  type="number"
-                  value={bandWidthPct}
-                  onChange={(e) => setBandWidthPct(Number(e.target.value) || 0)}
-                  sx={{ width: 88, "& .MuiInputBase-root": { fontSize: "0.75rem", height: 30 } }}
-                  slotProps={{
-                    htmlInput: { min: 0, max: 40, step: 1 },
-                    inputLabel: { sx: { fontSize: "0.7rem" } },
-                  }}
-                />
-              ) : null}
-              <Stack spacing={0.25}>
-                <FieldLabel className="!text-[9px]">Trend</FieldLabel>
-                <ToggleButtonGroup
-                  exclusive
-                  size="small"
-                  value={trendFilter}
-                  onChange={(_e, value: MybTrendFilter | null) => {
-                    if (value) setTrendFilter(value);
-                  }}
-                  sx={{ height: 30 }}
-                >
-                  <ToggleButton value="all" className="!px-2 !text-[10px] !normal-case">
-                    Any
-                  </ToggleButton>
-                  <ToggleButton value="uptrend" className="!px-2 !text-[10px] !normal-case">
-                    Uptrend
-                  </ToggleButton>
-                  <ToggleButton value="downtrend" className="!px-2 !text-[10px] !normal-case">
-                    Downtrend
-                  </ToggleButton>
-                </ToggleButtonGroup>
-              </Stack>
-              <AppButton
-                size="small"
-                variant="text"
-                onClick={() => setShowAdvancedTrend((v) => !v)}
-              >
-                {showAdvancedTrend ? "Hide MA" : "MA settings"}
-              </AppButton>
-            </>
-          ) : null}
-
-          {strategy === "custom" ? (
-            <Stack direction="row" spacing={0.5} className="items-center">
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    size="small"
-                    checked={includeMultiYear}
-                    onChange={(e) => setIncludeMultiYear(e.target.checked)}
-                  />
-                }
-                label={<span className="text-[10px] text-slate-300">Multi-year</span>}
-              />
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    size="small"
-                    checked={includeAthPullback}
-                    onChange={(e) => setIncludeAthPullback(e.target.checked)}
-                  />
-                }
-                label={<span className="text-[10px] text-slate-300">ATH pullback</span>}
-              />
-            </Stack>
-          ) : null}
-
-          <AppButton
-            variant="contained"
-            size="small"
-            startIcon={
-              <DocumentScannerIcon
-                fontSize="small"
-                className={scanRunning ? "animate-pulse" : undefined}
-              />
-            }
-            onClick={handleRunScan}
-            disabled={scanRunning || bootLoading || !tradeDate}
+        {showBreakoutControls ? (
+          <ToggleButtonGroup
+            exclusive
+            value={lookbackYears}
+            onChange={(_e, value: number | null) => {
+              if (value) setLookbackYears(value);
+            }}
+            sx={{ flexShrink: 0 }}
+            title="Lookback"
           >
-            {scanRunning && !scanStatus?.batch_mode ? "Scanning…" : "Run scan"}
-          </AppButton>
-          <AppButton
-            size="small"
-            className="shrink-0"
-            onClick={handleRunScanMonth}
-            disabled={scanRunning || bootLoading || !tradeDate}
-            title={
-              tradeDate
-                ? `Scan every weekday in ${tradeDate.slice(0, 7)} through ${tradeDate}`
-                : "Scan whole month"
-            }
-          >
-            Month
-          </AppButton>
-          <AppButton
-            size="small"
-            className="shrink-0"
-            onClick={handleRunScanLast7}
-            disabled={scanRunning || bootLoading || !tradeDate}
-            title={tradeDate ? `Scan the 7 weekdays before ${tradeDate}` : "Scan last 7 days"}
-          >
-            −7d
-          </AppButton>
-
-          <AppButton
-            variant="outlined"
-            size="small"
-            startIcon={
-              <RefreshIcon fontSize="small" className={loading ? "animate-spin" : undefined} />
-            }
-            onClick={() => void loadResults()}
-            disabled={loading || !tradeDate || filterInvalid}
-          >
-            Load
-          </AppButton>
-        </Stack>
-
-        <Collapse in={showPullbackControls && showAdvancedTrend}>
-          <Stack
-            direction="row"
-            spacing={1}
-            useFlexGap
-            className="mt-1.5 flex-wrap items-center border-t border-surface-border pt-1.5"
-          >
-            <Typography className="text-[9px] uppercase tracking-wide text-slate-500">
-              Trend MAs
-            </Typography>
-            <TextField
-              select
-              size="small"
-              label="Type"
-              value={maType}
-              onChange={(e) => setMaType(e.target.value as MybMaType)}
-              sx={{ minWidth: 90, "& .MuiInputBase-root": { fontSize: "0.75rem", height: 30 } }}
-              slotProps={{ inputLabel: { sx: { fontSize: "0.7rem" } } }}
-            >
-              <MenuItem value="sma">SMA</MenuItem>
-              <MenuItem value="ema">EMA</MenuItem>
-            </TextField>
-            <TextField
-              size="small"
-              label="Short"
-              type="number"
-              value={shortMaPeriod}
-              onChange={(e) => setShortMaPeriod(Number(e.target.value) || 50)}
-              sx={{ width: 80, "& .MuiInputBase-root": { fontSize: "0.75rem", height: 30 } }}
-              slotProps={{
-                htmlInput: { min: 5, max: 100 },
-                inputLabel: { sx: { fontSize: "0.7rem" } },
-              }}
-            />
-            <TextField
-              size="small"
-              label="Long"
-              type="number"
-              value={longMaPeriod}
-              onChange={(e) => setLongMaPeriod(Number(e.target.value) || 200)}
-              sx={{ width: 80, "& .MuiInputBase-root": { fontSize: "0.75rem", height: 30 } }}
-              slotProps={{
-                htmlInput: { min: 20, max: 300 },
-                inputLabel: { sx: { fontSize: "0.7rem" } },
-              }}
-            />
-            <Typography className="text-[9px] text-slate-500">
-              Uptrend = price &gt; {longMaPeriod} {maType.toUpperCase()}, short &gt; long, RSI ≥ 45.
-              Downtrend = opposite stack, RSI ≤ 50. Re-run scan after changing MAs.
-            </Typography>
-          </Stack>
-        </Collapse>
-
-        <Stack
-          direction="row"
-          spacing={1}
-          useFlexGap
-          className="mt-1.5 flex-wrap items-center border-t border-surface-border pt-1.5"
-        >
-          <Typography className="text-[9px] uppercase tracking-wide text-slate-500">
-            Global
-          </Typography>
-          <TextField
-            select
-            size="small"
-            label="Size"
-            value={sizeTier}
-            onChange={(e) => setSizeTier(e.target.value as MybSizeTier)}
-            sx={{ minWidth: 100, "& .MuiInputBase-root": { fontSize: "0.75rem", height: 30 } }}
-            slotProps={{ inputLabel: { sx: { fontSize: "0.7rem" } } }}
-          >
-            <MenuItem value="all">All sizes</MenuItem>
-            <MenuItem value="large">Large (≥₹50Cr)</MenuItem>
-            <MenuItem value="mid">Mid (≥₹10Cr)</MenuItem>
-            <MenuItem value="small">Small (≥₹5Cr)</MenuItem>
-          </TextField>
-          <TextField
-            select
-            size="small"
-            label="Sector"
-            value={sector}
-            onChange={(e) => setSector(e.target.value)}
-            sx={{ minWidth: 140, "& .MuiInputBase-root": { fontSize: "0.75rem", height: 30 } }}
-            slotProps={{ inputLabel: { sx: { fontSize: "0.7rem" } } }}
-          >
-            <MenuItem value={ALL}>All sectors</MenuItem>
-            {sectors.map((s) => (
-              <MenuItem key={s} value={s}>
-                {s}
-              </MenuItem>
+            {[2, 3, 5].map((y) => (
+              <ToggleButton key={y} value={y} className="!normal-case">
+                {y}Y
+              </ToggleButton>
             ))}
-          </TextField>
-          <TextField
-            select
-            size="small"
-            label="Listing"
-            value={fnoGroup}
-            onChange={(e) => setFnoGroup(e.target.value as FnoGroupFilter)}
-            sx={{ minWidth: 120, "& .MuiInputBase-root": { fontSize: "0.75rem", height: 30 } }}
-            slotProps={{ inputLabel: { sx: { fontSize: "0.7rem" } } }}
-          >
-            <MenuItem value="all">All</MenuItem>
-            <MenuItem value="fno">F&O ★</MenuItem>
-            <MenuItem value="non_fno">Non-F&O</MenuItem>
-          </TextField>
-          <FormControlLabel
-            className="!mr-0"
-            control={
-              <Checkbox
-                size="small"
-                checked={fundamentallyStrongOnly}
-                onChange={(e) => setFundamentallyStrongOnly(e.target.checked)}
-              />
-            }
-            label={
-              <span className="text-[10px] text-slate-300" title={FUNDAMENTALLY_STRONG_TOOLTIP}>
-                Strong Fund
-              </span>
-            }
-          />
-          <TextField
-            size="small"
-            label="Min ₹"
-            value={minPrice}
-            onChange={(e) => setMinPrice(e.target.value)}
-            sx={{ width: 80, "& .MuiInputBase-root": { fontSize: "0.75rem", height: 30 } }}
-            slotProps={{ inputLabel: { sx: { fontSize: "0.7rem" } } }}
-          />
-          <TextField
-            size="small"
-            label="Max ₹"
-            value={maxPrice}
-            onChange={(e) => setMaxPrice(e.target.value)}
-            sx={{ width: 80, "& .MuiInputBase-root": { fontSize: "0.75rem", height: 30 } }}
-            slotProps={{ inputLabel: { sx: { fontSize: "0.7rem" } } }}
-          />
-          <TextField
-            size="small"
-            label="Min RVOL"
-            value={minRvol}
-            onChange={(e) => setMinRvol(e.target.value)}
-            sx={{ width: 88, "& .MuiInputBase-root": { fontSize: "0.75rem", height: 30 } }}
-            slotProps={{ inputLabel: { sx: { fontSize: "0.7rem" } } }}
-          />
-          <TextField
-            select
-            size="small"
-            label="Status"
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value as MybStatus | typeof ALL)}
-            sx={{ minWidth: 110, "& .MuiInputBase-root": { fontSize: "0.75rem", height: 30 } }}
-            slotProps={{ inputLabel: { sx: { fontSize: "0.7rem" } } }}
-          >
-            <MenuItem value={ALL}>All</MenuItem>
-            {showBreakoutControls ? (
-              <>
-                <MenuItem value="breakout">Breakout</MenuItem>
-                <MenuItem value="near">Near</MenuItem>
-              </>
-            ) : null}
-            {showPullbackControls ? <MenuItem value="pullback">Pullback</MenuItem> : null}
-          </TextField>
-          <TextField
-            size="small"
-            label="Min score"
-            value={minScore}
-            onChange={(e) => setMinScore(e.target.value)}
-            sx={{ width: 88, "& .MuiInputBase-root": { fontSize: "0.75rem", height: 30 } }}
-            slotProps={{ inputLabel: { sx: { fontSize: "0.7rem" } } }}
-          />
-        </Stack>
-
-        <Typography variant="caption" className="mt-1 block text-[9px] text-slate-500">
-          {strategyMeta?.blurb}{" "}
-          {showPullbackControls
-            ? `Condition: % pullback = (ATH − LTP) / ATH × 100 ${
-                matchMode === "band"
-                  ? `∈ ${pullbackPct}% ± ${bandWidthPct}%`
-                  : matchMode === "at_most"
-                    ? `≤ ${pullbackPct}%`
-                    : `≥ ${pullbackPct}%`
-              }. Trend filter updates the table without re-scan; change min pullback / MAs then Run scan.`
-            : showBreakoutControls
-              ? `Close vs prior ${lookbackYears}Y high (fresh = Breakout; within 3% below = Near).`
-              : null}{" "}
-          Size tiers use 20d avg turnover. Listing filter uses the NSE F&O universe (★ = F&O).
-          Strong Fund: {FUNDAMENTALLY_STRONG_TOOLTIP}.
-        </Typography>
-
-        {scanRunning && scanStatus ? (
-          <div className="mt-1.5 space-y-1 border-t border-surface-border pt-1.5">
-            <div className="flex flex-wrap items-center justify-between gap-2 text-[9px] text-slate-400">
-              <span>
-                {scanStatus.batch_mode === "month"
-                  ? "Batch · month"
-                  : scanStatus.batch_mode === "last_7"
-                    ? "Batch · −7d"
-                    : "Scanning"}
-                {scanStatus.batch_day_total ? (
-                  <>
-                    {" · "}
-                    <span className="font-medium text-slate-200">
-                      {scanStatus.batch_day_index}/{scanStatus.batch_day_total}
-                    </span>
-                  </>
-                ) : null}
-                {scanStatus.strategy ? (
-                  <>
-                    {" · "}
-                    <span className="font-medium text-slate-200">{scanStatus.strategy}</span>
-                  </>
-                ) : null}
-                {scanStatus.trade_date ? (
-                  <>
-                    {" · "}
-                    <span className="font-medium text-slate-200">{scanStatus.trade_date}</span>
-                  </>
-                ) : null}
-                {scanStatus.current_ticker ? (
-                  <>
-                    {" · "}
-                    <span className="font-medium text-slate-200">{scanStatus.current_ticker}</span>
-                  </>
-                ) : null}
-              </span>
-              <span className="tabular-nums">
-                {scanStatus.processed.toLocaleString()}/{scanStatus.total.toLocaleString()}
-                {scanStatus.total > 0 ? ` (${activeProgressPct}%)` : ""}
-                {" · "}
-                {scanStatus.alerts_count.toLocaleString()} alerts
-              </span>
-            </div>
-            <LinearProgress
-              variant="determinate"
-              value={activeProgressPct}
-              className="h-1 rounded-full"
-              sx={{ bgcolor: "background.default", borderRadius: 999 }}
-            />
-          </div>
+          </ToggleButtonGroup>
         ) : null}
-      </div>
 
-      <div className="grid min-h-0 flex-1 gap-2 lg:grid-cols-[minmax(0,1.2fr)_minmax(0,0.9fr)]">
-        <div className="flex min-h-0 flex-col overflow-hidden rounded-xl border border-surface-border bg-surface-raised">
-          <div className="flex items-center justify-between border-b border-surface-border px-2 py-1.5">
-            <Typography className="text-[11px] font-medium text-slate-200">
-              Results
+        {showPullbackControls ? (
+          <ToggleButtonGroup
+            exclusive
+            value={trendFilter}
+            onChange={(_e, value: MybTrendFilter | null) => {
+              if (value) setTrendFilter(value);
+            }}
+            sx={{ flexShrink: 0 }}
+            title="Trend"
+          >
+            <ToggleButton value="all" className="!normal-case">Any</ToggleButton>
+            <ToggleButton value="uptrend" className="!normal-case">Uptrend</ToggleButton>
+            <ToggleButton value="downtrend" className="!normal-case">Downtrend</ToggleButton>
+          </ToggleButtonGroup>
+        ) : null}
+
+        {showPullbackControls ? (
+          <span className="shrink-0 whitespace-nowrap text-data-xs text-slate-300" title="Edit in Advanced">
+            Pullback{" "}
+            <span className="num text-slate-100">
+              {matchMode === "band"
+                ? `${pullbackPct}% ± ${bandWidthPct}%`
+                : matchMode === "at_most"
+                  ? `≤ ${pullbackPct}%`
+                  : `≥ ${pullbackPct}%`}
+            </span>
+          </span>
+        ) : null}
+
+        <ToolbarDivider />
+
+        <AppButton
+          variant="contained"
+          size="small"
+          className="shrink-0"
+          startIcon={
+            <DocumentScannerIcon
+              fontSize="small"
+              className={scanRunning ? "animate-pulse" : undefined}
+            />
+          }
+          onClick={handleRunScan}
+          disabled={scanRunning || bootLoading || !tradeDate}
+        >
+          {scanRunning && !scanStatus?.batch_mode ? "Scanning…" : "Run scan"}
+        </AppButton>
+        <AppButton
+          variant="outlined"
+          size="small"
+          className="shrink-0"
+          startIcon={
+            <RefreshIcon fontSize="small" className={loading ? "animate-spin" : undefined} />
+          }
+          onClick={() => void loadResults()}
+          disabled={loading || !tradeDate || filterInvalid}
+        >
+          Load
+        </AppButton>
+      </PageToolbar>
+
+      <div className="grid min-h-0 flex-1 gap-1 lg:grid-cols-[minmax(0,1.2fr)_minmax(0,0.9fr)]">
+        <section className="panel flex min-h-0 flex-col overflow-hidden">
+          <div className="flex shrink-0 items-center justify-between gap-2 border-b border-surface-border px-2 py-1">
+            <div className="flex min-w-0 items-baseline gap-2">
+              <h2 className="shrink-0 text-data-md font-semibold text-slate-100">Results</h2>
               {scanAlertsCount != null ? (
-                <span className="ml-1 text-slate-500">({total.toLocaleString()} shown)</span>
+                <span className="truncate text-data-xs tabular-nums text-slate-300">
+                  {total.toLocaleString()} shown · {tradeDate}
+                </span>
               ) : null}
-              {loading ? <span className="ml-2 text-[9px] text-slate-500">Updating…</span> : null}
-            </Typography>
-            <div className="flex items-center gap-1">
-              <AppButton
-                size="small"
+              {loading ? <span className="shrink-0 text-data-xs text-slate-400">Updating…</span> : null}
+            </div>
+            <div className="flex shrink-0 items-center gap-1 text-data-xs text-slate-300">
+              <button
+                type="button"
                 disabled={page <= 0 || loading}
                 onClick={() => setPage((p) => Math.max(0, p - 1))}
+                className="rounded border border-surface-border px-1.5 leading-5 disabled:opacity-40"
+                aria-label="Previous page"
               >
-                Prev
-              </AppButton>
-              <span className="px-1 text-[10px] tabular-nums text-slate-400">
+                ‹
+              </button>
+              <span className="tabular-nums">
                 {page + 1}/{pageCount}
               </span>
-              <AppButton
-                size="small"
+              <button
+                type="button"
                 disabled={page + 1 >= pageCount || loading}
                 onClick={() => setPage((p) => p + 1)}
+                className="rounded border border-surface-border px-1.5 leading-5 disabled:opacity-40"
+                aria-label="Next page"
               >
-                Next
-              </AppButton>
+                ›
+              </button>
             </div>
           </div>
 
           <div className="min-h-0 flex-1 overflow-auto">
-            <table className="w-full border-collapse text-left text-[11px]">
-              <thead className="sticky top-0 z-10 bg-surface-raised text-[9px] uppercase tracking-wide text-slate-500">
-                <tr className="border-b border-surface-border">
-                  <th className="px-2 py-2">Ticker</th>
+            <table className="dt">
+              <thead>
+                <tr>
+                  <th>Ticker</th>
                   {isPullbackView ? (
                     <>
-                      <th className="px-2 py-2 text-right">LTP</th>
-                      <th className="px-2 py-2 text-right">ATH</th>
-                      <th className="px-2 py-2 text-right">% Below ATH</th>
-                      <th className="px-2 py-2">Trend</th>
-                      <th className="px-2 py-2 text-right">vs 200</th>
-                      <th className="px-2 py-2 text-right">vs 50</th>
-                      <th className="px-2 py-2 text-right">RSI</th>
-                      <th className="px-2 py-2 text-right">Score</th>
+                      <th className="text-right">LTP</th>
+                      <th className="text-right">ATH</th>
+                      <th className="text-right">% Below ATH</th>
+                      <th>Trend</th>
+                      <th className="text-right">vs 200</th>
+                      <th className="text-right">vs 50</th>
+                      <th className="text-right">RSI</th>
+                      <th className="text-right">Score</th>
                     </>
                   ) : (
                     <>
-                      <th className="px-2 py-2">Status</th>
-                      <th className="px-2 py-2 text-right">Base yrs</th>
-                      <th className="px-2 py-2 text-right">Resistance</th>
-                      <th className="px-2 py-2 text-right">Vs high</th>
-                      <th className="px-2 py-2 text-right">RVOL</th>
-                      <th className="px-2 py-2 text-right">Score</th>
+                      <th>Status</th>
+                      <th className="text-right">Base yrs</th>
+                      <th className="text-right">Resistance</th>
+                      <th className="text-right">Vs high</th>
+                      <th className="text-right">RVOL</th>
+                      <th className="text-right">Score</th>
                     </>
                   )}
                 </tr>
@@ -1158,13 +904,13 @@ export function MultiYearBreakoutPage() {
               <tbody>
                 {noScanYet ? (
                   <tr>
-                    <td colSpan={colSpan} className="px-3 py-8 text-center text-slate-500">
+                    <td colSpan={colSpan} className="py-6 text-center text-slate-300">
                       No scan for {tradeDate} yet. Configure filters and click Run scan.
                     </td>
                   </tr>
                 ) : rows.length === 0 && hasLoaded && !loading ? (
                   <tr>
-                    <td colSpan={colSpan} className="px-3 py-8 text-center text-slate-500">
+                    <td colSpan={colSpan} className="py-6 text-center text-slate-300">
                       No names matched these filters.
                     </td>
                   </tr>
@@ -1180,45 +926,37 @@ export function MultiYearBreakoutPage() {
                       <tr
                         key={row.id}
                         onClick={() => setSelected(row)}
-                        className={`cursor-pointer border-b border-surface-border/70 hover:bg-white/5 ${
-                          active ? "bg-white/10" : ""
-                        }`}
+                        className={`dt-row ${active ? "dt-selected" : ""}`}
                       >
-                        <td className="px-2 py-1.5">
+                        <td className="max-w-[13rem]">
                           <div className="flex items-center gap-1">
-                            <div className="font-medium text-slate-100">{row.ticker}</div>
+                            <span className="ticker">{row.ticker}</span>
                             <FnoStarMark show={fnoSymbolSet.has(row.ticker)} />
                             {(fundamentalStrongFromDetails(row.details) === true ||
                               strongSymbolSet.has(row.ticker.toUpperCase())) && (
                               <span
-                                className="rounded border border-emerald-500/40 bg-emerald-500/15 px-1 py-px text-[8px] font-medium text-emerald-300"
+                                className="rounded border border-emerald-500/40 bg-emerald-500/15 px-1 text-[10px] font-semibold leading-[14px] text-emerald-200"
                                 title={FUNDAMENTALLY_STRONG_TOOLTIP}
                               >
                                 Strong
                               </span>
                             )}
                           </div>
-                          <div className="text-[9px] text-slate-500">
+                          <Clip className="text-data-xs text-slate-400">
                             {row.sector || row.company_name || "—"}
-                          </div>
+                          </Clip>
                         </td>
                         {isPullbackView ? (
                           <>
-                            <td className="px-2 py-1.5 text-right tabular-nums text-slate-300">
-                              {fmtPrice(row.close_price)}
-                            </td>
-                            <td className="px-2 py-1.5 text-right tabular-nums text-slate-300">
+                            <td className="text-right text-slate-200">{fmtPrice(row.close_price)}</td>
+                            <td className="text-right text-slate-200">
                               <div>{fmtPrice(row.prior_high)}</div>
-                              <div className="text-[9px] text-slate-500">
-                                {row.prior_high_date || "—"}
-                              </div>
+                              <div className="text-data-xs text-slate-400">{row.prior_high_date || "—"}</div>
                             </td>
-                            <td className="px-2 py-1.5 text-right tabular-nums font-semibold text-rose-300">
-                              {fmtBelowAth(drop)}
-                            </td>
-                            <td className="px-2 py-1.5">
+                            <td className="num text-right text-loss">{fmtBelowAth(drop)}</td>
+                            <td>
                               <span
-                                className={`inline-flex max-w-[140px] truncate rounded border px-1.5 py-0.5 text-[9px] font-medium ${trendTone(
+                                className={`inline-flex rounded border px-1.5 py-px text-[10px] font-medium ${trendTone(
                                   trend,
                                 )}`}
                                 title={trendLabel}
@@ -1230,52 +968,50 @@ export function MultiYearBreakoutPage() {
                                     : "Mixed"}
                               </span>
                             </td>
-                            <td className="px-2 py-1.5 text-right tabular-nums text-slate-300">
+                            <td className="text-right">
                               <span title={`vs ${longPeriod} MA`}>
-                                {fmtPct(detailNum(row, "dist_long_ma_pct"))}
+                                <PctCell value={detailNum(row, "dist_long_ma_pct")} />
                               </span>
                             </td>
-                            <td className="px-2 py-1.5 text-right tabular-nums text-slate-300">
+                            <td className="text-right">
                               <span title={`vs ${shortPeriod} MA`}>
-                                {fmtPct(detailNum(row, "dist_short_ma_pct"))}
+                                <PctCell value={detailNum(row, "dist_short_ma_pct")} />
                               </span>
                             </td>
-                            <td className="px-2 py-1.5 text-right tabular-nums text-slate-300">
+                            <td className="text-right text-slate-200">
                               {row.rsi14 != null ? row.rsi14.toFixed(0) : "—"}
                             </td>
-                            <td className="px-2 py-1.5 text-right tabular-nums font-medium text-slate-100">
-                              {row.score.toFixed(0)}
-                            </td>
+                            <td className="num text-right text-data-md text-slate-100">{row.score.toFixed(0)}</td>
                           </>
                         ) : (
                           <>
-                            <td className="px-2 py-1.5">
+                            <td>
                               <span
-                                className={`inline-flex rounded border px-1.5 py-0.5 text-[9px] font-medium capitalize ${statusTone(
+                                className={`inline-flex rounded border px-1.5 py-px text-[10px] font-medium capitalize ${statusTone(
                                   row.status,
                                 )}`}
                               >
                                 {row.status}
                               </span>
                             </td>
-                            <td className="px-2 py-1.5 text-right tabular-nums text-slate-300">
+                            <td className="text-right text-slate-200">
                               {row.years_since_high != null
                                 ? row.years_since_high.toFixed(1)
                                 : "—"}
                             </td>
-                            <td className="px-2 py-1.5 text-right tabular-nums text-slate-300">
+                            <td className="text-right text-slate-200">
                               <div>{fmtPrice(row.prior_high)}</div>
-                              <div className="text-[9px] text-slate-500">
+                              <div className="text-data-xs text-slate-400">
                                 {row.lookback_years ? `${row.lookback_years}Y` : "ATH"} ·{" "}
                                 {row.prior_high_date || "—"}
                               </div>
                             </td>
                             <td
-                              className={`px-2 py-1.5 text-right tabular-nums ${
+                              className={`num text-right ${
                                 row.status === "pullback"
-                                  ? "text-rose-300"
+                                  ? "text-loss"
                                   : (row.breakout_pct ?? 0) >= 0
-                                    ? "text-emerald-300"
+                                    ? "text-gain"
                                     : "text-amber-300"
                               }`}
                             >
@@ -1283,12 +1019,10 @@ export function MultiYearBreakoutPage() {
                                 ? fmtBelowAth(row.drop_from_ath_pct)
                                 : fmtPct(row.breakout_pct)}
                             </td>
-                            <td className="px-2 py-1.5 text-right tabular-nums text-slate-300">
+                            <td className="text-right text-slate-200">
                               {row.rvol20 != null ? row.rvol20.toFixed(2) : "—"}
                             </td>
-                            <td className="px-2 py-1.5 text-right tabular-nums font-medium text-slate-100">
-                              {row.score.toFixed(0)}
-                            </td>
+                            <td className="num text-right text-data-md text-slate-100">{row.score.toFixed(0)}</td>
                           </>
                         )}
                       </tr>
@@ -1298,26 +1032,26 @@ export function MultiYearBreakoutPage() {
               </tbody>
             </table>
           </div>
-        </div>
+        </section>
 
-        <div className="flex min-h-0 flex-col overflow-hidden rounded-xl border border-surface-border bg-surface-raised">
+        <section className="panel flex min-h-0 flex-col overflow-hidden">
           {selected ? (
             <>
-              <div className="border-b border-surface-border px-3 py-2">
-                <Typography className="text-[12px] font-medium text-slate-100">
-                  <span className="inline-flex items-center gap-1">
-                    {selected.ticker}
+              <div className="shrink-0 border-b border-surface-border px-2 py-1">
+                <div className="flex min-w-0 items-baseline gap-2">
+                  <span className="inline-flex shrink-0 items-center gap-1">
+                    <span className="ticker">{selected.ticker}</span>
                     <FnoStarMark show={fnoSymbolSet.has(selected.ticker)} />
                   </span>
-                  <span className="ml-2 text-[10px] font-normal text-slate-500">
+                  <Clip className="text-data-xs text-slate-400">
                     {selected.company_name || selected.sector || ""}
-                  </span>
-                </Typography>
-                <Typography className="mt-0.5 text-[10px] text-slate-400">
+                  </Clip>
+                </div>
+                <div className="mt-0.5 text-data-xs text-slate-300">
                   {selected.status === "pullback" || isPullbackView ? (
                     <>
                       ATH {fmtPrice(selected.prior_high)} · LTP {fmtPrice(selected.close_price)} ·{" "}
-                      <span className="font-medium text-rose-300">
+                      <span className="num text-loss">
                         {fmtBelowAth(selected.drop_from_ath_pct)}
                       </span>{" "}
                       · {detailStr(selected, "trend_label") || "—"} · RSI{" "}
@@ -1328,11 +1062,11 @@ export function MultiYearBreakoutPage() {
                     <>
                       {selected.lookback_years}Y high {fmtPrice(selected.prior_high)} on{" "}
                       {selected.prior_high_date || "—"} · close {fmtPrice(selected.close_price)} (
-                      {fmtPct(selected.breakout_pct)}) · RVOL{" "}
+                      <span className={`num ${pctTone(selected.breakout_pct)}`}>{fmtPct(selected.breakout_pct)}</span>) · RVOL{" "}
                       {selected.rvol20 != null ? selected.rvol20.toFixed(2) : "—"}
                     </>
                   )}
-                </Typography>
+                </div>
               </div>
               <div className="min-h-0 flex-1 p-1">
                 <TimelineStockChart
@@ -1355,12 +1089,48 @@ export function MultiYearBreakoutPage() {
               </div>
             </>
           ) : (
-            <div className="flex flex-1 items-center justify-center text-[11px] text-slate-500">
+            <div className="flex flex-1 items-center justify-center text-data-sm text-slate-400">
               Select a row to view the chart
             </div>
           )}
-        </div>
+        </section>
       </div>
+
+      <MultiYearBreakoutAdvanced
+        open={advancedOpen}
+        onClose={() => setAdvancedOpen(false)}
+        tradeDate={tradeDate}
+        stats={stats}
+        strategy={strategy}
+        strategyBlurb={strategyMeta?.blurb}
+        showBreakoutControls={showBreakoutControls}
+        showPullbackControls={showPullbackControls}
+        lookbackYears={lookbackYears}
+        scanRunning={scanRunning}
+        bootLoading={bootLoading}
+        onRunScanMonth={handleRunScanMonth}
+        onRunScanLast7={handleRunScanLast7}
+        scanStatus={scanStatus}
+        activeProgressPct={activeProgressPct}
+        pullbackPct={pullbackPct}
+        setPullbackPct={setPullbackPct}
+        matchMode={matchMode}
+        setMatchMode={setMatchMode}
+        bandWidthPct={bandWidthPct}
+        setBandWidthPct={setBandWidthPct}
+        showAdvancedTrend={showAdvancedTrend}
+        setShowAdvancedTrend={setShowAdvancedTrend}
+        maType={maType}
+        setMaType={setMaType}
+        shortMaPeriod={shortMaPeriod}
+        setShortMaPeriod={setShortMaPeriod}
+        longMaPeriod={longMaPeriod}
+        setLongMaPeriod={setLongMaPeriod}
+        includeMultiYear={includeMultiYear}
+        setIncludeMultiYear={setIncludeMultiYear}
+        includeAthPullback={includeAthPullback}
+        setIncludeAthPullback={setIncludeAthPullback}
+      />
     </div>
   );
 }

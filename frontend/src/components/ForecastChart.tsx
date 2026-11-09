@@ -14,7 +14,11 @@ import { DEFAULT_VISIBLE_TRADING_DAYS } from "@/lib/chartTimeScale";
 interface ForecastChartProps {
   data: ForecastPayload | null;
   loading?: boolean;
+  /** Stretch to the parent's height instead of a fixed 420px canvas. */
+  fillHeight?: boolean;
 }
+
+const FIXED_CHART_HEIGHT = 420;
 
 function formatPrice(value: number) {
   return `₹${value.toLocaleString("en-IN", { maximumFractionDigits: 2 })}`;
@@ -24,7 +28,7 @@ function toChartTime(dateStr: string): Time {
   return dateStr as Time;
 }
 
-export function ForecastChart({ data, loading }: ForecastChartProps) {
+export function ForecastChart({ data, loading, fillHeight = false }: ForecastChartProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const chartRef = useRef<IChartApi | null>(null);
 
@@ -53,7 +57,9 @@ export function ForecastChart({ data, loading }: ForecastChartProps) {
         secondsVisible: false,
       },
       width: containerRef.current.clientWidth,
-      height: 420,
+      height: fillHeight
+        ? Math.max(containerRef.current.clientHeight, 240)
+        : FIXED_CHART_HEIGHT,
     });
 
     const candleSeries = chart.addCandlestickSeries({
@@ -139,26 +145,34 @@ export function ForecastChart({ data, loading }: ForecastChartProps) {
 
     const handleResize = () => {
       if (containerRef.current && chartRef.current) {
-        chartRef.current.applyOptions({ width: containerRef.current.clientWidth });
+        chartRef.current.applyOptions({
+          width: containerRef.current.clientWidth,
+          ...(fillHeight ? { height: Math.max(containerRef.current.clientHeight, 240) } : {}),
+        });
       }
     };
 
     window.addEventListener("resize", handleResize);
+    const observer = fillHeight ? new ResizeObserver(handleResize) : null;
+    observer?.observe(containerRef.current);
 
     return () => {
       window.removeEventListener("resize", handleResize);
+      observer?.disconnect();
       chart.remove();
       chartRef.current = null;
     };
-  }, [data]);
+  }, [data, fillHeight]);
+
+  const placeholderHeight = fillHeight ? "h-full min-h-[240px]" : "h-[480px]";
 
   if (loading) {
     return (
-      <div className="flex h-[480px] items-center justify-center rounded-2xl border border-surface-border bg-surface-raised">
+      <div className={`flex ${placeholderHeight} items-center justify-center rounded-lg border border-surface-border bg-surface-raised`}>
         <div className="text-center">
           <div className="mx-auto mb-3 h-10 w-10 animate-spin rounded-full border-2 border-accent border-t-transparent" />
-          <p className="text-sm text-slate-400">Loading 5Y history & running TimesFM...</p>
-          <p className="mt-1 text-xs text-slate-500">First run downloads model weights</p>
+          <p className="text-data-md text-slate-300">Loading 5Y history & running TimesFM...</p>
+          <p className="mt-1 text-data-xs text-slate-400">First run downloads model weights</p>
         </div>
       </div>
     );
@@ -166,31 +180,60 @@ export function ForecastChart({ data, loading }: ForecastChartProps) {
 
   if (!data) {
     return (
-      <div className="flex h-[480px] items-center justify-center rounded-2xl border border-dashed border-surface-border bg-surface-raised/50">
-        <p className="text-sm text-slate-500">Select a stock and click Run Forecast to load TimesFM</p>
+      <div className={`flex ${placeholderHeight} items-center justify-center rounded-lg border border-dashed border-surface-border bg-surface-raised/50`}>
+        <p className="text-data-md text-slate-400">Select a stock and click Run Forecast to load TimesFM</p>
       </div>
     );
   }
 
+  const lastMedian = data.median.length ? data.median[data.median.length - 1] : null;
+  const medianChangePct =
+    lastMedian != null && data.latest_close ? ((lastMedian - data.latest_close) / data.latest_close) * 100 : null;
+  const changeTone =
+    medianChangePct == null ? "text-slate-300" : medianChangePct >= 0 ? "text-gain" : "text-loss";
+
   return (
-    <div className="rounded-2xl border border-surface-border bg-surface-raised p-4 sm:p-6">
-      <div className="mb-4 flex flex-wrap items-end justify-between gap-3">
-        <div>
-          <h2 className="text-xl font-semibold">{data.symbol}</h2>
-          <p className="text-sm capitalize text-slate-400">
+    <div
+      className={`rounded-lg border border-surface-border bg-surface-raised p-2 ${
+        fillHeight ? "flex h-full min-h-0 flex-col" : ""
+      }`}
+    >
+      <div className="mb-1.5 flex shrink-0 flex-wrap items-end justify-between gap-x-4 gap-y-1">
+        <div className="min-w-0">
+          <h2 className="text-lg font-semibold leading-tight text-slate-100">{data.symbol}</h2>
+          <p className="text-data-xs capitalize text-slate-300">
             {data.interval} · {data.history_bars} bars · {data.lookback_years}Y ·{" "}
             {data.model_label}
           </p>
         </div>
-        <div className="text-right">
-          <div className="text-xs uppercase tracking-wide text-slate-500">Latest close</div>
-          <div className="font-mono text-lg text-white">{formatPrice(data.latest_close)}</div>
+        <div className="flex items-end gap-4 text-right">
+          <div>
+            <div className="text-[10px] font-medium uppercase tracking-wide text-slate-400">Latest close</div>
+            <div className="num font-mono text-data-md text-slate-100">{formatPrice(data.latest_close)}</div>
+          </div>
+          {lastMedian != null ? (
+            <div title={`Median forecast at ${data.forecast_dates[data.forecast_dates.length - 1] ?? "horizon end"}`}>
+              <div className="text-[10px] font-medium uppercase tracking-wide text-slate-400">
+                Median @ {data.horizon} bars
+              </div>
+              <div className="num font-mono text-data-md text-slate-100">
+                {formatPrice(lastMedian)}{" "}
+                <span className={changeTone}>
+                  ({medianChangePct != null && medianChangePct > 0 ? "+" : ""}
+                  {medianChangePct?.toFixed(2)}%)
+                </span>
+              </div>
+            </div>
+          ) : null}
         </div>
       </div>
 
-      <div ref={containerRef} className="w-full rounded-lg overflow-hidden" />
+      <div
+        ref={containerRef}
+        className={`w-full overflow-hidden rounded-md ${fillHeight ? "min-h-0 flex-1" : ""}`}
+      />
 
-      <div className="mt-3 flex flex-wrap gap-4 text-xs text-slate-500">
+      <div className="mt-1.5 flex shrink-0 flex-wrap gap-x-4 gap-y-1 text-data-xs text-slate-300">
         <span className="flex items-center gap-1.5">
           <span className="inline-block h-2.5 w-2.5 rounded-sm bg-emerald-500" />
           Bullish candle

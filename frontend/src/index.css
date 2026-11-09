@@ -4,6 +4,8 @@
 
 :root {
   color-scheme: dark;
+  /* Height of the single app bar (AppBar in Header.tsx). Pages size themselves against it. */
+  --app-chrome-h: 2.5rem;
 }
 
 /* Tailwind layout + MUI components: MUI styles inject first via StyledEngineProvider. */
@@ -28,4 +30,60 @@ body {
 ::-webkit-scrollbar-thumb {
   background: #334155;
   border-radius: 999px;
+}
+
+@layer components {
+  /* Full-viewport page below the app bar; children manage their own scrolling. */
+  .page-shell {
+    height: calc(100dvh - var(--app-chrome-h));
+    min-height: 0;
+  }
+  /* Below lg, stacked panels can't share one viewport — let the document scroll instead. */
+  @media (max-width: 1023.98px) {
+    .page-shell {
+      height: auto;
+      min-height: calc(100dvh - var(--app-chrome-h));
+    }
+    .page-shell .mobile-pane {
+      height: 60vh;
+      flex: none;
+    }
+  }
+
+  /* Scrollable page below the app bar for document-style pages. */
+  .page-scroll {
+    height: calc(100dvh - var(--app-chrome-h));
+    overflow-y: auto;
+  }
+
+  .panel {
+    @apply rounded-lg border border-surface-border bg-surface-raised/60;
+  }
+
+  /* Dense data table */
+  .dt {
+    @apply w-full border-collapse text-left text-data-sm text-slate-200;
+  }
+  .dt thead th {
+    @apply sticky top-0 z-10 whitespace-nowrap bg-surface-raised px-2 py-1.5 text-[10px] font-semibold uppercase tracking-wide text-slate-400;
+  }
+  .dt tbody td {
+    @apply px-2 py-1 align-middle tabular-nums;
+  }
+  .dt tbody tr {
+    @apply border-t border-surface-border/60 transition-colors;
+  }
+  .dt tbody tr.dt-row {
+    @apply cursor-pointer hover:bg-surface/50;
+  }
+  .dt tbody tr.dt-selected {
+    @apply bg-accent/15 hover:bg-accent/20;
+  }
+
+  .ticker {
+    @apply text-data-md font-semibold tracking-tight text-slate-100;
+  }
+  .num {
+    @apply tabular-nums font-semibold;
+  }
 }

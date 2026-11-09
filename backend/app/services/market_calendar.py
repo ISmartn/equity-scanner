@@ -3,10 +3,18 @@ from __future__ import annotations
 from datetime import date, timedelta
 
 
+# Sunday sessions that trade. NSE Diwali Muhurat 2026 is 8 November.
+_SPECIAL_SESSIONS = {date(2026, 11, 8)}
+
+
+def _is_session_day(day: date) -> bool:
+    return day.weekday() < 5 or day in _SPECIAL_SESSIONS
+
+
 def expected_latest_session(as_of: date | None = None) -> str:
-    """Latest NSE session on or before as_of (rolls weekend back to Friday)."""
+    """Latest cash session on or before as_of. Weekends roll back, except a Muhurat Sunday."""
     d = as_of or date.today()
-    while d.weekday() >= 5:
+    while not _is_session_day(d):
         d -= timedelta(days=1)
     return d.isoformat()
 

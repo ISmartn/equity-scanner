@@ -188,6 +188,24 @@ export function TimelineDatePicker({
             "& .MuiInputBase-root": {
               fontSize: compact ? "0.75rem" : "0.875rem",
             },
+            ...(compact && {
+              width: 148,
+              "& .MuiPickersInputBase-root": {
+                fontSize: "0.8125rem",
+                fontVariantNumeric: "tabular-nums",
+                paddingRight: "6px",
+              },
+              "& .MuiPickersSectionList-root": {
+                paddingTop: "5px",
+                paddingBottom: "5px",
+              },
+              "& .MuiInputAdornment-root .MuiIconButton-root": {
+                padding: "2px",
+              },
+              "& .MuiInputAdornment-root .MuiSvgIcon-root": {
+                fontSize: "1.05rem",
+              },
+            }),
             ...((valueIsAccent || valueIsMarked) && {
               "& .MuiPickersOutlinedInput-root": {
                 boxShadow: `0 0 0 2px ${valueIsAccent ? ACCENT_COLOR.field : MARK_COLOR.field}`,
@@ -218,7 +236,7 @@ export function TimelineDatePicker({
       >
         <ChevronLeftIcon fontSize="small" />
       </IconButton>
-      <Box className="min-w-[132px] flex-1">{datePicker}</Box>
+      <Box className={compact ? "shrink-0" : "min-w-[132px] flex-1"}>{datePicker}</Box>
       <IconButton
         size="small"
         disabled={disabled || !canStepForward}
@@ -257,7 +275,7 @@ export function TimelineDatePicker({
           <Stack
             direction="row"
             spacing={1}
-            className="mt-1 flex-nowrap whitespace-nowrap text-[9px] text-slate-500"
+            className="mt-1 flex-nowrap whitespace-nowrap text-[10px] text-slate-400"
           >
             <span className="inline-flex items-center gap-1">
               <span

@@ -64,7 +64,15 @@ export interface MoveFilterSettings {
   threeGreenEnabled: boolean;
   darvasEnabled: boolean;
   darvasLookbackInput: string;
+  /** Period text for the five EMA overlays (15 / 20 / 50 / 100 / 200 by default). */
+  emaInputs: string[];
+  /** Whether each EMA overlay is drawn. */
+  emaEnabled: boolean[];
+  showRsi: boolean;
+  rsiInput: string;
 }
+
+export const DEFAULT_MOVE_FILTER_EMA_INPUTS = ["15", "20", "50", "100", "200"];
 
 export const DEFAULT_MOVE_FILTER_SETTINGS: MoveFilterSettings = {
   symbol: "RELIANCE",
@@ -75,7 +83,21 @@ export const DEFAULT_MOVE_FILTER_SETTINGS: MoveFilterSettings = {
   threeGreenEnabled: false,
   darvasEnabled: true,
   darvasLookbackInput: "30",
+  emaInputs: [...DEFAULT_MOVE_FILTER_EMA_INPUTS],
+  emaEnabled: DEFAULT_MOVE_FILTER_EMA_INPUTS.map(() => true),
+  showRsi: true,
+  rsiInput: "14",
 };
+
+function stringList(value: unknown, fallback: string[]): string[] {
+  if (!Array.isArray(value)) return [...fallback];
+  return fallback.map((item, index) => (typeof value[index] === "string" ? value[index] : item));
+}
+
+function boolList(value: unknown, fallback: boolean[]): boolean[] {
+  if (!Array.isArray(value)) return [...fallback];
+  return fallback.map((item, index) => (typeof value[index] === "boolean" ? value[index] : item));
+}
 
 export function getMoveFilterSettings(): MoveFilterSettings {
   try {
@@ -86,6 +108,12 @@ export function getMoveFilterSettings(): MoveFilterSettings {
       ...DEFAULT_MOVE_FILTER_SETTINGS,
       ...parsed,
       symbol: (parsed.symbol ?? DEFAULT_MOVE_FILTER_SETTINGS.symbol).trim().toUpperCase(),
+      emaInputs: stringList(parsed.emaInputs, DEFAULT_MOVE_FILTER_SETTINGS.emaInputs),
+      emaEnabled: boolList(parsed.emaEnabled, DEFAULT_MOVE_FILTER_SETTINGS.emaEnabled),
+      showRsi:
+        typeof parsed.showRsi === "boolean" ? parsed.showRsi : DEFAULT_MOVE_FILTER_SETTINGS.showRsi,
+      rsiInput:
+        typeof parsed.rsiInput === "string" ? parsed.rsiInput : DEFAULT_MOVE_FILTER_SETTINGS.rsiInput,
     };
   } catch {
     return DEFAULT_MOVE_FILTER_SETTINGS;

@@ -437,6 +437,9 @@ def _analyze_sector(
     rs_mom = float(rrg["rs_momentum"].iloc[-1])
     quadrant = _quadrant(rs_ratio, rs_mom)
     as_of = sector_df.index[-1]
+    # RRG needs sector+benchmark bars on the same day, so a stale benchmark
+    # pins RS/momentum to an older date than the latest price bar.
+    rs_as_of = rrg.index[-1]
     prev = sector_df["close"].iloc[-2] if len(sector_df) > 1 else sector_df["close"].iloc[-1]
     close = float(sector_df["close"].iloc[-1])
     daily_chg = (close / float(prev) - 1.0) * 100.0 if float(prev) else 0.0
@@ -497,6 +500,8 @@ def _analyze_sector(
             "top_laggard": top_laggard,
         },
         "as_of": as_of.strftime("%Y-%m-%d"),
+        "rs_as_of": rs_as_of.strftime("%Y-%m-%d"),
+        "rs_lag_days": int((as_of - rs_as_of).days),
     }
 
 
@@ -621,10 +626,25 @@ def run_sector_rotation_scan(
     stealth_n = sum(1 for s in sectors if s["is_stealth_accumulation"])
     pa_n = sum(1 for s in sectors if s["is_price_action_confirmed"])
 
+    benchmark_as_of = benchmark.index[-1]
+    price_as_of = max(
+        (pd.Timestamp(s["as_of"]) for s in sectors),
+        default=benchmark_as_of,
+    )
+    rs_as_of = max(
+        (pd.Timestamp(s["rs_as_of"]) for s in sectors),
+        default=benchmark_as_of,
+    )
+    rs_lag_days = int((price_as_of - rs_as_of).days)
+
     return {
         "timestamp": datetime.now(timezone.utc).isoformat(),
         "benchmark": BENCHMARK_NAME,
-        "benchmark_as_of": benchmark.index[-1].strftime("%Y-%m-%d"),
+        "benchmark_as_of": benchmark_as_of.strftime("%Y-%m-%d"),
+        "price_as_of": price_as_of.strftime("%Y-%m-%d"),
+        "rs_as_of": rs_as_of.strftime("%Y-%m-%d"),
+        "rs_lag_days": rs_lag_days,
+        "benchmark_stale": rs_lag_days > 0,
         "sectors": sectors,
         "summary": {
             "total": len(sectors),

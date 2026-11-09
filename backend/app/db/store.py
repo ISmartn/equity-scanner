@@ -269,11 +269,116 @@ CREATE TABLE IF NOT EXISTS index_candles (
 
 CREATE INDEX IF NOT EXISTS idx_index_candles_tf_ts
     ON index_candles(instrument_token, timeframe, ts);
+
+CREATE TABLE IF NOT EXISTS grimes_runs (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    trade_date TEXT NOT NULL,
+    started_at TEXT NOT NULL,
+    finished_at TEXT,
+    universe_size INTEGER DEFAULT 0,
+    analyzed INTEGER DEFAULT 0,
+    workers INTEGER DEFAULT 0,
+    status TEXT NOT NULL DEFAULT 'running',
+    engine_version TEXT,
+    summary_json TEXT
+);
+
+CREATE INDEX IF NOT EXISTS idx_grimes_runs_date ON grimes_runs(trade_date DESC, status);
+
+CREATE TABLE IF NOT EXISTS grimes_signals (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    run_id INTEGER NOT NULL,
+    trade_date TEXT NOT NULL,
+    ticker TEXT NOT NULL,
+    instrument_key TEXT NOT NULL,
+    kind TEXT,
+    company_name TEXT,
+    as_of TEXT,
+    price REAL,
+    regime TEXT,
+    setup_type TEXT,
+    setup_group TEXT,
+    quality_score INTEGER,
+    payload_json TEXT NOT NULL,
+    FOREIGN KEY (run_id) REFERENCES grimes_runs(id)
+);
+
+CREATE INDEX IF NOT EXISTS idx_grimes_signals_run ON grimes_signals(run_id);
+CREATE INDEX IF NOT EXISTS idx_grimes_signals_date ON grimes_signals(trade_date, quality_score DESC);
+CREATE INDEX IF NOT EXISTS idx_grimes_signals_ticker ON grimes_signals(ticker, trade_date);
+
+CREATE TABLE IF NOT EXISTS live_minute_bars (
+    instrument_key TEXT NOT NULL,
+    minute_ts TEXT NOT NULL,
+    volume INTEGER,
+    close_price REAL,
+    source TEXT,
+    open_price REAL,
+    high_price REAL,
+    low_price REAL,
+    PRIMARY KEY (instrument_key, minute_ts)
+);
+
+CREATE INDEX IF NOT EXISTS idx_live_minute_bars_ts
+    ON live_minute_bars(minute_ts);
+
+CREATE TABLE IF NOT EXISTS futures_oi_daily (
+    trade_date TEXT NOT NULL,
+    instrument_key TEXT NOT NULL,
+    symbol TEXT NOT NULL,
+    expiry TEXT,
+    oi REAL,
+    poi REAL,
+    ltp REAL,
+    prev_close REAL,
+    source TEXT,
+    updated_at TEXT NOT NULL,
+    PRIMARY KEY (trade_date, instrument_key)
+);
+
+CREATE INDEX IF NOT EXISTS idx_futures_oi_daily_symbol
+    ON futures_oi_daily(symbol, trade_date DESC);
+
+CREATE TABLE IF NOT EXISTS live_call_journal (
+    session_date TEXT NOT NULL,
+    symbol TEXT NOT NULL,
+    side TEXT NOT NULL,
+    kind TEXT,
+    company_name TEXT,
+    stance TEXT,
+    entry REAL NOT NULL,
+    stop REAL NOT NULL,
+    exit_price REAL NOT NULL,
+    status TEXT NOT NULL,
+    opened_at TEXT NOT NULL,
+    entry_at TEXT,
+    closed_at TEXT,
+    last_price REAL,
+    result_pct REAL,
+    mfe_pct REAL,
+    mae_pct REAL,
+    updated_at TEXT NOT NULL,
+    fill_price REAL,
+    swing_exit REAL,
+    swing_status TEXT,
+    swing_result_pct REAL,
+    swing_closed_at TEXT,
+    segment TEXT,
+    PRIMARY KEY (session_date, symbol, side)
+);
+
+CREATE INDEX IF NOT EXISTS idx_live_call_journal_status
+    ON live_call_journal(session_date, status);
 """
 
 
 def _utc_now() -> str:
     return datetime.now(timezone.utc).isoformat()
+
+
+def _chunks(items: list[Any], size: int) -> Iterator[list[Any]]:
+    for index in range(0, len(items), size):
+        yield items[index : index + size]
 
 
 class TimelineStore:
@@ -337,6 +442,23 @@ class TimelineStore:
                 for col, decl in alter_sigs.items():
                     if col not in myb_sig_cols:
                         conn.execute(f"ALTER TABLE myb_signals ADD COLUMN {col} {decl}")
+
+            journal_cols = {row[1] for row in conn.execute("PRAGMA table_info(live_call_journal)")}
+            if journal_cols and "fill_price" not in journal_cols:
+                conn.execute("ALTER TABLE live_call_journal ADD COLUMN fill_price REAL")
+            for column, decl in (
+                ("swing_exit", "REAL"),
+                ("swing_status", "TEXT"),
+                ("swing_result_pct", "REAL"),
+                ("swing_closed_at", "TEXT"),
+                ("segment", "TEXT"),
+            ):
+                if journal_cols and column not in journal_cols:
+                    conn.execute(f"ALTER TABLE live_call_journal ADD COLUMN {column} {decl}")
+            minute_cols = {row[1] for row in conn.execute("PRAGMA table_info(live_minute_bars)")}
+            for column in ("open_price", "high_price", "low_price"):
+                if minute_cols and column not in minute_cols:
+                    conn.execute(f"ALTER TABLE live_minute_bars ADD COLUMN {column} REAL")
 
     def upsert_profiles(self, profiles: list[dict[str, Any]]) -> int:
         if not profiles:
@@ -749,12 +871,17 @@ class TimelineStore:
         return [dict(row) for row in rows]
 
     def get_last_trade_dates(self) -> dict[str, str]:
-        """Map instrument_token -> latest trade_date (YYYY-MM-DD)."""
+        """Map instrument_token -> latest trade_date (YYYY-MM-DD).
+
+        Live-feed EOD candles are provisional (close is the last print, not the
+        official close), so they do not count: the next ingest overwrites them.
+        """
         with self.connection() as conn:
             rows = conn.execute(
                 """
                 SELECT instrument_token, MAX(trade_date) AS last_date
                 FROM daily_candles
+                WHERE COALESCE(source, '') != 'live_ws'
                 GROUP BY instrument_token
                 """
             ).fetchall()
@@ -2743,6 +2870,783 @@ class TimelineStore:
         total = len(out)
         page = out[offset : offset + limit]
         return page, total
+
+    # ── Grimes TA lab ────────────────────────────────────────────────────
+
+    def max_daily_trade_date(self) -> str | None:
+        with self.connection() as conn:
+            row = conn.execute(
+                "SELECT MAX(trade_date) AS max_date FROM daily_candles"
+            ).fetchone()
+        value = row["max_date"] if row else None
+        return str(value) if value else None
+
+    def delete_grimes_data_for_date(self, trade_date: str) -> None:
+        with self.connection() as conn:
+            conn.execute("DELETE FROM grimes_signals WHERE trade_date = ?", (trade_date,))
+            conn.execute("DELETE FROM grimes_runs WHERE trade_date = ?", (trade_date,))
+
+    def replace_grimes_scan(
+        self,
+        trade_date: str,
+        payload: dict[str, Any],
+        *,
+        engine_version: str,
+    ) -> int:
+        results = payload.get("results") or []
+        summary = payload.get("summary") or {}
+        now = _utc_now()
+        signal_rows = [
+            (
+                trade_date,
+                str(row.get("ticker") or ""),
+                str(row.get("instrument_key") or ""),
+                row.get("kind"),
+                row.get("company_name"),
+                row.get("as_of"),
+                row.get("price"),
+                row.get("regime"),
+                row.get("setup_type"),
+                row.get("setup_group"),
+                row.get("quality_score"),
+                json.dumps(row, default=str),
+            )
+            for row in results
+            if isinstance(row, dict)
+        ]
+        with self.connection() as conn:
+            conn.execute("DELETE FROM grimes_signals WHERE trade_date = ?", (trade_date,))
+            conn.execute("DELETE FROM grimes_runs WHERE trade_date = ?", (trade_date,))
+            cur = conn.execute(
+                """
+                INSERT INTO grimes_runs (
+                    trade_date, started_at, finished_at, universe_size, analyzed,
+                    workers, status, engine_version, summary_json
+                ) VALUES (?, ?, ?, ?, ?, ?, 'completed', ?, ?)
+                """,
+                (
+                    trade_date,
+                    payload.get("timestamp") or now,
+                    now,
+                    int(payload.get("universe_size") or 0),
+                    int(payload.get("analyzed") or len(signal_rows)),
+                    int(payload.get("workers") or 0),
+                    engine_version,
+                    json.dumps(summary, default=str),
+                ),
+            )
+            run_id = int(cur.lastrowid)
+            if signal_rows:
+                conn.executemany(
+                    """
+                    INSERT INTO grimes_signals (
+                        run_id, trade_date, ticker, instrument_key, kind, company_name,
+                        as_of, price, regime, setup_type, setup_group, quality_score,
+                        payload_json
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    """,
+                    [(run_id, *row) for row in signal_rows],
+                )
+        return run_id
+
+    def load_grimes_summary(
+        self,
+        trade_date: str,
+        *,
+        engine_version: str | None = None,
+    ) -> dict[str, Any] | None:
+        clauses = ["trade_date = ?", "status = 'completed'"]
+        params: list[Any] = [trade_date]
+        if engine_version is not None:
+            clauses.append("engine_version = ?")
+            params.append(engine_version)
+        with self.connection() as conn:
+            run = conn.execute(
+                f"""
+                SELECT * FROM grimes_runs
+                WHERE {' AND '.join(clauses)}
+                ORDER BY id DESC LIMIT 1
+                """,
+                params,
+            ).fetchone()
+            if not run:
+                return None
+            signal_rows = conn.execute(
+                """
+                SELECT payload_json FROM grimes_signals
+                WHERE run_id = ?
+                ORDER BY quality_score DESC, ticker ASC
+                """,
+                (run["id"],),
+            ).fetchall()
+        results: list[dict[str, Any]] = []
+        for row in signal_rows:
+            raw = row["payload_json"]
+            try:
+                item = json.loads(raw) if raw else {}
+            except (TypeError, json.JSONDecodeError):
+                continue
+            if isinstance(item, dict):
+                results.append(item)
+        try:
+            summary = json.loads(run["summary_json"]) if run["summary_json"] else {}
+        except (TypeError, json.JSONDecodeError):
+            summary = {}
+        return {
+            "timestamp": run["finished_at"] or run["started_at"],
+            "trade_date": run["trade_date"],
+            "universe_size": int(run["universe_size"] or 0),
+            "analyzed": int(run["analyzed"] or 0),
+            "workers": int(run["workers"] or 0),
+            "engine_version": run["engine_version"],
+            "source": "db",
+            "has_run": True,
+            "summary": summary,
+            "results": results,
+        }
+
+
+    def upsert_live_minute_bars(self, bars: list[dict[str, Any]]) -> int:
+        if not bars:
+            return 0
+        with self.connection() as conn:
+            return _write_live_minute_bars(conn, bars)
+
+    def upsert_live_batch(
+        self,
+        minute_bars: list[dict[str, Any]],
+        journal_rows: list[dict[str, Any]],
+    ) -> tuple[int, int]:
+        """Minute bars and journal changes in one transaction: one fsync, one write lock."""
+        if not minute_bars and not journal_rows:
+            return 0, 0
+        with self.connection() as conn:
+            bars = _write_live_minute_bars(conn, minute_bars) if minute_bars else 0
+            plans = _write_live_call_journal(conn, journal_rows) if journal_rows else 0
+        return bars, plans
+
+    def live_minute_profile(self, before_date: str, lookback_days: int = 30) -> dict[str, dict[int, float]]:
+        """Summed live minute volume per session date and 09:15-based minute index."""
+        start = (date.fromisoformat(before_date) - timedelta(days=lookback_days)).isoformat()
+        with self.connection() as conn:
+            rows = conn.execute(
+                """
+                SELECT substr(minute_ts, 1, 10) AS day,
+                       CAST(substr(minute_ts, 12, 2) AS INTEGER) * 60
+                         + CAST(substr(minute_ts, 15, 2) AS INTEGER) - 555 AS minute_index,
+                       SUM(volume) AS volume
+                FROM live_minute_bars
+                WHERE minute_ts >= ? AND minute_ts < ?
+                  AND source = 'live_ws'
+                  AND instrument_key LIKE 'NSE_EQ|%'
+                GROUP BY day, minute_index
+                """,
+                (start, before_date),
+            ).fetchall()
+        out: dict[str, dict[int, float]] = {}
+        for row in rows:
+            index = int(row["minute_index"])
+            if 0 <= index < 375 and row["volume"]:
+                out.setdefault(str(row["day"]), {})[index] = float(row["volume"])
+        return out
+
+    def upsert_futures_oi_daily(self, rows_in: list[dict[str, Any]]) -> int:
+        if not rows_in:
+            return 0
+        updated_at = _utc_now()
+        rows = [
+            (
+                row["trade_date"],
+                row["instrument_key"],
+                row["symbol"],
+                row.get("expiry"),
+                row.get("oi"),
+                row.get("poi"),
+                row.get("ltp"),
+                row.get("prev_close"),
+                row.get("source") or "live_ws",
+                updated_at,
+            )
+            for row in rows_in
+        ]
+        with self.connection() as conn:
+            conn.executemany(
+                """
+                INSERT INTO futures_oi_daily (
+                    trade_date, instrument_key, symbol, expiry, oi, poi,
+                    ltp, prev_close, source, updated_at
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                ON CONFLICT(trade_date, instrument_key) DO UPDATE SET
+                    symbol = excluded.symbol,
+                    expiry = excluded.expiry,
+                    oi = excluded.oi,
+                    poi = excluded.poi,
+                    ltp = excluded.ltp,
+                    prev_close = excluded.prev_close,
+                    source = excluded.source,
+                    updated_at = excluded.updated_at
+                """,
+                rows,
+            )
+        return len(rows)
+
+    def latest_futures_oi(self, symbols: list[str], before_date: str) -> dict[str, dict[str, Any]]:
+        """Last persisted futures OI for each symbol strictly before ``before_date``."""
+        found: dict[str, dict[str, Any]] = {}
+        unique = [symbol for symbol in dict.fromkeys(symbols) if symbol]
+        for chunk in _chunks(unique, 400):
+            placeholders = ",".join("?" * len(chunk))
+            sql = f"""
+                SELECT f.symbol, f.oi, f.trade_date, f.instrument_key, f.ltp
+                FROM futures_oi_daily f
+                INNER JOIN (
+                    SELECT symbol, MAX(trade_date) AS trade_date
+                    FROM futures_oi_daily
+                    WHERE trade_date < ? AND symbol IN ({placeholders})
+                    GROUP BY symbol
+                ) latest
+                    ON latest.symbol = f.symbol AND latest.trade_date = f.trade_date
+            """
+            with self.connection() as conn:
+                rows = conn.execute(sql, [before_date, *chunk]).fetchall()
+            for row in rows:
+                found[row["symbol"]] = dict(row)
+        return found
+
+    def liquid_cash_profiles(self, before_date: str, min_bars: int) -> list[dict[str, Any]]:
+        """EQ names with enough daily history, most active first.
+
+        The window is the last 20 sessions inside 80 calendar days, so a name
+        that barely trades does not take a full-mode websocket slot.
+        """
+        sql = """
+            WITH ranked AS (
+                SELECT
+                    instrument_token,
+                    volume,
+                    ROW_NUMBER() OVER (
+                        PARTITION BY instrument_token
+                        ORDER BY trade_date DESC
+                    ) AS rn
+                FROM daily_candles
+                WHERE trade_date < ?
+                  AND trade_date >= date(?, '-80 days')
+                  AND instrument_token LIKE 'NSE_EQ|%'
+            )
+            SELECT
+                p.ticker,
+                p.company_name,
+                p.sector,
+                p.instrument_token,
+                COUNT(r.instrument_token) AS history_bars,
+                AVG(r.volume) AS avg_volume
+            FROM security_profiles p
+            JOIN ranked r
+                ON r.instrument_token = p.instrument_token
+               AND r.rn <= 20
+            WHERE COALESCE(p.series, 'EQ') = 'EQ'
+              AND COALESCE(p.ingest_skip, 0) = 0
+            GROUP BY p.instrument_token, p.ticker, p.company_name, p.sector
+            HAVING history_bars >= ?
+            ORDER BY avg_volume DESC, p.ticker
+        """
+        with self.connection() as conn:
+            rows = conn.execute(sql, (before_date, before_date, int(min_bars))).fetchall()
+        return [dict(row) for row in rows]
+
+    def live_scan_candle_stats(self, tokens: list[str], before_date: str) -> dict[str, dict[str, Any]]:
+        """Prior-day OHLC and mean of up to 20 daily volumes before ``before_date``."""
+        stats: dict[str, dict[str, Any]] = {}
+        unique = [token for token in dict.fromkeys(tokens) if token]
+        for chunk in _chunks(unique, 400):
+            placeholders = ",".join("?" * len(chunk))
+            sql = f"""
+                WITH ranked AS (
+                    SELECT
+                        instrument_token,
+                        trade_date,
+                        high_price,
+                        low_price,
+                        close_price,
+                        volume,
+                        ROW_NUMBER() OVER (
+                            PARTITION BY instrument_token
+                            ORDER BY trade_date DESC
+                        ) AS rn
+                    FROM daily_candles
+                    WHERE instrument_token IN ({placeholders})
+                      AND trade_date < ?
+                )
+                SELECT instrument_token, trade_date, high_price, low_price, close_price, volume, rn
+                FROM ranked
+                WHERE rn <= 20
+            """
+            with self.connection() as conn:
+                rows = conn.execute(sql, [*chunk, before_date]).fetchall()
+            grouped: dict[str, list[sqlite3.Row]] = {}
+            for row in rows:
+                grouped.setdefault(row["instrument_token"], []).append(row)
+            for token, items in grouped.items():
+                ordered = sorted(items, key=lambda item: int(item["rn"]))
+                volumes = [float(item["volume"] or 0) for item in ordered]
+                closes = [float(item["close_price"] or 0) for item in ordered if item["close_price"]]
+                highs = [float(item["high_price"] or 0) for item in ordered if item["high_price"]]
+                lows = [float(item["low_price"] or 0) for item in ordered if item["low_price"]]
+                prior = ordered[0]
+                stats[token] = _daily_history_stats(
+                    volumes=volumes,
+                    closes=closes,
+                    highs=highs,
+                    lows=lows,
+                    prior_high=prior["high_price"],
+                    prior_low=prior["low_price"],
+                    prior_close=prior["close_price"],
+                    prior_date=str(prior["trade_date"]),
+                    bar_count=len(ordered),
+                    bars=_aligned_bars(ordered),
+                )
+        return stats
+
+    def latest_index_daily_date(self, instrument_token: str) -> str | None:
+        with self.connection() as conn:
+            row = conn.execute(
+                """
+                SELECT MAX(substr(ts, 1, 10)) AS last_date
+                FROM index_candles
+                WHERE instrument_token = ? AND timeframe = 'daily'
+                """,
+                (instrument_token,),
+            ).fetchone()
+        if row is None or not row["last_date"]:
+            return None
+        return str(row["last_date"])
+
+    def live_scan_index_candle_stats(self, tokens: list[str], before_date: str) -> dict[str, dict[str, Any]]:
+        """Same 20-session summary as cash names, read from index_candles daily bars."""
+        stats: dict[str, dict[str, Any]] = {}
+        for token in dict.fromkeys(tokens):
+            if not token:
+                continue
+            with self.connection() as conn:
+                rows = conn.execute(
+                    """
+                    SELECT substr(ts, 1, 10) AS trade_date,
+                           high_price, low_price, close_price, volume
+                    FROM index_candles
+                    WHERE instrument_token = ?
+                      AND timeframe = 'daily'
+                      AND substr(ts, 1, 10) < ?
+                    ORDER BY ts DESC
+                    LIMIT 20
+                    """,
+                    (token, before_date),
+                ).fetchall()
+            if not rows:
+                continue
+            volumes = [float(row["volume"] or 0) for row in rows]
+            closes = [float(row["close_price"] or 0) for row in rows if row["close_price"]]
+            highs = [float(row["high_price"] or 0) for row in rows if row["high_price"]]
+            lows = [float(row["low_price"] or 0) for row in rows if row["low_price"]]
+            prior = rows[0]
+            stats[token] = _daily_history_stats(
+                volumes=volumes,
+                closes=closes,
+                highs=highs,
+                lows=lows,
+                prior_high=prior["high_price"],
+                prior_low=prior["low_price"],
+                prior_close=prior["close_price"],
+                prior_date=str(prior["trade_date"]),
+                bar_count=len(rows),
+                bars=_aligned_bars(rows),
+            )
+        return stats
+
+    def tickers_missing_daily_session(self, tokens: list[str], session_date: str) -> list[str]:
+        """Tickers with no daily candle on or after ``session_date``."""
+        missing: list[str] = []
+        unique = [token for token in dict.fromkeys(tokens) if token]
+        for chunk in _chunks(unique, 400):
+            placeholders = ",".join("?" * len(chunk))
+            sql = f"""
+                SELECT p.ticker, MAX(c.trade_date) AS last_date
+                FROM security_profiles p
+                LEFT JOIN daily_candles c
+                    ON c.instrument_token = p.instrument_token
+                   AND COALESCE(c.source, '') != 'live_ws'
+                WHERE p.instrument_token IN ({placeholders})
+                GROUP BY p.instrument_token
+                HAVING last_date IS NULL OR last_date < ?
+                ORDER BY p.ticker
+            """
+            with self.connection() as conn:
+                rows = conn.execute(sql, [*chunk, session_date]).fetchall()
+            missing.extend(str(row["ticker"]) for row in rows)
+        return missing
+
+    def upsert_live_call_journal(self, rows: list[dict[str, Any]]) -> int:
+        if not rows:
+            return 0
+        with self.connection() as conn:
+            return _write_live_call_journal(conn, rows)
+
+    def list_live_call_journal(self, session_date: str) -> list[dict[str, Any]]:
+        """Plans opened today, plus earlier plans whose multi-session target is still open."""
+        with self.connection() as conn:
+            rows = conn.execute(
+                """
+                SELECT session_date, symbol, side, kind, company_name, stance,
+                       entry, stop, exit_price, status, opened_at, entry_at, closed_at,
+                       last_price, result_pct, mfe_pct, mae_pct, updated_at, fill_price,
+                       swing_exit, swing_status, swing_result_pct, swing_closed_at, segment
+                FROM live_call_journal
+                WHERE session_date = ?
+                   OR (
+                        session_date < ?
+                        AND (swing_status = 'open' OR status = 'open')
+                   )
+                ORDER BY session_date, symbol
+                """,
+                (session_date, session_date),
+            ).fetchall()
+        return [dict(row) for row in rows]
+
+    def list_live_call_journal_range(self, start: str | None = None, end: str | None = None) -> list[dict[str, Any]]:
+        """Every saved plan with ``start <= session_date <= end``. Either bound may be open."""
+        with self.connection() as conn:
+            rows = conn.execute(
+                """
+                SELECT session_date, symbol, side, kind, company_name, stance,
+                       entry, stop, exit_price, status, opened_at, entry_at, closed_at,
+                       last_price, result_pct, mfe_pct, mae_pct, updated_at, fill_price,
+                       swing_exit, swing_status, swing_result_pct, swing_closed_at, segment
+                FROM live_call_journal
+                WHERE session_date >= ? AND session_date <= ?
+                ORDER BY session_date, symbol, side
+                """,
+                (start or "0000-00-00", end or "9999-99-99"),
+            ).fetchall()
+        return [dict(row) for row in rows]
+
+    def daily_bars_between(
+        self,
+        tokens: list[str],
+        start: str,
+        end: str,
+    ) -> dict[str, list[tuple[str, float, float, float, float]]]:
+        """Cash daily OHLC per token, oldest first, ``start <= trade_date <= end``."""
+        out: dict[str, list[tuple[str, float, float, float, float]]] = {}
+        unique = [token for token in dict.fromkeys(tokens) if token]
+        for chunk in _chunks(unique, 400):
+            placeholders = ",".join("?" * len(chunk))
+            with self.connection() as conn:
+                rows = conn.execute(
+                    f"""
+                    SELECT instrument_token, trade_date, open_price, high_price, low_price, close_price
+                    FROM daily_candles
+                    WHERE instrument_token IN ({placeholders})
+                      AND trade_date >= ? AND trade_date <= ?
+                    ORDER BY instrument_token, trade_date
+                    """,
+                    [*chunk, start, end],
+                ).fetchall()
+            for row in rows:
+                out.setdefault(row[0], []).append(
+                    (str(row[1]), row[2] or 0.0, row[3] or 0.0, row[4] or 0.0, row[5] or 0.0)
+                )
+        return out
+
+    def live_minute_ohlc_dates(self, start: str, end: str) -> set[str]:
+        """Session dates that have any live minute bar carrying a high and low."""
+        with self.connection() as conn:
+            rows = conn.execute(
+                """
+                SELECT DISTINCT substr(minute_ts, 1, 10)
+                FROM live_minute_bars
+                WHERE minute_ts >= ? AND minute_ts < ? AND high_price IS NOT NULL
+                """,
+                (start, f"{end}T99"),
+            ).fetchall()
+        return {str(row[0]) for row in rows}
+
+    def live_minute_ohlc(self, instrument_key: str, session_date: str) -> list[tuple[str, float, float, float, float]]:
+        """(minute, open, high, low, close) for one instrument and session, minutes with prices only."""
+        with self.connection() as conn:
+            rows = conn.execute(
+                """
+                SELECT minute_ts, open_price, high_price, low_price, close_price
+                FROM live_minute_bars
+                WHERE instrument_key = ? AND minute_ts >= ? AND minute_ts < ?
+                  AND high_price IS NOT NULL AND low_price IS NOT NULL AND open_price IS NOT NULL
+                ORDER BY minute_ts
+                """,
+                (instrument_key, session_date, f"{session_date}T99"),
+            ).fetchall()
+        return [(str(row[0]), float(row[1]), float(row[2]), float(row[3]), float(row[4] or row[1])) for row in rows]
+
+    def index_daily_bars_between(
+        self,
+        tokens: list[str],
+        start: str,
+        end: str,
+    ) -> dict[str, list[tuple[str, float, float, float, float]]]:
+        """Index daily OHLC per token from ``index_candles``, oldest first."""
+        out: dict[str, list[tuple[str, float, float, float, float]]] = {}
+        for token in dict.fromkeys(tokens):
+            if not token:
+                continue
+            with self.connection() as conn:
+                rows = conn.execute(
+                    """
+                    SELECT substr(ts, 1, 10), open_price, high_price, low_price, close_price
+                    FROM index_candles
+                    WHERE instrument_token = ? AND timeframe = 'daily'
+                      AND substr(ts, 1, 10) >= ? AND substr(ts, 1, 10) <= ?
+                    ORDER BY ts
+                    """,
+                    (token, start, end),
+                ).fetchall()
+            if rows:
+                out[token] = [
+                    (str(row[0]), row[1] or 0.0, row[2] or 0.0, row[3] or 0.0, row[4] or 0.0) for row in rows
+                ]
+        return out
+
+    def latest_scan_pattern_rows(self) -> list[dict[str, Any]]:
+        with self.connection() as conn:
+            latest = conn.execute("SELECT MAX(trade_date) AS trade_date FROM pattern_signals").fetchone()
+            trade_date = latest["trade_date"] if latest else None
+            if not trade_date:
+                return []
+            rows = conn.execute(
+                """
+                SELECT ticker, pattern_type, score, details_json, trade_date
+                FROM pattern_signals
+                WHERE trade_date = ?
+                """,
+                (trade_date,),
+            ).fetchall()
+        return [dict(row) for row in rows]
+
+    def latest_scan_myb_rows(self) -> list[dict[str, Any]]:
+        with self.connection() as conn:
+            latest = conn.execute("SELECT MAX(trade_date) AS trade_date FROM myb_signals").fetchone()
+            trade_date = latest["trade_date"] if latest else None
+            if not trade_date:
+                return []
+            rows = conn.execute(
+                """
+                SELECT ticker, prior_high, score, status, trade_date, strategy
+                FROM myb_signals
+                WHERE trade_date = ?
+                """,
+                (trade_date,),
+            ).fetchall()
+        return [dict(row) for row in rows]
+
+    def list_grimes_dates(self, limit: int = 365, *, engine_version: str | None = None) -> list[str]:
+        clauses = ["status = 'completed'"]
+        params: list[Any] = []
+        if engine_version is not None:
+            clauses.append("engine_version = ?")
+            params.append(engine_version)
+        params.append(int(limit))
+        with self.connection() as conn:
+            rows = conn.execute(
+                f"""
+                SELECT DISTINCT trade_date FROM grimes_runs
+                WHERE {' AND '.join(clauses)}
+                ORDER BY trade_date DESC
+                LIMIT ?
+                """,
+                params,
+            ).fetchall()
+        return [row["trade_date"] for row in rows]
+
+
+def _write_live_minute_bars(conn: sqlite3.Connection, bars: list[dict[str, Any]]) -> int:
+    rows = [
+        (
+            bar["instrument_key"],
+            bar["minute_ts"],
+            bar.get("volume"),
+            bar.get("close_price"),
+            bar.get("source") or "live_ws",
+            bar.get("open_price"),
+            bar.get("high_price"),
+            bar.get("low_price"),
+        )
+        for bar in bars
+    ]
+    conn.executemany(
+        """
+        INSERT INTO live_minute_bars (
+            instrument_key, minute_ts, volume, close_price, source, open_price, high_price, low_price
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        ON CONFLICT(instrument_key, minute_ts) DO UPDATE SET
+            volume = excluded.volume,
+            close_price = excluded.close_price,
+            source = excluded.source,
+            open_price = excluded.open_price,
+            high_price = excluded.high_price,
+            low_price = excluded.low_price
+        """,
+        rows,
+    )
+    return len(rows)
+
+
+def _write_live_call_journal(conn: sqlite3.Connection, rows: list[dict[str, Any]]) -> int:
+    payload = [
+        (
+            row["session_date"],
+            row["symbol"],
+            row["side"],
+            row.get("kind"),
+            row.get("company_name"),
+            row.get("stance"),
+            row["entry"],
+            row["stop"],
+            row["exit_price"],
+            row["status"],
+            row["opened_at"],
+            row.get("entry_at"),
+            row.get("closed_at"),
+            row.get("last_price"),
+            row.get("result_pct"),
+            row.get("mfe_pct"),
+            row.get("mae_pct"),
+            row["updated_at"],
+            row.get("fill_price"),
+            row.get("swing_exit"),
+            row.get("swing_status"),
+            row.get("swing_result_pct"),
+            row.get("swing_closed_at"),
+            row.get("segment"),
+        )
+        for row in rows
+    ]
+    conn.executemany(
+        """
+        INSERT INTO live_call_journal (
+            session_date, symbol, side, kind, company_name, stance,
+            entry, stop, exit_price, status, opened_at, entry_at, closed_at,
+            last_price, result_pct, mfe_pct, mae_pct, updated_at, fill_price,
+            swing_exit, swing_status, swing_result_pct, swing_closed_at, segment
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ON CONFLICT(session_date, symbol, side) DO UPDATE SET
+            kind = excluded.kind,
+            company_name = excluded.company_name,
+            stance = excluded.stance,
+            status = excluded.status,
+            entry_at = excluded.entry_at,
+            closed_at = excluded.closed_at,
+            last_price = excluded.last_price,
+            result_pct = excluded.result_pct,
+            mfe_pct = excluded.mfe_pct,
+            mae_pct = excluded.mae_pct,
+            updated_at = excluded.updated_at,
+            fill_price = excluded.fill_price,
+            swing_exit = COALESCE(live_call_journal.swing_exit, excluded.swing_exit),
+            swing_status = excluded.swing_status,
+            swing_result_pct = excluded.swing_result_pct,
+            swing_closed_at = excluded.swing_closed_at,
+            segment = COALESCE(excluded.segment, live_call_journal.segment)
+        """,
+        payload,
+    )
+    return len(payload)
+
+
+_ATR_PERIOD = 14
+
+
+def _aligned_bars(rows: list[Any]) -> list[tuple[float, float, float]]:
+    return [
+        (float(row["high_price"] or 0), float(row["low_price"] or 0), float(row["close_price"] or 0))
+        for row in rows
+    ]
+
+
+def _median(values: list[float]) -> float | None:
+    if not values:
+        return None
+    ordered = sorted(values)
+    mid = len(ordered) // 2
+    if len(ordered) % 2:
+        return ordered[mid]
+    return (ordered[mid - 1] + ordered[mid]) / 2.0
+
+
+def _atr_pct(bars: list[tuple[float, float, float]], last_close: float | None) -> float | None:
+    """Simple 14-bar average true range as a percent of the last close. Bars newest first."""
+    if not last_close or len(bars) < 2:
+        return None
+    ranges: list[float] = []
+    for index in range(min(_ATR_PERIOD, len(bars) - 1)):
+        high, low, _close = bars[index]
+        prev_close = bars[index + 1][2]
+        if high <= 0 or low <= 0 or prev_close <= 0:
+            continue
+        ranges.append(max(high - low, abs(high - prev_close), abs(low - prev_close)))
+    if not ranges:
+        return None
+    return sum(ranges) / len(ranges) / last_close * 100.0
+
+
+def _efficiency(closes: list[float]) -> float | None:
+    """Kaufman efficiency ratio: net move over path length. Near 0 is chop, near 1 is trend."""
+    if len(closes) < 3:
+        return None
+    path = sum(abs(closes[i] - closes[i + 1]) for i in range(len(closes) - 1))
+    if path <= 0:
+        return None
+    return abs(closes[0] - closes[-1]) / path
+
+
+def _daily_history_stats(
+    *,
+    volumes: list[float],
+    closes: list[float],
+    highs: list[float],
+    lows: list[float],
+    prior_high: Any,
+    prior_low: Any,
+    prior_close: Any,
+    prior_date: str,
+    bar_count: int,
+    bars: list[tuple[float, float, float]] | None = None,
+) -> dict[str, Any]:
+    """Newest-first closes. ``closes[-1]`` is the oldest close in the window.
+
+    Typical volume is the median, not the mean: one expiry, rebalance, or
+    block-deal day in the window would otherwise lift the RVOL baseline for
+    the next twenty sessions.
+    """
+    last_close = float(prior_close or 0) or None
+    oldest_close = closes[-1] if closes else None
+    close_5_back = closes[5] if len(closes) >= 6 else None
+    trend_20 = None
+    if last_close and oldest_close:
+        trend_20 = (last_close - oldest_close) / oldest_close * 100.0
+    return_5d = None
+    if last_close and close_5_back:
+        return_5d = (last_close - close_5_back) / close_5_back * 100.0
+    return {
+        "avg_volume_20": _median([volume for volume in volumes if volume > 0]),
+        "atr_pct": _atr_pct(bars or [], last_close),
+        "efficiency_20": _efficiency(closes),
+        "prior_high": prior_high,
+        "prior_low": prior_low,
+        "prior_close": prior_close,
+        "prior_date": prior_date,
+        "sma20": (sum(closes) / len(closes)) if closes else None,
+        "high_20": max(highs) if highs else None,
+        "low_20": min(lows) if lows else None,
+        "trend_20_pct": trend_20,
+        "return_5d_pct": return_5d,
+        "history_bars": bar_count,
+    }
 
 
 _store: TimelineStore | None = None

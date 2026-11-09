@@ -43,10 +43,32 @@ async def load_fno_symbol_set() -> set[str]:
     try:
         async with aiohttp.ClientSession() as session:
             symbols = await nse_client.fetch_fno_symbols(session)
+        if symbols:
+            from ...cache import set_cache
+
+            set_cache("fno:symbols:v1", symbols, 3600)
         return set(symbols)
     except Exception as exc:
         logger.warning("Could not load F&O symbol list: %s", exc)
+        db = _fno_symbols_from_db()
+        if db:
+            return db
         return set()
+
+
+def _fno_symbols_from_db() -> set[str]:
+    """Distinct F&O underlyings already stored locally (no NSE call)."""
+    from ...db.store import get_store
+
+    with get_store().connection() as conn:
+        rows = conn.execute(
+            """
+            SELECT DISTINCT UPPER(symbol) AS symbol
+            FROM derivative_snapshots
+            WHERE symbol IS NOT NULL AND TRIM(symbol) != ''
+            """
+        ).fetchall()
+    return {str(r["symbol"]).upper() for r in rows if r["symbol"]}
 
 
 def load_fno_symbol_set_sync() -> set[str]:
@@ -54,10 +76,12 @@ def load_fno_symbol_set_sync() -> set[str]:
     if cached:
         return set(cached)
     try:
-        return run_coro_sync(load_fno_symbol_set())
+        result = run_coro_sync(load_fno_symbol_set())
+        if result:
+            return result
     except Exception as exc:
         logger.warning("Could not load F&O symbol list (sync): %s", exc)
-        return set()
+    return _fno_symbols_from_db()
 
 async def ensure_fno_derivatives_for_signals(
     store: TimelineStore,

@@ -28,6 +28,8 @@ interface NiftyChartProps {
   candles: NiftyCandlePoint[];
   timeframe: string;
   height?: number;
+  /** Stretch to the parent's height (ResizeObserver) instead of the fixed `height`. */
+  fillHeight?: boolean;
   rsiPeriod?: number;
   showRsi?: boolean;
   /** When set, RSI pane uses these lines instead of computing RSI from candles. */
@@ -109,6 +111,7 @@ export function NiftyChart({
   candles,
   timeframe,
   height = 540,
+  fillHeight = false,
   rsiPeriod = 19,
   showRsi = true,
   rsiOverlays,
@@ -257,7 +260,7 @@ export function NiftyChart({
         ...istTimeScaleOptions(!daily),
       },
       width: el.clientWidth || el.parentElement?.clientWidth || 640,
-      height,
+      height: fillHeight ? Math.max(el.clientHeight, 240) : height,
     });
 
     const candleSeries = chart.addCandlestickSeries({
@@ -343,13 +346,19 @@ export function NiftyChart({
 
     const onResize = () => {
       if (containerRef.current && chartRef.current) {
-        chartRef.current.applyOptions({ width: containerRef.current.clientWidth });
+        chartRef.current.applyOptions({
+          width: containerRef.current.clientWidth,
+          ...(fillHeight ? { height: Math.max(containerRef.current.clientHeight, 240) } : {}),
+        });
       }
     };
     window.addEventListener("resize", onResize);
+    const observer = fillHeight ? new ResizeObserver(onResize) : null;
+    observer?.observe(el);
 
     return () => {
       window.removeEventListener("resize", onResize);
+      observer?.disconnect();
       tooltip.remove();
       tooltipRef.current = null;
       chart.remove();
@@ -365,7 +374,7 @@ export function NiftyChart({
     };
     // barsIdentity intentionally gates full recreate; OHLC values refresh below.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [barsIdentity, height, daily]);
+  }, [barsIdentity, height, daily, fillHeight]);
 
   // Live OHLC refresh without tearing down the chart shell.
   useEffect(() => {
@@ -630,8 +639,10 @@ export function NiftyChart({
   if (!candles.length) {
     return (
       <div
-        className="flex items-center justify-center rounded-lg border border-surface-border bg-surface text-sm text-slate-500"
-        style={{ height }}
+        className={`flex items-center justify-center rounded-lg border border-surface-border bg-surface text-sm text-slate-400 ${
+          fillHeight ? "h-full min-h-[240px]" : ""
+        }`}
+        style={fillHeight ? undefined : { height }}
       >
         No candles loaded for this timeframe.
       </div>
@@ -639,6 +650,11 @@ export function NiftyChart({
   }
 
   return (
-    <div ref={containerRef} className="w-full overflow-hidden rounded-lg border border-surface-border" />
+    <div
+      ref={containerRef}
+      className={`w-full overflow-hidden rounded-lg border border-surface-border ${
+        fillHeight ? "h-full min-h-[240px]" : ""
+      }`}
+    />
   );
 }

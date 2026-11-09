@@ -18,6 +18,8 @@ from .routes.oi_momentum import router as oi_momentum_router
 from .routes.scanner import router as scanner_router
 from .routes.sector_rotation import router as sector_rotation_router
 from .routes.labs_elliott_wave import router as labs_elliott_wave_router
+from .routes.labs_grimes import router as labs_grimes_router
+from .routes.live_scan import router as live_scan_router
 from .routes.timeline import router as timeline_router
 
 setup_logging()
@@ -38,9 +40,11 @@ app.include_router(timeline_router)
 app.include_router(scanner_router)
 app.include_router(sector_rotation_router)
 app.include_router(labs_elliott_wave_router)
+app.include_router(labs_grimes_router)
 app.include_router(multi_year_breakout_router)
 app.include_router(market_info_router)
 app.include_router(oi_momentum_router)
+app.include_router(live_scan_router)
 app.include_router(mtf_rsi_router)
 app.include_router(nifty_router)
 app.include_router(indicator_analysis_router)

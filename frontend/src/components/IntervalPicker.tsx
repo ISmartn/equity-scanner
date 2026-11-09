@@ -1,3 +1,5 @@
+import ToggleButton from "@mui/material/ToggleButton";
+import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
 import type { Interval } from "@/lib/api";
 
 const INTERVALS: { id: Interval; label: string; hint: string }[] = [
@@ -9,9 +11,30 @@ const INTERVALS: { id: Interval; label: string; hint: string }[] = [
 interface IntervalPickerProps {
   value: Interval;
   onChange: (interval: Interval) => void;
+  /** Segmented control for toolbars; hints become tooltips. */
+  compact?: boolean;
 }
 
-export function IntervalPicker({ value, onChange }: IntervalPickerProps) {
+export function IntervalPicker({ value, onChange, compact = false }: IntervalPickerProps) {
+  if (compact) {
+    return (
+      <ToggleButtonGroup
+        exclusive
+        value={value}
+        onChange={(_e, next: Interval | null) => {
+          if (next) onChange(next);
+        }}
+        sx={{ flexShrink: 0 }}
+      >
+        {INTERVALS.map((item) => (
+          <ToggleButton key={item.id} value={item.id} title={item.hint}>
+            {item.label}
+          </ToggleButton>
+        ))}
+      </ToggleButtonGroup>
+    );
+  }
+
   return (
     <div className="flex flex-wrap gap-2">
       {INTERVALS.map((item) => (

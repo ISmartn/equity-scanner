@@ -5,6 +5,15 @@ import {
   type DerivativeSnapshotSummary,
   type InstitutionalFlowRow,
 } from "@/lib/api";
+import {
+  ActiveFilterChips,
+  AdvancedButton,
+  AdvancedDrawer,
+  AdvancedSection,
+  PageToolbar,
+  StatChip,
+  ToolbarDivider,
+} from "@/components/dense";
 import { localTodayIso } from "@/lib/dates";
 import { loadUiPrefs, saveUiPrefs } from "@/lib/uiPrefs";
 import { Activity, BarChart3, RefreshCw, TrendingUp } from "lucide-react";
@@ -43,6 +52,7 @@ export function MarketInfoPage() {
   const [syncing, setSyncing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [syncMessage, setSyncMessage] = useState<string | null>(null);
+  const [advancedOpen, setAdvancedOpen] = useState(false);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -106,75 +116,90 @@ export function MarketInfoPage() {
     }
   };
 
+  const today = localTodayIso();
+
   return (
-    <main className="mx-auto max-w-6xl space-y-4 px-4 py-4 sm:px-6">
-      <div className="flex flex-wrap items-end justify-between gap-3">
-        <div>
-          <h1 className="text-lg font-semibold text-slate-100">Market Information</h1>
-          <p className="text-xs text-slate-500">
-            FII/DII institutional flows and F&O OI, PCR, max pain (Upstox Market Information API)
-          </p>
-        </div>
-        <div className="flex flex-wrap items-center gap-2">
-          <label className="flex flex-col gap-0.5 text-[10px] text-slate-500">
-            Derivatives date
-            <input
-              type="date"
-              value={tradeDate}
-              onChange={(e) => setTradeDate(e.target.value)}
-              className="rounded-md border border-surface-border bg-surface px-2 py-1.5 text-xs text-slate-200"
+    <main className="page-scroll flex flex-col gap-1.5 px-1.5 py-1 sm:px-2">
+      <PageToolbar
+        right={
+          <AdvancedButton
+            onClick={() => setAdvancedOpen(true)}
+            label="Sync & date"
+            activeCount={tradeDate !== today ? 1 : 0}
+          />
+        }
+        below={
+          syncing ? (
+            <div className="flex items-center gap-1.5 text-data-xs text-sky-200">
+              <RefreshCw className="h-3 w-3 animate-spin" />
+              Syncing from Upstox…
+            </div>
+          ) : tradeDate !== today ? (
+            <ActiveFilterChips
+              chips={[
+                {
+                  key: "tradeDate",
+                  label: `Derivatives date: ${tradeDate}`,
+                  onRemove: () => setTradeDate(today),
+                },
+              ]}
             />
-          </label>
-          <button
-            type="button"
-            onClick={handleSync}
-            disabled={syncing}
-            className="inline-flex items-center gap-1.5 rounded-md border border-accent/40 bg-accent/10 px-3 py-1.5 text-xs font-medium text-accent hover:bg-accent/20 disabled:opacity-50"
-          >
-            <RefreshCw className={`h-3.5 w-3.5 ${syncing ? "animate-spin" : ""}`} />
-            {syncing ? "Syncing…" : "Sync from Upstox"}
-          </button>
-        </div>
-      </div>
+          ) : undefined
+        }
+      >
+        <h1 className="shrink-0 text-data-md font-semibold text-slate-100">Market Information</h1>
+        <ToolbarDivider />
+        <StatChip label="FII segments" value={fiiBySegment.length} />
+        <StatChip
+          label="DII net"
+          value={diiLatest ? formatCr(diiLatest.net_amount) : "—"}
+          valueClassName={
+            diiLatest?.net_amount == null
+              ? undefined
+              : diiLatest.net_amount >= 0
+                ? "text-gain"
+                : "text-loss"
+          }
+          hint={diiLatest ? `DII cash latest · ${formatTs(diiLatest.record_ts)}` : undefined}
+        />
+        <StatChip label="Derivs" value={derivatives.length} hint={`Derivative snapshots for ${tradeDate}`} />
+        <StatChip label="Date" value={tradeDate} valueClassName="text-data-sm" />
+        {loading ? <span className="text-data-xs text-slate-400">Loading…</span> : null}
+      </PageToolbar>
 
       {error && (
-        <div className="rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-2 text-xs text-red-200">
+        <div className="shrink-0 rounded-md border border-red-500/30 bg-red-500/10 px-2 py-1 text-data-sm text-red-200">
           {error}
         </div>
       )}
-      {syncMessage && (
-        <div className="rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-3 py-2 text-xs text-emerald-200">
-          {syncMessage}
-        </div>
-      )}
 
-      <div className="grid gap-4 lg:grid-cols-2">
-        <section className="rounded-xl border border-surface-border bg-surface-raised/60">
-          <div className="flex items-center gap-2 border-b border-surface-border px-3 py-2">
-            <Activity className="h-4 w-4 text-accent" />
-            <h2 className="text-sm font-semibold text-slate-100">FII activity (latest daily)</h2>
+      <div className="grid gap-1.5 lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)]">
+        <section className="panel min-w-0">
+          <div className="flex items-center gap-1.5 border-b border-surface-border px-2 py-1">
+            <Activity className="h-3.5 w-3.5 text-accent" />
+            <h2 className="text-data-md font-semibold text-slate-100">FII activity (latest daily)</h2>
           </div>
           <div className="overflow-auto">
-            <table className="min-w-full text-left text-xs">
-              <thead className="text-[10px] uppercase tracking-wide text-slate-500">
+            <table className="dt min-w-full text-left">
+              <thead>
                 <tr>
-                  <th className="px-3 py-2">Segment</th>
-                  <th className="px-3 py-2 text-right">Buy</th>
-                  <th className="px-3 py-2 text-right">Sell</th>
-                  <th className="px-3 py-2 text-right">Net</th>
-                  <th className="px-3 py-2">Date</th>
+                  <th>Segment</th>
+                  <th className="text-right">Buy</th>
+                  <th className="text-right">Sell</th>
+                  <th className="text-right">Net</th>
+                  <th>Date</th>
                 </tr>
               </thead>
               <tbody>
                 {loading && fiiBySegment.length === 0 ? (
                   <tr>
-                    <td colSpan={5} className="px-3 py-4 text-center text-slate-500">
+                    <td colSpan={5} className="py-3 text-center text-slate-400">
                       Loading…
                     </td>
                   </tr>
                 ) : fiiBySegment.length === 0 ? (
                   <tr>
-                    <td colSpan={5} className="px-3 py-4 text-center text-slate-500">
+                    <td colSpan={5} className="py-3 text-center text-slate-400">
                       No FII data — run sync
                     </td>
                   </tr>
@@ -182,24 +207,14 @@ export function MarketInfoPage() {
                   fiiBySegment.map((row) => {
                     const net = row.net_amount ?? 0;
                     return (
-                      <tr key={row.data_type} className="border-t border-surface-border/60">
-                        <td className="px-3 py-2 font-medium text-slate-200">
-                          {segmentLabel(row.data_type)}
-                        </td>
-                        <td className="px-3 py-2 text-right tabular-nums text-emerald-400">
-                          {formatCr(row.buy_amount)}
-                        </td>
-                        <td className="px-3 py-2 text-right tabular-nums text-red-400">
-                          {formatCr(row.sell_amount)}
-                        </td>
-                        <td
-                          className={`px-3 py-2 text-right tabular-nums font-medium ${
-                            net >= 0 ? "text-emerald-400" : "text-red-400"
-                          }`}
-                        >
+                      <tr key={row.data_type}>
+                        <td className="font-medium text-slate-100">{segmentLabel(row.data_type)}</td>
+                        <td className="num text-right text-gain">{formatCr(row.buy_amount)}</td>
+                        <td className="num text-right text-loss">{formatCr(row.sell_amount)}</td>
+                        <td className={`num text-right ${net >= 0 ? "text-gain" : "text-loss"}`}>
                           {formatCr(net)}
                         </td>
-                        <td className="px-3 py-2 text-slate-500">{formatTs(row.record_ts)}</td>
+                        <td className="text-slate-300">{formatTs(row.record_ts)}</td>
                       </tr>
                     );
                   })
@@ -208,11 +223,16 @@ export function MarketInfoPage() {
             </table>
           </div>
           {diiLatest && (
-            <div className="border-t border-surface-border px-3 py-2 text-xs text-slate-400">
-              <span className="font-medium text-slate-300">DII cash latest</span>
+            <div className="border-t border-surface-border px-2 py-1 text-data-sm text-slate-300">
+              <span className="font-medium text-slate-200">DII cash latest</span>
               {" · "}
-              Buy {formatCr(diiLatest.buy_amount)} / Sell {formatCr(diiLatest.sell_amount)} / Net{" "}
-              <span className={diiLatest.net_amount != null && diiLatest.net_amount >= 0 ? "text-emerald-400" : "text-red-400"}>
+              Buy <span className="num">{formatCr(diiLatest.buy_amount)}</span> / Sell{" "}
+              <span className="num">{formatCr(diiLatest.sell_amount)}</span> / Net{" "}
+              <span
+                className={`num ${
+                  diiLatest.net_amount != null && diiLatest.net_amount >= 0 ? "text-gain" : "text-loss"
+                }`}
+              >
                 {formatCr(diiLatest.net_amount)}
               </span>
               {" · "}
@@ -221,46 +241,48 @@ export function MarketInfoPage() {
           )}
         </section>
 
-        <section className="rounded-xl border border-surface-border bg-surface-raised/60">
-          <div className="flex items-center gap-2 border-b border-surface-border px-3 py-2">
-            <BarChart3 className="h-4 w-4 text-accent" />
-            <h2 className="text-sm font-semibold text-slate-100">Derivative snapshots</h2>
+        <section className="panel min-w-0">
+          <div className="flex items-center gap-1.5 border-b border-surface-border px-2 py-1">
+            <BarChart3 className="h-3.5 w-3.5 text-accent" />
+            <h2 className="text-data-md font-semibold text-slate-100">Derivative snapshots</h2>
+            <span className="text-data-xs text-slate-400">{tradeDate}</span>
           </div>
-          <div className="grid gap-2 p-3 sm:grid-cols-2">
+          <div className="grid gap-1.5 p-2 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
             {loading && derivatives.length === 0 ? (
-              <p className="col-span-full py-4 text-center text-xs text-slate-500">Loading…</p>
+              <p className="col-span-full py-3 text-center text-data-sm text-slate-400">Loading…</p>
             ) : derivatives.length === 0 ? (
-              <p className="col-span-full py-4 text-center text-xs text-slate-500">
+              <p className="col-span-full py-3 text-center text-data-sm text-slate-400">
                 No derivative data for {tradeDate} — run sync
               </p>
             ) : (
               derivatives.map((row) => (
                 <article
                   key={`${row.symbol}-${row.expiry}`}
-                  className="rounded-lg border border-surface-border bg-surface/40 p-2.5"
+                  className="rounded-md border border-surface-border bg-surface/40 px-2 py-1.5"
                 >
-                  <div className="flex items-center gap-1.5 text-sm font-semibold text-slate-100">
+                  <div className="flex items-center gap-1.5">
                     <TrendingUp className="h-3.5 w-3.5 text-accent" />
-                    {row.symbol}
+                    <span className="ticker">{row.symbol}</span>
                   </div>
-                  <p className="mt-0.5 text-[10px] text-slate-500">
-                    Expiry {row.expiry} · Spot {row.spot_close?.toLocaleString("en-IN") ?? "—"}
+                  <p className="text-data-xs text-slate-400">
+                    Expiry {row.expiry} · Spot{" "}
+                    <span className="num text-slate-200">{row.spot_close?.toLocaleString("en-IN") ?? "—"}</span>
                   </p>
-                  <dl className="mt-2 grid grid-cols-2 gap-x-2 gap-y-1 text-[11px]">
-                    <dt className="text-slate-500">Call OI</dt>
-                    <dd className="text-right tabular-nums text-slate-200">
+                  <dl className="mt-1 grid grid-cols-2 gap-x-2 gap-y-0.5 text-data-sm">
+                    <dt className="text-slate-400">Call OI</dt>
+                    <dd className="num text-right text-slate-100">
                       {row.total_call_oi?.toLocaleString("en-IN") ?? "—"}
                     </dd>
-                    <dt className="text-slate-500">Put OI</dt>
-                    <dd className="text-right tabular-nums text-slate-200">
+                    <dt className="text-slate-400">Put OI</dt>
+                    <dd className="num text-right text-slate-100">
                       {row.total_put_oi?.toLocaleString("en-IN") ?? "—"}
                     </dd>
-                    <dt className="text-slate-500">PCR</dt>
-                    <dd className="text-right tabular-nums text-slate-200">
+                    <dt className="text-slate-400">PCR</dt>
+                    <dd className="num text-right text-slate-100">
                       {row.pcr != null ? row.pcr.toFixed(3) : "—"}
                     </dd>
-                    <dt className="text-slate-500">Max pain</dt>
-                    <dd className="text-right tabular-nums text-slate-200">
+                    <dt className="text-slate-400">Max pain</dt>
+                    <dd className="num text-right text-slate-100">
                       {row.max_pain_strike?.toLocaleString("en-IN") ?? "—"}
                     </dd>
                   </dl>
@@ -271,10 +293,49 @@ export function MarketInfoPage() {
         </section>
       </div>
 
-      <p className="text-[10px] text-slate-600">
-        Default sync: FII all segments + DII cash (90d lookback), NIFTY/BANKNIFTY + top 5 F&O stocks.
-        CLI: <code className="text-slate-500">npm run market-info:sync</code>
-      </p>
+      <AdvancedDrawer
+        open={advancedOpen}
+        onClose={() => setAdvancedOpen(false)}
+        title="Market info sync"
+        subtitle="Upstox Market Information API"
+      >
+        <AdvancedSection title="Data">
+          <label className="flex flex-col gap-0.5 text-data-xs text-slate-300">
+            Derivatives date
+            <input
+              type="date"
+              value={tradeDate}
+              onChange={(e) => setTradeDate(e.target.value)}
+              className="rounded-md border border-surface-border bg-surface px-2 py-1 text-data-sm text-slate-200"
+            />
+          </label>
+        </AdvancedSection>
+        <AdvancedSection title="Jobs">
+          <button
+            type="button"
+            onClick={handleSync}
+            disabled={syncing}
+            className="inline-flex h-7 items-center gap-1.5 rounded-md border border-accent/40 bg-accent/10 px-3 text-data-sm font-medium text-accent hover:bg-accent/20 disabled:opacity-50"
+          >
+            <RefreshCw className={`h-3.5 w-3.5 ${syncing ? "animate-spin" : ""}`} />
+            {syncing ? "Syncing…" : "Sync from Upstox"}
+          </button>
+          {syncMessage && (
+            <div className="rounded-md border border-emerald-500/30 bg-emerald-500/10 px-2 py-1 text-data-xs text-emerald-200">
+              {syncMessage}
+            </div>
+          )}
+        </AdvancedSection>
+        <AdvancedSection title="Help" defaultOpen={false}>
+          <p className="text-data-xs text-slate-300">
+            FII/DII institutional flows and F&O OI, PCR, max pain (Upstox Market Information API).
+          </p>
+          <p className="text-data-xs text-slate-300">
+            Default sync: FII all segments + DII cash (90d lookback), NIFTY/BANKNIFTY + top 5 F&O stocks.
+            CLI: <code className="text-slate-200">npm run market-info:sync</code>
+          </p>
+        </AdvancedSection>
+      </AdvancedDrawer>
     </main>
   );
 }

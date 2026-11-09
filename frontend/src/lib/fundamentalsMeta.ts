@@ -4,6 +4,9 @@ import type { StockFundamentals } from "@/lib/api";
 export const FUNDAMENTALLY_STRONG_TOOLTIP =
   "ROE ≥ 15% or ROCE ≥ 15%; OPM ≥ 12%; positive PAT growth; D/E < 1 (non-banks); positive CFO & EPS when available";
 
+export const EARNINGS_MOMENTUM_TOOLTIP =
+  "Constructive quarterly trajectory: improving/accelerating/recovering PAT or revenue vs prior quarters (cached filings)";
+
 export function fundamentalStrongFromDetails(
   details: Record<string, unknown> | null | undefined,
 ): boolean | null {

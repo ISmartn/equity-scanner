@@ -56,6 +56,8 @@ def _rows_to_frame(rows: list[dict[str, Any]], *, date_key: str = "date") -> pd.
 def _load_equity_frames(
     store: TimelineStore,
     tickers: list[str],
+    *,
+    as_of: str | None = None,
 ) -> dict[str, pd.DataFrame]:
     """Bulk-load daily equity OHLCV from local daily_candles (chronological)."""
     if not tickers:
@@ -79,23 +81,26 @@ def _load_equity_frames(
     token_to_ticker = {v: k for k, v in profiles.items()}
     tokens = list(profiles.values())
     by_ticker: dict[str, list[dict[str, Any]]] = {t: [] for t in profiles}
+    as_of_day = as_of[:10] if as_of else None
 
     chunk = 300
     with store.connection() as conn:
         for i in range(0, len(tokens), chunk):
             part = tokens[i : i + chunk]
             ph = ",".join("?" for _ in part)
-            for row in conn.execute(
-                f"""
+            sql = f"""
                 SELECT instrument_token, trade_date AS date,
                        open_price AS open, high_price AS high,
                        low_price AS low, close_price AS close, volume
                 FROM daily_candles
                 WHERE instrument_token IN ({ph})
-                ORDER BY instrument_token ASC, trade_date ASC
-                """,
-                part,
-            ).fetchall():
+            """
+            params: list[Any] = list(part)
+            if as_of_day:
+                sql += " AND trade_date <= ?"
+                params.append(as_of_day)
+            sql += " ORDER BY instrument_token ASC, trade_date ASC"
+            for row in conn.execute(sql, params).fetchall():
                 ticker = token_to_ticker.get(str(row["instrument_token"]))
                 if ticker:
                     by_ticker[ticker].append(dict(row))
@@ -110,8 +115,9 @@ def _load_equity_frames(
     return out
 
 
-def _load_nifty_frame(store: TimelineStore) -> pd.DataFrame | None:
-    rows = store.get_index_candles(NIFTY_KEY, "daily", limit=LOOKBACK_BARS)
+def _load_nifty_frame(store: TimelineStore, *, as_of: str | None = None) -> pd.DataFrame | None:
+    to_ts = f"{as_of[:10]}T23:59:59.999" if as_of else None
+    rows = store.get_index_candles(NIFTY_KEY, "daily", to_ts=to_ts, limit=LOOKBACK_BARS)
     # index candles use ts — may be newest-first depending on store; normalize
     if not rows:
         return None

@@ -1,3 +1,4 @@
+import { Clip } from "@/components/dense";
 import type { SectorQuadrant, SectorRotationRow } from "@/lib/api";
 
 export type SectorTableFilter =
@@ -77,32 +78,32 @@ export function SectorScanTable({
   );
 
   return (
-    <div className="flex h-full min-h-0 flex-col overflow-hidden rounded-xl border border-surface-border bg-surface-raised">
+    <div className="panel flex h-full min-h-0 flex-col overflow-hidden">
       <div className="min-h-0 flex-1 overflow-auto">
-        <table className="w-full text-left">
-          <thead className="sticky top-0 z-10 bg-surface-raised text-[10px] uppercase tracking-wide text-slate-500">
+        <table className="dt">
+          <thead>
             <tr>
-              <th className="px-2 py-2">
+              <th>
                 <SortBtn k="name" label="Sector" />
               </th>
-              <th className="px-2 py-2">Quadrant</th>
-              <th className="px-2 py-2 text-right">
+              <th>Quadrant</th>
+              <th className="text-right">
                 <SortBtn k="daily_change_pct" label="Day %" />
               </th>
-              <th className="px-2 py-2 text-right">
+              <th className="text-right">
                 <SortBtn k="rs_ratio" label="RS-R" />
               </th>
-              <th className="px-2 py-2 text-right">RS-M</th>
-              <th className="px-2 py-2 text-right">
+              <th className="text-right">RS-M</th>
+              <th className="text-right">
                 <SortBtn k="surety_score" label="Surety" />
               </th>
-              <th className="px-2 py-2">Flags</th>
+              <th>Flags</th>
             </tr>
           </thead>
           <tbody>
             {sorted.length === 0 ? (
               <tr>
-                <td colSpan={7} className="px-3 py-8 text-center text-[11px] text-slate-500">
+                <td colSpan={7} className="py-6 text-center text-slate-400">
                   No sectors match this filter.
                 </td>
               </tr>
@@ -113,78 +114,68 @@ export function SectorScanTable({
                   <tr
                     key={s.name}
                     onClick={() => onSelect(s.name)}
-                    className={`cursor-pointer border-t border-surface-border/70 transition ${
-                      selected ? "bg-accent/10 hover:bg-accent/15" : "hover:bg-white/5"
-                    }`}
+                    className={`dt-row ${selected ? "dt-selected" : ""}`}
                   >
-                    <td className="px-2 py-1.5">
-                      <div className="flex items-center gap-1.5">
-                        <div className="text-[11px] font-medium text-slate-100">{s.name}</div>
+                    <td className="max-w-[14rem]">
+                      <div className="flex min-w-0 items-center gap-1.5">
+                        <Clip className="font-semibold text-slate-100">{s.name}</Clip>
                         {s.category === "Official" ? (
-                          <span className="shrink-0 rounded border border-amber-400/50 bg-amber-500/15 px-1 py-px text-[8px] font-semibold uppercase tracking-wide text-amber-200">
+                          <span className="shrink-0 rounded border border-amber-400/50 bg-amber-500/15 px-1 py-px text-[10px] font-semibold uppercase leading-3 tracking-wide text-amber-200">
                             Index
                           </span>
                         ) : (
-                          <span className="shrink-0 rounded border border-slate-500/40 bg-slate-500/10 px-1 py-px text-[8px] uppercase tracking-wide text-slate-400">
+                          <span className="shrink-0 rounded border border-slate-500/40 bg-slate-500/10 px-1 py-px text-[10px] uppercase leading-3 tracking-wide text-slate-300">
                             Theme
                           </span>
                         )}
                       </div>
-                      <div className="text-[9px] text-slate-500">
+                      <div className="text-data-xs text-slate-400">
                         {s.breadth_pct_above_50sma != null
                           ? `${s.breadth_pct_above_50sma.toFixed(0)}% >50SMA`
                           : s.category}
                       </div>
                     </td>
-                    <td className={`px-2 py-1.5 text-[10px] font-medium ${quadrantTone(s.quadrant)}`}>
+                    <td className={`font-medium ${quadrantTone(s.quadrant)}`}>
                       <div>{s.quadrant}</div>
                       {s.rotation_path ? (
                         <div
-                          className={`text-[8px] font-normal ${
+                          className={`text-[10px] font-normal ${
                             s.rotation_bias === "clockwise"
                               ? "text-amber-300/90"
                               : s.rotation_bias === "counter"
                                 ? "text-emerald-300/90"
-                                : "text-slate-500"
+                                : "text-slate-400"
                           }`}
                         >
                           {s.rotation_path}
                         </div>
                       ) : (
-                        <div className="text-[8px] font-normal text-slate-500">{s.next_probable_trend}</div>
+                        <div className="text-[10px] font-normal text-slate-400">{s.next_probable_trend}</div>
                       )}
                     </td>
-                    <td
-                      className={`px-2 py-1.5 text-right tabular-nums text-[11px] ${
-                        s.daily_change_pct >= 0 ? "text-emerald-400" : "text-rose-400"
-                      }`}
-                    >
+                    <td className={`num text-right ${s.daily_change_pct >= 0 ? "text-gain" : "text-loss"}`}>
                       {fmtPct(s.daily_change_pct)}
                     </td>
-                    <td className="px-2 py-1.5 text-right tabular-nums text-[11px] text-slate-300">
-                      {s.rs_ratio.toFixed(1)}
-                    </td>
-                    <td className="px-2 py-1.5 text-right tabular-nums text-[11px] text-slate-300">
-                      {s.rs_momentum.toFixed(1)}
-                    </td>
-                    <td className="px-2 py-1.5 text-right">
+                    <td className="text-right text-slate-200">{s.rs_ratio.toFixed(1)}</td>
+                    <td className="text-right text-slate-200">{s.rs_momentum.toFixed(1)}</td>
+                    <td className="text-right">
                       <span
-                        className={`inline-flex min-w-[2.25rem] justify-center rounded border px-1.5 py-0.5 text-[10px] font-semibold tabular-nums ${suretyTone(
+                        className={`inline-flex min-w-[2.25rem] justify-center rounded border px-1.5 py-px text-data-xs font-semibold tabular-nums ${suretyTone(
                           s.surety_score,
                         )}`}
                       >
                         {s.surety_score}
                       </span>
                     </td>
-                    <td className="px-2 py-1.5">
+                    <td>
                       <div className="flex flex-wrap gap-1">
                         {s.is_stealth_accumulation ? (
-                          <span className="rounded border border-violet-500/40 bg-violet-500/15 px-1 py-px text-[8px] text-violet-300">
+                          <span className="whitespace-nowrap rounded border border-violet-500/40 bg-violet-500/15 px-1 py-px text-[10px] leading-3 text-violet-300">
                             Stealth Inflow
                           </span>
                         ) : null}
                         {s.is_price_action_confirmed ? (
-                          <span className="rounded border border-emerald-500/40 bg-emerald-500/15 px-1 py-px text-[8px] text-emerald-300">
+                          <span className="whitespace-nowrap rounded border border-emerald-500/40 bg-emerald-500/15 px-1 py-px text-[10px] leading-3 text-emerald-300">
                             Momentum Active
                           </span>
                         ) : null}

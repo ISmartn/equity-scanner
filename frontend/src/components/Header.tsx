@@ -1,18 +1,13 @@
-import { AppButton } from "@/components/mui";
-import BarChartIcon from "@mui/icons-material/BarChart";
-import DatabaseIcon from "@mui/icons-material/Storage";
-import SettingsIcon from "@mui/icons-material/Settings";
-import TrendingUpIcon from "@mui/icons-material/TrendingUp";
-import Box from "@mui/material/Box";
-import Chip from "@mui/material/Chip";
-import Stack from "@mui/material/Stack";
-import Typography from "@mui/material/Typography";
+import type { ReactNode } from "react";
+import { Database, KeyRound, TrendingUp } from "lucide-react";
 
 interface HeaderProps {
   onOpenSettings: () => void;
   backendOnline: boolean;
   stocksWithData?: number | null;
   totalProfiles?: number | null;
+  /** Primary navigation rendered inline in the bar. */
+  nav?: ReactNode;
 }
 
 export function Header({
@@ -20,65 +15,57 @@ export function Header({
   backendOnline,
   stocksWithData,
   totalProfiles,
+  nav,
 }: HeaderProps) {
-  return (
-    <Box
-      component="header"
-      className="border-b border-surface-border bg-surface-raised/80 backdrop-blur"
-    >
-      <Box className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-4 sm:px-6">
-        <Stack direction="row" spacing={1.5} className="items-center">
-          <Box className="rounded-xl bg-accent/15 p-2 text-accent">
-            <TrendingUpIcon fontSize="medium" />
-          </Box>
-          <Box>
-            <Typography variant="h6" className="text-lg font-semibold tracking-tight sm:text-xl">
-              Equity Scan Lab
-            </Typography>
-            <Typography variant="body2" color="text.secondary" className="text-xs sm:text-sm">
-              NSE scanners · forecast · sector rotation
-            </Typography>
-          </Box>
-        </Stack>
+  const dbLabel =
+    stocksWithData != null && totalProfiles != null
+      ? `${stocksWithData.toLocaleString()} / ${totalProfiles.toLocaleString()} stocks`
+      : "Timeline DB";
 
-        <Stack direction="row" spacing={1} className="items-center">
-          <Chip
-            size="small"
-            color={backendOnline ? "success" : "warning"}
-            variant="outlined"
-            label={backendOnline ? "Backend online" : "Backend offline"}
-            className="hidden sm:inline-flex"
+  return (
+    <header className="sticky top-0 z-40 flex h-[var(--app-chrome-h)] items-stretch gap-2 border-b border-surface-border bg-surface-raised/90 px-2 backdrop-blur sm:px-3">
+      <div
+        className="flex shrink-0 items-center gap-1.5"
+        title="Equity Scan Lab — NSE scanners · forecast · sector rotation · TimesFM 2.5 on demand"
+      >
+        <span className="rounded-md bg-accent/15 p-1 text-accent">
+          <TrendingUp className="h-4 w-4" aria-hidden />
+        </span>
+        <span className="hidden whitespace-nowrap text-data-md font-semibold tracking-tight text-slate-100 md:inline">
+          Equity Scan Lab
+        </span>
+      </div>
+
+      <div className="min-w-0 flex-1">{nav}</div>
+
+      <div className="flex shrink-0 items-center gap-2">
+        <span
+          className="inline-flex items-center gap-1 text-data-xs text-slate-300"
+          title={backendOnline ? "Backend online" : "Backend offline"}
+        >
+          <span
+            className={`h-2 w-2 rounded-full ${backendOnline ? "bg-gain" : "bg-amber-400 animate-pulse"}`}
+            aria-hidden
           />
-          <Chip
-            size="small"
-            icon={<DatabaseIcon sx={{ fontSize: 14 }} />}
-            label={
-              stocksWithData != null && totalProfiles != null
-                ? `${stocksWithData.toLocaleString()} / ${totalProfiles.toLocaleString()} stocks`
-                : "Timeline DB"
-            }
-            variant="outlined"
-            className="hidden md:inline-flex"
-          />
-          <Chip
-            size="small"
-            icon={<BarChartIcon sx={{ fontSize: 14 }} />}
-            label="TimesFM 2.5 · on demand"
-            variant="outlined"
-            className="hidden lg:inline-flex"
-          />
-          <AppButton
-            variant="outlined"
-            size="small"
-            startIcon={<SettingsIcon fontSize="small" />}
-            onClick={onOpenSettings}
-            className="border-surface-border bg-surface text-slate-200"
-          >
-            <span className="hidden sm:inline">Upstox Token</span>
-            <span className="sm:hidden">Token</span>
-          </AppButton>
-        </Stack>
-      </Box>
-    </Box>
+          <span className="hidden xl:inline">{backendOnline ? "Online" : "Offline"}</span>
+        </span>
+        <span
+          className="hidden items-center gap-1 whitespace-nowrap text-data-xs tabular-nums text-slate-300 lg:inline-flex"
+          title="Stocks with timeline candles / total profiles"
+        >
+          <Database className="h-3 w-3 text-slate-400" aria-hidden />
+          {dbLabel}
+        </span>
+        <button
+          type="button"
+          onClick={onOpenSettings}
+          className="inline-flex h-7 items-center gap-1 rounded-md border border-surface-border bg-surface px-2 text-data-xs font-semibold text-slate-200 transition hover:border-accent/40 hover:text-white"
+        >
+          <KeyRound className="h-3.5 w-3.5" aria-hidden />
+          <span className="hidden sm:inline">Upstox Token</span>
+          <span className="sm:hidden">Token</span>
+        </button>
+      </div>
+    </header>
   );
 }

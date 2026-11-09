@@ -218,7 +218,7 @@ export function WaveChartRenderer({ data, loading, showGuideLevels = false }: Pr
 
   if (loading) {
     return (
-      <div className="flex h-full min-h-[280px] items-center justify-center rounded-xl border border-surface-border bg-surface-raised text-[12px] text-slate-500">
+      <div className="flex h-full min-h-[280px] items-center justify-center rounded-lg border border-surface-border bg-surface-raised text-[12px] text-slate-400">
         Loading chart…
       </div>
     );
@@ -226,7 +226,7 @@ export function WaveChartRenderer({ data, loading, showGuideLevels = false }: Pr
 
   if (!data) {
     return (
-      <div className="flex h-full min-h-[280px] items-center justify-center rounded-xl border border-dashed border-surface-border bg-surface-raised text-[12px] text-slate-500">
+      <div className="flex h-full min-h-[280px] items-center justify-center rounded-lg border border-dashed border-surface-border bg-surface-raised text-[12px] text-slate-400">
         Select a symbol to view wave overlays
       </div>
     );
@@ -236,16 +236,16 @@ export function WaveChartRenderer({ data, loading, showGuideLevels = false }: Pr
   const legend = isZigzag ? WAVE_LEGEND_ZIGZAG : WAVE_LEGEND_IMPULSE;
 
   return (
-    <div className="flex h-full min-h-0 flex-col overflow-hidden rounded-xl border border-surface-border bg-surface-raised">
-      <div className="flex shrink-0 flex-wrap items-baseline gap-x-3 gap-y-1 border-b border-surface-border px-3 py-2">
-        <h3 className="text-[13px] font-semibold text-slate-100">{data.ticker}</h3>
-        <span className="text-[10px] text-slate-500">
+    <div className="panel flex h-full min-h-0 flex-col overflow-hidden">
+      <div className="flex shrink-0 flex-wrap items-baseline gap-x-3 gap-y-1 border-b border-surface-border px-2 py-1">
+        <h3 className="ticker">{data.ticker}</h3>
+        <span className="text-data-xs text-slate-300">
           {data.phase} · surety {data.surety_score.toFixed(0)}
           {data.invalidation_price != null
             ? ` · inv ₹${data.invalidation_price.toLocaleString("en-IN")}`
             : ""}
         </span>
-        <div className="ml-auto flex flex-wrap items-center gap-2 text-[9px] text-slate-400">
+        <div className="ml-auto flex flex-wrap items-center gap-2 text-[10px] text-slate-400">
           {legend.map((w) => (
             <span key={w.id} className="inline-flex items-center gap-1">
               <span

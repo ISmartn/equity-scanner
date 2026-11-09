@@ -1,4 +1,27 @@
-/** Chart indicators — Wilder RSI + Bollinger Bands */
+/** Chart indicators — EMA, Wilder RSI, and Bollinger Bands. */
+
+/**
+ * Standard EMA: SMA seed over the first `period` closes, then
+ * multiplier 2 / (period + 1). Matches pandas `ewm(span=period, adjust=False)`.
+ * Leading values before the seed are null.
+ */
+export function emaSeries(values: number[], period: number): (number | null)[] {
+  const out: (number | null)[] = new Array(values.length).fill(null);
+  if (period < 1 || values.length < period) return out;
+
+  const k = 2 / (period + 1);
+  let seed = 0;
+  for (let i = 0; i < period; i += 1) seed += values[i];
+  seed /= period;
+
+  out[period - 1] = seed;
+  let prev = seed;
+  for (let i = period; i < values.length; i += 1) {
+    prev = values[i] * k + prev * (1 - k);
+    out[i] = prev;
+  }
+  return out;
+}
 
 export function wildersRsiSeries(closes: number[], period: number): number[] {
   if (period < 1) throw new Error("RSI period must be >= 1");

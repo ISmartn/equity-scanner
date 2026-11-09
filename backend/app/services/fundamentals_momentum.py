@@ -379,3 +379,17 @@ def evaluate_earnings_momentum(
         "reasons": reasons,
         "thresholds": asdict(thr),
     }
+
+
+def list_earnings_momentum_pass_tickers(
+    fundamentals_index: dict[str, dict[str, Any]],
+    *,
+    thresholds: MomentumThresholds = DEFAULT_MOMENTUM_THRESHOLDS,
+) -> list[str]:
+    """Tickers whose latest quarterly trajectory passes the momentum gate (pass=True)."""
+    out: list[str] = []
+    for ticker, payload in fundamentals_index.items():
+        result = evaluate_earnings_momentum(payload, thresholds=thresholds)
+        if result.get("pass") is True:
+            out.append(str(ticker).upper())
+    return sorted(out)

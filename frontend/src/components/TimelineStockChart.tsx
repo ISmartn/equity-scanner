@@ -13,8 +13,10 @@ import {
   type Time,
 } from "lightweight-charts";
 import { VcpOverlayPrimitive } from "@/components/VcpOverlayPrimitive";
+import { DarvasBoxPrimitive } from "@/components/DarvasBoxPrimitive";
 import type { TimelineCandlePoint } from "@/lib/api";
 import { applyChartVisibleRange, setChartVisibleRangeCentered, setDefaultChartVisibleRange } from "@/lib/chartTimeScale";
+import type { DarvasBox } from "@/lib/darvasBox";
 import { wildersRsiSeries } from "@/lib/indicators";
 import type { VcpOverlayData } from "@/lib/vcpOverlay";
 
@@ -39,6 +41,8 @@ interface TimelineStockChartProps {
   tailVisibleRange?: boolean;
   /** VCP contraction bands + pivot line (null hides overlay). */
   vcpOverlay?: VcpOverlayData | null;
+  /** Darvas consolidation boxes rendered behind candles. */
+  darvasBoxes?: DarvasBox[];
   /** Extra news/event markers (in addition to highlight). */
   extraMarkers?: ChartNewsMarker[];
   /** Wilder RSI pane under price/volume (default on). */
@@ -183,6 +187,7 @@ export function TimelineStockChart({
   fillHeight = false,
   tailVisibleRange = false,
   vcpOverlay = null,
+  darvasBoxes = [],
   extraMarkers = [],
   showRsi = true,
   rsiPeriod = 14,
@@ -192,6 +197,7 @@ export function TimelineStockChart({
   const tooltipRef = useRef<HTMLDivElement>(null);
   const chartRef = useRef<IChartApi | null>(null);
   const vcpPrimitiveRef = useRef<VcpOverlayPrimitive | null>(null);
+  const darvasPrimitiveRef = useRef<DarvasBoxPrimitive | null>(null);
 
   const highlightBar = history.find((c) => c.date === highlightDate);
   const period = Math.max(1, Math.min(200, rsiPeriod));
@@ -280,6 +286,9 @@ export function TimelineStockChart({
     const vcpPrimitive = new VcpOverlayPrimitive();
     candleSeries.attachPrimitive(vcpPrimitive);
     vcpPrimitiveRef.current = vcpPrimitive;
+    const darvasPrimitive = new DarvasBoxPrimitive();
+    candleSeries.attachPrimitive(darvasPrimitive);
+    darvasPrimitiveRef.current = darvasPrimitive;
 
     candleSeries.setData(candleData);
     volumeSeries.setData(volumeData);
@@ -287,6 +296,15 @@ export function TimelineStockChart({
       buildHighlightMarker(highlightDate, selectedBar, highlightMovePct, extraMarkers),
     );
     vcpPrimitive.setOverlay(vcpOverlay);
+    darvasPrimitive.setBoxes(
+      darvasBoxes.map((box) => ({
+        startTime: toChartTime(box.startDate),
+        endTime: toChartTime(box.endDate),
+        top: box.top,
+        bottom: box.bottom,
+        direction: box.direction,
+      })),
+    );
 
     if (showRsi && rsiLine.length) {
       const rsiSeries = chart.addLineSeries({
@@ -414,25 +432,26 @@ export function TimelineStockChart({
       observer.disconnect();
       window.removeEventListener("resize", resize);
       vcpPrimitiveRef.current = null;
+      darvasPrimitiveRef.current = null;
       chart.remove();
       chartRef.current = null;
     };
-  }, [history, highlightDate, highlightMovePct, tailVisibleRange, extraMarkers, showRsi, period]);
+  }, [history, highlightDate, highlightMovePct, tailVisibleRange, extraMarkers, showRsi, period, darvasBoxes]);
 
   useEffect(() => {
     vcpPrimitiveRef.current?.setOverlay(vcpOverlay ?? null);
   }, [vcpOverlay]);
 
   const shellClass = fillHeight
-    ? "flex h-full min-h-0 flex-col rounded-2xl border border-surface-border bg-surface-raised p-3"
-    : "rounded-2xl border border-surface-border bg-surface-raised p-4 sm:p-6";
+    ? "flex h-full min-h-0 flex-col rounded-lg border border-surface-border bg-surface-raised p-1.5"
+    : "rounded-lg border border-surface-border bg-surface-raised p-2";
 
   if (loading) {
     return (
       <div className={`${shellClass} items-center justify-center`}>
         <div className="text-center">
           <div className="mx-auto mb-3 h-8 w-8 animate-spin rounded-full border-2 border-accent border-t-transparent" />
-          <p className="text-sm text-slate-400">Loading chart…</p>
+          <p className="text-data-md text-slate-300">Loading chart…</p>
         </div>
       </div>
     );
@@ -443,7 +462,7 @@ export function TimelineStockChart({
       <div
         className={`${shellClass} items-center justify-center border-dashed bg-surface-raised/50`}
       >
-        <p className="text-center text-sm text-slate-500">
+        <p className="text-center text-data-md text-slate-400">
           {symbol ? `No chart data for ${symbol}` : "Select a stock from the results table"}
         </p>
       </div>
@@ -454,39 +473,42 @@ export function TimelineStockChart({
 
   return (
     <div className={shellClass}>
-      <div className="mb-2 flex shrink-0 flex-wrap items-end justify-between gap-2">
-        <div className="min-w-0">
-          <h2 className="truncate text-lg font-semibold">{symbol}</h2>
-          <p className="truncate text-xs text-slate-400">
+      <div className="mb-1 flex shrink-0 flex-wrap items-end justify-between gap-x-3 gap-y-1 px-0.5">
+        <div className="min-w-0 flex-1">
+          <h2 className="truncate text-base font-semibold leading-tight text-slate-100">{symbol}</h2>
+          <p
+            className="truncate text-data-xs text-slate-300"
+            title={`${companyName ?? "—"}${sector ? ` · ${sector}` : ""} · ${history.length} bars · ${source.toUpperCase()}`}
+          >
             {companyName ?? "—"}
             {sector ? ` · ${sector}` : ""} · {history.length} bars · {source.toUpperCase()}
           </p>
         </div>
-        <div className="flex shrink-0 gap-4 text-right">
+        <div className="flex shrink-0 gap-3 text-right">
           {marketCap && (
             <div>
-              <div className="text-[10px] uppercase tracking-wide text-slate-500">Sector mcap</div>
-              <div className="font-mono text-sm text-slate-200">{marketCap}</div>
+              <div className="text-[10px] uppercase tracking-wide text-slate-400">Sector mcap</div>
+              <div className="num font-mono text-data-md text-slate-200">{marketCap}</div>
             </div>
           )}
           <div>
-            <div className="text-[10px] uppercase tracking-wide text-slate-500">Latest close</div>
-            <div className="font-mono text-sm text-white">{formatPrice(latest.close)}</div>
+            <div className="text-[10px] uppercase tracking-wide text-slate-400">Latest close</div>
+            <div className="num font-mono text-data-md text-white">{formatPrice(latest.close)}</div>
           </div>
           {latestRsi != null && (
             <div>
-              <div className="text-[10px] uppercase tracking-wide text-slate-500">RSI({period})</div>
-              <div className="font-mono text-sm text-violet-300">{latestRsi.toFixed(1)}</div>
+              <div className="text-[10px] uppercase tracking-wide text-slate-400">RSI({period})</div>
+              <div className="num font-mono text-data-md text-violet-300">{latestRsi.toFixed(1)}</div>
             </div>
           )}
           {highlightBar && (
             <div>
-              <div className="text-[10px] uppercase tracking-wide text-slate-500">
+              <div className="text-[10px] uppercase tracking-wide text-slate-400">
                 Move · {highlightDate}
               </div>
               <div
-                className={`font-mono text-sm ${
-                  (highlightMovePct ?? 0) >= 0 ? "text-emerald-400" : "text-red-400"
+                className={`num font-mono text-data-md ${
+                  (highlightMovePct ?? 0) >= 0 ? "text-gain" : "text-loss"
                 }`}
               >
                 {highlightMovePct == null
@@ -513,8 +535,8 @@ export function TimelineStockChart({
       </div>
 
       {highlightBar && (
-        <div className="mt-2 flex shrink-0 flex-wrap items-center gap-x-4 gap-y-1 border-t border-surface-border/60 pt-2 text-[11px] text-slate-400">
-          <span className="font-medium text-slate-300">{highlightDate}</span>
+        <div className="mt-1 flex shrink-0 flex-wrap items-center gap-x-3 gap-y-0.5 border-t border-surface-border/60 px-0.5 pt-1 text-data-xs text-slate-300">
+          <span className="font-semibold text-slate-100">{highlightDate}</span>
           <span>
             Close{" "}
             <span className="font-mono text-slate-200">{formatPrice(highlightBar.close)}</span>
@@ -522,8 +544,8 @@ export function TimelineStockChart({
           <span>
             Move{" "}
             <span
-              className={`font-mono ${
-                (highlightMovePct ?? 0) >= 0 ? "text-emerald-400" : "text-red-400"
+              className={`num font-mono ${
+                (highlightMovePct ?? 0) >= 0 ? "text-gain" : "text-loss"
               }`}
             >
               {highlightMovePct == null
@@ -540,11 +562,11 @@ export function TimelineStockChart({
           <span>
             Volume{" "}
             <span className="font-mono text-sky-400">{formatVolume(highlightBar.volume)}</span>
-            <span className="ml-1 text-slate-500">
+            <span className="ml-1 text-slate-400">
               ({highlightBar.volume.toLocaleString("en-IN")} shares)
             </span>
           </span>
-          <span className="text-slate-500">
+          <span className="tabular-nums text-slate-300">
             O {formatPrice(highlightBar.open)} · H {formatPrice(highlightBar.high)} · L{" "}
             {formatPrice(highlightBar.low)}
           </span>
@@ -552,8 +574,8 @@ export function TimelineStockChart({
       )}
 
       {vcpOverlay && (
-        <div className="mt-1.5 flex shrink-0 flex-wrap items-center gap-x-3 gap-y-1 text-[10px] text-slate-500">
-          <span className="font-medium text-slate-400">VCP overlay</span>
+        <div className="mt-1 flex shrink-0 flex-wrap items-center gap-x-3 gap-y-0.5 px-0.5 text-data-xs text-slate-400">
+          <span className="font-semibold text-slate-300">VCP overlay</span>
           <span className="inline-flex items-center gap-1">
             <span className="h-2 w-3 rounded-sm border border-sky-400/50 bg-sky-400/15" />
             20d range

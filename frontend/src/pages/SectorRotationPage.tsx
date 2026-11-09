@@ -3,7 +3,6 @@ import RefreshIcon from "@mui/icons-material/Refresh";
 import Alert from "@mui/material/Alert";
 import ToggleButton from "@mui/material/ToggleButton";
 import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
-import Typography from "@mui/material/Typography";
 import { TimelineStockChart } from "@/components/TimelineStockChart";
 import { RRGScatterChart } from "@/components/sectorRotation/RRGScatterChart";
 import { SectorConstituentsPanel } from "@/components/sectorRotation/SectorConstituentsPanel";
@@ -12,6 +11,16 @@ import {
   type SectorTableFilter,
 } from "@/components/sectorRotation/SectorScanTable";
 import { AppButton } from "@/components/mui/AppButton";
+import {
+  AdvancedButton,
+  AdvancedDrawer,
+  AdvancedSection,
+  Clip,
+  PageToolbar,
+  PctCell,
+  StatChip,
+  ToolbarDivider,
+} from "@/components/dense";
 import {
   fetchSectorRotation,
   fetchSectorRotationConstituents,
@@ -85,9 +94,12 @@ export function SectorRotationPage() {
   const [chartLoading, setChartLoading] = useState(false);
   const [chartError, setChartError] = useState<string | null>(null);
 
+  const [syncNote, setSyncNote] = useState<string | null>(null);
+
   const load = useCallback(async (refresh = false) => {
     setLoading(true);
     setError(null);
+    if (refresh) setSyncNote(null);
     try {
       const payload = await fetchSectorRotation(refresh);
       setData(payload);
@@ -95,6 +107,20 @@ export function SectorRotationPage() {
         if (prev && payload.sectors.some((s) => s.name === prev)) return prev;
         return payload.sectors[0]?.name ?? null;
       });
+      const sync = payload.benchmark_sync;
+      if (sync) {
+        if (sync.status === "unauthorized") {
+          setSyncNote(
+            "Benchmark candles could not be synced — add your Upstox token in Settings, then refresh again.",
+          );
+        } else if (sync.status === "failed") {
+          setSyncNote(`Benchmark sync failed: ${sync.detail ?? "unknown error"}`);
+        } else if (sync.upserted > 0) {
+          setSyncNote(`Synced ${sync.upserted} new ${payload.benchmark} bars.`);
+        } else {
+          setSyncNote("Benchmark already up to date.");
+        }
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to load sector rotation");
     } finally {
@@ -215,66 +241,59 @@ export function SectorRotationPage() {
 
   const summary = data?.summary;
   const showStockChart = Boolean(selectedTicker);
+  const [advancedOpen, setAdvancedOpen] = useState(false);
 
   return (
-    <div className="mx-auto flex h-[calc(100dvh-6.5rem)] max-w-[1600px] flex-col gap-2 overflow-hidden px-2 py-2 sm:px-4">
+    <div className="page-shell flex flex-col gap-1 overflow-hidden px-1.5 py-1 sm:px-2">
       {error ? (
-        <Alert severity="error" onClose={() => setError(null)} className="shrink-0">
+        <Alert severity="error" onClose={() => setError(null)} className="shrink-0 py-0 text-data-sm">
           {error}
         </Alert>
       ) : null}
 
-      <div className="shrink-0 rounded-xl border border-surface-border bg-surface-raised px-3 py-2">
-        <div className="flex flex-wrap items-center gap-2">
-          <div>
-            <Typography className="text-[13px] font-semibold text-slate-100">
-              Sector Rotation & Themes
-            </Typography>
-            <Typography className="text-[10px] text-slate-500">
-              Benchmark {data?.benchmark ?? "Nifty 50"}
-              {data?.benchmark_as_of ? ` · as of ${data.benchmark_as_of}` : ""}
-              {loading ? " · Updating…" : ""}
-              {" · "}
-              <span className="text-amber-200/90">◆ Official index</span>
-              {" · "}
-              <span className="text-slate-400">● Theme</span>
-            </Typography>
-          </div>
-
-          <div className="ml-auto flex flex-wrap items-center gap-3 text-[10px] text-slate-400">
-            {summary ? (
-              <>
-                <span>
-                  <span className="font-medium text-slate-200">{summary.total}</span> sectors
-                </span>
-                <span className="text-emerald-300">Leading {summary.leading}</span>
-                <span className="text-sky-300">Improving {summary.improving}</span>
-                <span className="text-violet-300">Stealth {summary.stealth_accumulation}</span>
-                <span className="text-amber-300">PA {summary.price_action_confirmed}</span>
-              </>
+      <PageToolbar
+        right={
+          <>
+            {data?.benchmark_stale ? (
+              <button
+                type="button"
+                onClick={() => setAdvancedOpen(true)}
+                title={`RS is ${data.rs_lag_days}d behind prices — open Advanced to sync`}
+                className="inline-flex h-7 shrink-0 items-center rounded-md border border-amber-500/50 bg-amber-500/15 px-2 text-data-xs font-semibold text-amber-200 hover:bg-amber-500/25"
+              >
+                Benchmark stale
+              </button>
             ) : null}
-            <AppButton
-              size="small"
-              startIcon={
-                <RefreshIcon fontSize="small" className={loading ? "animate-spin" : undefined} />
-              }
-              onClick={() => void load(true)}
-              disabled={loading}
-            >
-              Refresh
-            </AppButton>
-          </div>
-        </div>
-
+            <AdvancedButton onClick={() => setAdvancedOpen(true)} label="Details" />
+          </>
+        }
+        below={
+          syncNote && !advancedOpen ? (
+            <div className="flex items-center justify-between gap-2 text-data-xs text-sky-100">
+              <span>{syncNote}</span>
+              <button
+                type="button"
+                onClick={() => setSyncNote(null)}
+                className="shrink-0 text-sky-300 hover:text-white"
+                aria-label="Dismiss sync note"
+              >
+                Dismiss
+              </button>
+            </div>
+          ) : undefined
+        }
+      >
+        <h1 className="shrink-0 text-data-md font-semibold text-slate-100" title="Sector Rotation & Themes">
+          Sector Rotation
+        </h1>
+        <ToolbarDivider />
         <ToggleButtonGroup
           exclusive
-          size="small"
           value={filter}
           onChange={(_e, value: SectorTableFilter | null) => {
             if (value) setFilter(value);
           }}
-          className="mt-2 flex flex-wrap"
-          sx={{ "& .MuiToggleButton-root": { textTransform: "none", fontSize: "0.7rem", px: 1.25 } }}
+          sx={{ flexShrink: 0, "& .MuiToggleButton-root": { textTransform: "none" } }}
         >
           <ToggleButton value="all">All</ToggleButton>
           <ToggleButton value="stealth">Stealth Accumulation</ToggleButton>
@@ -282,41 +301,41 @@ export function SectorRotationPage() {
           <ToggleButton value="improving">Next Bullish</ToggleButton>
           <ToggleButton value="leading">Leading</ToggleButton>
         </ToggleButtonGroup>
-      </div>
+        {summary ? (
+          <>
+            <ToolbarDivider />
+            <StatChip label="Sectors" value={summary.total} />
+            <StatChip label="Leading" value={summary.leading} valueClassName="text-emerald-300" />
+            <StatChip label="Improving" value={summary.improving} valueClassName="text-sky-300" />
+            <StatChip label="Stealth" value={summary.stealth_accumulation} valueClassName="text-violet-300" />
+            <StatChip label="PA" hint="Price action confirmed" value={summary.price_action_confirmed} valueClassName="text-amber-300" />
+          </>
+        ) : null}
+        {loading ? <span className="shrink-0 text-data-xs text-slate-400">Updating…</span> : null}
+      </PageToolbar>
 
-      <div className="grid min-h-0 flex-1 gap-2 lg:grid-cols-[minmax(0,0.95fr)_minmax(0,1.2fr)]">
+      <div className="grid min-h-0 flex-1 gap-1 lg:grid-cols-[minmax(0,0.95fr)_minmax(0,1.2fr)]">
         <div className="min-h-0">
           {showStockChart ? (
-            <div className="flex h-full min-h-0 flex-col overflow-hidden rounded-xl border border-surface-border bg-surface-raised">
-              <div className="flex shrink-0 items-center gap-2 border-b border-surface-border px-3 py-1.5">
+            <div className="panel flex h-full min-h-0 flex-col overflow-hidden">
+              <div className="flex shrink-0 items-center gap-2 border-b border-surface-border px-2 py-1">
                 <button
                   type="button"
                   onClick={() => setSelectedTicker(null)}
-                  className="text-[10px] text-sky-300 hover:text-sky-200"
+                  className="shrink-0 text-data-xs text-sky-300 hover:text-sky-200"
                 >
                   ← RRG
                 </button>
-                <Typography className="text-[12px] font-medium text-slate-100">
-                  {selectedTicker}
-                  {selectedStock?.company_name ? (
-                    <span className="ml-2 text-[10px] font-normal text-slate-500">
-                      {selectedStock.company_name}
-                    </span>
-                  ) : null}
-                </Typography>
+                <span className="ticker shrink-0">{selectedTicker}</span>
+                {selectedStock?.company_name ? (
+                  <Clip className="text-data-xs text-slate-400">{selectedStock.company_name}</Clip>
+                ) : null}
                 {selectedStock?.change_1d_pct != null ? (
-                  <span
-                    className={`ml-auto text-[11px] tabular-nums ${
-                      selectedStock.change_1d_pct >= 0 ? "text-emerald-300" : "text-rose-300"
-                    }`}
-                  >
-                    {selectedStock.change_1d_pct >= 0 ? "+" : ""}
-                    {selectedStock.change_1d_pct.toFixed(2)}%
-                  </span>
+                  <PctCell value={selectedStock.change_1d_pct} className="ml-auto shrink-0 text-data-sm" />
                 ) : null}
               </div>
               {chartError ? (
-                <div className="px-3 py-1.5 text-[11px] text-rose-300">{chartError}</div>
+                <div className="px-2 py-1 text-data-sm text-loss">{chartError}</div>
               ) : null}
               <div className="min-h-0 flex-1 p-1">
                 <TimelineStockChart
@@ -341,7 +360,7 @@ export function SectorRotationPage() {
             />
           )}
         </div>
-        <div className="flex min-h-0 flex-col gap-2">
+        <div className="flex min-h-0 flex-col gap-1">
           <div className="min-h-0 flex-[0.95]">
             <SectorScanTable
               sectors={data?.sectors ?? []}
@@ -353,40 +372,6 @@ export function SectorRotationPage() {
               onSort={handleSort}
             />
           </div>
-          {selected ? (
-            <div className="shrink-0 rounded-xl border border-surface-border bg-surface-raised px-3 py-1.5">
-              <Typography className="text-[11px] font-medium text-slate-100">
-                {selected.name}
-                {selected.category === "Official" ? (
-                  <span className="ml-1.5 rounded border border-amber-400/50 bg-amber-500/15 px-1 py-px text-[8px] font-semibold uppercase tracking-wide text-amber-200">
-                    Index
-                  </span>
-                ) : (
-                  <span className="ml-1.5 rounded border border-slate-500/40 bg-slate-500/10 px-1 py-px text-[8px] uppercase tracking-wide text-slate-400">
-                    Theme
-                  </span>
-                )}
-                <span className="ml-2 text-[10px] font-normal text-slate-500">
-                  surety {selected.surety_score} · {selected.quadrant}
-                  {selected.rotation_path ? ` · ${selected.rotation_path}` : ""}
-                </span>
-              </Typography>
-              <Typography className="mt-0.5 text-[10px] text-slate-400">
-                {selected.rotation_note}
-                {selected.rs_momentum_delta_5d != null || selected.rs_ratio_delta_5d != null ? (
-                  <span className="ml-1 text-slate-500">
-                    (RS{" "}
-                    {selected.rs_ratio_delta_5d != null && selected.rs_ratio_delta_5d >= 0 ? "+" : ""}
-                    {selected.rs_ratio_delta_5d?.toFixed(1) ?? "—"} · Mom{" "}
-                    {selected.rs_momentum_delta_5d != null && selected.rs_momentum_delta_5d >= 0
-                      ? "+"
-                      : ""}
-                    {selected.rs_momentum_delta_5d?.toFixed(1) ?? "—"} / 5d)
-                  </span>
-                ) : null}
-              </Typography>
-            </div>
-          ) : null}
           <div className="min-h-[220px] flex-[1.15]">
             <SectorConstituentsPanel
               sectorName={selectedName}
@@ -399,6 +384,96 @@ export function SectorRotationPage() {
           </div>
         </div>
       </div>
+
+      <AdvancedDrawer
+        open={advancedOpen}
+        onClose={() => setAdvancedOpen(false)}
+        title="Sector rotation details"
+        subtitle={`Benchmark ${data?.benchmark ?? "Nifty 50"}`}
+      >
+        {selected ? (
+          <AdvancedSection title="Selected sector">
+            <div className="flex flex-wrap items-center gap-1.5">
+              <span className="text-data-md font-semibold text-slate-100">{selected.name}</span>
+              {selected.category === "Official" ? (
+                <span className="rounded border border-amber-400/50 bg-amber-500/15 px-1 py-px text-[10px] font-semibold uppercase tracking-wide text-amber-200">
+                  Index
+                </span>
+              ) : (
+                <span className="rounded border border-slate-500/40 bg-slate-500/10 px-1 py-px text-[10px] uppercase tracking-wide text-slate-300">
+                  Theme
+                </span>
+              )}
+            </div>
+            <div className="flex flex-wrap gap-x-3 gap-y-1">
+              <StatChip label="Surety" value={selected.surety_score} />
+              <StatChip label="Quadrant" value={selected.quadrant} />
+              {selected.rotation_path ? <StatChip label="Path" value={selected.rotation_path} /> : null}
+            </div>
+            <p className="text-data-sm leading-relaxed text-slate-200">
+              {selected.rotation_note}
+              {selected.rs_momentum_delta_5d != null || selected.rs_ratio_delta_5d != null ? (
+                <span className="ml-1 text-slate-400">
+                  (RS{" "}
+                  {selected.rs_ratio_delta_5d != null && selected.rs_ratio_delta_5d >= 0 ? "+" : ""}
+                  {selected.rs_ratio_delta_5d?.toFixed(1) ?? "—"} · Mom{" "}
+                  {selected.rs_momentum_delta_5d != null && selected.rs_momentum_delta_5d >= 0
+                    ? "+"
+                    : ""}
+                  {selected.rs_momentum_delta_5d?.toFixed(1) ?? "—"} / 5d)
+                </span>
+              ) : null}
+            </p>
+          </AdvancedSection>
+        ) : null}
+
+        <AdvancedSection title="Data">
+          <div className="space-y-0.5 text-data-xs text-slate-300">
+            <div>
+              Benchmark <span className="text-slate-100">{data?.benchmark ?? "Nifty 50"}</span>
+            </div>
+            {data?.price_as_of ? (
+              <div>
+                Prices as of <span className="num text-slate-100">{data.price_as_of}</span>
+              </div>
+            ) : null}
+            {data?.rs_as_of ? (
+              <div>
+                RS as of <span className="num text-slate-100">{data.rs_as_of}</span>
+              </div>
+            ) : null}
+          </div>
+          {data?.benchmark_stale ? (
+            <Alert severity="warning" className="py-0 text-data-xs">
+              {data.benchmark} candles end {data.benchmark_as_of}, but sector prices run to{" "}
+              {data.price_as_of}. RS ratio, momentum and quadrants are as of {data.rs_as_of} (
+              {data.rs_lag_days}d behind). Refresh with an Upstox token to sync the benchmark.
+            </Alert>
+          ) : null}
+          {syncNote ? (
+            <Alert severity="info" onClose={() => setSyncNote(null)} className="py-0 text-data-xs">
+              {syncNote}
+            </Alert>
+          ) : null}
+          <AppButton
+            size="small"
+            startIcon={
+              <RefreshIcon fontSize="small" className={loading ? "animate-spin" : undefined} />
+            }
+            onClick={() => void load(true)}
+            disabled={loading}
+          >
+            Refresh
+          </AppButton>
+        </AdvancedSection>
+
+        <AdvancedSection title="Help" defaultOpen={false}>
+          <div className="flex flex-wrap gap-3 text-data-xs">
+            <span className="text-amber-200/90">◆ Official index</span>
+            <span className="text-slate-300">● Theme</span>
+          </div>
+        </AdvancedSection>
+      </AdvancedDrawer>
     </div>
   );
 }

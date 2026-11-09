@@ -1,5 +1,6 @@
 import { useMemo, useRef } from "react";
 import { useVirtualizer } from "@tanstack/react-virtual";
+import { Clip } from "@/components/dense";
 import type { ElliottWaveFilter, ElliottWaveRow } from "@/lib/api";
 
 type Props = {
@@ -52,28 +53,28 @@ export function WaveScannerTable({
   ];
 
   return (
-    <div className="flex h-full min-h-0 flex-col overflow-hidden rounded-xl border border-surface-border bg-surface-raised">
-      <div className="flex shrink-0 flex-wrap gap-1.5 border-b border-surface-border px-2 py-2">
+    <div className="panel flex h-full min-h-0 flex-col overflow-hidden">
+      <div className="flex shrink-0 flex-wrap gap-1 border-b border-surface-border px-2 py-1">
         {pills.map((p) => (
           <button
             key={p.id}
             type="button"
             onClick={() => onFilterChange(p.id)}
-            className={`rounded-full px-2.5 py-1 text-[10px] font-medium transition ${
+            className={`rounded-full px-2.5 py-0.5 text-data-xs font-medium transition ${
               filter === p.id
                 ? "bg-accent/20 text-accent"
-                : "bg-white/5 text-slate-400 hover:bg-white/10 hover:text-slate-200"
+                : "bg-white/5 text-slate-300 hover:bg-white/10 hover:text-slate-100"
             }`}
           >
             {p.label}
           </button>
         ))}
-        <span className="ml-auto self-center text-[10px] text-slate-500">
+        <span className="ml-auto self-center text-data-xs tabular-nums text-slate-400">
           {filtered.length} / {rows.length}
         </span>
       </div>
 
-      <div className="grid shrink-0 grid-cols-[minmax(0,1.1fr)_minmax(0,1.4fr)_4.5rem_5rem_5rem] gap-1 border-b border-surface-border px-2 py-1.5 text-[9px] uppercase tracking-wide text-slate-500">
+      <div className="grid shrink-0 grid-cols-[minmax(0,1.1fr)_minmax(0,1.4fr)_4.5rem_5rem_5rem] gap-1 border-b border-surface-border px-2 py-1 text-[10px] font-semibold uppercase tracking-wide text-slate-400">
         <span>Symbol</span>
         <span>Phase</span>
         <span className="text-right">Surety</span>
@@ -83,7 +84,7 @@ export function WaveScannerTable({
 
       <div ref={parentRef} className="min-h-0 flex-1 overflow-auto">
         {filtered.length === 0 ? (
-          <div className="px-3 py-8 text-center text-[11px] text-slate-500">
+          <div className="px-3 py-6 text-center text-data-sm text-slate-400">
             No rows match this filter
           </div>
         ) : (
@@ -99,7 +100,7 @@ export function WaveScannerTable({
                   key={row.instrument_key}
                   type="button"
                   onClick={() => onSelect(row)}
-                  className={`absolute left-0 grid w-full grid-cols-[minmax(0,1.1fr)_minmax(0,1.4fr)_4.5rem_5rem_5rem] gap-1 border-b border-surface-border/50 px-2 text-left text-[11px] transition ${
+                  className={`absolute left-0 grid w-full grid-cols-[minmax(0,1.1fr)_minmax(0,1.4fr)_4.5rem_5rem_5rem] gap-1 border-b border-surface-border/50 px-2 text-left text-data-sm transition ${
                     selected ? "bg-accent/15" : "hover:bg-white/[0.04]"
                   }`}
                   style={{
@@ -107,26 +108,28 @@ export function WaveScannerTable({
                     transform: `translateY(${vRow.start}px)`,
                   }}
                 >
-                  <span className="flex items-center truncate font-medium text-slate-100">
-                    {row.ticker}
+                  <span className="flex min-w-0 items-center">
+                    <Clip className="ticker">{row.ticker}</Clip>
                     {row.kind === "index" ? (
-                      <span className="ml-1 text-[8px] text-amber-300">IDX</span>
+                      <span className="ml-1 shrink-0 text-[10px] font-semibold text-amber-300">IDX</span>
                     ) : null}
                   </span>
-                  <span className="flex items-center truncate text-slate-300">{row.phase}</span>
+                  <span className="flex min-w-0 items-center">
+                    <Clip className="text-slate-300">{row.phase}</Clip>
+                  </span>
                   <span
-                    className={`flex items-center justify-end tabular-nums font-semibold ${suretyTone(
+                    className={`flex items-center justify-end num ${suretyTone(
                       row.surety_score,
                     )}`}
                   >
                     {row.surety_score.toFixed(0)}
                   </span>
-                  <span className="flex items-center justify-end tabular-nums text-slate-400">
+                  <span className="flex items-center justify-end num text-slate-300">
                     {row.invalidation_risk_pct != null
                       ? `${row.invalidation_risk_pct.toFixed(1)}%`
                       : "—"}
                   </span>
-                  <span className="flex items-center justify-end tabular-nums text-slate-200">
+                  <span className="flex items-center justify-end num text-slate-100">
                     {row.price.toLocaleString("en-IN", { maximumFractionDigits: 2 })}
                   </span>
                 </button>

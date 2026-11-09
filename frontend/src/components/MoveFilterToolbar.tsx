@@ -1,5 +1,6 @@
 import { ArrowDown, ArrowUp, Box, RefreshCw, TrendingUp, X } from "lucide-react";
-import { useMemo } from "react";
+import { useMemo, type ReactNode } from "react";
+import { PageToolbar, ToolbarDivider } from "@/components/dense";
 
 export interface MoveFilterToolbarProps {
   positiveEnabled: boolean;
@@ -23,6 +24,9 @@ export interface MoveFilterToolbarProps {
   darvasLookbackInvalid: boolean;
   loadingCandles: boolean;
   onRefresh: () => void;
+
+  /** Rendered at the right edge of the toolbar (typically the Advanced button). */
+  right?: ReactNode;
 }
 
 type ActiveChip = {
@@ -52,13 +56,13 @@ function Chip({
 
   return (
     <span
-      className={`inline-flex max-w-full items-center gap-1 rounded-full border px-2 py-0.5 text-[11px] ${toneClass}`}
+      className={`inline-flex max-w-full items-center gap-1 rounded border px-1.5 py-px text-data-xs ${toneClass}`}
     >
       <span className="truncate">{label}</span>
       <button
         type="button"
         onClick={onRemove}
-        className="rounded-full p-0.5 opacity-70 transition hover:bg-black/20 hover:opacity-100"
+        className="rounded-full opacity-70 transition hover:bg-black/20 hover:opacity-100"
         aria-label={`Remove ${label}`}
       >
         <X className="h-3 w-3" />
@@ -66,6 +70,16 @@ function Chip({
     </span>
   );
 }
+
+const toggleBtn = (active: boolean) =>
+  `inline-flex h-7 shrink-0 items-center gap-1 rounded-md border px-2 text-data-xs transition ${
+    active
+      ? "border-accent/40 bg-accent/15 font-medium text-accent"
+      : "border-surface-border text-slate-300 hover:border-accent/30 hover:text-slate-100"
+  }`;
+
+const numInputClass =
+  "ml-0.5 w-12 rounded border border-surface-border bg-surface px-1 py-0.5 text-data-xs tabular-nums text-slate-200 outline-none disabled:opacity-40";
 
 export function MoveFilterToolbar(props: MoveFilterToolbarProps) {
   const {
@@ -88,6 +102,7 @@ export function MoveFilterToolbar(props: MoveFilterToolbarProps) {
     darvasLookbackInvalid,
     loadingCandles,
     onRefresh,
+    right,
   } = props;
 
   const chips = useMemo<ActiveChip[]>(() => {
@@ -139,156 +154,156 @@ export function MoveFilterToolbar(props: MoveFilterToolbarProps) {
     onDarvasEnabled,
   ]);
 
-  const toggleBtn = (active: boolean) =>
-    `inline-flex h-8 items-center gap-1 rounded-md border px-2 text-[11px] transition ${
-      active
-        ? "border-accent/40 bg-accent/15 font-medium text-accent"
-        : "border-surface-border text-slate-400 hover:border-accent/30 hover:text-slate-200"
-    }`;
-
   return (
-    <div className="shrink-0 space-y-2 rounded-xl border border-surface-border bg-surface-raised px-3 py-2.5">
-      <div className="flex flex-wrap items-center gap-2">
-        <button
-          type="button"
-          className={toggleBtn(positiveEnabled)}
-          onClick={() => onPositiveEnabled(!positiveEnabled)}
-        >
-          <ArrowUp className="h-3.5 w-3.5 text-emerald-400" />
-          Up
-          <input
-            type="number"
-            min="0"
-            step="0.1"
-            value={positiveInput}
-            onClick={(e) => e.stopPropagation()}
-            onChange={(e) => {
-              onPositiveEnabled(true);
-              onPositiveInput(e.target.value);
-            }}
-            disabled={!positiveEnabled}
-            className="ml-0.5 w-12 rounded border border-surface-border bg-surface px-1 py-0.5 text-[11px] text-slate-200 outline-none disabled:opacity-40"
-            aria-label="Positive move threshold percent"
-          />
-          <span className="text-slate-500">%</span>
-        </button>
-
-        <button
-          type="button"
-          className={toggleBtn(negativeEnabled)}
-          onClick={() => onNegativeEnabled(!negativeEnabled)}
-        >
-          <ArrowDown className="h-3.5 w-3.5 text-red-400" />
-          Down
-          <input
-            type="number"
-            min="0"
-            step="0.1"
-            value={negativeInput}
-            onClick={(e) => e.stopPropagation()}
-            onChange={(e) => {
-              onNegativeEnabled(true);
-              onNegativeInput(e.target.value);
-            }}
-            disabled={!negativeEnabled}
-            className="ml-0.5 w-12 rounded border border-surface-border bg-surface px-1 py-0.5 text-[11px] text-slate-200 outline-none disabled:opacity-40"
-            aria-label="Negative move threshold percent"
-          />
-          <span className="text-slate-500">%</span>
-        </button>
-
-        <button
-          type="button"
-          className={toggleBtn(threeGreenEnabled)}
-          onClick={() => onThreeGreenEnabled(!threeGreenEnabled)}
-          title="Highlight 3+ consecutive green candles"
-        >
-          <TrendingUp className="h-3.5 w-3.5 text-lime-400" />
-          3 green
-        </button>
-
-        <button
-          type="button"
-          className={toggleBtn(darvasEnabled)}
-          onClick={() => onDarvasEnabled(!darvasEnabled)}
-          title="Show Darvas boxes on filtered days"
-        >
-          <Box className="h-3.5 w-3.5 text-sky-400" />
-          Darvas
-          <input
-            type="number"
-            min="5"
-            max="252"
-            step="1"
-            value={darvasLookbackInput}
-            onClick={(e) => e.stopPropagation()}
-            onChange={(e) => {
-              onDarvasEnabled(true);
-              onDarvasLookbackInput(e.target.value);
-            }}
-            disabled={!darvasEnabled}
-            className="ml-0.5 w-12 rounded border border-surface-border bg-surface px-1 py-0.5 text-[11px] text-slate-200 outline-none disabled:opacity-40"
-            aria-label="Darvas lookback days"
-          />
-          <span className="text-slate-500">d</span>
-        </button>
-
-        {darvasEnabled && (
-          <div className="flex items-center gap-1">
-            {[10, 20, 30, 60].map((days) => (
-              <button
-                key={days}
-                type="button"
-                onClick={() => onDarvasLookbackInput(String(days))}
-                className={`rounded border px-1.5 py-0.5 text-[10px] transition ${
-                  darvasLookbackInput === String(days)
-                    ? "border-sky-500/40 bg-sky-500/10 text-sky-200"
-                    : "border-surface-border text-slate-500 hover:text-slate-300"
-                }`}
-              >
-                {days}d
-              </button>
+    <PageToolbar
+      right={right}
+      below={
+        chips.length > 0 || filterInvalid || darvasLookbackInvalid ? (
+          <div className="flex flex-wrap items-center gap-1">
+            {chips.map((chip) => (
+              <Chip key={chip.id} label={chip.label} tone={chip.tone} onRemove={chip.onRemove} />
             ))}
+            {chips.length > 0 && (
+              <button
+                type="button"
+                onClick={onResetFilters}
+                className="ml-1 rounded border border-surface-border px-1.5 py-px text-data-xs text-slate-300 transition hover:border-red-500/40 hover:text-red-300"
+              >
+                Clear all
+              </button>
+            )}
+            {filterInvalid && (
+              <span className="text-data-xs text-amber-400">Enter valid % thresholds</span>
+            )}
+            {darvasLookbackInvalid && (
+              <span className="text-data-xs text-amber-400">Darvas lookback must be 5–252</span>
+            )}
           </div>
-        )}
+        ) : undefined
+      }
+    >
+      <button
+        type="button"
+        className={toggleBtn(positiveEnabled)}
+        onClick={() => onPositiveEnabled(!positiveEnabled)}
+      >
+        <ArrowUp className="h-3.5 w-3.5 text-emerald-400" />
+        Up
+        <input
+          type="number"
+          min="0"
+          step="0.1"
+          value={positiveInput}
+          onClick={(e) => e.stopPropagation()}
+          onChange={(e) => {
+            onPositiveEnabled(true);
+            onPositiveInput(e.target.value);
+          }}
+          disabled={!positiveEnabled}
+          className={numInputClass}
+          aria-label="Positive move threshold percent"
+        />
+        <span className="text-slate-400">%</span>
+      </button>
 
-        <button
-          type="button"
-          onClick={onRefresh}
-          disabled={loadingCandles}
-          className="ml-auto inline-flex h-8 items-center gap-1.5 rounded-lg bg-accent px-3 text-[11px] font-semibold text-white transition hover:bg-accent-muted disabled:opacity-60"
-        >
-          <RefreshCw className={`h-3.5 w-3.5 ${loadingCandles ? "animate-spin" : ""}`} />
-          Refresh
-        </button>
-      </div>
+      <button
+        type="button"
+        className={toggleBtn(negativeEnabled)}
+        onClick={() => onNegativeEnabled(!negativeEnabled)}
+      >
+        <ArrowDown className="h-3.5 w-3.5 text-red-400" />
+        Down
+        <input
+          type="number"
+          min="0"
+          step="0.1"
+          value={negativeInput}
+          onClick={(e) => e.stopPropagation()}
+          onChange={(e) => {
+            onNegativeEnabled(true);
+            onNegativeInput(e.target.value);
+          }}
+          disabled={!negativeEnabled}
+          className={numInputClass}
+          aria-label="Negative move threshold percent"
+        />
+        <span className="text-slate-400">%</span>
+      </button>
 
-      <div className="flex flex-wrap items-center gap-1.5 border-t border-surface-border/80 pt-2">
-        <span className="text-[10px] uppercase tracking-wide text-slate-500">Active</span>
-        {chips.length === 0 ? (
-          <span className="text-[11px] text-slate-500">
-            No move filters on — chart shows raw price
-          </span>
-        ) : (
-          chips.map((chip) => (
-            <Chip key={chip.id} label={chip.label} tone={chip.tone} onRemove={chip.onRemove} />
-          ))
-        )}
-        {chips.length > 0 && (
-          <button
-            type="button"
-            onClick={onResetFilters}
-            className="ml-1 rounded-md border border-surface-border px-2 py-0.5 text-[10px] text-slate-400 transition hover:border-red-500/40 hover:text-red-300"
-          >
-            Clear all
-          </button>
-        )}
-        {(filterInvalid || darvasLookbackInvalid) && (
-          <span className="text-[11px] text-amber-400">
-            {filterInvalid ? "Enter valid % thresholds" : "Darvas lookback must be 5–252"}
-          </span>
-        )}
-      </div>
-    </div>
+      <ToolbarDivider />
+
+      <button
+        type="button"
+        className={toggleBtn(threeGreenEnabled)}
+        onClick={() => onThreeGreenEnabled(!threeGreenEnabled)}
+        title="Highlight 3+ consecutive green candles"
+      >
+        <TrendingUp className="h-3.5 w-3.5 text-lime-400" />
+        3 green
+      </button>
+
+      <button
+        type="button"
+        className={toggleBtn(darvasEnabled)}
+        onClick={() => onDarvasEnabled(!darvasEnabled)}
+        title="Show Darvas boxes on filtered days"
+      >
+        <Box className="h-3.5 w-3.5 text-sky-400" />
+        Darvas
+        <input
+          type="number"
+          min="5"
+          max="252"
+          step="1"
+          value={darvasLookbackInput}
+          onClick={(e) => e.stopPropagation()}
+          onChange={(e) => {
+            onDarvasEnabled(true);
+            onDarvasLookbackInput(e.target.value);
+          }}
+          disabled={!darvasEnabled}
+          className={numInputClass}
+          aria-label="Darvas lookback days"
+        />
+        <span className="text-slate-400">d</span>
+      </button>
+
+      {darvasEnabled && (
+        <div className="flex shrink-0 items-center gap-1">
+          {[10, 20, 30, 60].map((days) => (
+            <button
+              key={days}
+              type="button"
+              onClick={() => onDarvasLookbackInput(String(days))}
+              className={`rounded border px-1.5 py-0.5 text-data-xs transition ${
+                darvasLookbackInput === String(days)
+                  ? "border-sky-500/40 bg-sky-500/10 text-sky-200"
+                  : "border-surface-border text-slate-300 hover:text-slate-100"
+              }`}
+            >
+              {days}d
+            </button>
+          ))}
+        </div>
+      )}
+
+      <ToolbarDivider />
+
+      <button
+        type="button"
+        onClick={onRefresh}
+        disabled={loadingCandles}
+        className="inline-flex h-7 shrink-0 items-center gap-1.5 rounded-md bg-accent px-2.5 text-data-xs font-semibold text-white transition hover:bg-accent-muted disabled:opacity-60"
+      >
+        <RefreshCw className={`h-3.5 w-3.5 ${loadingCandles ? "animate-spin" : ""}`} />
+        Refresh
+      </button>
+
+      {chips.length === 0 && (
+        <span className="shrink-0 whitespace-nowrap text-data-xs text-slate-400">
+          No move filters on — chart shows raw price
+        </span>
+      )}
+    </PageToolbar>
   );
 }

@@ -27,6 +27,7 @@ NSE_SYMBOL_BY_INTERNAL: dict[str, str] = {v: k for k, v in SYMBOL_ALIASES.items(
 INDEX_INSTRUMENT_KEYS: dict[str, str] = {
     "NIFTY": "NSE_INDEX|Nifty 50",
     "BANKNIFTY": "NSE_INDEX|Nifty Bank",
+    "SENSEX": "BSE_INDEX|SENSEX",
 }
 
 EQUITY_INSTRUMENT_KEYS: dict[str, str] = {

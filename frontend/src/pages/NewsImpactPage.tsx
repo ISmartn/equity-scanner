@@ -1,6 +1,17 @@
 import { TimelineStockChart } from "@/components/TimelineStockChart";
 import { RecentNewsFeed } from "@/components/news/RecentNewsFeed";
-import { AppButton, FieldLabel } from "@/components/mui";
+import { AppButton } from "@/components/mui";
+import {
+  ActiveFilterChips,
+  AdvancedButton,
+  AdvancedDrawer,
+  AdvancedSection,
+  Clip,
+  PageToolbar,
+  PctCell,
+  StatChip,
+  ToolbarDivider,
+} from "@/components/dense";
 import {
   fetchNewsEvent,
   fetchNewsEvents,
@@ -24,11 +35,9 @@ import FormControl from "@mui/material/FormControl";
 import InputLabel from "@mui/material/InputLabel";
 import MenuItem from "@mui/material/MenuItem";
 import Select, { type SelectChangeEvent } from "@mui/material/Select";
-import Stack from "@mui/material/Stack";
 import TextField from "@mui/material/TextField";
 import ToggleButton from "@mui/material/ToggleButton";
 import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
-import Typography from "@mui/material/Typography";
 import { Newspaper, Sparkles } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { loadUiPrefs, saveUiPrefs } from "@/lib/uiPrefs";
@@ -97,6 +106,7 @@ export function NewsImpactPage() {
   const [outlookLoading, setOutlookLoading] = useState(false);
   const [liveBusy, setLiveBusy] = useState(false);
   const [monitorTopic, setMonitorTopic] = useState<string>(initialPrefs.monitorTopic);
+  const [advancedOpen, setAdvancedOpen] = useState(false);
 
   useEffect(() => {
     saveUiPrefs(NEWS_PREFS_KEY, {
@@ -279,155 +289,62 @@ export function NewsImpactPage() {
         { key: "CRUDEOIL", label: "Crude Oil", keywords: [] as string[] },
       ];
 
+  const statusTone = liveRunning ? "text-emerald-400" : "text-slate-400";
+
   return (
-    <div className="mx-auto flex max-w-7xl flex-col gap-4 px-3 py-4 sm:px-4">
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <div>
-          <Typography variant="h5" className="flex items-center gap-2 font-semibold text-white">
-            <Newspaper className="h-5 w-5 text-sky-400" />
-            News Impact
-          </Typography>
-          <p className="mt-1 text-sm text-slate-400">
-            {channelHint} · DB-backed posts · monitors: Gold / Silver / Crude Oil
-            {stats?.gemini_enabled ? " · Gemini on" : " · Gemini off"}
-          </p>
-          <p className="mt-1 text-[11px] text-slate-500">
-            Live:{" "}
-            <span className={liveRunning ? "text-emerald-400" : "text-slate-400"}>
-              {stats?.live?.status || "stopped"}
-            </span>
-            {stats?.live?.last_event_at
-              ? ` · last event ${new Date(stats.live.last_event_at).toLocaleTimeString()}`
-              : ""}
-            {stats?.live?.error ? ` · ${stats.live.error}` : ""}
-          </p>
-        </div>
-        <Stack direction="row" spacing={1} useFlexGap sx={{ flexWrap: "wrap" }}>
-          <AppButton
-            size="small"
-            variant="contained"
-            startIcon={<SyncIcon fontSize="small" className={syncing ? "animate-spin" : undefined} />}
-            disabled={syncing || liveBusy}
-            onClick={() => void onSync(false)}
-          >
-            {syncing ? "Syncing…" : "Sync news"}
-          </AppButton>
-          <AppButton
-            size="small"
-            variant={liveRunning ? "outlined" : "contained"}
-            color={liveRunning ? "error" : "primary"}
-            startIcon={
-              liveRunning ? (
-                <StopCircleIcon fontSize="small" />
-              ) : (
-                <RadioButtonCheckedIcon fontSize="small" />
-              )
-            }
-            disabled={liveBusy || syncing}
-            onClick={() => void onToggleLive()}
-          >
-            {liveBusy ? "…" : liveRunning ? "Live off" : "Live on"}
-          </AppButton>
-          <AppButton size="small" variant="outlined" disabled={syncing} onClick={() => void onSync(true)}>
-            Backfill 500
-          </AppButton>
-          <AppButton
-            size="small"
-            variant="outlined"
-            startIcon={<RefreshIcon />}
-            disabled={loading}
-            onClick={() => void refreshFeed()}
-          >
-            Refresh
-          </AppButton>
-        </Stack>
-      </div>
-
-      <div className="flex flex-wrap items-center gap-2 rounded-2xl border border-surface-border bg-surface-raised/50 px-3 py-2">
-        <span className="text-[10px] font-semibold uppercase tracking-wide text-slate-500">Monitor</span>
-        <button
-          type="button"
-          onClick={() => {
-            setFeedMode("all");
-            setMonitorTopic("");
-          }}
-          className={`rounded-md px-2.5 py-1 text-[11px] font-medium ring-1 transition ${
-            feedMode === "all" && !monitorTopic
-              ? "bg-sky-300 text-sky-950 ring-sky-500/50"
-              : "bg-slate-800 text-slate-300 ring-slate-600/50 hover:bg-slate-700"
-          }`}
-        >
-          All posts
-        </button>
-        {monitors.map((m) => (
-          <button
-            key={m.key}
-            type="button"
-            title={(m.keywords || []).join(", ")}
-            onClick={() => {
-              setFeedMode("all");
-              setMonitorTopic(m.key);
-            }}
-            className={`rounded-md px-2.5 py-1 text-[11px] font-medium ring-1 transition ${
-              monitorTopic === m.key
-                ? "bg-amber-300 text-amber-950 ring-amber-500/50"
-                : "bg-slate-800 text-slate-300 ring-slate-600/50 hover:bg-slate-700"
-            }`}
-          >
-            {m.label}
-          </button>
-        ))}
-      </div>
-
-      <div className="grid gap-3 rounded-2xl border border-surface-border bg-surface-raised/60 p-3 sm:grid-cols-4">
-        <div>
-          <div className="text-[10px] uppercase text-slate-500">Messages in DB</div>
-          <div className="font-mono text-lg text-white">{stats?.message_count ?? "—"}</div>
-        </div>
-        <div>
-          <div className="text-[10px] uppercase text-slate-500">Linked events</div>
-          <div className="font-mono text-lg text-white">{stats?.linked_events ?? "—"}</div>
-        </div>
-        <div>
-          <div className="text-[10px] uppercase text-slate-500">With reactions</div>
-          <div className="font-mono text-lg text-white">{stats?.events_with_reactions ?? "—"}</div>
-        </div>
-        <div>
-          <div className="text-[10px] uppercase text-slate-500">Queue</div>
-          <div className="font-mono text-lg text-white">{stats?.unprocessed_messages ?? "—"}</div>
-        </div>
-      </div>
-
-      <div className="flex flex-wrap items-end gap-3 rounded-2xl border border-surface-border bg-surface p-3">
+    <div className="page-shell flex flex-col gap-1 overflow-y-auto px-1.5 py-1 sm:px-2 lg:overflow-hidden">
+      <PageToolbar
+        right={
+          <AdvancedButton
+            onClick={() => setAdvancedOpen(true)}
+            label="Sync & live"
+            activeCount={monitorTopic ? 1 : 0}
+          />
+        }
+        below={
+          monitorTopic ? (
+            <ActiveFilterChips
+              chips={[
+                {
+                  key: "monitor",
+                  label: `Monitor: ${monitors.find((m) => m.key === monitorTopic)?.label ?? monitorTopic}`,
+                  onRemove: () => setMonitorTopic(""),
+                },
+              ]}
+            />
+          ) : undefined
+        }
+      >
+        <h1 className="flex shrink-0 items-center gap-1.5 text-data-md font-semibold text-slate-100">
+          <Newspaper className="h-4 w-4 text-sky-400" />
+          News Impact
+        </h1>
+        <ToolbarDivider />
         <ToggleButtonGroup
-          size="small"
           exclusive
           value={feedMode}
           onChange={(_, v: FeedMode | null) => {
             if (v) setFeedMode(v);
           }}
         >
-          <ToggleButton value="all" sx={{ textTransform: "none", px: 1.5 }}>
+          <ToggleButton value="all" sx={{ textTransform: "none" }}>
             All recent posts
           </ToggleButton>
-          <ToggleButton value="linked" sx={{ textTransform: "none", px: 1.5 }}>
+          <ToggleButton value="linked" sx={{ textTransform: "none" }}>
             Linked (company)
           </ToggleButton>
         </ToggleButtonGroup>
 
         {feedMode === "linked" && (
           <>
-            <div className="min-w-[160px] flex-1">
-              <FieldLabel>Ticker filter</FieldLabel>
-              <TextField
-                size="small"
-                fullWidth
-                placeholder="e.g. RELIANCE"
-                value={ticker}
-                onChange={(e) => setTicker(e.target.value.toUpperCase())}
-              />
-            </div>
-            <FormControl size="small" sx={{ minWidth: 140 }}>
+            <TextField
+              placeholder="Ticker e.g. RELIANCE"
+              value={ticker}
+              onChange={(e) => setTicker(e.target.value.toUpperCase())}
+              sx={{ width: 160 }}
+              slotProps={{ htmlInput: { "aria-label": "Ticker filter" } }}
+            />
+            <FormControl sx={{ minWidth: 120 }}>
               <InputLabel>Sentiment</InputLabel>
               <Select
                 label="Sentiment"
@@ -441,25 +358,33 @@ export function NewsImpactPage() {
                 <MenuItem value="unknown">Unknown</MenuItem>
               </Select>
             </FormControl>
-            <AppButton variant="contained" onClick={() => void loadEvents()} disabled={loading}>
+            <AppButton size="small" variant="contained" onClick={() => void loadEvents()} disabled={loading}>
               Apply
             </AppButton>
           </>
         )}
-        <Typography variant="caption" className="text-slate-500">
-          {total} {feedMode === "all" ? "posts" : "events"}
-        </Typography>
-      </div>
+        <ToolbarDivider />
+        <StatChip label={feedMode === "all" ? "Posts" : "Events"} value={total} />
+        <StatChip label="In DB" value={stats?.message_count ?? "—"} hint="Messages in DB" />
+        <StatChip label="Linked" value={stats?.linked_events ?? "—"} hint="Linked events" />
+        <StatChip label="Queue" value={stats?.unprocessed_messages ?? "—"} hint="Unprocessed messages" />
+        <StatChip
+          label="Live"
+          value={stats?.live?.status || "stopped"}
+          valueClassName={`text-data-sm ${statusTone}`}
+          hint={stats?.live?.error || undefined}
+        />
+      </PageToolbar>
 
       {error && (
-        <div className="rounded-xl border border-red-500/40 bg-red-500/10 px-3 py-2 text-sm text-red-200">
+        <div className="shrink-0 rounded-md border border-red-500/40 bg-red-500/10 px-2 py-1 text-data-sm text-red-200">
           {error}
         </div>
       )}
 
       {feedMode === "all" ? (
-        <div className="grid min-h-[560px] gap-3 lg:grid-cols-[minmax(0,1fr)_360px]">
-          <div className="max-h-[70vh] overflow-auto rounded-2xl border border-surface-border bg-surface-raised">
+        <div className="grid min-h-0 flex-1 gap-1.5 lg:grid-cols-[minmax(0,1fr)_360px] lg:grid-rows-[minmax(0,1fr)]">
+          <div className="panel max-h-[70vh] min-h-0 overflow-auto lg:max-h-none">
             <RecentNewsFeed
               messages={messages}
               loading={loading}
@@ -467,47 +392,43 @@ export function NewsImpactPage() {
               onSelect={setSelectedMessage}
             />
           </div>
-          <div className="max-h-[70vh] overflow-auto rounded-2xl border border-surface-border bg-surface-raised p-3">
-            {!selectedMessage && <p className="text-sm text-slate-500">Select a post.</p>}
+          <div className="panel max-h-[70vh] min-h-0 overflow-auto p-2 lg:max-h-none">
+            {!selectedMessage && <p className="text-data-sm text-slate-400">Select a post.</p>}
             {selectedMessage && (
-              <div className="space-y-3 text-sm">
-                <div className="text-[10px] uppercase text-slate-500">Full post</div>
+              <div className="space-y-2 text-data-md">
+                <div className="text-[10px] uppercase tracking-wide text-slate-400">Full post</div>
                 <p className="whitespace-pre-wrap text-slate-200">{selectedMessage.text || "—"}</p>
-                <div className="grid grid-cols-2 gap-2 text-xs">
+                <div className="grid grid-cols-2 gap-1.5 text-data-sm">
                   <div>
-                    <div className="text-slate-500">Posted</div>
-                    <div className="font-mono text-slate-300">{selectedMessage.posted_at}</div>
+                    <div className="text-slate-400">Posted</div>
+                    <div className="num text-slate-200">{selectedMessage.posted_at}</div>
                   </div>
                   <div>
-                    <div className="text-slate-500">Telegram ID</div>
-                    <div className="font-mono text-slate-300">{selectedMessage.message_id}</div>
+                    <div className="text-slate-400">Telegram ID</div>
+                    <div className="num text-slate-200">{selectedMessage.message_id}</div>
                   </div>
                   <div>
-                    <div className="text-slate-500">Ticker link</div>
-                    <div className="font-mono text-sky-300">{selectedMessage.primary_ticker || "—"}</div>
+                    <div className="text-slate-400">Ticker link</div>
+                    <div className="ticker text-sky-300">{selectedMessage.primary_ticker || "—"}</div>
                   </div>
                   <div>
-                    <div className="text-slate-500">Status</div>
-                    <div className="text-slate-300">
+                    <div className="text-slate-400">Status</div>
+                    <div className="text-slate-200">
                       {selectedMessage.event_status ||
                         (selectedMessage.processed ? "processed" : "queued")}
                     </div>
                   </div>
                 </div>
-                <p className="text-[11px] text-slate-600">
-                  Raw rows live in <code>telegram_messages</code>. Company links create{" "}
-                  <code>news_events</code> (+ reactions when candles exist).
-                </p>
               </div>
             )}
           </div>
         </div>
       ) : (
-        <div className="grid min-h-[560px] gap-3 lg:grid-cols-[320px_minmax(0,1fr)_320px]">
-          <div className="max-h-[70vh] overflow-auto rounded-2xl border border-surface-border bg-surface-raised">
-            {loading && <p className="p-3 text-sm text-slate-400">Loading events…</p>}
+        <div className="grid min-h-0 flex-1 gap-1.5 lg:grid-cols-[300px_minmax(0,1fr)_320px] lg:grid-rows-[minmax(0,1fr)]">
+          <div className="panel max-h-[70vh] min-h-0 overflow-auto lg:max-h-none">
+            {loading && <p className="p-2 text-data-sm text-slate-400">Loading events…</p>}
             {!loading && !events.length && (
-              <p className="p-3 text-sm text-slate-500">
+              <p className="p-2 text-data-sm text-slate-400">
                 No linked events yet. Sync/backfill/listen, then open Linked view.
               </p>
             )}
@@ -518,23 +439,30 @@ export function NewsImpactPage() {
                   <li key={ev.id}>
                     <button
                       type="button"
-                      className={`w-full px-3 py-2.5 text-left transition ${
+                      className={`w-full px-2 py-1.5 text-left transition ${
                         active ? "bg-sky-500/15" : "hover:bg-white/5"
                       }`}
                       onClick={() => setSelected(ev)}
                     >
                       <div className="flex items-center justify-between gap-2">
-                        <span className="font-mono text-sm font-semibold text-white">{ev.ticker}</span>
-                        <span className={`text-xs ${sentimentClass(ev.sentiment)}`}>{ev.sentiment}</span>
+                        <span className="ticker">{ev.ticker}</span>
+                        <span className={`text-data-xs ${sentimentClass(ev.sentiment)}`}>{ev.sentiment}</span>
                       </div>
-                      <div className="mt-0.5 truncate text-xs text-slate-400">
+                      <Clip
+                        className="text-data-xs text-slate-400"
+                        title={`${ev.company_name_matched || "—"} · ${ev.event_date ?? ""}`}
+                      >
                         {ev.company_name_matched || "—"} · {ev.event_date}
+                      </Clip>
+                      <div className="mt-0.5 flex gap-2 text-data-xs text-slate-300">
+                        <span>
+                          T+1 <PctCell value={reactionFor(ev, "t1")} />
+                        </span>
+                        <span>
+                          T+3 <PctCell value={reactionFor(ev, "t3")} />
+                        </span>
                       </div>
-                      <div className="mt-1 flex gap-2 font-mono text-[11px] text-slate-300">
-                        <span>T+1 {formatPct(reactionFor(ev, "t1"))}</span>
-                        <span>T+3 {formatPct(reactionFor(ev, "t3"))}</span>
-                      </div>
-                      <p className="mt-1 line-clamp-2 text-xs text-slate-500">
+                      <p className="mt-0.5 line-clamp-2 text-data-xs text-slate-400">
                         {ev.summary || ev.message_text}
                       </p>
                     </button>
@@ -544,7 +472,7 @@ export function NewsImpactPage() {
             </ul>
           </div>
 
-          <div className="min-h-[420px]">
+          <div className="h-[28rem] min-h-0 lg:h-auto">
             {selected?.ticker ? (
               <TimelineStockChart
                 symbol={selected.ticker}
@@ -558,42 +486,42 @@ export function NewsImpactPage() {
                 extraMarkers={extraMarkers}
               />
             ) : (
-              <div className="flex h-full min-h-[420px] items-center justify-center rounded-2xl border border-dashed border-surface-border text-sm text-slate-500">
+              <div className="flex h-full items-center justify-center rounded-lg border border-dashed border-surface-border text-data-md text-slate-400">
                 Select a linked news event
               </div>
             )}
           </div>
 
-          <div className="max-h-[70vh] overflow-auto rounded-2xl border border-surface-border bg-surface-raised p-3">
-            {!detail && <p className="text-sm text-slate-500">Event detail appears here.</p>}
+          <div className="panel max-h-[70vh] min-h-0 overflow-auto p-2 lg:max-h-none">
+            {!detail && <p className="text-data-sm text-slate-400">Event detail appears here.</p>}
             {detail && (
-              <div className="space-y-3">
+              <div className="space-y-2">
                 <div>
-                  <div className="text-[10px] uppercase text-slate-500">Headline</div>
-                  <p className="mt-1 whitespace-pre-wrap text-sm text-slate-200">
+                  <div className="text-[10px] uppercase tracking-wide text-slate-400">Headline</div>
+                  <p className="mt-0.5 whitespace-pre-wrap text-data-md text-slate-200">
                     {detail.message_text || detail.summary || "—"}
                   </p>
                 </div>
-                <div className="grid grid-cols-2 gap-2 text-xs">
+                <div className="grid grid-cols-2 gap-1.5 text-data-sm">
                   <div>
-                    <div className="text-slate-500">Posted</div>
-                    <div className="font-mono text-slate-200">{detail.posted_at?.slice(0, 19) || "—"}</div>
+                    <div className="text-slate-400">Posted</div>
+                    <div className="num text-slate-200">{detail.posted_at?.slice(0, 19) || "—"}</div>
                   </div>
                   <div>
-                    <div className="text-slate-500">Event session</div>
-                    <div className="font-mono text-slate-200">{detail.event_date || "—"}</div>
+                    <div className="text-slate-400">Event session</div>
+                    <div className="num text-slate-200">{detail.event_date || "—"}</div>
                   </div>
                 </div>
 
                 <div>
-                  <div className="mb-1 text-[10px] uppercase text-slate-500">Reaction path</div>
-                  <div className="overflow-hidden rounded-lg border border-surface-border">
-                    <table className="w-full text-left text-xs">
-                      <thead className="bg-black/20 text-slate-500">
+                  <div className="mb-0.5 text-[10px] uppercase tracking-wide text-slate-400">Reaction path</div>
+                  <div className="overflow-hidden rounded-md border border-surface-border">
+                    <table className="dt w-full text-left">
+                      <thead>
                         <tr>
-                          <th className="px-2 py-1">H</th>
-                          <th className="px-2 py-1">Return</th>
-                          <th className="px-2 py-1">vs Nifty</th>
+                          <th>H</th>
+                          <th className="text-right">Return</th>
+                          <th className="text-right">vs Nifty</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -604,25 +532,19 @@ export function NewsImpactPage() {
                             return order.indexOf(a.horizon) - order.indexOf(b.horizon);
                           })
                           .map((r) => (
-                            <tr key={r.horizon} className="border-t border-surface-border/70">
-                              <td className="px-2 py-1 font-mono text-slate-300">
-                                {HORIZON_LABELS[r.horizon] || r.horizon}
+                            <tr key={r.horizon}>
+                              <td className="num text-slate-200">{HORIZON_LABELS[r.horizon] || r.horizon}</td>
+                              <td className="text-right">
+                                <PctCell value={r.return_pct} />
                               </td>
-                              <td
-                                className={`px-2 py-1 font-mono ${sentimentClass(
-                                  r.return_pct != null && r.return_pct >= 0 ? "bullish" : "bearish",
-                                )}`}
-                              >
-                                {formatPct(r.return_pct)}
-                              </td>
-                              <td className="px-2 py-1 font-mono text-slate-400">
-                                {formatPct(r.rel_return_pct)}
+                              <td className="text-right">
+                                <PctCell value={r.rel_return_pct} />
                               </td>
                             </tr>
                           ))}
                         {!detail.reactions?.length && (
                           <tr>
-                            <td colSpan={3} className="px-2 py-2 text-slate-500">
+                            <td colSpan={3} className="text-slate-400">
                               No candle reaction yet
                             </td>
                           </tr>
@@ -633,31 +555,22 @@ export function NewsImpactPage() {
                 </div>
 
                 <div>
-                  <div className="mb-1 flex items-center justify-between gap-2">
-                    <div className="text-[10px] uppercase text-slate-500">Gemini outlook</div>
-                    <AppButton
-                      size="small"
-                      variant="outlined"
-                      startIcon={<Sparkles className="h-3.5 w-3.5" />}
-                      disabled={outlookLoading || !stats?.gemini_enabled}
-                      onClick={() => void onOutlook()}
-                    >
-                      {outlookLoading ? "…" : "Generate"}
-                    </AppButton>
-                  </div>
+                  <div className="mb-0.5 text-[10px] uppercase tracking-wide text-slate-400">Gemini outlook</div>
                   {detail.outlook ? (
-                    <div className="space-y-1 rounded-lg border border-surface-border bg-black/20 p-2 text-xs text-slate-300">
+                    <div className="space-y-1 rounded-md border border-surface-border bg-black/20 p-2 text-data-sm text-slate-200">
                       <div>
                         <span className={sentimentClass(detail.outlook.bias)}>{detail.outlook.bias}</span>
                         {detail.outlook.typical_move_pct != null && (
-                          <span className="ml-2 font-mono">{formatPct(detail.outlook.typical_move_pct)}</span>
+                          <span className="num ml-2">{formatPct(detail.outlook.typical_move_pct)}</span>
                         )}
                       </div>
                       <p>{detail.outlook.rationale}</p>
                     </div>
                   ) : (
-                    <p className="text-xs text-slate-500">
-                      {stats?.gemini_enabled ? "No outlook yet." : "Set GEMINI_API_KEY for outlook."}
+                    <p className="text-data-xs text-slate-400">
+                      {stats?.gemini_enabled
+                        ? "No outlook yet — generate one from Sync & live."
+                        : "Set GEMINI_API_KEY for outlook."}
                     </p>
                   )}
                 </div>
@@ -666,6 +579,137 @@ export function NewsImpactPage() {
           </div>
         </div>
       )}
+
+      <AdvancedDrawer
+        open={advancedOpen}
+        onClose={() => setAdvancedOpen(false)}
+        title="News sync & live"
+        subtitle={channelHint}
+      >
+        <AdvancedSection title="Jobs">
+          <div className="flex flex-wrap gap-1.5">
+            <AppButton
+              size="small"
+              variant="contained"
+              startIcon={<SyncIcon fontSize="small" className={syncing ? "animate-spin" : undefined} />}
+              disabled={syncing || liveBusy}
+              onClick={() => void onSync(false)}
+            >
+              {syncing ? "Syncing…" : "Sync news"}
+            </AppButton>
+            <AppButton
+              size="small"
+              variant={liveRunning ? "outlined" : "contained"}
+              color={liveRunning ? "error" : "primary"}
+              startIcon={
+                liveRunning ? (
+                  <StopCircleIcon fontSize="small" />
+                ) : (
+                  <RadioButtonCheckedIcon fontSize="small" />
+                )
+              }
+              disabled={liveBusy || syncing}
+              onClick={() => void onToggleLive()}
+            >
+              {liveBusy ? "…" : liveRunning ? "Live off" : "Live on"}
+            </AppButton>
+            <AppButton size="small" variant="outlined" disabled={syncing} onClick={() => void onSync(true)}>
+              Backfill 500
+            </AppButton>
+            <AppButton
+              size="small"
+              variant="outlined"
+              startIcon={<RefreshIcon />}
+              disabled={loading}
+              onClick={() => void refreshFeed()}
+            >
+              Refresh
+            </AppButton>
+          </div>
+          <p className="text-data-xs text-slate-300">
+            Live:{" "}
+            <span className={statusTone}>{stats?.live?.status || "stopped"}</span>
+            {stats?.live?.last_event_at
+              ? ` · last event ${new Date(stats.live.last_event_at).toLocaleTimeString()}`
+              : ""}
+            {stats?.live?.error ? ` · ${stats.live.error}` : ""}
+          </p>
+          <p className="text-data-xs text-slate-400">
+            {channelHint} · DB-backed posts · monitors: Gold / Silver / Crude Oil
+            {stats?.gemini_enabled ? " · Gemini on" : " · Gemini off"}
+          </p>
+        </AdvancedSection>
+
+        <AdvancedSection title="Filters" hint="Monitor topic">
+          <div className="flex flex-wrap gap-1.5">
+            <button
+              type="button"
+              onClick={() => {
+                setFeedMode("all");
+                setMonitorTopic("");
+              }}
+              className={`rounded-md px-2 py-0.5 text-data-xs font-medium ring-1 transition ${
+                feedMode === "all" && !monitorTopic
+                  ? "bg-sky-300 text-sky-950 ring-sky-500/50"
+                  : "bg-slate-800 text-slate-300 ring-slate-600/50 hover:bg-slate-700"
+              }`}
+            >
+              All posts
+            </button>
+            {monitors.map((m) => (
+              <button
+                key={m.key}
+                type="button"
+                title={(m.keywords || []).join(", ")}
+                onClick={() => {
+                  setFeedMode("all");
+                  setMonitorTopic(m.key);
+                }}
+                className={`rounded-md px-2 py-0.5 text-data-xs font-medium ring-1 transition ${
+                  monitorTopic === m.key
+                    ? "bg-amber-300 text-amber-950 ring-amber-500/50"
+                    : "bg-slate-800 text-slate-300 ring-slate-600/50 hover:bg-slate-700"
+                }`}
+              >
+                {m.label}
+              </button>
+            ))}
+          </div>
+        </AdvancedSection>
+
+        <AdvancedSection title="Gemini outlook" hint={selected?.ticker ?? undefined}>
+          <AppButton
+            size="small"
+            variant="outlined"
+            startIcon={<Sparkles className="h-3.5 w-3.5" />}
+            disabled={outlookLoading || !stats?.gemini_enabled}
+            onClick={() => void onOutlook()}
+          >
+            {outlookLoading ? "…" : "Generate"}
+          </AppButton>
+          <p className="text-data-xs text-slate-400">
+            {stats?.gemini_enabled
+              ? "Generates an outlook for the selected linked event."
+              : "Set GEMINI_API_KEY for outlook."}
+          </p>
+        </AdvancedSection>
+
+        <AdvancedSection title="Data">
+          <div className="grid grid-cols-2 gap-1.5">
+            <StatChip label="Messages in DB" value={stats?.message_count ?? "—"} />
+            <StatChip label="Linked events" value={stats?.linked_events ?? "—"} />
+            <StatChip label="With reactions" value={stats?.events_with_reactions ?? "—"} />
+            <StatChip label="Queue" value={stats?.unprocessed_messages ?? "—"} />
+          </div>
+        </AdvancedSection>
+
+        <AdvancedSection title="Help" defaultOpen={false}>
+          <p className="text-data-xs text-slate-300">
+            Raw rows live in <code>telegram_messages</code>. Company links create{" "}
+            <code>news_events</code> (+ reactions when candles exist).
+          </p>
+        </AdvancedSection>
+      </AdvancedDrawer>
     </div>
   );
 }

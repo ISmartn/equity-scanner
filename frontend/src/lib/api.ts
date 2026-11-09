@@ -93,8 +93,19 @@ export async function fetchNifty50(): Promise<Nifty50Response> {
 }
 
 export async function fetchFno(): Promise<FnoResponse> {
-  const res = await fetch("/api/fno");
-  return parseJson(res);
+  let lastError: unknown;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    try {
+      const res = await fetch("/api/fno");
+      return parseJson(res);
+    } catch (err) {
+      lastError = err;
+      if (attempt < 2) {
+        await new Promise((r) => setTimeout(r, 600 * (attempt + 1)));
+      }
+    }
+  }
+  throw lastError;
 }
 
 export interface FundamentallyStrongResponse {
@@ -106,6 +117,11 @@ export interface FundamentallyStrongResponse {
 
 export async function fetchFundamentallyStrong(): Promise<FundamentallyStrongResponse> {
   const res = await fetch("/api/timeline/fundamentals/strong");
+  return parseJson(res);
+}
+
+export async function fetchFundamentalsMomentumPass(): Promise<FundamentallyStrongResponse> {
+  const res = await fetch("/api/timeline/fundamentals/momentum-pass");
   return parseJson(res);
 }
 
@@ -1689,12 +1705,29 @@ export interface SectorRotationRow {
     top_laggard: string | null;
   };
   as_of: string;
+  /** Date the RS/momentum pair was computed — lags `as_of` when the benchmark is stale. */
+  rs_as_of?: string;
+  rs_lag_days?: number;
+}
+
+export interface SectorBenchmarkSync {
+  status: "ok" | "current" | "unauthorized" | "failed";
+  upserted: number;
+  as_of?: string;
+  detail?: string;
 }
 
 export interface SectorRotationResponse {
   timestamp: string;
   benchmark: string;
   benchmark_as_of: string;
+  /** Latest sector price bar available. */
+  price_as_of?: string;
+  /** Latest date RS/momentum could be computed (needs benchmark + sector bars). */
+  rs_as_of?: string;
+  rs_lag_days?: number;
+  benchmark_stale?: boolean;
+  benchmark_sync?: SectorBenchmarkSync;
   sectors: SectorRotationRow[];
   summary: {
     total: number;
@@ -1709,7 +1742,9 @@ export async function fetchSectorRotation(refresh = false): Promise<SectorRotati
   const search = new URLSearchParams();
   if (refresh) search.set("refresh", "true");
   const q = search.toString();
-  const res = await fetch(`/api/sector-rotation${q ? `?${q}` : ""}`);
+  const res = await fetch(`/api/sector-rotation${q ? `?${q}` : ""}`, {
+    headers: authHeaders(),
+  });
   return parseJson(res);
 }
 
@@ -1839,6 +1874,665 @@ export async function fetchElliottWaveChart(
 ): Promise<ElliottWaveChartPayload> {
   const encoded = encodeURIComponent(instrumentKey);
   const res = await fetch(`/api/labs/elliott-wave/chart/${encoded}`);
+  return parseJson(res);
+}
+
+export type GrimesRegime =
+  | "TREND_BULL"
+  | "TREND_BEAR"
+  | "VOLATILITY_COMPRESSION"
+  | "TRADING_RANGE"
+  | "CLIMACTIC_EXHAUSTION";
+
+export type GrimesSetupType =
+  | "TREND_PULLBACK"
+  | "COMPLEX_PULLBACK"
+  | "VOL_SQUEEZE"
+  | "FAILED_BREAKOUT"
+  | "CLIMACTIC_EXHAUSTION"
+  | "ABSORPTION";
+
+export type GrimesListingFilter = "all" | "fno" | "non_fno" | "index_only";
+
+/** Regime filter — `trend` = bull + bear combined. */
+export type GrimesRegimeFilter = "all" | "trend" | GrimesRegime;
+
+export type GrimesSetupFilter =
+  | "all"
+  | "continuation"
+  | "mean_reversion"
+  | "squeeze_breakout"
+  | "high_quality";
+
+export type GrimesFundamentalFilter =
+  | "all"
+  | "strong"
+  | "momentum"
+  | "strong_and_momentum";
+
+/** @deprecated Combined filter — use listing / regime / setup filters instead */
+export type GrimesFilter =
+  | GrimesListingFilter
+  | "trend"
+  | "range"
+  | "squeeze"
+  | GrimesSetupFilter;
+
+export interface GrimesScanRow {
+  ticker: string;
+  instrument_key: string;
+  kind: string;
+  company_name?: string | null;
+  as_of: string;
+  price: number;
+  regime: GrimesRegime;
+  swing_trend: string | null;
+  ma_stack: string;
+  weekly_aligned: boolean | null;
+  weekly_ema_up: boolean | null;
+  squeeze: boolean;
+  setup_type: GrimesSetupType | null;
+  setup_group: string | null;
+  setup_side: string | null;
+  setup_flags: string[] | null;
+  active_setups: Array<{ type: string; side?: string; group?: string }>;
+  quality_score: number;
+  volatility_rank: number | null;
+  atr: number | null;
+  pivot_count: number;
+}
+
+export interface GrimesSummaryResponse {
+  timestamp: string;
+  trade_date?: string | null;
+  universe_size: number;
+  analyzed: number;
+  workers: number;
+  engine_version?: string;
+  source?: "db" | "scan";
+  has_run?: boolean;
+  summary: {
+    trend_bull: number;
+    trend_bear: number;
+    range: number;
+    squeeze: number;
+    climax: number;
+    pullbacks: number;
+    squeezes: number;
+    mean_reversion: number;
+    high_quality: number;
+  };
+  results: GrimesScanRow[];
+}
+
+export interface GrimesPaperTrade {
+  entry_index: number;
+  signal_index: number;
+  side: string;
+  entry: number;
+  stop: number;
+  exit: number;
+  exit_reason: string;
+  r: number;
+  mae_r: number | null;
+  mfe_r: number | null;
+  timestamp: string;
+  setup_type?: string;
+}
+
+export interface GrimesExpectancy {
+  n: number;
+  win_rate: number | null;
+  loss_rate: number | null;
+  profit_factor: number | null;
+  expectancy: number | null;
+  avg_win_r: number | null;
+  avg_loss_r: number | null;
+  avg_r: number | null;
+  stdev_r: number | null;
+  skew: number | null;
+  excess_kurtosis: number | null;
+  histogram: Array<{ bin: string; count: number }>;
+}
+
+export interface GrimesChartPayload extends GrimesScanRow {
+  candles: Array<{
+    date: string;
+    open: number;
+    high: number;
+    low: number;
+    close: number;
+    volume: number;
+  }>;
+  pivots: Array<{
+    index: number;
+    timestamp: string;
+    price: number;
+    kind: string;
+    label: string | null;
+  }>;
+  sr_zones: Array<{
+    price: number;
+    kind: string;
+    label: string | null;
+    timestamp: string;
+    index: number;
+    role: string;
+  }>;
+  ema20: Array<{ time: string; value: number }>;
+  sma50: Array<{ time: string; value: number }>;
+  kc_upper: Array<{ time: string; value: number }>;
+  kc_lower: Array<{ time: string; value: number }>;
+  history_setups: Array<{
+    type: string;
+    side?: string;
+    group?: string;
+    timestamp: string;
+    index: number;
+    flags?: string[];
+    variant?: string;
+  }>;
+  risk_box: {
+    side: string;
+    setup_type: string;
+    entry: number;
+    stop: number;
+    atr: number;
+    targets: Record<string, number>;
+    sizing: {
+      shares: number;
+      notional: number;
+      risk_amount: number;
+      r_distance: number;
+      valid: boolean;
+    };
+    trail_swing: { price: number | null; method: string };
+    time_stop: { kill: boolean; reason: string | null; bars_held: number };
+    signal_date: string;
+  } | null;
+  paper_trades: GrimesPaperTrade[];
+  expectancy: GrimesExpectancy;
+  monte_carlo: {
+    p_value: number | null;
+    observed_mean_fwd?: number;
+    random_mean_fwd?: number;
+    z_score?: number;
+    n_patterns?: number;
+    n_simulations?: number;
+    horizon?: number;
+    note?: string;
+  } | null;
+  checklist: {
+    title: string;
+    entry: string;
+    stop: string;
+    targets: string;
+    fail: string;
+    time_stop: string;
+  } | null;
+}
+
+export interface GrimesChartGuideItem {
+  id: string;
+  label: string;
+  symbol?: string;
+  color?: string;
+  plain: string;
+  when: string;
+  expect: string;
+  worry?: string;
+}
+
+export interface GrimesChartGuideSection {
+  id: string;
+  title: string;
+  blurb: string;
+  items: GrimesChartGuideItem[];
+}
+
+export interface GrimesKnowledgeResponse {
+  cards: Array<{
+    id: string;
+    part: string;
+    title: string;
+    summary: string;
+    rules: string[];
+    failure?: string;
+    management?: string;
+  }>;
+  checklists: Record<
+    string,
+    {
+      title: string;
+      entry: string;
+      stop: string;
+      targets: string;
+      fail: string;
+      time_stop: string;
+    }
+  >;
+  chart_guide?: {
+    intro: string;
+    sections: GrimesChartGuideSection[];
+  };
+}
+
+export async function fetchGrimesDates(): Promise<{
+  dates: string[];
+  count: number;
+  engine_version?: string;
+  latest_data_date: string | null;
+  latest_with_scan: string | null;
+}> {
+  const res = await fetch("/api/labs/grimes/dates?limit=365");
+  return parseJson(res);
+}
+
+export async function fetchGrimesSummary(
+  refresh = false,
+  tradeDate?: string | null,
+): Promise<GrimesSummaryResponse> {
+  const search = new URLSearchParams();
+  if (refresh) search.set("refresh", "true");
+  if (tradeDate) search.set("trade_date", tradeDate);
+  const q = search.toString();
+  const res = await fetch(`/api/labs/grimes/summary${q ? `?${q}` : ""}`);
+  return parseJson(res);
+}
+
+export async function fetchGrimesChart(
+  instrumentKey: string,
+  opts?: {
+    accountSize?: number;
+    riskPct?: number;
+    nSimulations?: number;
+    tradeDate?: string | null;
+  },
+): Promise<GrimesChartPayload> {
+  const encoded = encodeURIComponent(instrumentKey);
+  const search = new URLSearchParams();
+  if (opts?.accountSize) search.set("account_size", String(opts.accountSize));
+  if (opts?.riskPct) search.set("risk_pct", String(opts.riskPct));
+  if (opts?.nSimulations) search.set("n_simulations", String(opts.nSimulations));
+  if (opts?.tradeDate) search.set("trade_date", opts.tradeDate);
+  const q = search.toString();
+  const res = await fetch(`/api/labs/grimes/chart/${encoded}${q ? `?${q}` : ""}`);
+  return parseJson(res);
+}
+
+export async function fetchGrimesKnowledge(): Promise<GrimesKnowledgeResponse> {
+  const res = await fetch("/api/labs/grimes/knowledge");
+  return parseJson(res);
+}
+
+export interface LiveScanStatus {
+  status: string;
+  error: string | null;
+  subscribed: number;
+  universe: number;
+  futures_matched: number;
+  fno_symbols?: number;
+  cash_symbols?: number;
+  full_key_limit?: number;
+  tick_count: number;
+  last_tick_at: number | null;
+  last_tick_age_sec: number | null;
+  symbols_live: number;
+  reconnect_attempts: number;
+  offhours: boolean;
+  session_name?: string;
+  session_flushed: boolean;
+  candle_sync?: {
+    session: string;
+    requested: number;
+    success: number;
+    failed: number;
+    deferred?: number;
+    phase?: string;
+  } | null;
+  writer: {
+    queued: number;
+    dropped: number;
+    minute_rows: number;
+    session_flushes: number;
+  };
+}
+
+export interface LiveScanLevel {
+  level: number | null;
+  state: string;
+  distance_pct: number | null;
+}
+
+export interface LiveMomentumRow {
+  symbol: string;
+  company_name: string | null;
+  sector: string | null;
+  ltp: number | null;
+  change_pct: number | null;
+  vwap_dist_pct: number | null;
+  day_range_pos: number | null;
+  session_rvol: number | null;
+  burst_rvol: number | null;
+  on_last_scan: boolean;
+  scanner_pattern: string | null;
+  scanner_score: number | null;
+  myb_status: string | null;
+  score: number | null;
+}
+
+export interface LiveBreakoutRow {
+  symbol: string;
+  company_name: string | null;
+  sector: string | null;
+  ltp: number | null;
+  state: string;
+  nearest_distance_pct: number | null;
+  prior_high: LiveScanLevel;
+  opening_range: LiveScanLevel;
+  pivot: LiveScanLevel;
+  multi_year: LiveScanLevel;
+  on_last_scan: boolean;
+  scanner_pattern: string | null;
+  myb_status: string | null;
+}
+
+export interface LiveOiRow {
+  symbol: string;
+  company_name: string | null;
+  sector: string | null;
+  cash_ltp: number | null;
+  fut_ltp: number | null;
+  future_expiry: string | null;
+  price_change_pct: number | null;
+  oi: number | null;
+  poi: number | null;
+  poi_source: string | null;
+  oi_change_pct: number | null;
+  quadrant: string;
+  quadrant_label: string;
+  basis: number | null;
+  on_last_scan: boolean;
+}
+
+export interface LiveIndexDriver {
+  symbol: string;
+  change_pct: number;
+  contribution: number;
+}
+
+export interface LiveCallRow {
+  symbol: string;
+  company_name: string | null;
+  sector: string | null;
+  kind?: "equity" | "index" | string;
+  segment?: "fno" | "cash" | "index" | string;
+  ltp: number | null;
+  change_pct: number | null;
+  vs_sma_pct: number | null;
+  trend_20_pct: number | null;
+  return_5d_pct: number | null;
+  session_rvol: number | null;
+  stance: "buy" | "sell" | "wait" | "stand_aside";
+  stance_label: string;
+  reason: string;
+  entry: number | null;
+  stop: number | null;
+  exit: number | null;
+  swing_exit?: number | null;
+  swing_basis?: "candle" | "multi_r" | string | null;
+  plan_phase?: "wait" | "enter" | "late" | "none" | string;
+  quadrant: string | null;
+  on_last_scan: boolean;
+  score: number | null;
+  breadth_up?: number;
+  breadth_down?: number;
+  breadth_flat?: number;
+  breadth_seen?: number;
+  breadth_total?: number;
+  weighted_change_pct?: number | null;
+  tone?: string;
+  tone_label?: string;
+  read?: string;
+  leaders?: LiveIndexDriver[];
+  drags?: LiveIndexDriver[];
+}
+
+export interface LiveJournalRow {
+  session_date: string;
+  symbol: string;
+  company_name: string | null;
+  kind: string;
+  segment?: string;
+  side: "buy" | "sell" | string;
+  side_label: string;
+  status: "pending" | "open" | "target" | "stopped" | "cancelled" | string;
+  status_label: string;
+  entry: number;
+  stop: number;
+  exit: number;
+  swing_exit: number | null;
+  swing_status: string | null;
+  swing_status_label: string | null;
+  swing_result_pct: number | null;
+  last_price: number | null;
+  result_pct: number | null;
+  mfe_pct: number | null;
+  mae_pct: number | null;
+  opened_at: string | null;
+  entry_at: string | null;
+  closed_at: string | null;
+  swing_closed_at: string | null;
+}
+
+export interface LiveJournalSummary {
+  plans: number;
+  pending: number;
+  open: number;
+  target: number;
+  stopped: number;
+  cancelled: number;
+  closed?: number;
+  win_rate_pct: number | null;
+  avg_result_pct: number | null;
+  swing_pending?: number;
+  swing_open?: number;
+  swing_target?: number;
+  swing_stopped?: number;
+  swing_cancelled?: number;
+  swing_win_rate_pct?: number | null;
+  swing_avg_result_pct?: number | null;
+}
+
+export interface LiveScanSnapshot {
+  board: string;
+  ranked_at: number | null;
+  stale: boolean;
+  totals: { momentum: number; breakout: number; oi: number; calls: number; journal?: number };
+  status: LiveScanStatus;
+  momentum: LiveMomentumRow[];
+  breakout: LiveBreakoutRow[];
+  oi: LiveOiRow[];
+  calls: LiveCallRow[];
+  journal?: LiveJournalRow[];
+  journal_summary?: LiveJournalSummary;
+}
+
+export async function fetchLiveScanStatus(): Promise<LiveScanStatus> {
+  const res = await fetch("/api/live-scan/status");
+  return parseJson(res);
+}
+
+export async function fetchLiveScanSnapshot(
+  limit = 50,
+  segment: "fno" | "cash" = "fno",
+): Promise<LiveScanSnapshot> {
+  const res = await fetch(`/api/live-scan/snapshot?board=all&limit=${limit}&segment=${segment}`);
+  return parseJson(res);
+}
+
+export async function startLiveScan(): Promise<LiveScanStatus> {
+  const res = await fetch("/api/live-scan/start", {
+    method: "POST",
+    headers: authHeaders(),
+  });
+  return parseJson(res);
+}
+
+export async function stopLiveScan(): Promise<LiveScanStatus> {
+  const res = await fetch("/api/live-scan/stop", { method: "POST" });
+  return parseJson(res);
+}
+
+export interface LiveBacktestParams {
+  start: string;
+  end: string;
+  segment: "fno" | "cash" | "all";
+  side: "buy" | "sell" | "both";
+  reward_r: number;
+  swing_r: number;
+  entry_window_r: number;
+  min_efficiency: number;
+  risk_min_atr: number;
+  risk_max_atr: number;
+  max_swing_days: number;
+  cost_pct: number;
+}
+
+export interface LiveBacktestLeg {
+  trades: number;
+  statuses: Record<string, number>;
+  win_rate_pct?: number;
+  avg_r?: number;
+  total_r?: number;
+  median_r?: number;
+  avg_win_r?: number | null;
+  avg_loss_r?: number | null;
+  profit_factor?: number | null;
+  avg_pct?: number | null;
+  std_r?: number | null;
+  avg_mfe_r?: number | null;
+  avg_mae_r?: number | null;
+  avg_days?: number | null;
+  bounds?: {
+    ambiguous: number;
+    ambiguous_pct: number | null;
+    minute_resolved?: number;
+    optimistic_trades: number;
+    optimistic_avg_r: number | null;
+    optimistic_win_rate_pct: number | null;
+  };
+}
+
+export interface LiveBacktestGroup {
+  group: string;
+  trades: number;
+  win_rate_pct: number;
+  avg_r: number;
+  total_r: number;
+  std_r?: number;
+  profit_factor?: number | null;
+  target_pct?: number;
+  stopped_pct?: number;
+  swing_trades?: number;
+  swing_avg_r?: number | null;
+  swing_win_rate_pct?: number | null;
+}
+
+export interface LiveBacktestBreakdown {
+  key: string;
+  label: string;
+  rows: LiveBacktestGroup[];
+}
+
+export interface LiveBacktestTrade {
+  trade_date: string;
+  symbol: string;
+  segment: string;
+  side: "buy" | "sell";
+  entry: number;
+  stop: number;
+  target: number;
+  swing_target: number;
+  fill: number;
+  fill_type: "level" | "open" | "pullback" | "recovery";
+  stop_basis: string;
+  day_status: "target" | "stopped" | "closed";
+  day_r: number;
+  day_pct: number;
+  mfe_r: number;
+  mae_r: number;
+  swing_status: "target" | "stopped" | "timeout" | "open";
+  swing_r: number | null;
+  swing_days: number;
+  swing_closed_on: string | null;
+  efficiency: number | null;
+  atr_pct: number | null;
+  ambiguous: boolean;
+}
+
+export interface LiveBacktestInsight {
+  dimension: string;
+  group: string;
+  trades: number;
+  avg_r: number;
+  delta_r: number;
+  t_stat: number;
+  direction: "better" | "worse";
+}
+
+export interface LiveBacktestResult {
+  params: LiveBacktestParams;
+  universe: { symbols: number; fno: number; cash: number; index: number };
+  first_trade: string | null;
+  last_trade: string | null;
+  funnel: Record<string, number>;
+  day: LiveBacktestLeg;
+  swing: LiveBacktestLeg;
+  target_sweep: { reward_r: number; trades: number; target_pct: number; win_rate_pct: number; avg_r: number; total_r: number }[];
+  curve: {
+    points: { date: string; trades: number; mean_r: number; cum_r: number }[];
+    sessions: number;
+    green_sessions_pct: number | null;
+    max_drawdown_r: number;
+    final_r: number;
+  };
+  breakdowns: LiveBacktestBreakdown[];
+  insights: LiveBacktestInsight[];
+  symbols: { best: LiveBacktestGroup[]; worst: LiveBacktestGroup[] };
+  trades: LiveBacktestTrade[];
+  assumptions: string[];
+  warnings: string[];
+  elapsed_ms: number;
+  cached?: boolean;
+}
+
+export interface LiveJournalScorecard {
+  cost_pct: number;
+  segment: string;
+  sessions: number;
+  first_session: string | null;
+  last_session: string | null;
+  funnel: { plans: number; pending: number; open: number; cancelled: number; resolved: number };
+  day: LiveBacktestLeg;
+  swing: LiveBacktestLeg;
+  breakdowns: LiveBacktestBreakdown[];
+}
+
+export async function fetchLiveBacktest(params: Partial<LiveBacktestParams>): Promise<LiveBacktestResult> {
+  const query = new URLSearchParams();
+  for (const [key, value] of Object.entries(params)) {
+    if (value !== undefined && value !== "") query.set(key, String(value));
+  }
+  const res = await fetch(`/api/live-scan/backtest?${query.toString()}`);
+  return parseJson(res);
+}
+
+export async function fetchLiveJournalStats(
+  segment: "fno" | "cash" | "all",
+  costPct: number,
+): Promise<LiveJournalScorecard> {
+  const res = await fetch(`/api/live-scan/journal-stats?segment=${segment}&cost_pct=${costPct}`);
   return parseJson(res);
 }
 

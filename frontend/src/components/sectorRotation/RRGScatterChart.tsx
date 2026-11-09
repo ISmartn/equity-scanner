@@ -109,12 +109,12 @@ export function RRGScatterChart({ sectors, selectedName, onSelect }: Props) {
     <div className="flex h-full min-h-0 w-full flex-col overflow-hidden rounded-xl border border-surface-border bg-surface-raised p-2">
       <div className="mb-1 flex items-center justify-between gap-2 px-1">
         <div>
-          <h3 className="text-[11px] font-medium text-slate-200">Relative Rotation Graph</h3>
-          <p className="text-[9px] text-slate-500">
+          <h3 className="text-data-sm font-semibold text-slate-100">Relative Rotation Graph</h3>
+          <p className="text-[10px] text-slate-400">
             ◆ Official index · ● Theme · click to load stocks · trail = selection only
           </p>
         </div>
-        <div className="hidden flex-wrap gap-x-2 gap-y-0.5 text-[8px] text-slate-500 sm:flex">
+        <div className="hidden flex-wrap gap-x-2 gap-y-0.5 text-[10px] text-slate-300 sm:flex">
           <span className="text-emerald-400">● Leading</span>
           <span className="text-amber-300">● Weakening</span>
           <span className="text-rose-300">● Lagging</span>

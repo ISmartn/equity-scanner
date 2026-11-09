@@ -34,6 +34,10 @@ export function MoveFilterPage() {
   const [darvasLookbackInput, setDarvasLookbackInput] = useState(
     initialSettings.darvasLookbackInput || String(DEFAULT_DARVAS_LOOKBACK_DAYS),
   );
+  const [emaInputs, setEmaInputs] = useState(initialSettings.emaInputs);
+  const [emaEnabled, setEmaEnabled] = useState(initialSettings.emaEnabled);
+  const [showRsi, setShowRsi] = useState(initialSettings.showRsi);
+  const [rsiInput, setRsiInput] = useState(initialSettings.rsiInput);
 
   const positiveThreshold = positiveEnabled ? parseFloat(positiveInput) : null;
   const negativeThreshold = negativeEnabled ? parseFloat(negativeInput) : null;
@@ -78,6 +82,10 @@ export function MoveFilterPage() {
       threeGreenEnabled,
       darvasEnabled,
       darvasLookbackInput,
+      emaInputs,
+      emaEnabled,
+      showRsi,
+      rsiInput,
     });
   }, [
     symbol,
@@ -88,6 +96,10 @@ export function MoveFilterPage() {
     threeGreenEnabled,
     darvasEnabled,
     darvasLookbackInput,
+    emaInputs,
+    emaEnabled,
+    showRsi,
+    rsiInput,
   ]);
 
   const loadCandles = useCallback(async () => {
@@ -129,7 +141,7 @@ export function MoveFilterPage() {
   };
 
   return (
-    <main className="mx-auto flex h-[calc(100dvh-7.25rem)] min-h-0 max-w-[1920px] flex-col gap-2 overflow-hidden px-3 py-2 sm:px-4 lg:flex-row">
+    <main className="page-shell flex min-h-0 flex-col gap-1.5 overflow-hidden px-1.5 py-1 sm:px-2 lg:flex-row">
       <div className="h-[40vh] shrink-0 lg:h-full lg:w-auto">
         <MoveFilterStockSidebar
           symbol={symbol}
@@ -141,7 +153,7 @@ export function MoveFilterPage() {
         />
       </div>
 
-      <div className="flex min-h-0 min-w-0 flex-1 flex-col gap-2 overflow-hidden">
+      <div className="flex min-h-0 min-w-0 flex-1 flex-col gap-1 overflow-hidden">
         <MoveFilterToolbar
           positiveEnabled={positiveEnabled}
           negativeEnabled={negativeEnabled}
@@ -165,13 +177,13 @@ export function MoveFilterPage() {
         />
 
         {error && (
-          <div className="flex shrink-0 items-start gap-2 rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-1.5 text-xs text-red-200">
+          <div className="flex shrink-0 items-start gap-2 rounded-lg border border-red-500/30 bg-red-500/10 px-2 py-1 text-data-sm text-red-200">
             <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0" />
             <span>{error}</span>
           </div>
         )}
 
-        <section className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-xl border border-surface-border bg-surface-raised/30 p-1">
+        <section className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-lg border border-surface-border bg-surface-raised/30 p-1">
           <MoveFilterChart
             symbol={data?.symbol ?? symbol}
             source={data?.source ?? "upstox"}
@@ -190,6 +202,18 @@ export function MoveFilterPage() {
             }
             loading={loadingCandles}
             fillHeight
+            emaInputs={emaInputs}
+            emaEnabled={emaEnabled}
+            onEmaInput={(index, value) =>
+              setEmaInputs((prev) => prev.map((item, i) => (i === index ? value : item)))
+            }
+            onEmaEnabled={(index, enabled) =>
+              setEmaEnabled((prev) => prev.map((item, i) => (i === index ? enabled : item)))
+            }
+            showRsi={showRsi}
+            rsiInput={rsiInput}
+            onShowRsi={setShowRsi}
+            onRsiInput={setRsiInput}
           />
         </section>
       </div>

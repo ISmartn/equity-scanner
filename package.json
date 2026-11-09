@@ -20,6 +20,7 @@
     "scanner:outcomes": "cd backend && .venv/bin/python scripts/evaluate_signal_outcomes.py",
     "scanner:failures": "cd backend && .venv/bin/python scripts/analyze_scanner_failures.py",
     "scanner:july20d": "cd backend && .venv/bin/python scripts/analyze_july_20d_exhaustion.py",
+    "livescan:backtest": "cd backend && .venv/bin/python scripts/backtest_live_calls.py",
     "breakout:run": "cd backend && .venv/bin/python scripts/run_multi_year_breakout.py",
     "nifty:sync": "cd backend && .venv/bin/python scripts/sync_nifty_candles.py",
     "fundamentals:sync-all": "cd backend && .venv/bin/python scripts/sync_fundamentals.py",

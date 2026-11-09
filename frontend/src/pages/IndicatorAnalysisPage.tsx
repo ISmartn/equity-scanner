@@ -7,6 +7,17 @@ import {
   type IndicatorReading,
   type SymbolSearchResult,
 } from "@/lib/api";
+import {
+  ActiveFilterChips,
+  AdvancedButton,
+  AdvancedDrawer,
+  AdvancedSection,
+  Clip,
+  PageToolbar,
+  StatChip,
+  ToolbarDivider,
+  type ActiveFilterChip,
+} from "@/components/dense";
 import { loadUiPrefs, saveUiPrefs } from "@/lib/uiPrefs";
 
 const NIFTY_TFS = ["daily", "10m", "5m", "3m", "1m"] as const;
@@ -52,14 +63,14 @@ function MetricChips({ metrics }: { metrics: IndicatorReading["metrics"] }) {
   });
   if (!entries.length) return null;
   return (
-    <div className="mt-2 flex flex-wrap gap-1.5">
+    <div className="mt-1 flex flex-wrap gap-1">
       {entries.slice(0, 6).map(([k, v]) => (
         <span
           key={k}
-          className="rounded border border-surface-border bg-surface-elevated/40 px-1.5 py-0.5 text-[10px] text-slate-400"
+          className="rounded border border-surface-border bg-surface-elevated/40 px-1 text-data-xs text-slate-400"
         >
           {k.replace(/_/g, " ")}:{" "}
-          <span className="text-slate-200">
+          <span className="num text-slate-200">
             {typeof v === "number" ? formatNum(v, Math.abs(v) >= 100 ? 1 : 2) : String(v)}
           </span>
         </span>
@@ -95,6 +106,7 @@ export function IndicatorAnalysisPage() {
   const [error, setError] = useState<string | null>(null);
   const [data, setData] = useState<IndicatorAnalysisPayload | null>(null);
   const [suggestions, setSuggestions] = useState<SymbolSearchResult[]>([]);
+  const [advancedOpen, setAdvancedOpen] = useState(false);
 
   const isNifty = symbol.toUpperCase() === "NIFTY" || symbol.toUpperCase() === "NIFTY50";
 
@@ -168,137 +180,100 @@ export function IndicatorAnalysisPage() {
     [data],
   );
 
-  return (
-    <main className="mx-auto max-w-6xl space-y-4 px-4 py-4 sm:px-6">
-      <div className="flex flex-wrap items-end justify-between gap-3">
-        <div>
-          <h1 className="text-lg font-semibold text-slate-100">Indicator Analysis</h1>
-          <p className="max-w-2xl text-xs text-slate-500">
-            Live readings for the toolkit ranked from @kyalashish tweets (Elliott, Time Cycle, Bollinger,
-            Keltner, KST, Supertrend, Volume Profile, RSI, …). Computable indicators run on Nifty /
-            stock OHLC; discretionary ones stay as reference.
-          </p>
-        </div>
+  const advancedChips = useMemo(() => {
+    const chips: ActiveFilterChip[] = [];
+    if (isNifty && timeframe !== DEFAULT_IA_PREFS.timeframe) {
+      chips.push({
+        key: "tf",
+        label: `TF ${timeframe}`,
+        onRemove: () => setTimeframe(DEFAULT_IA_PREFS.timeframe),
+      });
+    }
+    if (rsiPeriod !== DEFAULT_IA_PREFS.rsiPeriod) {
+      chips.push({
+        key: "rsi",
+        label: `RSI ${rsiPeriod}`,
+        onRemove: () => setRsiPeriod(DEFAULT_IA_PREFS.rsiPeriod),
+      });
+    }
+    return chips;
+  }, [isNifty, timeframe, rsiPeriod]);
 
-        <div className="flex flex-wrap items-end gap-2">
-          <div className="relative">
-            <label className="mb-1 block text-[10px] uppercase tracking-wide text-slate-500">Symbol</label>
-            <div className="flex items-center gap-1">
-              <div className="relative">
-                <Search className="pointer-events-none absolute left-2 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate-500" />
-                <input
-                  value={symbolInput}
-                  onChange={(e) => setSymbolInput(e.target.value.toUpperCase())}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter") applySymbol(symbolInput);
-                  }}
-                  placeholder="NIFTY or RELIANCE"
-                  className="w-40 rounded-md border border-surface-border bg-surface py-1.5 pl-7 pr-2 text-xs text-slate-200"
-                />
-                {suggestions.length > 0 && (
-                  <div className="absolute z-20 mt-1 max-h-48 w-56 overflow-auto rounded-md border border-surface-border bg-surface shadow-lg">
-                    <button
-                      type="button"
-                      className="block w-full px-2 py-1.5 text-left text-xs text-accent hover:bg-accent/10"
-                      onClick={() => applySymbol("NIFTY")}
-                    >
-                      NIFTY (index)
-                    </button>
-                    {suggestions.map((s) => (
-                      <button
-                        key={s.instrument_key}
-                        type="button"
-                        className="block w-full px-2 py-1.5 text-left text-xs text-slate-300 hover:bg-white/5"
-                        onClick={() => applySymbol(s.symbol)}
-                      >
-                        <span className="font-medium text-slate-100">{s.symbol}</span>
-                        <span className="ml-1 text-slate-500">{s.name}</span>
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
+  const toolbarBelow =
+    suggestions.length > 0 || advancedChips.length > 0 ? (
+      <div className="flex flex-col gap-1">
+        {suggestions.length > 0 && (
+          <div className="flex flex-wrap items-center gap-1">
+            <span className="text-[10px] uppercase tracking-wide text-slate-400">Matches</span>
+            <button
+              type="button"
+              className="rounded border border-accent/40 bg-accent/10 px-1.5 py-0.5 text-data-xs text-accent hover:bg-accent/20"
+              onClick={() => applySymbol("NIFTY")}
+            >
+              NIFTY (index)
+            </button>
+            {suggestions.map((s) => (
               <button
+                key={s.instrument_key}
                 type="button"
-                onClick={() => applySymbol(symbolInput)}
-                className="rounded-md border border-surface-border px-2 py-1.5 text-xs text-slate-300 hover:border-accent/40"
+                className="inline-flex max-w-[16rem] items-baseline gap-1 rounded border border-surface-border px-1.5 py-0.5 text-data-xs text-slate-300 hover:border-accent/40 hover:bg-white/5"
+                onClick={() => applySymbol(s.symbol)}
               >
-                Go
+                <span className="ticker">{s.symbol}</span>
+                <Clip title={s.name} className="text-slate-400">
+                  {s.name}
+                </Clip>
               </button>
-            </div>
+            ))}
           </div>
-
-          {isNifty && (
-            <div>
-              <label className="mb-1 block text-[10px] uppercase tracking-wide text-slate-500">TF</label>
-              <div className="flex rounded-md border border-surface-border bg-surface p-0.5">
-                {NIFTY_TFS.map((tf) => (
-                  <button
-                    key={tf}
-                    type="button"
-                    onClick={() => setTimeframe(tf)}
-                    className={`rounded px-2 py-1 text-xs ${
-                      timeframe === tf ? "bg-accent/15 text-accent" : "text-slate-400 hover:text-slate-200"
-                    }`}
-                  >
-                    {tf}
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
-
-          <div>
-            <label className="mb-1 block text-[10px] uppercase tracking-wide text-slate-500">RSI period</label>
-            <input
-              type="number"
-              min={2}
-              max={100}
-              value={rsiPeriod}
-              onChange={(e) => setRsiPeriod(Number(e.target.value) || 14)}
-              className="w-16 rounded-md border border-surface-border bg-surface px-2 py-1.5 text-xs text-slate-200"
-            />
-          </div>
-
-          <button
-            type="button"
-            disabled={loading}
-            onClick={() => void load()}
-            className="inline-flex items-center gap-1.5 rounded-md border border-accent/40 bg-accent/10 px-3 py-1.5 text-xs text-accent hover:bg-accent/20 disabled:opacity-50"
-          >
-            <RefreshCw className={`h-3.5 w-3.5 ${loading ? "animate-spin" : ""}`} />
-            Refresh
-          </button>
-        </div>
+        )}
+        {advancedChips.length > 0 && <ActiveFilterChips chips={advancedChips} />}
       </div>
+    ) : undefined;
 
-      {error && (
-        <div className="rounded-md border border-rose-500/30 bg-rose-500/10 px-3 py-2 text-xs text-rose-200">
-          {error}
-        </div>
-      )}
-
-      {data && (
-        <div className="grid grid-cols-2 gap-2 sm:grid-cols-5">
-          <Stat label="Instrument" value={data.label} sub={data.symbol} />
-          <Stat
-            label="Last close"
-            value={formatNum(data.last_bar.close)}
-            sub={data.last_bar.ts ? String(data.last_bar.ts).slice(0, 16) : undefined}
+  return (
+    <div className="page-scroll space-y-1 px-1.5 py-1 sm:px-2">
+      <PageToolbar
+        right={
+          <AdvancedButton
+            onClick={() => setAdvancedOpen(true)}
+            activeCount={advancedChips.length}
           />
-          <Stat label="Bars" value={String(data.bar_count)} sub={`${data.timeframe} · ${data.source}`} />
-          <Stat
-            label="Overall"
-            value={overallLabel(data.overall_bias)}
-            valueClass={biasClass(data.overall_bias).split(" ").filter((c) => c.startsWith("text-")).join(" ")}
-            sub={`score ${data.bias_score > 0 ? "+" : ""}${data.bias_score}`}
+        }
+        below={toolbarBelow}
+      >
+        <h1 className="shrink-0 text-data-md font-semibold text-slate-100">Indicator Analysis</h1>
+        <ToolbarDivider />
+        <div className="relative shrink-0">
+          <Search className="pointer-events-none absolute left-2 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate-400" />
+          <input
+            value={symbolInput}
+            onChange={(e) => setSymbolInput(e.target.value.toUpperCase())}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") applySymbol(symbolInput);
+            }}
+            placeholder="NIFTY or RELIANCE"
+            className="h-7 w-40 rounded-md border border-surface-border bg-surface pl-7 pr-2 text-data-sm text-slate-200"
           />
-          <Stat label="Bull vs Bear" value={`${bullishCount} / ${bearishCount}`} sub="computable leans" />
         </div>
-      )}
-
-      <div className="flex flex-wrap items-center gap-2">
-        <span className="text-[10px] uppercase tracking-wide text-slate-500">Show</span>
+        <button
+          type="button"
+          onClick={() => applySymbol(symbolInput)}
+          className="h-7 shrink-0 rounded-md border border-surface-border px-2 text-data-sm text-slate-200 hover:border-accent/40"
+        >
+          Go
+        </button>
+        <button
+          type="button"
+          disabled={loading}
+          onClick={() => void load()}
+          className="inline-flex h-7 shrink-0 items-center gap-1.5 rounded-md border border-accent/40 bg-accent/10 px-2.5 text-data-sm font-semibold text-accent hover:bg-accent/20 disabled:opacity-50"
+        >
+          <RefreshCw className={`h-3.5 w-3.5 ${loading ? "animate-spin" : ""}`} />
+          Refresh
+        </button>
+        <ToolbarDivider />
+        <span className="shrink-0 text-[10px] uppercase tracking-wide text-slate-400">Show</span>
         {(
           [
             ["all", "All"],
@@ -310,72 +285,153 @@ export function IndicatorAnalysisPage() {
             key={key}
             type="button"
             onClick={() => setFilter(key)}
-            className={`rounded-md border px-2.5 py-1 text-xs ${
+            className={`h-7 shrink-0 rounded-md border px-2 text-data-sm ${
               filter === key
                 ? "border-accent/40 bg-accent/10 text-accent"
-                : "border-surface-border text-slate-400 hover:text-slate-200"
+                : "border-surface-border text-slate-300 hover:text-slate-100"
             }`}
           >
             {label}
           </button>
         ))}
-        <span className="ml-auto text-[10px] text-slate-600">
-          Ranked by tweet mention frequency · catalog from kyalashish_own_400
-        </span>
-      </div>
+      </PageToolbar>
+
+      {error && (
+        <div className="rounded-md border border-rose-500/30 bg-rose-500/10 px-2 py-1 text-data-sm text-rose-200">
+          {error}
+        </div>
+      )}
+
+      {data && (
+        <div className="panel flex items-center gap-3 overflow-x-auto px-2 py-1">
+          <StatChip label="Instrument" value={data.label} hint={data.symbol} />
+          <StatChip
+            label="Last close"
+            value={formatNum(data.last_bar.close)}
+            hint={data.last_bar.ts ? String(data.last_bar.ts).slice(0, 16) : undefined}
+          />
+          <StatChip label="Bars" value={String(data.bar_count)} hint={`${data.timeframe} · ${data.source}`} />
+          <StatChip
+            label="Overall"
+            value={
+              <>
+                <span className="capitalize">{overallLabel(data.overall_bias)}</span>
+                <span className="ml-1 text-data-xs font-normal text-slate-300">
+                  score {data.bias_score > 0 ? "+" : ""}
+                  {data.bias_score}
+                </span>
+              </>
+            }
+            valueClassName={biasClass(data.overall_bias)
+              .split(" ")
+              .filter((c) => c.startsWith("text-"))
+              .join(" ")}
+          />
+          <StatChip
+            label="Bull / Bear"
+            value={
+              <>
+                <span className="text-gain">{bullishCount}</span>
+                <span className="text-slate-500"> / </span>
+                <span className="text-loss">{bearishCount}</span>
+              </>
+            }
+            hint="computable leans"
+          />
+          <StatChip label="Showing" value={`${indicators.length}`} valueClassName="text-slate-300" />
+        </div>
+      )}
 
       {loading && !data ? (
-        <div className="flex h-48 items-center justify-center rounded-lg border border-surface-border bg-surface text-sm text-slate-500">
+        <div className="panel flex h-48 items-center justify-center text-data-sm text-slate-400">
           Computing indicators…
         </div>
       ) : (
-        <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-1.5 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
           {indicators.map((ind) => (
-            <article
-              key={ind.id}
-              className="rounded-lg border border-surface-border bg-surface p-3"
-            >
+            <article key={ind.id} className="panel p-2">
               <div className="flex items-start justify-between gap-2">
-                <div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-[10px] font-medium text-slate-500">#{ind.rank}</span>
-                    <h2 className="text-sm font-medium text-slate-100">{ind.name}</h2>
+                <div className="min-w-0">
+                  <div className="flex items-baseline gap-1.5">
+                    <span className="text-[10px] font-medium text-slate-400">#{ind.rank}</span>
+                    <h2 className="min-w-0 text-data-md font-semibold text-slate-100">
+                      <Clip title={ind.name}>{ind.name}</Clip>
+                    </h2>
                   </div>
-                  <p className="mt-0.5 text-[10px] text-slate-500">
+                  <p className="text-[10px] text-slate-400">
                     {ind.tweet_count} tweet mentions
                     {!ind.computable ? " · reference only" : ""}
                   </p>
                 </div>
-                <span className={`shrink-0 rounded border px-1.5 py-0.5 text-[10px] capitalize ${biasClass(ind.bias)}`}>
+                <span className={`shrink-0 rounded border px-1.5 text-[10px] leading-4 capitalize ${biasClass(ind.bias)}`}>
                   {ind.bias.replace(/_/g, " ")}
                 </span>
               </div>
-              <p className="mt-2 text-xs leading-relaxed text-slate-300">{ind.detail}</p>
               <MetricChips metrics={ind.metrics} />
+              {ind.detail ? (
+                <details className="group mt-1">
+                  <summary className="cursor-pointer select-none text-[10px] uppercase tracking-wide text-slate-400 hover:text-slate-200">
+                    Details
+                  </summary>
+                  <p className="mt-1 text-data-sm leading-relaxed text-slate-300">{ind.detail}</p>
+                </details>
+              ) : null}
             </article>
           ))}
         </div>
       )}
-    </main>
-  );
-}
 
-function Stat({
-  label,
-  value,
-  valueClass,
-  sub,
-}: {
-  label: string;
-  value: string;
-  valueClass?: string;
-  sub?: string;
-}) {
-  return (
-    <div className="rounded-md border border-surface-border bg-surface px-3 py-2">
-      <div className="text-[10px] uppercase tracking-wide text-slate-500">{label}</div>
-      <div className={`mt-0.5 text-sm font-medium capitalize ${valueClass ?? "text-slate-100"}`}>{value}</div>
-      {sub ? <div className="truncate text-[10px] text-slate-500">{sub}</div> : null}
+      <AdvancedDrawer
+        open={advancedOpen}
+        onClose={() => setAdvancedOpen(false)}
+        title="Analysis settings"
+        subtitle={symbol}
+      >
+        <AdvancedSection title="Filters">
+          {isNifty ? (
+            <div className="space-y-1">
+              <div className="text-[10px] uppercase tracking-wide text-slate-400">Nifty timeframe</div>
+              <div className="inline-flex rounded-md border border-surface-border bg-surface p-0.5">
+                {NIFTY_TFS.map((tf) => (
+                  <button
+                    key={tf}
+                    type="button"
+                    onClick={() => setTimeframe(tf)}
+                    className={`rounded px-2 py-0.5 text-data-sm ${
+                      timeframe === tf ? "bg-accent/15 text-accent" : "text-slate-300 hover:text-slate-100"
+                    }`}
+                  >
+                    {tf}
+                  </button>
+                ))}
+              </div>
+            </div>
+          ) : (
+            <p className="text-data-xs text-slate-400">Stocks use daily bars; timeframe applies to NIFTY only.</p>
+          )}
+          <div className="space-y-1">
+            <div className="text-[10px] uppercase tracking-wide text-slate-400">RSI period</div>
+            <input
+              type="number"
+              min={2}
+              max={100}
+              value={rsiPeriod}
+              onChange={(e) => setRsiPeriod(Number(e.target.value) || 14)}
+              className="h-7 w-16 rounded-md border border-surface-border bg-surface px-2 text-data-sm text-slate-200"
+            />
+          </div>
+        </AdvancedSection>
+        <AdvancedSection title="Help">
+          <p className="leading-relaxed text-slate-300">
+            Live readings for the toolkit ranked from @kyalashish tweets (Elliott, Time Cycle, Bollinger,
+            Keltner, KST, Supertrend, Volume Profile, RSI, …). Computable indicators run on Nifty /
+            stock OHLC; discretionary ones stay as reference.
+          </p>
+          <p className="text-data-xs text-slate-400">
+            Ranked by tweet mention frequency · catalog from kyalashish_own_400
+          </p>
+        </AdvancedSection>
+      </AdvancedDrawer>
     </div>
   );
 }

@@ -246,6 +246,11 @@ SYNTHETIC_THEMES: tuple[SectorUniverseItem, ...] = (
         tickers=("BALRAMCHIN", "TRIVENI", "RENUKA", "EIDPARRY", "DALMIASUG"),
     ),
     SectorUniverseItem(
+        "Fertilizers",
+        "Synthetic",
+        tickers=("COROMANDEL", "CHAMBLFERT", "DEEPAKFERT", "GNFC", "GSFC", "RCF", "PARADEEP"),
+    ),
+    SectorUniverseItem(
         "Specialty Chemicals",
         "Synthetic",
         tickers=("SRF", "DEEPAKNTR", "TATACHEM", "NAVINFLUOR", "AARTIIND"),
