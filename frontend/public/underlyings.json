@@ -1,0 +1,2318 @@
+{
+ "generatedAt": "2026-08-13T18:52:27.390Z",
+ "count": 217,
+ "themes": {
+  "sectors": {
+   "banks-private": {
+    "label": "Private Banks",
+    "count": 11
+   },
+   "banks-psu": {
+    "label": "PSU Banks",
+    "count": 7
+   },
+   "nbfc-lending": {
+    "label": "NBFC & Lending",
+    "count": 15
+   },
+   "insurance": {
+    "label": "Insurance",
+    "count": 7
+   },
+   "capital-markets": {
+    "label": "Capital Markets",
+    "count": 11
+   },
+   "it-services": {
+    "label": "IT Services",
+    "count": 12
+   },
+   "auto-oem": {
+    "label": "Auto OEM",
+    "count": 10
+   },
+   "auto-ancillary": {
+    "label": "Auto Ancillary",
+    "count": 6
+   },
+   "pharma-healthcare": {
+    "label": "Pharma & Healthcare",
+    "count": 16
+   },
+   "metals-mining": {
+    "label": "Metals & Mining",
+    "count": 10
+   },
+   "oil-gas": {
+    "label": "Oil & Gas",
+    "count": 8
+   },
+   "power-utilities": {
+    "label": "Power & Utilities",
+    "count": 15
+   },
+   "fmcg-consumer": {
+    "label": "FMCG & Consumer",
+    "count": 16
+   },
+   "cement-building": {
+    "label": "Cement & Building",
+    "count": 10
+   },
+   "capital-goods-infra": {
+    "label": "Capital Goods & Infra",
+    "count": 12
+   },
+   "defence-railways": {
+    "label": "Defence & Railways",
+    "count": 6
+   },
+   "realty": {
+    "label": "Realty",
+    "count": 6
+   },
+   "new-age-internet": {
+    "label": "New-Age Internet",
+    "count": 6
+   },
+   "telecom-media": {
+    "label": "Telecom & Media",
+    "count": 3
+   },
+   "chemicals-agri": {
+    "label": "Chemicals & Agri",
+    "count": 3
+   },
+   "retail-consumer-durables": {
+    "label": "Retail & Durables",
+    "count": 12
+   },
+   "transport-logistics": {
+    "label": "Transport & Logistics",
+    "count": 3
+   },
+   "diversified": {
+    "label": "Diversified",
+    "count": 3
+   }
+  },
+  "baskets": {
+   "psu": {
+    "label": "PSU",
+    "count": 35
+   },
+   "adani-group": {
+    "label": "Adani Group",
+    "count": 6
+   },
+   "tata-group": {
+    "label": "Tata Group",
+    "count": 10
+   },
+   "bajaj-group": {
+    "label": "Bajaj Group",
+    "count": 4
+   },
+   "defence": {
+    "label": "Defence",
+    "count": 6
+   },
+   "railways": {
+    "label": "Railways",
+    "count": 3
+   },
+   "green-energy": {
+    "label": "Green Energy",
+    "count": 8
+   },
+   "ems": {
+    "label": "EMS",
+    "count": 5
+   },
+   "capital-market-plays": {
+    "label": "Capital Market Plays",
+    "count": 8
+   }
+  }
+ },
+ "underlyings": [
+  {
+   "symbol": "NIFTY",
+   "name": "Nifty 50",
+   "apiKey": "NSE:NIFTY50",
+   "lot": 65,
+   "kind": "index",
+   "exch": "NSE"
+  },
+  {
+   "symbol": "BANKNIFTY",
+   "name": "Nifty Bank",
+   "apiKey": "NSE:BANKNIFTY",
+   "lot": 30,
+   "kind": "index",
+   "exch": "NSE"
+  },
+  {
+   "symbol": "FINNIFTY",
+   "name": "Nifty Fin Service",
+   "apiKey": "NSE:FINNIFTY",
+   "lot": 60,
+   "kind": "index",
+   "exch": "NSE"
+  },
+  {
+   "symbol": "MIDCPNIFTY",
+   "name": "NIFTY MID SELECT",
+   "apiKey": "NSE:MIDCPNIFTY",
+   "lot": 120,
+   "kind": "index",
+   "exch": "NSE"
+  },
+  {
+   "symbol": "SENSEX",
+   "name": "Sensex",
+   "apiKey": "BSE:SENSEX",
+   "lot": 20,
+   "kind": "index",
+   "exch": "BSE"
+  },
+  {
+   "symbol": "BANKEX",
+   "name": "Bankex",
+   "apiKey": "BSE:BANKEX",
+   "lot": 30,
+   "kind": "index",
+   "exch": "BSE"
+  },
+  {
+   "symbol": "FOCIT",
+   "name": "FOCIT",
+   "apiKey": "BSE:FOCIT",
+   "lot": 45,
+   "kind": "index",
+   "exch": "BSE"
+  },
+  {
+   "symbol": "NIFTYNXT50",
+   "name": "Nifty Next 50",
+   "apiKey": "NSE:NIFTYNXT50",
+   "lot": 25,
+   "kind": "index",
+   "exch": "NSE"
+  },
+  {
+   "symbol": "SENSEX50",
+   "name": "Sensex 50",
+   "apiKey": "BSE:SENSEX50",
+   "lot": 75,
+   "kind": "index",
+   "exch": "BSE"
+  },
+  {
+   "symbol": "360ONE",
+   "name": "360 One Wealth Asset Mgmt",
+   "apiKey": "NSE:360ONE",
+   "lot": 500,
+   "kind": "stock",
+   "exch": "NSE",
+   "sector": "capital-markets",
+   "baskets": [
+    "capital-market-plays"
+   ]
+  },
+  {
+   "symbol": "ABB",
+   "name": "ABB India",
+   "apiKey": "NSE:ABB",
+   "lot": 125,
+   "kind": "stock",
+   "exch": "NSE",
+   "sector": "capital-goods-infra"
+  },
+  {
+   "symbol": "ABCAPITAL",
+   "name": "Aditya Birla Capital",
+   "apiKey": "NSE:ABCAPITAL",
+   "lot": 3100,
+   "kind": "stock",
+   "exch": "NSE",
+   "sector": "nbfc-lending"
+  },
+  {
+   "symbol": "ADANIENSOL",
+   "name": "Adani Energy Solutions",
+   "apiKey": "NSE:ADANIENSOL",
+   "lot": 675,
+   "kind": "stock",
+   "exch": "NSE",
+   "sector": "power-utilities",
+   "baskets": [
+    "adani-group"
+   ]
+  },
+  {
+   "symbol": "ADANIENT",
+   "name": "Adani Enterprises",
+   "apiKey": "NSE:ADANIENT",
+   "lot": 309,
+   "kind": "stock",
+   "exch": "NSE",
+   "sector": "diversified",
+   "baskets": [
+    "adani-group"
+   ]
+  },
+  {
+   "symbol": "ADANIGREEN",
+   "name": "Adani Green Energy",
+   "apiKey": "NSE:ADANIGREEN",
+   "lot": 600,
+   "kind": "stock",
+   "exch": "NSE",
+   "sector": "power-utilities",
+   "baskets": [
+    "adani-group",
+    "green-energy"
+   ]
+  },
+  {
+   "symbol": "ADANIPORTS",
+   "name": "Adani Ports & SEZ",
+   "apiKey": "NSE:ADANIPORTS",
+   "lot": 475,
+   "kind": "stock",
+   "exch": "NSE",
+   "sector": "transport-logistics",
+   "baskets": [
+    "adani-group"
+   ]
+  },
+  {
+   "symbol": "ADANIPOWER",
+   "name": "Adani Power",
+   "apiKey": "NSE:ADANIPOWER",
+   "lot": 3550,
+   "kind": "stock",
+   "exch": "NSE",
+   "sector": "power-utilities",
+   "baskets": [
+    "adani-group"
+   ]
+  },
+  {
+   "symbol": "ALKEM",
+   "name": "Alkem Laboratories",
+   "apiKey": "NSE:ALKEM",
+   "lot": 125,
+   "kind": "stock",
+   "exch": "NSE",
+   "sector": "pharma-healthcare"
+  },
+  {
+   "symbol": "AMBER",
+   "name": "Amber ENT India",
+   "apiKey": "NSE:AMBER",
+   "lot": 100,
+   "kind": "stock",
+   "exch": "NSE",
+   "sector": "retail-consumer-durables",
+   "baskets": [
+    "ems"
+   ]
+  },
+  {
+   "symbol": "AMBUJACEM",
+   "name": "Ambuja Cements",
+   "apiKey": "NSE:AMBUJACEM",
+   "lot": 1200,
+   "kind": "stock",
+   "exch": "NSE",
+   "sector": "cement-building",
+   "baskets": [
+    "adani-group"
+   ]
+  },
+  {
+   "symbol": "ANGELONE",
+   "name": "Angel One",
+   "apiKey": "NSE:ANGELONE",
+   "lot": 2500,
+   "kind": "stock",
+   "exch": "NSE",
+   "sector": "capital-markets",
+   "baskets": [
+    "capital-market-plays"
+   ]
+  },
+  {
+   "symbol": "APLAPOLLO",
+   "name": "APL Apollo Tubes",
+   "apiKey": "NSE:APLAPOLLO",
+   "lot": 350,
+   "kind": "stock",
+   "exch": "NSE",
+   "sector": "cement-building"
+  },
+  {
+   "symbol": "APOLLOHOSP",
+   "name": "Apollo Hospitals Ent",
+   "apiKey": "NSE:APOLLOHOSP",
+   "lot": 125,
+   "kind": "stock",
+   "exch": "NSE",
+   "sector": "pharma-healthcare"
+  },
+  {
+   "symbol": "ASHOKLEY",
+   "name": "Ashok Leyland",
+   "apiKey": "NSE:ASHOKLEY",
+   "lot": 5000,
+   "kind": "stock",
+   "exch": "NSE",
+   "sector": "auto-oem"
+  },
+  {
+   "symbol": "ASIANPAINT",
+   "name": "Asian Paints",
+   "apiKey": "NSE:ASIANPAINT",
+   "lot": 250,
+   "kind": "stock",
+   "exch": "NSE",
+   "sector": "cement-building"
+  },
+  {
+   "symbol": "ASTRAL",
+   "name": "Astral",
+   "apiKey": "NSE:ASTRAL",
+   "lot": 425,
+   "kind": "stock",
+   "exch": "NSE",
+   "sector": "cement-building"
+  },
+  {
+   "symbol": "AUBANK",
+   "name": "AU Small Finance Bank",
+   "apiKey": "NSE:AUBANK",
+   "lot": 1000,
+   "kind": "stock",
+   "exch": "NSE",
+   "sector": "banks-private"
+  },
+  {
+   "symbol": "AUROPHARMA",
+   "name": "Aurobindo Pharma",
+   "apiKey": "NSE:AUROPHARMA",
+   "lot": 550,
+   "kind": "stock",
+   "exch": "NSE",
+   "sector": "pharma-healthcare"
+  },
+  {
+   "symbol": "AXISBANK",
+   "name": "Axis Bank",
+   "apiKey": "NSE:AXISBANK",
+   "lot": 625,
+   "kind": "stock",
+   "exch": "NSE",
+   "sector": "banks-private"
+  },
+  {
+   "symbol": "BAJAJ-AUTO",
+   "name": "Bajaj Auto",
+   "apiKey": "NSE:BAJAJ-AUTO",
+   "lot": 75,
+   "kind": "stock",
+   "exch": "NSE",
+   "sector": "auto-oem",
+   "baskets": [
+    "bajaj-group"
+   ]
+  },
+  {
+   "symbol": "BAJAJFINSV",
+   "name": "Bajaj Finserv",
+   "apiKey": "NSE:BAJAJFINSV",
+   "lot": 300,
+   "kind": "stock",
+   "exch": "NSE",
+   "sector": "insurance",
+   "baskets": [
+    "bajaj-group"
+   ]
+  },
+  {
+   "symbol": "BAJAJHLDNG",
+   "name": "Bajaj Holdings & Invest",
+   "apiKey": "NSE:BAJAJHLDNG",
+   "lot": 75,
+   "kind": "stock",
+   "exch": "NSE",
+   "sector": "nbfc-lending",
+   "baskets": [
+    "bajaj-group"
+   ]
+  },
+  {
+   "symbol": "BAJFINANCE",
+   "name": "Bajaj Finance",
+   "apiKey": "NSE:BAJFINANCE",
+   "lot": 750,
+   "kind": "stock",
+   "exch": "NSE",
+   "sector": "nbfc-lending",
+   "baskets": [
+    "bajaj-group"
+   ]
+  },
+  {
+   "symbol": "BANDHANBNK",
+   "name": "Bandhan Bank",
+   "apiKey": "NSE:BANDHANBNK",
+   "lot": 3600,
+   "kind": "stock",
+   "exch": "NSE",
+   "sector": "banks-private"
+  },
+  {
+   "symbol": "BANKBARODA",
+   "name": "Bank of Baroda",
+   "apiKey": "NSE:BANKBARODA",
+   "lot": 2925,
+   "kind": "stock",
+   "exch": "NSE",
+   "sector": "banks-psu",
+   "baskets": [
+    "psu"
+   ]
+  },
+  {
+   "symbol": "BANKINDIA",
+   "name": "Bank of India",
+   "apiKey": "NSE:BANKINDIA",
+   "lot": 5200,
+   "kind": "stock",
+   "exch": "NSE",
+   "sector": "banks-psu",
+   "baskets": [
+    "psu"
+   ]
+  },
+  {
+   "symbol": "BDL",
+   "name": "Bharat Dynamics",
+   "apiKey": "NSE:BDL",
+   "lot": 425,
+   "kind": "stock",
+   "exch": "NSE",
+   "sector": "defence-railways",
+   "baskets": [
+    "defence",
+    "psu"
+   ]
+  },
+  {
+   "symbol": "BEL",
+   "name": "Bharat Electronics",
+   "apiKey": "NSE:BEL",
+   "lot": 1425,
+   "kind": "stock",
+   "exch": "NSE",
+   "sector": "defence-railways",
+   "baskets": [
+    "defence",
+    "psu"
+   ]
+  },
+  {
+   "symbol": "BHARATFORG",
+   "name": "Bharat Forge",
+   "apiKey": "NSE:BHARATFORG",
+   "lot": 500,
+   "kind": "stock",
+   "exch": "NSE",
+   "sector": "auto-ancillary"
+  },
+  {
+   "symbol": "BHARTIARTL",
+   "name": "Bharti Airtel",
+   "apiKey": "NSE:BHARTIARTL",
+   "lot": 475,
+   "kind": "stock",
+   "exch": "NSE",
+   "sector": "telecom-media"
+  },
+  {
+   "symbol": "BHEL",
+   "name": "Bharat Heavy Electricals",
+   "apiKey": "NSE:BHEL",
+   "lot": 2625,
+   "kind": "stock",
+   "exch": "NSE",
+   "sector": "capital-goods-infra",
+   "baskets": [
+    "psu"
+   ]
+  },
+  {
+   "symbol": "BIOCON",
+   "name": "Biocon",
+   "apiKey": "NSE:BIOCON",
+   "lot": 2500,
+   "kind": "stock",
+   "exch": "NSE",
+   "sector": "pharma-healthcare"
+  },
+  {
+   "symbol": "BLUESTARCO",
+   "name": "Blue Star",
+   "apiKey": "NSE:BLUESTARCO",
+   "lot": 325,
+   "kind": "stock",
+   "exch": "NSE",
+   "sector": "retail-consumer-durables"
+  },
+  {
+   "symbol": "BOSCHLTD",
+   "name": "Bosch",
+   "apiKey": "NSE:BOSCHLTD",
+   "lot": 25,
+   "kind": "stock",
+   "exch": "NSE",
+   "sector": "auto-ancillary"
+  },
+  {
+   "symbol": "BPCL",
+   "name": "Bharat Petroleum Corp.",
+   "apiKey": "NSE:BPCL",
+   "lot": 1975,
+   "kind": "stock",
+   "exch": "NSE",
+   "sector": "oil-gas",
+   "baskets": [
+    "psu"
+   ]
+  },
+  {
+   "symbol": "BRITANNIA",
+   "name": "Britannia Industries",
+   "apiKey": "NSE:BRITANNIA",
+   "lot": 125,
+   "kind": "stock",
+   "exch": "NSE",
+   "sector": "fmcg-consumer"
+  },
+  {
+   "symbol": "BSE",
+   "name": "BSE",
+   "apiKey": "NSE:BSE",
+   "lot": 200,
+   "kind": "stock",
+   "exch": "NSE",
+   "sector": "capital-markets",
+   "baskets": [
+    "capital-market-plays"
+   ]
+  },
+  {
+   "symbol": "CAMS",
+   "name": "Computer Age Management Services",
+   "apiKey": "NSE:CAMS",
+   "lot": 825,
+   "kind": "stock",
+   "exch": "NSE",
+   "sector": "capital-markets",
+   "baskets": [
+    "capital-market-plays"
+   ]
+  },
+  {
+   "symbol": "CANBK",
+   "name": "Canara Bank",
+   "apiKey": "NSE:CANBK",
+   "lot": 6750,
+   "kind": "stock",
+   "exch": "NSE",
+   "sector": "banks-psu",
+   "baskets": [
+    "psu"
+   ]
+  },
+  {
+   "symbol": "CDSL",
+   "name": "Central Depository Services",
+   "apiKey": "NSE:CDSL",
+   "lot": 475,
+   "kind": "stock",
+   "exch": "NSE",
+   "sector": "capital-markets",
+   "baskets": [
+    "capital-market-plays"
+   ]
+  },
+  {
+   "symbol": "CGPOWER",
+   "name": "CG Power & Industrial",
+   "apiKey": "NSE:CGPOWER",
+   "lot": 850,
+   "kind": "stock",
+   "exch": "NSE",
+   "sector": "power-utilities",
+   "baskets": [
+    "ems"
+   ]
+  },
+  {
+   "symbol": "CHOLAFIN",
+   "name": "Cholamandalam Investment",
+   "apiKey": "NSE:CHOLAFIN",
+   "lot": 625,
+   "kind": "stock",
+   "exch": "NSE",
+   "sector": "nbfc-lending"
+  },
+  {
+   "symbol": "CIPLA",
+   "name": "Cipla",
+   "apiKey": "NSE:CIPLA",
+   "lot": 425,
+   "kind": "stock",
+   "exch": "NSE",
+   "sector": "pharma-healthcare"
+  },
+  {
+   "symbol": "COALINDIA",
+   "name": "Coal India",
+   "apiKey": "NSE:COALINDIA",
+   "lot": 1350,
+   "kind": "stock",
+   "exch": "NSE",
+   "sector": "metals-mining",
+   "baskets": [
+    "psu"
+   ]
+  },
+  {
+   "symbol": "COCHINSHIP",
+   "name": "Cochin Shipyard",
+   "apiKey": "NSE:COCHINSHIP",
+   "lot": 400,
+   "kind": "stock",
+   "exch": "NSE",
+   "sector": "defence-railways",
+   "baskets": [
+    "defence",
+    "psu"
+   ]
+  },
+  {
+   "symbol": "COFORGE",
+   "name": "Coforge",
+   "apiKey": "NSE:COFORGE",
+   "lot": 475,
+   "kind": "stock",
+   "exch": "NSE",
+   "sector": "it-services"
+  },
+  {
+   "symbol": "COLPAL",
+   "name": "Colgate Palmolive (India)",
+   "apiKey": "NSE:COLPAL",
+   "lot": 275,
+   "kind": "stock",
+   "exch": "NSE",
+   "sector": "fmcg-consumer"
+  },
+  {
+   "symbol": "CONCOR",
+   "name": "Container Corp. of India",
+   "apiKey": "NSE:CONCOR",
+   "lot": 1250,
+   "kind": "stock",
+   "exch": "NSE",
+   "sector": "capital-goods-infra",
+   "baskets": [
+    "psu",
+    "railways"
+   ]
+  },
+  {
+   "symbol": "CROMPTON",
+   "name": "Crompton Greaves Consumer",
+   "apiKey": "NSE:CROMPTON",
+   "lot": 2150,
+   "kind": "stock",
+   "exch": "NSE",
+   "sector": "retail-consumer-durables"
+  },
+  {
+   "symbol": "CUMMINSIND",
+   "name": "Cummins India",
+   "apiKey": "NSE:CUMMINSIND",
+   "lot": 200,
+   "kind": "stock",
+   "exch": "NSE",
+   "sector": "capital-goods-infra"
+  },
+  {
+   "symbol": "DABUR",
+   "name": "Dabur India",
+   "apiKey": "NSE:DABUR",
+   "lot": 1250,
+   "kind": "stock",
+   "exch": "NSE",
+   "sector": "fmcg-consumer"
+  },
+  {
+   "symbol": "DALBHARAT",
+   "name": "Dalmia Bharat",
+   "apiKey": "NSE:DALBHARAT",
+   "lot": 325,
+   "kind": "stock",
+   "exch": "NSE",
+   "sector": "cement-building"
+  },
+  {
+   "symbol": "DELHIVERY",
+   "name": "Delhivery",
+   "apiKey": "NSE:DELHIVERY",
+   "lot": 2075,
+   "kind": "stock",
+   "exch": "NSE",
+   "sector": "new-age-internet"
+  },
+  {
+   "symbol": "DIVISLAB",
+   "name": "Divi's Laboratories",
+   "apiKey": "NSE:DIVISLAB",
+   "lot": 100,
+   "kind": "stock",
+   "exch": "NSE",
+   "sector": "pharma-healthcare"
+  },
+  {
+   "symbol": "DIXON",
+   "name": "Dixon Technologies India",
+   "apiKey": "NSE:DIXON",
+   "lot": 50,
+   "kind": "stock",
+   "exch": "NSE",
+   "sector": "retail-consumer-durables",
+   "baskets": [
+    "ems"
+   ]
+  },
+  {
+   "symbol": "DLF",
+   "name": "DLF",
+   "apiKey": "NSE:DLF",
+   "lot": 950,
+   "kind": "stock",
+   "exch": "NSE",
+   "sector": "realty"
+  },
+  {
+   "symbol": "DMART",
+   "name": "Avenue Supermarts",
+   "apiKey": "NSE:DMART",
+   "lot": 150,
+   "kind": "stock",
+   "exch": "NSE",
+   "sector": "retail-consumer-durables"
+  },
+  {
+   "symbol": "DRREDDY",
+   "name": "Dr Reddy's Laboratories",
+   "apiKey": "NSE:DRREDDY",
+   "lot": 625,
+   "kind": "stock",
+   "exch": "NSE",
+   "sector": "pharma-healthcare"
+  },
+  {
+   "symbol": "EICHERMOT",
+   "name": "Eicher Motors",
+   "apiKey": "NSE:EICHERMOT",
+   "lot": 100,
+   "kind": "stock",
+   "exch": "NSE",
+   "sector": "auto-oem"
+  },
+  {
+   "symbol": "ETERNAL",
+   "name": "Zomato",
+   "apiKey": "NSE:ETERNAL",
+   "lot": 2425,
+   "kind": "stock",
+   "exch": "NSE",
+   "sector": "new-age-internet"
+  },
+  {
+   "symbol": "FEDERALBNK",
+   "name": "Federal Bank",
+   "apiKey": "NSE:FEDERALBNK",
+   "lot": 2500,
+   "kind": "stock",
+   "exch": "NSE",
+   "sector": "banks-private"
+  },
+  {
+   "symbol": "FORCEMOT",
+   "name": "Force Motors",
+   "apiKey": "NSE:FORCEMOT",
+   "lot": 25,
+   "kind": "stock",
+   "exch": "NSE",
+   "sector": "auto-oem"
+  },
+  {
+   "symbol": "FORTIS",
+   "name": "Fortis Healthcare",
+   "apiKey": "NSE:FORTIS",
+   "lot": 775,
+   "kind": "stock",
+   "exch": "NSE",
+   "sector": "pharma-healthcare"
+  },
+  {
+   "symbol": "GAIL",
+   "name": "GAIL India",
+   "apiKey": "NSE:GAIL",
+   "lot": 3550,
+   "kind": "stock",
+   "exch": "NSE",
+   "sector": "oil-gas",
+   "baskets": [
+    "psu"
+   ]
+  },
+  {
+   "symbol": "GLENMARK",
+   "name": "Glenmark Pharma",
+   "apiKey": "NSE:GLENMARK",
+   "lot": 375,
+   "kind": "stock",
+   "exch": "NSE",
+   "sector": "pharma-healthcare"
+  },
+  {
+   "symbol": "GMRAIRPORT",
+   "name": "GMR Airports Infra",
+   "apiKey": "NSE:GMRAIRPORT",
+   "lot": 6975,
+   "kind": "stock",
+   "exch": "NSE",
+   "sector": "capital-goods-infra"
+  },
+  {
+   "symbol": "GODFRYPHLP",
+   "name": "Godfrey Phillips India",
+   "apiKey": "NSE:GODFRYPHLP",
+   "lot": 275,
+   "kind": "stock",
+   "exch": "NSE",
+   "sector": "fmcg-consumer"
+  },
+  {
+   "symbol": "GODREJCP",
+   "name": "Godrej Consumer Products",
+   "apiKey": "NSE:GODREJCP",
+   "lot": 500,
+   "kind": "stock",
+   "exch": "NSE",
+   "sector": "fmcg-consumer"
+  },
+  {
+   "symbol": "GODREJPROP",
+   "name": "Godrej Properties",
+   "apiKey": "NSE:GODREJPROP",
+   "lot": 325,
+   "kind": "stock",
+   "exch": "NSE",
+   "sector": "realty"
+  },
+  {
+   "symbol": "GRASIM",
+   "name": "Grasim Industries",
+   "apiKey": "NSE:GRASIM",
+   "lot": 250,
+   "kind": "stock",
+   "exch": "NSE",
+   "sector": "cement-building"
+  },
+  {
+   "symbol": "GVT&D",
+   "name": "GE T&D India",
+   "apiKey": "NSE:GVT&D",
+   "lot": 125,
+   "kind": "stock",
+   "exch": "NSE",
+   "sector": "capital-goods-infra"
+  },
+  {
+   "symbol": "HAL",
+   "name": "Hindustan Aeronautics",
+   "apiKey": "NSE:HAL",
+   "lot": 150,
+   "kind": "stock",
+   "exch": "NSE",
+   "sector": "defence-railways",
+   "baskets": [
+    "defence",
+    "psu"
+   ]
+  },
+  {
+   "symbol": "HAVELLS",
+   "name": "Havells India",
+   "apiKey": "NSE:HAVELLS",
+   "lot": 500,
+   "kind": "stock",
+   "exch": "NSE",
+   "sector": "capital-goods-infra"
+  },
+  {
+   "symbol": "HCLTECH",
+   "name": "HCL Technologies",
+   "apiKey": "NSE:HCLTECH",
+   "lot": 400,
+   "kind": "stock",
+   "exch": "NSE",
+   "sector": "it-services"
+  },
+  {
+   "symbol": "HDFCAMC",
+   "name": "HDFC Asset Mgmt. Company",
+   "apiKey": "NSE:HDFCAMC",
+   "lot": 300,
+   "kind": "stock",
+   "exch": "NSE",
+   "sector": "capital-markets"
+  },
+  {
+   "symbol": "HDFCBANK",
+   "name": "HDFC Bank",
+   "apiKey": "NSE:HDFCBANK",
+   "lot": 650,
+   "kind": "stock",
+   "exch": "NSE",
+   "sector": "banks-private"
+  },
+  {
+   "symbol": "HDFCLIFE",
+   "name": "HDFC Life Ins. Company",
+   "apiKey": "NSE:HDFCLIFE",
+   "lot": 1100,
+   "kind": "stock",
+   "exch": "NSE",
+   "sector": "insurance"
+  },
+  {
+   "symbol": "HEROMOTOCO",
+   "name": "Hero MotoCorp",
+   "apiKey": "NSE:HEROMOTOCO",
+   "lot": 150,
+   "kind": "stock",
+   "exch": "NSE",
+   "sector": "auto-oem"
+  },
+  {
+   "symbol": "HINDALCO",
+   "name": "Hindalco Industries",
+   "apiKey": "NSE:HINDALCO",
+   "lot": 700,
+   "kind": "stock",
+   "exch": "NSE",
+   "sector": "metals-mining"
+  },
+  {
+   "symbol": "HINDPETRO",
+   "name": "Hindustan Petroleum Corp",
+   "apiKey": "NSE:HINDPETRO",
+   "lot": 2025,
+   "kind": "stock",
+   "exch": "NSE",
+   "sector": "oil-gas",
+   "baskets": [
+    "psu"
+   ]
+  },
+  {
+   "symbol": "HINDUNILVR",
+   "name": "Hindustan Unilever",
+   "apiKey": "NSE:HINDUNILVR",
+   "lot": 300,
+   "kind": "stock",
+   "exch": "NSE",
+   "sector": "fmcg-consumer"
+  },
+  {
+   "symbol": "HINDZINC",
+   "name": "Hindustan Zinc",
+   "apiKey": "NSE:HINDZINC",
+   "lot": 1225,
+   "kind": "stock",
+   "exch": "NSE",
+   "sector": "metals-mining",
+   "baskets": [
+    "psu"
+   ]
+  },
+  {
+   "symbol": "HYUNDAI",
+   "name": "Hyundai Motor India",
+   "apiKey": "NSE:HYUNDAI",
+   "lot": 275,
+   "kind": "stock",
+   "exch": "NSE",
+   "sector": "auto-oem"
+  },
+  {
+   "symbol": "ICICIBANK",
+   "name": "ICICI Bank",
+   "apiKey": "NSE:ICICIBANK",
+   "lot": 700,
+   "kind": "stock",
+   "exch": "NSE",
+   "sector": "banks-private"
+  },
+  {
+   "symbol": "ICICIGI",
+   "name": "ICICI Lombard General Ins",
+   "apiKey": "NSE:ICICIGI",
+   "lot": 325,
+   "kind": "stock",
+   "exch": "NSE",
+   "sector": "insurance"
+  },
+  {
+   "symbol": "ICICIPRULI",
+   "name": "ICICI Prudential Life Ins",
+   "apiKey": "NSE:ICICIPRULI",
+   "lot": 925,
+   "kind": "stock",
+   "exch": "NSE",
+   "sector": "insurance"
+  },
+  {
+   "symbol": "IDEA",
+   "name": "Vodafone Idea",
+   "apiKey": "NSE:IDEA",
+   "lot": 71475,
+   "kind": "stock",
+   "exch": "NSE",
+   "sector": "telecom-media"
+  },
+  {
+   "symbol": "IDFCFIRSTB",
+   "name": "IDFC First Bank",
+   "apiKey": "NSE:IDFCFIRSTB",
+   "lot": 9275,
+   "kind": "stock",
+   "exch": "NSE",
+   "sector": "banks-private"
+  },
+  {
+   "symbol": "IEX",
+   "name": "Indian Energy Exchange",
+   "apiKey": "NSE:IEX",
+   "lot": 4350,
+   "kind": "stock",
+   "exch": "NSE",
+   "sector": "diversified"
+  },
+  {
+   "symbol": "INDHOTEL",
+   "name": "Indian Hotels Co.",
+   "apiKey": "NSE:INDHOTEL",
+   "lot": 1000,
+   "kind": "stock",
+   "exch": "NSE",
+   "sector": "transport-logistics",
+   "baskets": [
+    "tata-group"
+   ]
+  },
+  {
+   "symbol": "INDIANB",
+   "name": "Indian Bank",
+   "apiKey": "NSE:INDIANB",
+   "lot": 1000,
+   "kind": "stock",
+   "exch": "NSE",
+   "sector": "banks-psu",
+   "baskets": [
+    "psu"
+   ]
+  },
+  {
+   "symbol": "INDIGO",
+   "name": "InterGlobe Aviation",
+   "apiKey": "NSE:INDIGO",
+   "lot": 150,
+   "kind": "stock",
+   "exch": "NSE",
+   "sector": "transport-logistics"
+  },
+  {
+   "symbol": "INDUSINDBK",
+   "name": "IndusInd Bank",
+   "apiKey": "NSE:INDUSINDBK",
+   "lot": 700,
+   "kind": "stock",
+   "exch": "NSE",
+   "sector": "banks-private"
+  },
+  {
+   "symbol": "INDUSTOWER",
+   "name": "Indus Towers",
+   "apiKey": "NSE:INDUSTOWER",
+   "lot": 1700,
+   "kind": "stock",
+   "exch": "NSE",
+   "sector": "telecom-media"
+  },
+  {
+   "symbol": "INFY",
+   "name": "Infosys",
+   "apiKey": "NSE:INFY",
+   "lot": 400,
+   "kind": "stock",
+   "exch": "NSE",
+   "sector": "it-services"
+  },
+  {
+   "symbol": "INOXWIND",
+   "name": "Inox Wind",
+   "apiKey": "NSE:INOXWIND",
+   "lot": 6400,
+   "kind": "stock",
+   "exch": "NSE",
+   "sector": "power-utilities",
+   "baskets": [
+    "green-energy"
+   ]
+  },
+  {
+   "symbol": "IOC",
+   "name": "Indian Oil Corp",
+   "apiKey": "NSE:IOC",
+   "lot": 4875,
+   "kind": "stock",
+   "exch": "NSE",
+   "sector": "oil-gas",
+   "baskets": [
+    "psu"
+   ]
+  },
+  {
+   "symbol": "IREDA",
+   "name": "Indian Renew. Energy Dev",
+   "apiKey": "NSE:IREDA",
+   "lot": 4525,
+   "kind": "stock",
+   "exch": "NSE",
+   "sector": "nbfc-lending",
+   "baskets": [
+    "green-energy",
+    "psu"
+   ]
+  },
+  {
+   "symbol": "IRFC",
+   "name": "Indian Railway Fin Corp",
+   "apiKey": "NSE:IRFC",
+   "lot": 5425,
+   "kind": "stock",
+   "exch": "NSE",
+   "sector": "nbfc-lending",
+   "baskets": [
+    "psu",
+    "railways"
+   ]
+  },
+  {
+   "symbol": "ITC",
+   "name": "ITC",
+   "apiKey": "NSE:ITC",
+   "lot": 1725,
+   "kind": "stock",
+   "exch": "NSE",
+   "sector": "fmcg-consumer"
+  },
+  {
+   "symbol": "JINDALSTEL",
+   "name": "Jindal Steel & Power",
+   "apiKey": "NSE:JINDALSTEL",
+   "lot": 625,
+   "kind": "stock",
+   "exch": "NSE",
+   "sector": "metals-mining"
+  },
+  {
+   "symbol": "JIOFIN",
+   "name": "Jio Fin Services",
+   "apiKey": "NSE:JIOFIN",
+   "lot": 2350,
+   "kind": "stock",
+   "exch": "NSE",
+   "sector": "nbfc-lending"
+  },
+  {
+   "symbol": "JSWENERGY",
+   "name": "JSW Energy",
+   "apiKey": "NSE:JSWENERGY",
+   "lot": 1075,
+   "kind": "stock",
+   "exch": "NSE",
+   "sector": "power-utilities",
+   "baskets": [
+    "green-energy"
+   ]
+  },
+  {
+   "symbol": "JSWSTEEL",
+   "name": "JSW Steel",
+   "apiKey": "NSE:JSWSTEEL",
+   "lot": 675,
+   "kind": "stock",
+   "exch": "NSE",
+   "sector": "metals-mining"
+  },
+  {
+   "symbol": "JUBLFOOD",
+   "name": "Jubilant Foodworks",
+   "apiKey": "NSE:JUBLFOOD",
+   "lot": 1250,
+   "kind": "stock",
+   "exch": "NSE",
+   "sector": "fmcg-consumer"
+  },
+  {
+   "symbol": "KALYANKJIL",
+   "name": "Kalyan Jewellers India",
+   "apiKey": "NSE:KALYANKJIL",
+   "lot": 1350,
+   "kind": "stock",
+   "exch": "NSE",
+   "sector": "retail-consumer-durables"
+  },
+  {
+   "symbol": "KAYNES",
+   "name": "Kaynes Technology India",
+   "apiKey": "NSE:KAYNES",
+   "lot": 150,
+   "kind": "stock",
+   "exch": "NSE",
+   "sector": "retail-consumer-durables",
+   "baskets": [
+    "ems"
+   ]
+  },
+  {
+   "symbol": "KEI",
+   "name": "KEI Industries",
+   "apiKey": "NSE:KEI",
+   "lot": 175,
+   "kind": "stock",
+   "exch": "NSE",
+   "sector": "capital-goods-infra"
+  },
+  {
+   "symbol": "KFINTECH",
+   "name": "Kfin Technologies",
+   "apiKey": "NSE:KFINTECH",
+   "lot": 575,
+   "kind": "stock",
+   "exch": "NSE",
+   "sector": "capital-markets",
+   "baskets": [
+    "capital-market-plays"
+   ]
+  },
+  {
+   "symbol": "KOTAKBANK",
+   "name": "Kotak Mahindra Bank",
+   "apiKey": "NSE:KOTAKBANK",
+   "lot": 2000,
+   "kind": "stock",
+   "exch": "NSE",
+   "sector": "banks-private"
+  },
+  {
+   "symbol": "KPITTECH",
+   "name": "KPIT Technologies",
+   "apiKey": "NSE:KPITTECH",
+   "lot": 775,
+   "kind": "stock",
+   "exch": "NSE",
+   "sector": "it-services"
+  },
+  {
+   "symbol": "LAURUSLABS",
+   "name": "Laurus Labs",
+   "apiKey": "NSE:LAURUSLABS",
+   "lot": 850,
+   "kind": "stock",
+   "exch": "NSE",
+   "sector": "pharma-healthcare"
+  },
+  {
+   "symbol": "LICHSGFIN",
+   "name": "LIC Housing Finance",
+   "apiKey": "NSE:LICHSGFIN",
+   "lot": 1000,
+   "kind": "stock",
+   "exch": "NSE",
+   "sector": "nbfc-lending"
+  },
+  {
+   "symbol": "LICI",
+   "name": "LIC",
+   "apiKey": "NSE:LICI",
+   "lot": 1400,
+   "kind": "stock",
+   "exch": "NSE",
+   "sector": "insurance",
+   "baskets": [
+    "psu"
+   ]
+  },
+  {
+   "symbol": "LODHA",
+   "name": "Macrotech Developers",
+   "apiKey": "NSE:LODHA",
+   "lot": 625,
+   "kind": "stock",
+   "exch": "NSE",
+   "sector": "realty"
+  },
+  {
+   "symbol": "LT",
+   "name": "Larsen & Toubro",
+   "apiKey": "NSE:LT",
+   "lot": 175,
+   "kind": "stock",
+   "exch": "NSE",
+   "sector": "capital-goods-infra"
+  },
+  {
+   "symbol": "LTF",
+   "name": "L&T Finance Holdings",
+   "apiKey": "NSE:LTF",
+   "lot": 2250,
+   "kind": "stock",
+   "exch": "NSE",
+   "sector": "nbfc-lending"
+  },
+  {
+   "symbol": "LTM",
+   "name": "LTIMindtree",
+   "apiKey": "NSE:LTM",
+   "lot": 150,
+   "kind": "stock",
+   "exch": "NSE",
+   "sector": "it-services"
+  },
+  {
+   "symbol": "LUPIN",
+   "name": "Lupin",
+   "apiKey": "NSE:LUPIN",
+   "lot": 425,
+   "kind": "stock",
+   "exch": "NSE",
+   "sector": "pharma-healthcare"
+  },
+  {
+   "symbol": "M&M",
+   "name": "Mahindra & Mahindra",
+   "apiKey": "NSE:M&M",
+   "lot": 200,
+   "kind": "stock",
+   "exch": "NSE",
+   "sector": "auto-oem"
+  },
+  {
+   "symbol": "MANAPPURAM",
+   "name": "Manappuram Finance",
+   "apiKey": "NSE:MANAPPURAM",
+   "lot": 3000,
+   "kind": "stock",
+   "exch": "NSE",
+   "sector": "nbfc-lending"
+  },
+  {
+   "symbol": "MANKIND",
+   "name": "Mankind Pharma",
+   "apiKey": "NSE:MANKIND",
+   "lot": 250,
+   "kind": "stock",
+   "exch": "NSE",
+   "sector": "pharma-healthcare"
+  },
+  {
+   "symbol": "MARICO",
+   "name": "Marico",
+   "apiKey": "NSE:MARICO",
+   "lot": 1200,
+   "kind": "stock",
+   "exch": "NSE",
+   "sector": "fmcg-consumer"
+  },
+  {
+   "symbol": "MARUTI",
+   "name": "Maruti Suzuki India",
+   "apiKey": "NSE:MARUTI",
+   "lot": 50,
+   "kind": "stock",
+   "exch": "NSE",
+   "sector": "auto-oem"
+  },
+  {
+   "symbol": "MAXHEALTH",
+   "name": "Max Healthcare Institute",
+   "apiKey": "NSE:MAXHEALTH",
+   "lot": 525,
+   "kind": "stock",
+   "exch": "NSE",
+   "sector": "pharma-healthcare"
+  },
+  {
+   "symbol": "MAZDOCK",
+   "name": "Mazagon Dock Shipbuilders",
+   "apiKey": "NSE:MAZDOCK",
+   "lot": 225,
+   "kind": "stock",
+   "exch": "NSE",
+   "sector": "defence-railways",
+   "baskets": [
+    "defence",
+    "psu"
+   ]
+  },
+  {
+   "symbol": "MCX",
+   "name": "Multi Commodity Exchange of India",
+   "apiKey": "NSE:MCX",
+   "lot": 225,
+   "kind": "stock",
+   "exch": "NSE",
+   "sector": "capital-markets",
+   "baskets": [
+    "capital-market-plays"
+   ]
+  },
+  {
+   "symbol": "MFSL",
+   "name": "Max Fin Services",
+   "apiKey": "NSE:MFSL",
+   "lot": 400,
+   "kind": "stock",
+   "exch": "NSE",
+   "sector": "insurance"
+  },
+  {
+   "symbol": "MOTHERSON",
+   "name": "Samvardhana Motherson Int",
+   "apiKey": "NSE:MOTHERSON",
+   "lot": 6150,
+   "kind": "stock",
+   "exch": "NSE",
+   "sector": "auto-ancillary"
+  },
+  {
+   "symbol": "MOTILALOFS",
+   "name": "Motilal Oswal Fin",
+   "apiKey": "NSE:MOTILALOFS",
+   "lot": 775,
+   "kind": "stock",
+   "exch": "NSE",
+   "sector": "capital-markets",
+   "baskets": [
+    "capital-market-plays"
+   ]
+  },
+  {
+   "symbol": "MPHASIS",
+   "name": "Mphasis",
+   "apiKey": "NSE:MPHASIS",
+   "lot": 275,
+   "kind": "stock",
+   "exch": "NSE",
+   "sector": "it-services"
+  },
+  {
+   "symbol": "MUTHOOTFIN",
+   "name": "Muthoot Finance",
+   "apiKey": "NSE:MUTHOOTFIN",
+   "lot": 275,
+   "kind": "stock",
+   "exch": "NSE",
+   "sector": "nbfc-lending"
+  },
+  {
+   "symbol": "NAM-INDIA",
+   "name": "Nippon Life Asset Mgmt",
+   "apiKey": "NSE:NAM-INDIA",
+   "lot": 625,
+   "kind": "stock",
+   "exch": "NSE",
+   "sector": "diversified"
+  },
+  {
+   "symbol": "NATIONALUM",
+   "name": "National Aluminium Co.",
+   "apiKey": "NSE:NATIONALUM",
+   "lot": 1875,
+   "kind": "stock",
+   "exch": "NSE",
+   "sector": "metals-mining",
+   "baskets": [
+    "psu"
+   ]
+  },
+  {
+   "symbol": "NAUKRI",
+   "name": "Info Edge (India)",
+   "apiKey": "NSE:NAUKRI",
+   "lot": 550,
+   "kind": "stock",
+   "exch": "NSE",
+   "sector": "new-age-internet"
+  },
+  {
+   "symbol": "NBCC",
+   "name": "NBCC India",
+   "apiKey": "NSE:NBCC",
+   "lot": 6500,
+   "kind": "stock",
+   "exch": "NSE",
+   "sector": "capital-goods-infra",
+   "baskets": [
+    "psu"
+   ]
+  },
+  {
+   "symbol": "NESTLEIND",
+   "name": "Nestle India",
+   "apiKey": "NSE:NESTLEIND",
+   "lot": 500,
+   "kind": "stock",
+   "exch": "NSE",
+   "sector": "fmcg-consumer"
+  },
+  {
+   "symbol": "NHPC",
+   "name": "NHPC",
+   "apiKey": "NSE:NHPC",
+   "lot": 6950,
+   "kind": "stock",
+   "exch": "NSE",
+   "sector": "power-utilities",
+   "baskets": [
+    "green-energy",
+    "psu"
+   ]
+  },
+  {
+   "symbol": "NMDC",
+   "name": "NMDC",
+   "apiKey": "NSE:NMDC",
+   "lot": 6750,
+   "kind": "stock",
+   "exch": "NSE",
+   "sector": "metals-mining",
+   "baskets": [
+    "psu"
+   ]
+  },
+  {
+   "symbol": "NTPC",
+   "name": "NTPC",
+   "apiKey": "NSE:NTPC",
+   "lot": 1500,
+   "kind": "stock",
+   "exch": "NSE",
+   "sector": "power-utilities",
+   "baskets": [
+    "psu"
+   ]
+  },
+  {
+   "symbol": "NYKAA",
+   "name": "FSN E-Commerce Ventures",
+   "apiKey": "NSE:NYKAA",
+   "lot": 3125,
+   "kind": "stock",
+   "exch": "NSE",
+   "sector": "new-age-internet"
+  },
+  {
+   "symbol": "OBEROIRLTY",
+   "name": "Oberoi Realty",
+   "apiKey": "NSE:OBEROIRLTY",
+   "lot": 350,
+   "kind": "stock",
+   "exch": "NSE",
+   "sector": "realty"
+  },
+  {
+   "symbol": "OFSS",
+   "name": "Oracle Fin Services",
+   "apiKey": "NSE:OFSS",
+   "lot": 100,
+   "kind": "stock",
+   "exch": "NSE",
+   "sector": "it-services"
+  },
+  {
+   "symbol": "OIL",
+   "name": "Oil India",
+   "apiKey": "NSE:OIL",
+   "lot": 1400,
+   "kind": "stock",
+   "exch": "NSE",
+   "sector": "oil-gas",
+   "baskets": [
+    "psu"
+   ]
+  },
+  {
+   "symbol": "ONGC",
+   "name": "Oil & Natural Gas Corp",
+   "apiKey": "NSE:ONGC",
+   "lot": 2250,
+   "kind": "stock",
+   "exch": "NSE",
+   "sector": "oil-gas",
+   "baskets": [
+    "psu"
+   ]
+  },
+  {
+   "symbol": "PAGEIND",
+   "name": "Page Industries",
+   "apiKey": "NSE:PAGEIND",
+   "lot": 20,
+   "kind": "stock",
+   "exch": "NSE",
+   "sector": "retail-consumer-durables"
+  },
+  {
+   "symbol": "PATANJALI",
+   "name": "Patanjali Foods",
+   "apiKey": "NSE:PATANJALI",
+   "lot": 1075,
+   "kind": "stock",
+   "exch": "NSE",
+   "sector": "fmcg-consumer"
+  },
+  {
+   "symbol": "PAYTM",
+   "name": "One 97 Communications",
+   "apiKey": "NSE:PAYTM",
+   "lot": 725,
+   "kind": "stock",
+   "exch": "NSE",
+   "sector": "new-age-internet"
+  },
+  {
+   "symbol": "PERSISTENT",
+   "name": "Persistent Systems",
+   "apiKey": "NSE:PERSISTENT",
+   "lot": 125,
+   "kind": "stock",
+   "exch": "NSE",
+   "sector": "it-services"
+  },
+  {
+   "symbol": "PETRONET",
+   "name": "Petronet LNG",
+   "apiKey": "NSE:PETRONET",
+   "lot": 1900,
+   "kind": "stock",
+   "exch": "NSE",
+   "sector": "oil-gas"
+  },
+  {
+   "symbol": "PFC",
+   "name": "Power Finance Corp",
+   "apiKey": "NSE:PFC",
+   "lot": 1300,
+   "kind": "stock",
+   "exch": "NSE",
+   "sector": "nbfc-lending",
+   "baskets": [
+    "psu"
+   ]
+  },
+  {
+   "symbol": "PGEL",
+   "name": "PG Electroplast",
+   "apiKey": "NSE:PGEL",
+   "lot": 950,
+   "kind": "stock",
+   "exch": "NSE",
+   "sector": "retail-consumer-durables",
+   "baskets": [
+    "ems"
+   ]
+  },
+  {
+   "symbol": "PHOENIXLTD",
+   "name": "Phoenix Mills",
+   "apiKey": "NSE:PHOENIXLTD",
+   "lot": 350,
+   "kind": "stock",
+   "exch": "NSE",
+   "sector": "realty"
+  },
+  {
+   "symbol": "PIDILITIND",
+   "name": "Pidilite Industries",
+   "apiKey": "NSE:PIDILITIND",
+   "lot": 500,
+   "kind": "stock",
+   "exch": "NSE",
+   "sector": "cement-building"
+  },
+  {
+   "symbol": "PIIND",
+   "name": "PI Industries",
+   "apiKey": "NSE:PIIND",
+   "lot": 175,
+   "kind": "stock",
+   "exch": "NSE",
+   "sector": "chemicals-agri"
+  },
+  {
+   "symbol": "PNB",
+   "name": "Punjab National Bank",
+   "apiKey": "NSE:PNB",
+   "lot": 8000,
+   "kind": "stock",
+   "exch": "NSE",
+   "sector": "banks-psu",
+   "baskets": [
+    "psu"
+   ]
+  },
+  {
+   "symbol": "PNBHOUSING",
+   "name": "PNB Housing Finance",
+   "apiKey": "NSE:PNBHOUSING",
+   "lot": 650,
+   "kind": "stock",
+   "exch": "NSE",
+   "sector": "nbfc-lending"
+  },
+  {
+   "symbol": "POLICYBZR",
+   "name": "PB Fintech",
+   "apiKey": "NSE:POLICYBZR",
+   "lot": 350,
+   "kind": "stock",
+   "exch": "NSE",
+   "sector": "capital-markets"
+  },
+  {
+   "symbol": "POLYCAB",
+   "name": "Polycab India",
+   "apiKey": "NSE:POLYCAB",
+   "lot": 125,
+   "kind": "stock",
+   "exch": "NSE",
+   "sector": "capital-goods-infra"
+  },
+  {
+   "symbol": "POWERGRID",
+   "name": "Power Grid Corp. of India",
+   "apiKey": "NSE:POWERGRID",
+   "lot": 1900,
+   "kind": "stock",
+   "exch": "NSE",
+   "sector": "power-utilities",
+   "baskets": [
+    "psu"
+   ]
+  },
+  {
+   "symbol": "POWERINDIA",
+   "name": "Hitachi Energy India",
+   "apiKey": "NSE:POWERINDIA",
+   "lot": 25,
+   "kind": "stock",
+   "exch": "NSE",
+   "sector": "power-utilities"
+  },
+  {
+   "symbol": "PREMIERENE",
+   "name": "Premier Energies",
+   "apiKey": "NSE:PREMIERENE",
+   "lot": 650,
+   "kind": "stock",
+   "exch": "NSE",
+   "sector": "power-utilities",
+   "baskets": [
+    "green-energy"
+   ]
+  },
+  {
+   "symbol": "PRESTIGE",
+   "name": "Prestige Estates Projects",
+   "apiKey": "NSE:PRESTIGE",
+   "lot": 450,
+   "kind": "stock",
+   "exch": "NSE",
+   "sector": "realty"
+  },
+  {
+   "symbol": "RADICO",
+   "name": "Radico Khaitan",
+   "apiKey": "NSE:RADICO",
+   "lot": 150,
+   "kind": "stock",
+   "exch": "NSE",
+   "sector": "fmcg-consumer"
+  },
+  {
+   "symbol": "RBLBANK",
+   "name": "RBL Bank",
+   "apiKey": "NSE:RBLBANK",
+   "lot": 3175,
+   "kind": "stock",
+   "exch": "NSE",
+   "sector": "banks-private"
+  },
+  {
+   "symbol": "RECLTD",
+   "name": "REC",
+   "apiKey": "NSE:RECLTD",
+   "lot": 1575,
+   "kind": "stock",
+   "exch": "NSE",
+   "sector": "nbfc-lending",
+   "baskets": [
+    "psu"
+   ]
+  },
+  {
+   "symbol": "RELIANCE",
+   "name": "Reliance Industries",
+   "apiKey": "NSE:RELIANCE",
+   "lot": 500,
+   "kind": "stock",
+   "exch": "NSE",
+   "sector": "oil-gas"
+  },
+  {
+   "symbol": "RVNL",
+   "name": "Rail Vikas Nigam",
+   "apiKey": "NSE:RVNL",
+   "lot": 1925,
+   "kind": "stock",
+   "exch": "NSE",
+   "sector": "defence-railways",
+   "baskets": [
+    "psu",
+    "railways"
+   ]
+  },
+  {
+   "symbol": "SAIL",
+   "name": "Steel Authority of India",
+   "apiKey": "NSE:SAIL",
+   "lot": 4700,
+   "kind": "stock",
+   "exch": "NSE",
+   "sector": "metals-mining",
+   "baskets": [
+    "psu"
+   ]
+  },
+  {
+   "symbol": "SBICARD",
+   "name": "SBI Cards & Payment Svcs",
+   "apiKey": "NSE:SBICARD",
+   "lot": 800,
+   "kind": "stock",
+   "exch": "NSE",
+   "sector": "capital-markets"
+  },
+  {
+   "symbol": "SBILIFE",
+   "name": "SBI Life Ins. Company",
+   "apiKey": "NSE:SBILIFE",
+   "lot": 375,
+   "kind": "stock",
+   "exch": "NSE",
+   "sector": "insurance"
+  },
+  {
+   "symbol": "SBIN",
+   "name": "State Bank of India",
+   "apiKey": "NSE:SBIN",
+   "lot": 750,
+   "kind": "stock",
+   "exch": "NSE",
+   "sector": "banks-psu",
+   "baskets": [
+    "psu"
+   ]
+  },
+  {
+   "symbol": "SHREECEM",
+   "name": "Shree Cement",
+   "apiKey": "NSE:SHREECEM",
+   "lot": 25,
+   "kind": "stock",
+   "exch": "NSE",
+   "sector": "cement-building"
+  },
+  {
+   "symbol": "SHRIRAMFIN",
+   "name": "Shriram Finance",
+   "apiKey": "NSE:SHRIRAMFIN",
+   "lot": 825,
+   "kind": "stock",
+   "exch": "NSE",
+   "sector": "nbfc-lending"
+  },
+  {
+   "symbol": "SIEMENS",
+   "name": "Siemens",
+   "apiKey": "NSE:SIEMENS",
+   "lot": 175,
+   "kind": "stock",
+   "exch": "NSE",
+   "sector": "capital-goods-infra"
+  },
+  {
+   "symbol": "SOLARINDS",
+   "name": "Solar Industries India",
+   "apiKey": "NSE:SOLARINDS",
+   "lot": 50,
+   "kind": "stock",
+   "exch": "NSE",
+   "sector": "power-utilities",
+   "baskets": [
+    "defence"
+   ]
+  },
+  {
+   "symbol": "SONACOMS",
+   "name": "Sona BLW Precision",
+   "apiKey": "NSE:SONACOMS",
+   "lot": 1225,
+   "kind": "stock",
+   "exch": "NSE",
+   "sector": "auto-ancillary"
+  },
+  {
+   "symbol": "SRF",
+   "name": "SRF",
+   "apiKey": "NSE:SRF",
+   "lot": 200,
+   "kind": "stock",
+   "exch": "NSE",
+   "sector": "chemicals-agri"
+  },
+  {
+   "symbol": "SUNPHARMA",
+   "name": "Sun Pharma Industries",
+   "apiKey": "NSE:SUNPHARMA",
+   "lot": 350,
+   "kind": "stock",
+   "exch": "NSE",
+   "sector": "pharma-healthcare"
+  },
+  {
+   "symbol": "SUPREMEIND",
+   "name": "Supreme Industries",
+   "apiKey": "NSE:SUPREMEIND",
+   "lot": 175,
+   "kind": "stock",
+   "exch": "NSE",
+   "sector": "cement-building"
+  },
+  {
+   "symbol": "SUZLON",
+   "name": "Suzlon Energy",
+   "apiKey": "NSE:SUZLON",
+   "lot": 12700,
+   "kind": "stock",
+   "exch": "NSE",
+   "sector": "power-utilities",
+   "baskets": [
+    "green-energy"
+   ]
+  },
+  {
+   "symbol": "SWIGGY",
+   "name": "Swiggy",
+   "apiKey": "NSE:SWIGGY",
+   "lot": 1825,
+   "kind": "stock",
+   "exch": "NSE",
+   "sector": "new-age-internet"
+  },
+  {
+   "symbol": "TATACONSUM",
+   "name": "Tata Consumer Products",
+   "apiKey": "NSE:TATACONSUM",
+   "lot": 550,
+   "kind": "stock",
+   "exch": "NSE",
+   "sector": "fmcg-consumer",
+   "baskets": [
+    "tata-group"
+   ]
+  },
+  {
+   "symbol": "TATAELXSI",
+   "name": "Tata Elxsi",
+   "apiKey": "NSE:TATAELXSI",
+   "lot": 125,
+   "kind": "stock",
+   "exch": "NSE",
+   "sector": "it-services",
+   "baskets": [
+    "tata-group"
+   ]
+  },
+  {
+   "symbol": "TATAPOWER",
+   "name": "Tata Power Co.",
+   "apiKey": "NSE:TATAPOWER",
+   "lot": 1450,
+   "kind": "stock",
+   "exch": "NSE",
+   "sector": "power-utilities",
+   "baskets": [
+    "tata-group"
+   ]
+  },
+  {
+   "symbol": "TATASTEEL",
+   "name": "Tata Steel",
+   "apiKey": "NSE:TATASTEEL",
+   "lot": 2750,
+   "kind": "stock",
+   "exch": "NSE",
+   "sector": "metals-mining",
+   "baskets": [
+    "tata-group"
+   ]
+  },
+  {
+   "symbol": "TCS",
+   "name": "Tata Consultancy Services",
+   "apiKey": "NSE:TCS",
+   "lot": 225,
+   "kind": "stock",
+   "exch": "NSE",
+   "sector": "it-services",
+   "baskets": [
+    "tata-group"
+   ]
+  },
+  {
+   "symbol": "TECHM",
+   "name": "Tech Mahindra",
+   "apiKey": "NSE:TECHM",
+   "lot": 600,
+   "kind": "stock",
+   "exch": "NSE",
+   "sector": "it-services"
+  },
+  {
+   "symbol": "TIINDIA",
+   "name": "Tube Investments of India",
+   "apiKey": "NSE:TIINDIA",
+   "lot": 200,
+   "kind": "stock",
+   "exch": "NSE",
+   "sector": "auto-ancillary"
+  },
+  {
+   "symbol": "TITAN",
+   "name": "Titan Company",
+   "apiKey": "NSE:TITAN",
+   "lot": 175,
+   "kind": "stock",
+   "exch": "NSE",
+   "sector": "retail-consumer-durables",
+   "baskets": [
+    "tata-group"
+   ]
+  },
+  {
+   "symbol": "TMPV",
+   "name": "Tata Motors",
+   "apiKey": "NSE:TMPV",
+   "lot": 1600,
+   "kind": "stock",
+   "exch": "NSE",
+   "sector": "auto-oem",
+   "baskets": [
+    "tata-group"
+   ]
+  },
+  {
+   "symbol": "TORNTPHARM",
+   "name": "Torrent Pharma",
+   "apiKey": "NSE:TORNTPHARM",
+   "lot": 125,
+   "kind": "stock",
+   "exch": "NSE",
+   "sector": "pharma-healthcare"
+  },
+  {
+   "symbol": "TRENT",
+   "name": "Trent",
+   "apiKey": "NSE:TRENT",
+   "lot": 225,
+   "kind": "stock",
+   "exch": "NSE",
+   "sector": "retail-consumer-durables",
+   "baskets": [
+    "tata-group"
+   ]
+  },
+  {
+   "symbol": "TVSMOTOR",
+   "name": "TVS Motor Company",
+   "apiKey": "NSE:TVSMOTOR",
+   "lot": 175,
+   "kind": "stock",
+   "exch": "NSE",
+   "sector": "auto-oem"
+  },
+  {
+   "symbol": "ULTRACEMCO",
+   "name": "UltraTech Cement",
+   "apiKey": "NSE:ULTRACEMCO",
+   "lot": 50,
+   "kind": "stock",
+   "exch": "NSE",
+   "sector": "cement-building"
+  },
+  {
+   "symbol": "UNIONBANK",
+   "name": "Union Bank of India",
+   "apiKey": "NSE:UNIONBANK",
+   "lot": 4425,
+   "kind": "stock",
+   "exch": "NSE",
+   "sector": "banks-psu",
+   "baskets": [
+    "psu"
+   ]
+  },
+  {
+   "symbol": "UNITDSPR",
+   "name": "United Spirits",
+   "apiKey": "NSE:UNITDSPR",
+   "lot": 400,
+   "kind": "stock",
+   "exch": "NSE",
+   "sector": "fmcg-consumer"
+  },
+  {
+   "symbol": "UNOMINDA",
+   "name": "UNO Minda",
+   "apiKey": "NSE:UNOMINDA",
+   "lot": 550,
+   "kind": "stock",
+   "exch": "NSE",
+   "sector": "auto-ancillary"
+  },
+  {
+   "symbol": "UPL",
+   "name": "UPL",
+   "apiKey": "NSE:UPL",
+   "lot": 1355,
+   "kind": "stock",
+   "exch": "NSE",
+   "sector": "chemicals-agri"
+  },
+  {
+   "symbol": "VBL",
+   "name": "Varun Beverages",
+   "apiKey": "NSE:VBL",
+   "lot": 1275,
+   "kind": "stock",
+   "exch": "NSE",
+   "sector": "fmcg-consumer"
+  },
+  {
+   "symbol": "VEDL",
+   "name": "Vedanta",
+   "apiKey": "NSE:VEDL",
+   "lot": 1150,
+   "kind": "stock",
+   "exch": "NSE",
+   "sector": "metals-mining"
+  },
+  {
+   "symbol": "VMM",
+   "name": "Vishal Mega Mart",
+   "apiKey": "NSE:VMM",
+   "lot": 4850,
+   "kind": "stock",
+   "exch": "NSE",
+   "sector": "fmcg-consumer"
+  },
+  {
+   "symbol": "VOLTAS",
+   "name": "Voltas",
+   "apiKey": "NSE:VOLTAS",
+   "lot": 375,
+   "kind": "stock",
+   "exch": "NSE",
+   "sector": "retail-consumer-durables",
+   "baskets": [
+    "tata-group"
+   ]
+  },
+  {
+   "symbol": "WAAREEENER",
+   "name": "Waaree Energies",
+   "apiKey": "NSE:WAAREEENER",
+   "lot": 175,
+   "kind": "stock",
+   "exch": "NSE",
+   "sector": "power-utilities",
+   "baskets": [
+    "green-energy"
+   ]
+  },
+  {
+   "symbol": "WIPRO",
+   "name": "Wipro",
+   "apiKey": "NSE:WIPRO",
+   "lot": 3000,
+   "kind": "stock",
+   "exch": "NSE",
+   "sector": "it-services"
+  },
+  {
+   "symbol": "YESBANK",
+   "name": "Yes Bank",
+   "apiKey": "NSE:YESBANK",
+   "lot": 31100,
+   "kind": "stock",
+   "exch": "NSE",
+   "sector": "banks-private"
+  },
+  {
+   "symbol": "ZYDUSLIFE",
+   "name": "Zydus Lifesciences",
+   "apiKey": "NSE:ZYDUSLIFE",
+   "lot": 900,
+   "kind": "stock",
+   "exch": "NSE",
+   "sector": "pharma-healthcare"
+  }
+ ],
+ "note": "F&O underlyings: symbol, name, exchange key (EXCHANGE:SYMBOL), lot size, kind, sector. Providers map these symbols to their own instrument ids."
+}

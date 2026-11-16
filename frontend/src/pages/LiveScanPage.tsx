@@ -63,6 +63,15 @@ function levelClass(state: string): string {
   return "text-slate-400";
 }
 
+function futuresLabel(quadrant: string | null | undefined): string {
+  if (quadrant === "long_buildup") return "Long build";
+  if (quadrant === "short_buildup") return "Short build";
+  if (quadrant === "short_covering") return "Short cover";
+  if (quadrant === "long_unwinding") return "Long unwind";
+  if (quadrant === "neutral") return "Neutral";
+  return "—";
+}
+
 function quadrantClass(quadrant: string): string {
   if (quadrant === "long_buildup") return "text-gain";
   if (quadrant === "short_buildup" || quadrant === "long_unwinding") return "text-loss";
@@ -318,7 +327,7 @@ export function LiveScanPage() {
             );
           })}
           <span className="text-[10px] text-slate-500">
-            Exit is today’s target. Swing can stay open past the close.
+            Exit is the 2R target. Swing is 2.5R and can stay open past the close.
           </span>
         </div>
       ) : null}
@@ -386,6 +395,7 @@ function RecordTable({
             <th className="px-2 py-1.5 font-medium">Day</th>
             <th className="px-2 py-1.5 font-medium">Swing</th>
             <th className="px-2 py-1.5 font-medium">Side</th>
+            <th className="px-2 py-1.5 font-medium">Futures</th>
             <th className="px-2 py-1.5 font-medium">Symbol</th>
             <th className="px-2 py-1.5 text-right font-medium">Last</th>
             <th className="px-2 py-1.5 text-right font-medium">Day %</th>
@@ -401,7 +411,7 @@ function RecordTable({
         <tbody>
           {rows.length === 0 ? (
             <tr>
-              <td colSpan={13} className="px-2 py-6 text-center text-slate-500">
+              <td colSpan={14} className="px-2 py-6 text-center text-slate-500">
                 No plans yet. A row is saved when a stock or index is given an entry, stop, and exit.
               </td>
             </tr>
@@ -420,6 +430,10 @@ function RecordTable({
                 </td>
                 <td className={`px-2 py-1 font-semibold ${row.side === "buy" ? "text-gain" : "text-loss"}`}>
                   {row.side_label}
+                </td>
+                <td className={`px-2 py-1 ${quadrantClass(row.fut_quadrant ?? "")}`}>
+                  {futuresLabel(row.fut_quadrant)}
+                  {row.fut_oi_change_pct == null ? "" : ` ${row.fut_oi_change_pct > 0 ? "+" : ""}${row.fut_oi_change_pct.toFixed(1)}%`}
                 </td>
                 <td className="px-2 py-1 font-semibold text-slate-100">
                   {row.symbol}
@@ -614,7 +628,7 @@ function CallTable({ rows, onOpen }: { rows: LiveCallRow[]; onOpen: (symbol: str
         {rows.length === 0 ? (
           <tr>
             <td colSpan={12} className="px-2 py-6 text-center text-slate-500">
-              No session calls yet. A buy or sell needs the 20-day trend and a break of yesterday’s candle.
+              No session calls yet. F&O only, at least 2% from the 20-day average, a 5-day move the same way, and a break of a prior candle at least 0.8 ATR wide. Short build-up blocks a buy, and long build-up blocks a sell.
             </td>
           </tr>
         ) : (

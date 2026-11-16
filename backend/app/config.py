@@ -8,7 +8,7 @@ from dotenv import load_dotenv
 ROOT_DIR = Path(__file__).resolve().parent.parent.parent
 load_dotenv(ROOT_DIR / ".env")
 
-PORT = int(os.getenv("BACKEND_PORT", "8000"))
+PORT = int(os.getenv("BACKEND_PORT", "9000"))
 UPSTOX_BASE = "https://api.upstox.com"
 NSE_BASE = "https://www.nseindia.com"
 NSE_ARCHIVE_BASE = "https://nsearchives.nseindia.com/content/indices"

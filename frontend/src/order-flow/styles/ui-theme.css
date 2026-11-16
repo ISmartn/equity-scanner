@@ -1,0 +1,472 @@
+/*
+ * the app application theme foundation
+ *
+ * This is deliberately the final global stylesheet. It translates the Brand
+ * Kit semantic names into browser-safe CSS variables and keeps all product
+ * surfaces on the same palette, rather than adding page-by-page colour rules.
+ */
+
+:root {
+  /* Brand kit: spacing/XSmall → XLarge */
+  --ui-space-xsmall: 4px;
+  --ui-space-small: 8px;
+  --ui-space-medium: 12px;
+  --ui-space-large: 16px;
+  --ui-space-xlarge: 24px;
+
+  --space-xs: var(--ui-space-xsmall);
+  --space-sm: var(--ui-space-small);
+  --space-md: var(--ui-space-medium);
+  --space-lg: var(--ui-space-large);
+  --space-xl: var(--ui-space-xlarge);
+  --spacing-xsmall: var(--ui-space-xsmall);
+  --spacing-small: var(--ui-space-small);
+  --spacing-medium: var(--ui-space-medium);
+  --spacing-large: var(--ui-space-large);
+  --spacing-xlarge: var(--ui-space-xlarge);
+
+  /* Minimum readable UI size is 10px; compact data labels move up from 8–9px. */
+  /* --ui-type-min lives in ui-prototype-system.css (10px) — it loads
+     later and won on import order anyway; the duplicate 11px here only made
+     the winner depend on that order. Removed (plan §5 rank 2). */
+  --ui-type-2xs: var(--ui-type-min);
+  --ui-type-xs: 12px;
+  --ui-type-sm: 13px;
+  --ui-type-md: 14px;
+  --ui-type-lg: 14px;
+  --ui-type-xl: 16px;
+  --ui-type-2xl: 20px;
+  --ui-line-tight: 1.15;
+  --ui-line-ui: 1.3;
+
+  /* Brand kit surface ramp. */
+  --ui-bg-0: var(--bg);
+  --ui-bg-1: var(--bg-subtle);
+  --ui-bg-2: var(--bg-subtle);
+  --ui-surface-1: var(--bg-subtle);
+  --ui-surface-2: var(--bg-subtle);
+  --ui-surface-3: var(--ui-surface-3);
+  --ui-border-soft: var(--line);
+  --ui-border-strong: var(--line);
+  --ui-text-1: var(--text);
+  --ui-text-2: var(--text-muted);
+  --ui-text-3: var(--text-subtle);
+  --ui-accent: var(--capital-purple);
+  --ui-positive: var(--up);
+  --ui-positive-strong: var(--up);
+  --ui-negative: var(--down);
+  --ui-negative-strong: var(--down);
+  --ui-attentive: var(--attentive);
+
+  /* OI side colours are analytical identities, not gain/loss states. */
+  --ui-oi-call: var(--sell-fill);
+  --ui-oi-call-ink: var(--down);
+  --ui-oi-put: var(--buy-fill);
+  --ui-oi-put-ink: var(--up);
+
+  --bg: var(--ui-bg-0);
+  --bg2: var(--ui-bg-1);
+  --bg3: var(--ui-bg-2);
+  --surface: color-mix(in srgb, var(--ui-surface-1) 92%, var(--surface) 8%);
+  --surface2: var(--ui-surface-2);
+  --surface-raised: var(--ui-surface-2);
+  --surface3: var(--ui-surface-3);
+  --terminal-panel: color-mix(in srgb, var(--ui-surface-1) 92%, var(--ui-bg-0));
+  --terminal-panel-strong: var(--ui-bg-1);
+  --terminal-panel-soft: color-mix(in srgb, var(--ui-bg-1) 78%, transparent);
+  --bg-panel: var(--terminal-panel-strong);
+  --bg-input: color-mix(in srgb, var(--ui-bg-0) 86%, var(--ui-surface-1));
+  --terminal-divider: var(--ui-border-soft);
+  --border: var(--ui-border-soft);
+  --border2: var(--ui-border-strong);
+  --text: var(--ui-text-1);
+  --text1: var(--ui-text-1);
+  --text2: var(--ui-text-2);
+  --text3: var(--ui-text-3);
+  --muted: var(--ui-text-3);
+  --accent: var(--ui-accent);
+  --blue: var(--ui-accent);
+  --purple: var(--ui-accent);
+  --green: var(--up);
+  --red: var(--down);
+  --yellow: var(--ui-attentive);
+  --cyan: var(--up);
+  --positive: var(--up);
+  --negative: var(--down);
+  --attentive: var(--ui-attentive);
+  --ui-purple: var(--ui-accent);
+  --ui-control-accent: var(--ui-accent);
+
+  /* Compatibility aliases for existing feature panels. */
+  --bg1: var(--bg2);
+  --bg-card: var(--surface);
+  --text4: var(--text3);
+  --text-heading: var(--text);
+  --text-positive: var(--toast-positive-text);
+  --text-negative: var(--toast-negative-text);
+  --text-warning: var(--toast-attentive-text);
+  --brand-purple: var(--ui-accent);
+  --brand-coral: var(--sell-fill);
+  --brand-grad: var(--ui-cta-gradient);
+  --blur-panel: blur(18px);
+
+  /* Brand-kit component surfaces. */
+  --btn-primary-top: var(--ui-accent);
+  --btn-primary-bottom: var(--ui-accent);
+  --components-button-primary-surface-top: var(--btn-primary-top);
+  --components-button-primary-surface-bottom: var(--btn-primary-bottom);
+  --ui-cta-gradient: linear-gradient(180deg, var(--components-button-primary-surface-top), var(--components-button-primary-surface-bottom));
+
+  --chip-surface-unselected: color-mix(in srgb, var(--line) 5.5%, transparent);
+  --chip-surface-selected: color-mix(in srgb, var(--capital-purple) 20%, transparent);
+  --chip-stroke-unselected: color-mix(in srgb, var(--line) 14%, transparent);
+  --chip-stroke-selected: color-mix(in srgb, var(--line) 66%, transparent);
+  --components-Chip-surface-unselected: var(--chip-surface-unselected);
+  --components-Chip-surface-selected: var(--chip-surface-selected);
+  --components-Chip-stroke-unselected: var(--chip-stroke-unselected);
+  --components-Chip-stroke-selected: var(--chip-stroke-selected);
+
+  --nav-surface: color-mix(in srgb, var(--bg) 94%, transparent);
+  --components-Navigation-surface-L1: var(--nav-surface);
+  --components-Navigation-surface-L2: var(--ui-surface-1);
+  --components-Navigation-stroke-top: color-mix(in srgb, var(--line) 12%, transparent);
+  --components-Navigation-stroke-bottom: color-mix(in srgb, var(--bg) 36%, transparent);
+
+  --toast-neutral-bg: color-mix(in srgb, var(--line) 14%, transparent);
+  --toast-neutral-border: color-mix(in srgb, var(--line) 28%, transparent);
+  --toast-neutral-text: var(--text);
+  --toast-positive-bg: color-mix(in srgb, var(--buy-fill) 15%, transparent);
+  --toast-positive-border: color-mix(in srgb, var(--buy-fill) 34%, transparent);
+  --toast-positive-text: var(--up);
+  --toast-negative-bg: color-mix(in srgb, var(--sell-fill) 16%, transparent);
+  --toast-negative-border: color-mix(in srgb, var(--sell-fill) 36%, transparent);
+  --toast-negative-text: var(--down);
+  --toast-attentive-bg: color-mix(in srgb, var(--attentive) 15%, transparent);
+  --toast-attentive-border: color-mix(in srgb, var(--attentive) 34%, transparent);
+  --toast-attentive-text: var(--down);
+  --components-toasts-Neutral-surface-L1: var(--toast-neutral-bg);
+  --components-toasts-Neutral-stroke-L1: var(--toast-neutral-border);
+  --components-toasts-Neutral-text: var(--toast-neutral-text);
+  --components-toasts-Neutral-icon: var(--toast-neutral-text);
+  --components-toasts-positive-surface-L1: var(--toast-positive-bg);
+  --components-toasts-positive-stroke-L1: var(--toast-positive-border);
+  --components-toasts-positive-text: var(--toast-positive-text);
+  --components-toasts-positive-icon: var(--toast-positive-text);
+  --components-toasts-negative-surface-L1: var(--toast-negative-bg);
+  --components-toasts-negative-stroke-L1: var(--toast-negative-border);
+  --components-toasts-negative-text: var(--toast-negative-text);
+  --components-toasts-negative-icon: var(--toast-negative-text);
+  --components-toasts-Attentive-surface-L1: var(--toast-attentive-bg);
+  --components-toasts-Attentive-stroke-L1: var(--toast-attentive-border);
+  --components-toasts-Attentive-text: var(--toast-attentive-text);
+  --components-toasts-Attentive-icon: var(--toast-attentive-text);
+  --components-toasts-Neutral-surface: var(--toast-neutral-bg);
+  --components-toasts-Neutral-stroke: var(--toast-neutral-border);
+  --components-toasts-positive-surface: var(--toast-positive-bg);
+  --components-toasts-positive-stroke: var(--toast-positive-border);
+  --components-toasts-negative-surface: var(--toast-negative-bg);
+  --components-toasts-negative-stroke: var(--toast-negative-border);
+  --components-toasts-Attentive-surface: var(--toast-attentive-bg);
+  --components-toasts-Attentive-stroke: var(--toast-attentive-border);
+  /* Legacy aliases remain valid while components migrate to Figma names. */
+  --components-toasts-Neutral-bg: var(--toast-neutral-bg);
+  --components-toasts-Neutral-border: var(--toast-neutral-border);
+  --components-toasts-positive-bg: var(--toast-positive-bg);
+  --components-toasts-positive-border: var(--toast-positive-border);
+  --components-toasts-negative-bg: var(--toast-negative-bg);
+  --components-toasts-negative-border: var(--toast-negative-border);
+  --components-toasts-Attentive-bg: var(--toast-attentive-bg);
+  --components-toasts-Attentive-border: var(--toast-attentive-border);
+
+  --surface-solid-brand-primary-L1: var(--surface);
+  --surface-solid-brand-primary-L2: var(--surface2);
+  --surface-solid-brand-primary-L3: var(--surface3);
+  --surface-solid-brand-l2: var(--surface2);
+  --surface-solid-brand-l3: var(--surface3);
+  --surface-transparent-positive-primary: var(--toast-positive-bg);
+  --surface-transparent-negative-primary: var(--toast-negative-bg);
+  --green-bg: var(--toast-positive-bg);
+  --red-bg: var(--toast-negative-bg);
+  --yellow-bg: var(--toast-attentive-bg);
+  --blue-bg: var(--chip-surface-selected);
+  --purple-bg: var(--chip-surface-selected);
+
+  /* Brand-kit elevation / pressed effect. */
+  --shadow-l1: 0 1px 2px color-mix(in srgb, var(--bg) 16%, transparent);
+  --shadow-l2: 0 3px 8px color-mix(in srgb, var(--bg) 20%, transparent);
+  --shadow-l3: 0 10px 24px color-mix(in srgb, var(--bg) 28%, transparent);
+  --shadow-l4: 0 20px 48px color-mix(in srgb, var(--bg) 34%, transparent);
+  --shadow-smooth-l1: 0 2px 8px color-mix(in srgb, var(--bg) 16%, transparent);
+  --shadow-smooth-l2: 0 8px 22px color-mix(in srgb, var(--bg) 20%, transparent);
+  --shadow-smooth-l3: 0 16px 38px color-mix(in srgb, var(--bg) 26%, transparent);
+  --shadow-smooth-l4: 0 24px 54px color-mix(in srgb, var(--bg) 30%, transparent);
+  --shadow-smooth-l5: 0 34px 70px color-mix(in srgb, var(--bg) 36%, transparent);
+  --shadow-L1: var(--shadow-l1);
+  --shadow-L2: var(--shadow-l2);
+  --shadow-L3: var(--shadow-l3);
+  --shadow-L4: var(--shadow-l4);
+  --shadow-smooth-L1: var(--shadow-smooth-l1);
+  --shadow-smooth-L2: var(--shadow-smooth-l2);
+  --shadow-smooth-L3: var(--shadow-smooth-l3);
+  --shadow-smooth-L4: var(--shadow-smooth-l4);
+  --shadow-smooth-L5: var(--shadow-smooth-l5);
+  --inner-shadow: inset 0 1px 2px color-mix(in srgb, var(--bg) 30%, transparent);
+
+  /* Radius is NOT defined here. ui-prototype-system.css is the radius
+     authority (main.tsx position 27 vs this file's 25) and publishes
+     --radius-sm 6 / --radius 9 / --radius-lg 12 / --radius-xl 16. The block
+     that used to sit here declared --radius: 8px and lost every time, so the
+     only thing it could ever do was mislead a reader into thinking corners
+     were 8px. Removed. */
+  /* Nor here — same reason as the light block below. ui-colour-system.css
+     imports later and defines --focus-ring: 0 0 0 3px var(--accent-ring). */
+
+  /* Easing is NOT defined here either. ui-motion.css loads last (position
+     136) and binds --ease-ui-standard / --ease-ui-emphasized onto the
+     four --ease-ios-* curves; the pair that used to be declared at this point
+     was overwritten on every page load. One motion authority, one place to
+     change it — design contract §1.7 / §6. */
+}
+
+:root[data-theme='light'] {
+  --ui-bg-0: var(--surface);
+  --ui-bg-1: var(--bg-subtle);
+  --ui-bg-2: var(--bg-subtle);
+  --ui-surface-1: var(--surface);
+  --ui-surface-2: var(--bg-subtle);
+  --ui-surface-3: var(--bg-subtle);
+  /* These are BORDERS. --ui-border-soft was pointing at --bg-subtle, a
+     background token, and only ever resolved correctly because
+     ui-market-semantics.css happens to import later and re-declare it at the
+     same specificity. Own it here. */
+  --ui-border-soft: var(--line);
+  --ui-border-strong: var(--line-strong);
+  --ui-text-1: var(--text);
+  --ui-text-2: var(--text-muted);
+  --ui-text-3: var(--text-subtle);
+  --ui-accent: var(--capital-purple);
+  --ui-positive: var(--up);
+  --ui-positive-strong: var(--up);
+  --ui-negative: var(--down);
+  --ui-negative-strong: var(--down);
+  --ui-attentive: var(--attentive);
+  --ui-oi-call: var(--sell-fill);
+  --ui-oi-call-ink: var(--down);
+  --ui-oi-put: var(--up);
+  --ui-oi-put-ink: var(--buy-fill);
+
+  --surface: var(--surface);
+  --terminal-panel: var(--surface);
+  --terminal-panel-strong: var(--surface);
+  --terminal-panel-soft: color-mix(in srgb, var(--surface) 88%, transparent);
+  --bg-input: var(--surface);
+  --nav-surface: color-mix(in srgb, var(--surface) 94%, transparent);
+  --ui-control-accent-rgb: 165, 15, 102;
+  --components-Navigation-stroke-top: color-mix(in srgb, var(--line) 12%, transparent);
+  --components-Navigation-stroke-bottom: color-mix(in srgb, var(--line) 8%, transparent);
+  --btn-primary-top: var(--capital-purple);
+  --btn-primary-bottom: var(--capital-purple);
+  --chip-surface-unselected: color-mix(in srgb, var(--line) 4.5%, transparent);
+  --chip-surface-selected: color-mix(in srgb, var(--capital-purple) 12%, transparent);
+  --chip-stroke-unselected: color-mix(in srgb, var(--line) 13%, transparent);
+  --chip-stroke-selected: color-mix(in srgb, var(--capital-purple) 46%, transparent);
+  --toast-neutral-bg: color-mix(in srgb, var(--line) 10%, transparent);
+  --toast-neutral-border: color-mix(in srgb, var(--line) 22%, transparent);
+  --toast-neutral-text: var(--text);
+  --toast-positive-bg: color-mix(in srgb, var(--buy-fill) 11%, transparent);
+  --toast-positive-border: color-mix(in srgb, var(--buy-fill) 28%, transparent);
+  --toast-positive-text: var(--text);
+  --toast-negative-bg: color-mix(in srgb, var(--sell-fill) 10%, transparent);
+  --toast-negative-border: color-mix(in srgb, var(--sell-fill) 28%, transparent);
+  --toast-negative-text: var(--down);
+  --toast-attentive-bg: color-mix(in srgb, var(--attentive) 12%, transparent);
+  --toast-attentive-border: color-mix(in srgb, var(--attentive) 28%, transparent);
+  /* Amber is its own direction (§4). This was --down, which painted every
+     warning toast as an error. */
+  --toast-attentive-text: var(--warning-text);
+  --shadow-l1: 0 1px 2px color-mix(in srgb, var(--line) 5%, transparent);
+  --shadow-l2: 0 3px 8px color-mix(in srgb, var(--line) 7%, transparent);
+  --shadow-l3: 0 10px 24px color-mix(in srgb, var(--line) 10%, transparent);
+  --shadow-l4: 0 20px 48px color-mix(in srgb, var(--line) 13%, transparent);
+  --shadow-smooth-l1: 0 2px 8px color-mix(in srgb, var(--line) 5%, transparent);
+  --shadow-smooth-l2: 0 8px 22px color-mix(in srgb, var(--line) 8%, transparent);
+  --shadow-smooth-l3: 0 16px 38px color-mix(in srgb, var(--line) 11%, transparent);
+  --shadow-smooth-l4: 0 24px 54px color-mix(in srgb, var(--line) 14%, transparent);
+  --shadow-smooth-l5: 0 34px 70px color-mix(in srgb, var(--line) 17%, transparent);
+  --inner-shadow: inset 0 1px 2px color-mix(in srgb, var(--line) 7%, transparent);
+  /* --focus-ring is NOT declared here. It used to be, at (0,2,0), which beat
+     ui-colour-system.css's plain :root definition and meant --accent-ring
+     never reached the light theme's focus indicator at all — the ring rendered
+     at 1.51:1, half the 3:1 floor. The authority owns it. */
+}
+
+/* Bridge the last legacy theme islands into the shared semantic system. */
+#root > .app {
+  --context-header-bg: var(--components-Navigation-surface-L1);
+  --context-header-surface: var(--surface-solid-brand-primary-L1);
+  --context-header-surface-hover: var(--surface-solid-brand-primary-L2);
+  --context-header-surface-active: var(--components-Chip-surface-selected);
+  --context-header-border: var(--components-Navigation-stroke-top);
+  --context-header-divider: var(--components-Navigation-stroke-bottom);
+  --context-header-text: var(--text);
+  --context-header-muted: var(--text3);
+  --context-header-faint: color-mix(in srgb, var(--text3) 74%, transparent);
+  --context-header-accent: var(--components-button-primary-surface-top);
+  --context-header-accent-soft: var(--components-Chip-surface-selected);
+  --context-header-accent-border: var(--components-Chip-stroke-selected);
+  --context-header-positive: var(--components-toasts-positive-text);
+  --context-header-negative: var(--components-toasts-negative-text);
+  --context-header-warning: var(--components-toasts-Attentive-text);
+  --context-header-radius: var(--radius-lg);
+  --context-header-shadow: var(--shadow-smooth-L1);
+
+  --command-bg: var(--components-Navigation-surface-L1);
+  --command-bg-active: var(--components-Chip-surface-selected);
+  --command-line: var(--components-Navigation-stroke-top);
+  --command-text: var(--text2);
+  --command-muted: var(--text3);
+  --command-accent: var(--components-button-primary-surface-top);
+  --command-focus: color-mix(in srgb, var(--components-button-primary-surface-top) 38%, transparent);
+}
+
+:root[data-theme='light'] #root > .app {
+  --context-header-bg: var(--components-Navigation-surface-L1);
+  --context-header-surface: var(--surface-solid-brand-primary-L1);
+  --context-header-surface-hover: var(--surface-solid-brand-primary-L2);
+  --context-header-surface-active: var(--components-Chip-surface-selected);
+  --context-header-border: var(--components-Navigation-stroke-top);
+  --context-header-divider: var(--components-Navigation-stroke-bottom);
+  --context-header-text: var(--text);
+  --context-header-muted: var(--text3);
+  --context-header-faint: color-mix(in srgb, var(--text3) 74%, transparent);
+  --context-header-accent: var(--components-button-primary-surface-top);
+  --context-header-accent-soft: var(--components-Chip-surface-selected);
+  --context-header-accent-border: var(--components-Chip-stroke-selected);
+  --context-header-positive: var(--components-toasts-positive-text);
+  --context-header-negative: var(--components-toasts-negative-text);
+  --context-header-warning: var(--components-toasts-Attentive-text);
+  --context-header-shadow: var(--shadow-smooth-L1);
+}
+
+/* Selection controls follow the primary component surface, not a parallel palette. */
+:root {
+  --ui-selection-gradient: var(--ui-cta-gradient);
+  --ui-selection-gradient-horizontal: linear-gradient(90deg, var(--components-button-primary-surface-top), var(--components-button-primary-surface-bottom));
+  --ui-selection-surface: var(--bg-input);
+  --ui-selection-surface-hover: var(--surface2);
+  --ui-selection-border: var(--components-Chip-stroke-unselected);
+  --ui-selection-text: var(--text2);
+  --ui-selection-focus: color-mix(in srgb, var(--components-button-primary-surface-top) 22%, transparent);
+  --ui-selection-shadow: 0 8px 20px color-mix(in srgb, var(--components-button-primary-surface-bottom) 22%, transparent);
+}
+
+/* Shared shell and navigation consume the Navigation component tokens. */
+.app,
+.dashboard-shell,
+.dashboard-body,
+.main-content {
+  background: var(--bg);
+  color: var(--text);
+}
+
+
+
+/* Cards/sheets share one deliberate surface and elevation model.
+   Was three consecutive blocks on the same selector, the second box-shadow
+   silently overwriting the first; folded into one so the elevation actually
+   in force is the one a reader sees. */
+.index-menu,
+.detail-panel {
+  border-color: var(--border) !important;
+  background-color: var(--surface) !important;
+  box-shadow: var(--shadow-smooth-L3);
+}
+
+/* Button variants match the App UI Kit intent / size conventions. */
+/* `--motion-fast` was never defined anywhere in the app, so all four legs of
+   this transition ran on their literal 140ms fallback — an off-ladder duration
+   that only existed here. Moved onto the motion authority's tap step. */
+.ui-btn {
+  border-radius: var(--radius-lg);
+  line-height: var(--ui-line-ui);
+  transition: transform var(--dur-tap) var(--ease-ui-standard),
+    box-shadow var(--dur-tap) var(--ease-ui-standard),
+    background var(--dur-tap) var(--ease-ui-standard),
+    border-color var(--dur-tap) var(--ease-ui-standard);
+}
+
+.ui-btn-m { min-height: 48px; }
+.ui-btn-s { min-height: 40px; }
+
+/* Button.css:128-131 declares the coarse-pointer floor, but this sheet
+   re-declares .ui-btn-s at EQUAL specificity (0,1,0) and loads ~2,950 lines
+   later in the bundle, so the 40px above silently won and touch users got a
+   40px target where the file comment promised 44. Restating the floor here,
+   after that declaration, is what actually makes it hold. */
+@media (pointer: coarse) {
+  .ui-btn-s { min-height: var(--btn-h-tap, 44px); }
+}
+
+/* Kept in step with Button.css's intent layer — this block wins on !important,
+   so if the two disagree the component file is silently dead. Flat brand fill,
+   white ink; see the rationale comment in Button.css. */
+.ui-btn-intent-primary {
+  background: var(--cta-fill, var(--brand-600)) !important;
+  color: var(--cta-text, var(--capital-white)) !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
+}
+
+@media (hover: hover) {
+  .ui-btn-intent-primary:hover:not(:disabled) {
+    background: color-mix(in srgb, var(--cta-fill, var(--brand-700)) 86%, var(--cta-text, var(--capital-white))) !important;
+    box-shadow: none !important;
+  }
+}
+
+.ui-btn-intent-secondary {
+  background: var(--surface2) !important;
+  border-color: var(--border2) !important;
+  color: var(--text) !important;
+}
+
+.ui-btn-intent-tertiary.is-active,
+.ui-btn-intent-tertiary.active {
+  color: var(--text) !important;
+  border-color: var(--components-Chip-stroke-selected) !important;
+  background: var(--components-Chip-surface-selected) !important;
+  box-shadow: inset 0 1px 0 color-mix(in srgb, var(--surface) 8%, transparent);
+}
+
+.ui-btn-intent-critical {
+  color: var(--components-toasts-negative-text) !important;
+  background: var(--components-toasts-negative-surface-L1) !important;
+  border-color: var(--components-toasts-negative-stroke-L1) !important;
+}
+
+.ui-btn-intent-positive {
+  color: var(--text) !important;
+  background: linear-gradient(180deg, var(--ui-positive-strong), var(--ui-positive)) !important;
+}
+
+/* Inputs, selection controls, and focus affordances use the published states. */
+
+:is(button, input, select, textarea, [role='button'], [role='tab'], [role='switch']):focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring) !important;
+}
+
+
+/* Reduced motion is handled once, in ui-motion.css, which collapses every
+   transition and animation to 1ms — not to 0s and not to 0.01ms. The rule that
+   used to sit here beat that global one on specificity (.ui-btn over *) and
+   put the button back under a hundredth of a millisecond, i.e. effectively
+   zero. Design contract §6: a zero-length transition never fires
+   `transitionend`, and panels in this app close on that event. */
+
+/* Global Font Enforcer */
+table,
+span,
+.mono {
+  font-variant-numeric: tabular-nums;
+}

@@ -1,0 +1,162 @@
+/* THE the app BOX (owner, 26 Oct 2026: "each and every small aspect in each
+   section has its decided area … like a box. That box can fit in any place").
+
+   Measured from the reference design at 3840x2160 (a reference audit, light/ dumps),
+   halved to CSS px:
+
+   page        black / white; panels sit on it 8px apart, 8px from the edge
+   panel       --surface fill, 1px edge (#333333 dark, #E2E2E2 light), 12px
+               corners; nothing drawn behind it, no shadow
+   head        46px, title 15px / 500, a 1px rule under it (#383838 / #E2E2E2)
+   bar         36px rows for a panel's sub-header and column heads
+   table       50px rows ruled in the line colour, on the panel's own fill;
+               13px figures, 12px changes and column heads, 14px strike
+
+   Every tool's outer box reads these tokens, so a box looks the same whether
+   it is a whole page (Option Chain, Open Interest) or one widget among many
+   (Trader Cockpit). Loaded after ui-finish-pass.css (main.tsx). */
+
+:root {
+  --box-radius: 12px;
+  --box-gap: 8px;
+  --box-head-h: 46px;
+  --box-bar-h: 36px;
+  --box-pad-x: 16px;
+  --box-title-size: 15px;
+  --box-title-weight: 500;
+  --box-fill: var(--surface);
+  --box-edge: var(--hairline);
+  --box-head-rule: var(--neutral-740);
+  /* The page rhythm follows the box gap: 8px gutters and gaps, as the app. */
+  --tool-gutter: var(--box-gap);
+  --tool-gap: var(--box-gap);
+}
+:root[data-theme='light'] {
+  --box-head-rule: var(--neutral-225);
+}
+
+/* THE SHELL: every tool's outer box. */
+:root[data-theme] body #root#root > .app.app :is(
+  .chain-table-container, .tp-card, .ui-sp-plane, .sb-card, .os-ct-scroll,
+  .ui-oi-page > .ui-oi-card, .ui-gex-page .ui-oi-card, .ui-iv-page .ui-oi-card, .ui-hm-card
+) {
+  background-color: var(--box-fill) !important;
+  border: 1px solid var(--box-edge) !important;
+  border-radius: var(--box-radius) !important;
+  box-shadow: none !important;
+}
+:root[data-theme] body #root#root > .app.app[data-active-tab='chain'] .chain-table-container {
+  --chain-box-edge: var(--box-edge);
+  overflow: hidden;
+}
+
+/* THE CHAIN on the panel's own fill: rows ruled in the line colour, column
+   heads on the fill too. Only the Strike column keeps its band, head to foot. */
+:root[data-theme] body #root#root > .app.app[data-active-tab='chain'] {
+  --oc-grid-row: var(--box-fill);
+  --oc-grid-row-alt: var(--box-fill);
+  --table-head-surface: var(--box-fill);
+}
+:root[data-theme] body #root#root .tw-widget.tw-widget[data-widget-page='chain'] {
+  --oc-grid-row: var(--box-fill);
+  --oc-grid-row-alt: var(--box-fill);
+  --table-head-surface: var(--box-fill);
+}
+:root[data-theme] body #root#root :is(.app.app[data-active-tab='chain'], .tw-widget.tw-widget[data-widget-page='chain'])
+  .chain-table.chain-table thead tr.chain-header-row > th {
+  background: var(--box-fill) !important;
+}
+:root[data-theme] body #root#root :is(.app.app[data-active-tab='chain'], .tw-widget.tw-widget[data-widget-page='chain'])
+  .chain-table.chain-table thead tr > th.th-strike {
+  background: var(--oc-grid-strike) !important;
+}
+/* Both header rows are the app's 36px bar: Call · expiry · Put, then the
+   column heads. The table measures its head (--chain-head-h), so the spot
+   line and the row window follow whatever this paints. */
+:root[data-theme] body #root#root :is(.app.app[data-active-tab='chain'], .tw-widget.tw-widget[data-widget-page='chain']) .chain-table.chain-table thead :is(.chain-side-nav-row, .chain-header-row) > th {
+  height: var(--box-bar-h) !important;
+  min-height: var(--box-bar-h) !important;
+  padding-block: 0 !important;
+}
+/* What sits in those rows fits inside them, so the bar keeps its height. */
+:root[data-theme] body #root#root :is(.app.app[data-active-tab='chain'], .tw-widget.tw-widget[data-widget-page='chain']) .chain-table.chain-table thead .chain-side-expiry-wrap {
+  height: calc(var(--box-bar-h) - 1px) !important;
+  min-height: 0 !important;
+}
+:root[data-theme] body #root#root :is(.app.app[data-active-tab='chain'], .tw-widget.tw-widget[data-widget-page='chain']) .chain-table.chain-table thead :is(.chain-sort-button, .chain-side-nav-button, .chain-expiry-selector__trigger) {
+  height: 28px !important;
+  min-height: 28px !important;
+  padding-block: 0 !important;
+}
+:root[data-theme] body #root#root :is(.app.app[data-active-tab='chain'], .tw-widget.tw-widget[data-widget-page='chain']) .chain-table.chain-table thead .chain-header-row > th {
+  font-size: var(--chain-font-sm, 12px) !important;
+  color: var(--text-muted) !important;
+}
+/* One line per column head, as the app's "OI (K)": a narrow column trims its
+   label rather than stacking it three lines deep past the 36px bar. The full
+   name stays in the head's tooltip and accessible name. */
+:root[data-theme] body #root#root :is(.app.app[data-active-tab='chain'], .tw-widget.tw-widget[data-widget-page='chain']) .chain-table.chain-table thead .chain-header-row > th :is(.chain-sort-button, .tt-wrap, .tt-label) {
+  white-space: nowrap !important;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+:root[data-theme] body #root#root :is(.app.app[data-active-tab='chain'], .tw-widget.tw-widget[data-widget-page='chain']) .chain-table.chain-table .strike-cell .strike-val-lbl {
+  font-size: var(--chain-font-md, 14px) !important;
+}
+
+/* FAST, LIKE the app: a figure repaints the moment it changes. Every chain cell
+   carried a colour/background/border transition (oi-controls.css), so each
+   tick animated a few hundred cells at once; the reference design swaps the value
+   instantly. Controls keep their own feedback. */
+:root[data-theme] body #root#root :is(.app.app[data-active-tab='chain'], .tw-widget.tw-widget[data-widget-page='chain']) .chain-table .chain-row td {
+  transition: none !important;
+}
+
+/* THE TRADER COCKPIT: each widget is the same box, with the app's 46px head.
+   Compact density keeps its own slimmer head (the reader chose it). */
+:root[data-theme] body #root#root .tw-terminal {
+  --tw-head-h: var(--box-head-h);
+}
+:root[data-theme] body #root#root .tw-terminal:is([data-titlebar='slim'], [data-density='compact']) {
+  --tw-head-h: 32px;
+}
+:root[data-theme] body #root#root .tw-terminal .tw-frame {
+  background: var(--box-fill) !important;
+  border: 1px solid var(--box-edge) !important;
+  border-radius: var(--box-radius) !important;
+  box-shadow: none !important;
+}
+:root[data-theme] body #root#root .tw-terminal .tw-frame:focus-within {
+  border-color: var(--line-strong) !important;
+}
+:root[data-theme] body #root#root .tw-terminal .tw-stage .tw-frame:not(.is-tabbed) .tw-frame__head {
+  height: var(--tw-head-h) !important;
+  min-height: var(--tw-head-h) !important;
+  padding: 0 8px 0 6px !important;
+  background: var(--box-fill) !important;
+  border-bottom: 1px solid var(--box-head-rule) !important;
+  box-shadow: none !important;
+}
+:root[data-theme] body #root#root .tw-terminal:not([data-titlebar='slim']):not([data-density='compact']) .tw-frame__title {
+  font-size: var(--box-title-size) !important;
+  font-weight: var(--box-title-weight) !important;
+  line-height: 20px !important;
+}
+:root[data-theme] body #root#root .tw-terminal:not([data-titlebar='slim']):not([data-density='compact']) .tw-stage .tw-frame:not(.is-tabbed) .tw-frame__btn:not(.tw-frame__customise) {
+  width: 32px !important;
+  height: 32px !important;
+  border-radius: 8px !important;
+}
+:root[data-theme] body #root#root .tw-terminal .tw-frame__body {
+  background: var(--box-fill) !important;
+}
+
+/* PANE HEADS inside a tool box (IV, GEX and OI plots): the same 46px head. */
+:root[data-theme] body #root#root > .app.app .ui-pane-head:not(.is-minimal .ui-pane-head) {
+  min-height: var(--box-head-h);
+}
+:root[data-theme] body #root#root > .app.app .ui-pane-head__sym {
+  font-size: var(--box-title-size) !important;
+  font-weight: var(--box-title-weight) !important;
+}

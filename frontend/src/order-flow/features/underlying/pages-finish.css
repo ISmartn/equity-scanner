@@ -1,0 +1,190 @@
+/* Page finish: the capsule-button recipe, applied to every control, chip and
+   plate on PCR, Straddle, GEX, IV, Strategy Builder, Options Scanner, Terminal
+   and the Search popover. Visual only. Loaded last by each page, so it never
+   needs !important.
+
+   The recipe (one finish, six properties, by role):
+     shape      pills for controls, 12px cards, 10px plates, concentric corners
+     edge       1px hairline + var(--edge-highlight); resting cards: no shadow
+     material   bg -> surface -> surface-raised; SELECTED = neutral ink plate
+     motion     120/180/240ms ios easing; hover warms toward the accent;
+                pressed = press-wash + scale(.97); focus = double ring
+     type       Manrope + tabular numerals; Season only for hero moments
+     rhythm     4/8 grid, heights 28/32/36/44, contrast from token pairs        */
+
+.app {
+  --pf-ease: var(--ease-ios-out, cubic-bezier(0.16, 1, 0.3, 1));
+  --pf-motion:
+    background-color var(--dur-tap, 120ms) var(--pf-ease),
+    border-color var(--dur-tap, 120ms) var(--pf-ease),
+    color var(--dur-tap, 120ms) var(--pf-ease),
+    box-shadow var(--dur-quick, 180ms) var(--pf-ease),
+    transform var(--dur-tap, 120ms) var(--pf-ease);
+  --pf-card-radius: 12px;
+  --pf-plate-radius: 10px;
+  --pf-selected: color-mix(in srgb, var(--text) 9%, var(--surface));
+  --pf-hover-edge: var(--selection-line);
+  --pf-hover-tint: var(--hover-wash);
+}
+
+/* ── 1. SHAPE: every control, chip and badge is a pill ─────────────────── */
+.app :is(
+  .ui-pane-icon, .tw-tabs__new, .tw-toolbar__add, .chain-widget__customise,
+  .chain-insight__chip, .ui-oi-prov, .ui-gex-lvltag, .os-status-pill, .os-atmoi-tag,
+  .ui-pcr-rewound__back, .tw-card__badge,
+  .sb-leg-entry, .sb-flip, .sb-step-button, .sb-select-trigger, .sb-link,
+  .os-sx-choice__box
+) { border-radius: 999px; }
+.app .os-sx-choice__box { border-radius: 6px; } /* a tick box stays a rounded square: 18px / 6px reads as a checkbox */
+.app .os-sx-tabs__track .ui-capsule > button { border-radius: 999px; }
+.app .tw-frame .chain-sort-button { border-radius: 999px; }
+.app .os-sx-entry-edit { border-radius: 999px; }
+.app .upk-compact-row,
+.app .tw-menu__item{ border-radius: var(--pf-plate-radius); }
+.app .os-sx-catalogue .os-sx-category { border-radius: var(--pf-plate-radius); }
+.app .os-sx-catalogue .os-sx-category__icon { border-radius: 8px; }
+.app .tp-thumb__tile::before { border-radius: 3px; }
+.app .sb-hb-tile { border-radius: var(--pf-plate-radius); }
+.app .sb-card { border-radius: var(--pf-card-radius); }
+.app .ui-oi-card.is-plot:is(.ui-pcr-card, .ui-gex-card, .ui-iv-card),
+.app :is(.ui-pcr-card, .ui-gex-card, .ui-iv-card, .ui-straddle-card) { border-radius: var(--pf-card-radius); }
+.app .ui-oi-sw { border-radius: 999px; }
+.app .ui-straddle-strikeplot__bar { border-radius: 999px 999px 0 0; }
+.app .ui-multistraddle-tip-swatch,
+.app .ui-multistrike-tooltip__swatch { border-radius: 999px; }
+.app :is(.ui-pcr-lwchart__tooltip, .ui-straddle-lwchart__tooltip, .ui-iv-lwchart__tooltip, .ui-iv-explore__tip) {
+  border-radius: var(--pf-plate-radius);
+  box-shadow: var(--shadow-4), var(--edge-highlight);
+}
+
+/* ── 2. EDGE: the inset top highlight on every raised control ──────────── */
+.app :is(
+  .tw-tab, .ui-pane-icon, .tw-tabs__new, .tw-toolbar__btn, .chain-widget__customise, .tw-frame__link,
+  .ui-pcr-rewound__back, .ui-pcr-cz-asof__latest,
+  .sb-select-trigger, .sb-leg-entry, .sb-flip, .st-btn, .sb-button, .sb-pop-trigger.sb-quiet-button,
+  .os-ct-chip, .os-sx-pill, .ui-straddle-decay__legend-chip, .ui-straddle-multistraddle__legend-chip, .ui-multistrike-legend__chip,
+  .chain-insight__chip, .ui-oi-prov, .st-tag, .os-status-pill, .os-atmoi-tag
+):not(:disabled) { box-shadow: var(--edge-highlight); }
+.app .sb-hb-tile:not(.is-selected) { box-shadow: var(--edge-highlight); }
+
+/* ── 3. MATERIAL: selected = a neutral ink plate, accent only as an edge ── */
+.app :is(.sb-hb-tile.is-selected, .tw-toolbar__btn.is-on, .tw-tab.is-active, .sb-layer-chip.is-on, .ui-pane-icon.is-on) {
+  background: var(--pf-selected);
+  color: var(--text);
+}
+.app .sb-hb-tile.is-selected { border-color: var(--text); box-shadow: var(--edge-highlight); }
+.app :is(.tw-toolbar__btn.is-on, .ui-pane-icon.is-on) { border-color: var(--line-strong); box-shadow: var(--edge-highlight); }
+
+/* ── 4. INTERACTION: one motion, one hover, one press, one focus ───────── */
+
+@media (hover: hover) {
+  .app :is(
+    .tw-tab, .ui-pane-icon, .tw-tabs__new, .tw-toolbar__btn, .tw-frame__link, .chain-widget__customise,
+    .ui-pcr-rewound__back, .ui-pcr-cz-asof__latest,
+    .sb-select-trigger, .sb-flip, .sb-link, .st-btn, .sb-button, .sb-pop-trigger.sb-quiet-button,
+    .os-ct-chip, .os-sx-pill, .upk-compact-row
+  ):hover:not(:disabled, [aria-disabled='true'], .is-on, .is-selected, .is-active, .active) {
+    background: var(--pf-hover-tint);
+    border-color: var(--pf-hover-edge);
+    box-shadow: none;
+  }
+  .app .sb-hb-tile:hover:not(:disabled, .is-selected) {
+    background: var(--pf-hover-tint);
+    border-color: var(--pf-hover-edge);
+    box-shadow: none;
+  }
+  .app :is(.sb-icon-button, .sb-leg-more, .sb-leg-remove, .tw-frame__btn, .tw-tab__more, .sb-step-button):hover:not(:disabled) {
+    background: var(--pf-hover-tint);
+  }
+}
+.app :is(
+  .ui-pane-icon, .tw-tabs__new, .tw-toolbar__btn, .tw-frame__btn, .tw-frame__link,
+  .chain-widget__customise, .ui-pcr-rewound__back,
+  .sb-select-trigger, .sb-flip, .sb-step-button, .sb-link, .sb-icon-button, .sb-leg-more, .sb-leg-remove, .st-btn, .sb-button, .sb-pop-trigger,
+  .os-ct-chip__label, .os-ct-chip__clear, .os-sx-pill__main
+):active:not(:disabled, [aria-disabled='true']) {
+  background: var(--press-wash);
+  transform: scale(0.97);
+}
+
+.app .sb-leg-entry:focus-visible,
+.app .os-sx-pill:focus-within { border-color: var(--pf-hover-edge); box-shadow: var(--glow-accent-soft); }
+.app :is(
+  .ui-pane-icon, .tw-tabs__new, .tw-toolbar__btn, .tw-frame__btn, .chain-widget__customise, .ui-pcr-rewound__back,
+  .sb-select-trigger, .sb-flip, .sb-step-button, .sb-link, .sb-icon-button, .st-btn, .sb-button, .sb-hb-tile, .os-ct-chip__label, .os-sx-pill__main
+):disabled { opacity: 0.5; cursor: not-allowed; box-shadow: none; transform: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  .app :is(.ui-pane-icon, .tw-toolbar__btn, .tw-frame__btn, .sb-flip, .sb-step-button, .sb-select-trigger, .st-btn, .sb-hb-tile, .os-sx-pill__main):active:not(:disabled) {
+    transform: none;
+  }
+}
+
+/* ── 5. TYPE: Sans with tabular numerals on every dense surface ────────── */
+.app :is(
+  .chain-insight__chip, .ui-oi-prov, .ui-oi-legend__row, .ui-gex-scope, .os-status-pill, .os-atmoi-tag,
+  .sb-flip, .sb-select-trigger, .sb-leg-entry, .sb-step-button, .sb-hb-tile, .sb-card,
+  .tw-toolbar__btn, .tw-frame__link, .tw-tab__label, .tw-snap__tile, .tw-add-item, .tw-menu__item,
+  .os-ct-chip, .os-sx-pill, .upk-compact-row, .ui-customize-panel
+) {
+  font-family: var(--font-sans);
+  font-variant-numeric: tabular-nums;
+}
+.app :is(.chain-insight__chip, .ui-oi-prov, .os-status-pill, .os-atmoi-tag) { font-weight: 600; }
+.app :is(.ui-oi-legend__row, .sb-select-trigger) { font-weight: 500; }
+
+/* ── 6. READABILITY: tinted fills must keep their text legible ─────────── */
+.app :is(.ui-oi-legend__row, .ui-gex-scope, .ui-oi-legend small) { color: var(--text-muted); }
+
+/* ── Popovers and the Search shell: token-level only (shared with the
+      top-bar index dropdown), so the two branches merge without a conflict. */
+.app .upk-compact-row.active,
+.app .upk-compact-row[aria-selected='true'] { background: var(--pf-selected); border-color: var(--line-strong); }
+
+/* ── Terminal: the Option Chain widget's own header controls ───────────── */
+.app .tw-widget :is(.chain-sort-button, .chain-side-nav-button, .chain-expiry-selector__trigger, .strike-header-button, .chain-widget__customise) {
+  transition: var(--pf-motion);
+}
+.app .tw-widget .chain-sort-button { border-radius: 999px; }
+.app .tw-widget :is(.chain-sort-button, .chain-side-nav-button, .chain-expiry-selector__trigger, .strike-header-button):focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring-double);
+}
+
+/* ── Strategy Builder keeps its owner rule (27 Sep): nothing on the page
+      moves. It takes the recipe's shape, edge, material and hover tint, but no
+      transition and no pressed scale. ────────────────────────────────────── */
+.app .sb-page :is(.sb-flip, .sb-step-button, .sb-select-trigger, .st-btn, .sb-button, .sb-pop-trigger, .sb-link, .sb-icon-button, .sb-leg-more, .sb-leg-remove, .sb-hb-tile):active:not(:disabled) { transform: none; }
+
+/* ── Options Scanner: panels, actions, menus ───────────────────────────── */
+.app :is(.os-table-scroll, .os-coverage, .os-folds, .os-pricing, .os-hedge, .os-scenarios, .os-payoff, .os-calendar) { border-radius: var(--pf-card-radius); }
+.app .os-screen-menu__action { border-radius: var(--pf-plate-radius); }
+.app :is(.os-ct-action, .os-screen-trigger, .os-button) {
+  border-radius: 999px;
+  box-shadow: var(--edge-highlight);
+  transition: var(--pf-motion);
+}
+@media (hover: hover) {
+  .app :is(.os-ct-action, .os-screen-trigger, .os-button):hover:not(:disabled, .is-primary) {
+    border-color: var(--pf-hover-edge);
+    background: var(--pf-hover-tint);
+    box-shadow: var(--edge-highlight), var(--glow-accent-soft);
+  }
+}
+.app :is(.os-ct-action, .os-screen-trigger, .os-button):active:not(:disabled) { background: var(--press-wash); transform: scale(0.97); }
+.app :is(.os-ct-action, .os-screen-trigger, .os-button):focus-visible { outline: none; box-shadow: var(--focus-ring-double); }
+.app :is(.os-ct-action, .os-screen-trigger, .os-button):disabled { opacity: 0.5; cursor: not-allowed; box-shadow: none; transform: none; }
+@media (prefers-reduced-motion: reduce) {
+  .app :is(.os-ct-action, .os-screen-trigger, .os-button):active:not(:disabled) { transform: none; }
+}
+
+/* ── Search popover (token-level only; the shell is untouched) ─────────── */
+.app .ui-isearch__x { border-radius: 999px; transition: var(--pf-motion); }
+@media (hover: hover) {
+  .app .ui-isearch__x:hover { background: var(--pf-hover-tint); box-shadow: var(--glow-accent-soft); }
+}
+.app .ui-isearch__x:active { background: var(--press-wash); transform: scale(0.97); }
+.app .ui-isearch__x:focus-visible { outline: none; box-shadow: var(--focus-ring-double); }
+.app .ui-isearch__kind { color: var(--text-muted); } /* was --text-disabled: below 4.5:1 on the row */
+.app .ui-isearch__row.is-hot { background: var(--pf-hover-tint); }
+@media (prefers-reduced-motion: reduce) { .app .ui-isearch__x:active { transform: none; } }

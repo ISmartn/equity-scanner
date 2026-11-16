@@ -1,0 +1,1566 @@
+/*
+ * Strike studio — dialog authority
+ * ---------------------------------------------------------------------------
+ * The strike detail pop-up is portaled to <body>, so it was styled from six
+ * sheets at once (strike-filter, oi-controls, option-chain-refinement,
+ * ui-strike-payoff, ui-strike-detail-studio, ui-motion) and the loudest
+ * `!important` won. The result on a 1709x982 desktop measured 1120x760 with an
+ * 842px stack inside it: the direction control was BELOW the dialog's own
+ * bottom edge, "More contract data" was sliced in half, and 589px of screen
+ * width to the right of the dialog held nothing.
+ *
+ * This sheet owns the frame and the layout:
+ *   - the scrim (a veil, not a blackout)
+ *   - the dialog box and its height budget
+ *   - the two-pane body: chart plane + figures rail
+ *   - the controls, which are the app's one capsule (CapsuleSegmented)
+ *
+ * It follows the chain's rules: no glow of any kind, the neutral palette the
+ * chain already uses, one colour rule (green up, red down, everything else
+ * neutral), every figure printed once.
+ *
+ * Loaded after ui-strike-detail-studio.css and ui-strike-payoff.css and
+ * before ui-control-capsule-authority.css — that sheet must stay last, and
+ * nothing here restyles the capsule itself, only where it sits and how wide.
+ */
+
+/* ── Scrim ────────────────────────────────────────────────────────────────
+   The chain stays readable behind its own dialog: a 10% veil and a 4px blur,
+   not the 72% blackout this used to paint. `--scrim-sheet*` are consumed by
+   `.strike-detail-sheet-backdrop` in strike-filter.css. */
+.strike-detail-sheet-backdrop[data-workspace='chain'].strike-detail-sheet-backdrop {
+  --scrim-sheet: color-mix(in srgb, var(--capital-black) 10%, transparent);
+  --scrim-sheet-blur: 4px;
+  align-items: center;
+  justify-content: center;
+  padding: 32px;
+}
+
+:root[data-theme='light'] .strike-detail-sheet-backdrop[data-workspace='chain'].strike-detail-sheet-backdrop {
+  /* The same 10% on a light page: the chain's own ink, not the brand plum. */
+  --scrim-sheet: color-mix(in srgb, var(--neutral-950) 10%, transparent);
+}
+
+/* ── Ground ───────────────────────────────────────────────────────────────
+   Inside the dialog is the chain's own cell ground: the very dark neutral in
+   dark, white in light. The backdrop is portaled to <body>, so the chain's
+   `--oc-grid-row` (scoped to `#root > .app`) never reaches it — the value is
+   restated here. Header, plane, rail and figure cards all take it, and the
+   hairlines do the separating that a second grey used to do. Keep in step with
+   ui-chain-grid-finish.css. */
+.strike-detail-sheet-backdrop[data-workspace='chain'].strike-detail-sheet-backdrop {
+  --studio-ground: #0F0F0F;
+  --surface: var(--studio-ground);
+  --surface-raised: var(--studio-ground);
+  --surface-card: var(--studio-ground);
+  --bg-surface: var(--studio-ground);
+}
+
+:root[data-theme='light'] .strike-detail-sheet-backdrop[data-workspace='chain'].strike-detail-sheet-backdrop {
+  --studio-ground: #FFFFFF;
+}
+
+/* ── Dialog ───────────────────────────────────────────────────────────────
+   Height is a budget, not a constant: `100dvh − 64px` of gutter. The sheet
+   itself never scrolls on a desktop — the rail does — so the frame can carry
+   the header and the plane at a fixed size while the data column moves. */
+.strike-detail-sheet-backdrop[data-workspace='chain'] .strike-detail-bottom-sheet.strike-detail-bottom-sheet {
+  box-sizing: border-box;
+  width: min(1320px, calc(100vw - 64px));
+  height: min(820px, calc(100dvh - 64px));
+  min-height: 0;
+  /* Beats oi-controls' historical `max-height: … !important`; kept explicit so
+     a future sheet cannot silently shrink the dialog below its own content. */
+  max-height: calc(100dvh - 64px) !important;
+  padding: 0;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-xl, 16px);
+  background: var(--surface);
+  /* Neutral elevation only. The accent ring that used to ride along with this
+     shadow was a glow by another name. */
+  box-shadow: 0 24px 64px color-mix(in srgb, var(--capital-black) 44%, transparent);
+  overflow: hidden;
+}
+
+.strike-detail-sheet-backdrop[data-workspace='chain'] .strike-detail-bottom-sheet .strike-detail-studio.strike-detail-studio {
+  width: 100% !important;
+  height: 100% !important;
+  min-height: 0 !important;
+  display: grid !important;
+  grid-template-rows: auto auto minmax(0, 1fr) !important;
+  border: 0 !important;
+  border-radius: inherit !important;
+  background: transparent !important;
+  overflow: hidden !important;
+}
+
+/* ── Header ───────────────────────────────────────────────────────────────
+   One row: the contract on the left, the direction capsule and the close on
+   the right. It is in flow, not sticky — the panes below it scroll.
+
+   Where the two do not fit on one line the controls wrap to a second row,
+   held to the right edge. Unwrapped, the row simply ran past the dialog and
+   the frame clipped it: a leg's header below ~910px (84px of it, close
+   button included, on an 820px tablet), and the straddle's longer
+   "Long Straddle / Short Straddle" pair below ~1030px. */
+.strike-detail-sheet-backdrop[data-workspace='chain'] .strike-detail-bottom-sheet .detail-studio-header.detail-studio-header {
+  position: static !important;
+  box-sizing: border-box !important;
+  min-height: 0 !important;
+  display: flex !important;
+  flex-wrap: wrap !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 10px 16px !important;
+  padding: 12px 14px !important;
+  border-bottom: 1px solid var(--line) !important;
+  background: var(--surface-raised) !important;
+  box-shadow: none !important;
+}
+
+.strike-detail-sheet-backdrop[data-workspace='chain'] .strike-detail-bottom-sheet .detail-header-actions.detail-header-actions {
+  position: static !important;
+  flex: 0 0 auto !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+  margin-left: auto !important;
+}
+
+.strike-detail-sheet-backdrop[data-workspace='chain'] .strike-detail-bottom-sheet .detail-close.detail-close {
+  position: static !important;
+  flex: 0 0 32px !important;
+  width: 32px !important;
+  height: 32px !important;
+  border-radius: 999px !important;
+  background: transparent !important;
+}
+
+/* Contract §8's ring, for the two controls that are not capsules (the
+   capsule carries its own). It used to live in ui-strike-detail-studio.css
+   alongside the mode/greek/direction pills; those are CapsuleSegmented now, so
+   the whole rule went with them and these two were left with nothing. */
+.strike-detail-sheet-backdrop[data-workspace='chain'] .strike-detail-bottom-sheet :is(.detail-close, .detail-disclosure-trigger):focus-visible {
+  outline: 2px solid var(--accent) !important;
+  outline-offset: 1px !important;
+}
+
+/* ── Strategy line ────────────────────────────────────────────────────────
+   Was a 46px bordered band that repeated what the plot head printed under it.
+   It is one hairline-separated line now: position, what the underlying has to
+   do, the risk shape, and the single probability on this screen. */
+.strike-detail-sheet-backdrop[data-workspace='chain'] .strike-detail-bottom-sheet .detail-strategy-ribbon.detail-strategy-ribbon {
+  min-height: 0 !important;
+  display: flex !important;
+  flex-wrap: wrap !important;
+  align-items: baseline !important;
+  gap: 4px 10px !important;
+  margin: 0 !important;
+  padding: 8px 14px !important;
+  border: 0 !important;
+  border-bottom: 1px solid var(--line) !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  color: var(--text-muted) !important;
+  font-size: 12px !important;
+  font-weight: 500 !important;
+  line-height: 1.3 !important;
+}
+
+.strike-detail-sheet-backdrop[data-workspace='chain'] .strike-detail-bottom-sheet .detail-strategy-ribbon > span + span::before {
+  display: inline-block;
+  width: 1px;
+  height: 12px;
+  margin-right: 10px;
+  background: var(--line);
+  vertical-align: -1px;
+  content: '';
+}
+
+.strike-detail-sheet-backdrop[data-workspace='chain'] .strike-detail-bottom-sheet .detail-strategy-ribbon .detail-strategy-position {
+  color: var(--text) !important;
+  font-weight: 700 !important;
+}
+
+.strike-detail-sheet-backdrop[data-workspace='chain'] .strike-detail-bottom-sheet .detail-strategy-ribbon strong {
+  color: var(--text) !important;
+  font-weight: 700 !important;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── Body: plane + rail ───────────────────────────────────────────────────
+   The dialog is wider than it is tall, so the figures sit BESIDE the chart
+   rather than stacked under it. That is the whole height saving: the plane
+   keeps every pixel the frame can give it and nothing lands off the edge. */
+.strike-detail-sheet-backdrop[data-workspace='chain'] .strike-detail-bottom-sheet .detail-studio-body.detail-studio-body {
+  min-height: 0 !important;
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) clamp(260px, 22%, 320px) !important;
+  gap: 0 !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+}
+
+.strike-detail-sheet-backdrop[data-workspace='chain'] .strike-detail-bottom-sheet .detail-analysis-workspace.detail-analysis-workspace {
+  min-width: 0 !important;
+  min-height: 0 !important;
+  display: grid !important;
+  /* ONE explicit, shrinkable column. Without it the implicit `auto` column
+     sizes to the toolbar's min-content — the mode capsule plus five greek
+     options laid end to end — and the whole pane runs ~117px past a 390px
+     phone with the greek capsule, which scrolls, never getting the chance. */
+  grid-template-columns: minmax(0, 1fr) !important;
+  grid-template-rows: auto minmax(0, 1fr) !important;
+  gap: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+  background: transparent !important;
+  overflow: hidden !important;
+}
+
+/* ── Toolbar ──────────────────────────────────────────────────────────────
+   Two capsules on one hairline row. No card, no tint, no rounded box: the
+   dialog already has an edge and a second frame inside it read as clutter. */
+.strike-detail-sheet-backdrop[data-workspace='chain'] .strike-detail-bottom-sheet .detail-analysis-toolbar.detail-analysis-toolbar {
+  min-height: 0 !important;
+  display: flex !important;
+  flex-wrap: wrap !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 10px !important;
+  padding: 10px 14px !important;
+  border: 0 !important;
+  border-bottom: 1px solid var(--line) !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+}
+
+.strike-detail-sheet-backdrop[data-workspace='chain'] .strike-detail-bottom-sheet .detail-control-cluster--greeks {
+  display: flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+}
+
+.strike-detail-sheet-backdrop[data-workspace='chain'] .strike-detail-bottom-sheet .detail-control-label {
+  flex: 0 0 auto;
+  font-size: var(--text-meta, 11px);
+  letter-spacing: .06em;
+}
+
+/* ── Chart plane ──────────────────────────────────────────────────────────
+   Flat. The radial accent wash that used to sit behind the curve was a glow,
+   and the plane already reads as a plane because the toolbar rules it off. */
+.strike-detail-sheet-backdrop[data-workspace='chain'] .strike-detail-bottom-sheet .detail-analysis-chart.detail-analysis-chart {
+  position: relative !important;
+  box-sizing: border-box !important;
+  min-width: 0 !important;
+  min-height: 0 !important;
+  padding: 12px 14px 14px !important;
+  border: 0 !important;
+  background: transparent !important;
+  overflow: hidden !important;
+}
+
+/* Both modes cross-fade in the same box, so they are stacked on top of each
+   other rather than laid out in flow — two in flow would double its height
+   for the length of the transition. */
+.strike-detail-sheet-backdrop[data-workspace='chain'] .strike-detail-bottom-sheet .detail-analysis-chart > .detail-chart-content {
+  position: absolute !important;
+  inset: 12px 14px 14px !important;
+  min-height: 0 !important;
+}
+
+/* The plot keeps the whole plane now that the rail prints the four figures. */
+.strike-detail-sheet-backdrop[data-workspace='chain'] .strike-detail-bottom-sheet .payoff-workspace--plot {
+  grid-template-rows: minmax(0, 1fr) !important;
+  gap: 0 !important;
+}
+
+/* ── Rail ─────────────────────────────────────────────────────────────────
+   The figures for whatever the plane is showing, then the greeks, then the
+   full contract on request. This column scrolls; the dialog does not. */
+.strike-detail-sheet-backdrop[data-workspace='chain'] .strike-detail-bottom-sheet .detail-studio-rail {
+  box-sizing: border-box;
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 12px;
+  border-left: 1px solid var(--line);
+  background: var(--surface-raised);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+}
+
+.strike-detail-sheet-backdrop[data-workspace='chain'] .strike-detail-bottom-sheet .detail-studio-rail .payoff-summary-strip {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) !important;
+  gap: 8px !important;
+}
+
+.strike-detail-sheet-backdrop[data-workspace='chain'] .strike-detail-bottom-sheet .detail-studio-rail .payoff-summary-card {
+  min-height: 0 !important;
+  display: grid !important;
+  gap: 2px !important;
+  padding: 8px 10px !important;
+  border: 1px solid var(--line) !important;
+  border-radius: 10px !important;
+  background: var(--surface) !important;
+  box-shadow: none !important;
+}
+
+/* ── Greeks ───────────────────────────────────────────────────────────────
+   Label over figure, two to a row, hairline-separated — the same shape the
+   chain's own cells use. It was a five-across strip under the chart. */
+.strike-detail-sheet-backdrop[data-workspace='chain'] .strike-detail-bottom-sheet .detail-studio-rail .detail-analysis-metric-strip {
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  gap: 0 !important;
+  overflow: hidden !important;
+  border: 1px solid var(--line) !important;
+  border-radius: 10px !important;
+  background: var(--surface) !important;
+}
+
+.strike-detail-sheet-backdrop[data-workspace='chain'] .strike-detail-bottom-sheet .detail-studio-rail .detail-analysis-metric-strip > span {
+  box-sizing: border-box !important;
+  min-width: 0 !important;
+  display: grid !important;
+  gap: 2px !important;
+  align-content: center !important;
+  padding: 7px 10px !important;
+  border-top: 1px solid var(--line) !important;
+  border-right: 1px solid var(--line) !important;
+}
+
+.strike-detail-sheet-backdrop[data-workspace='chain'] .strike-detail-bottom-sheet .detail-studio-rail .detail-analysis-metric-strip > span:nth-child(-n + 2) {
+  border-top: 0 !important;
+}
+
+.strike-detail-sheet-backdrop[data-workspace='chain'] .strike-detail-bottom-sheet .detail-studio-rail .detail-analysis-metric-strip > span:nth-child(2n) {
+  border-right: 0 !important;
+}
+
+/* Five figures over a two-column grid leave an orphan; it takes the row. */
+.strike-detail-sheet-backdrop[data-workspace='chain'] .strike-detail-bottom-sheet .detail-studio-rail .detail-analysis-metric-strip > span:last-child:nth-child(odd) {
+  grid-column: 1 / -1 !important;
+  border-right: 0 !important;
+}
+
+/* ── More contract data ───────────────────────────────────────────────────
+   Directly under the greeks, not pinned to the rail's foot: on a tall dialog
+   the pin left a 300px void above the button, which reads as a mistake rather
+   than as breathing room. Short content sits at the top; the slack falls at
+   the bottom where it belongs. */
+.strike-detail-sheet-backdrop[data-workspace='chain'] .strike-detail-bottom-sheet .detail-studio-rail .detail-contract-disclosure {
+  min-width: 0 !important;
+  margin-top: 0 !important;
+}
+
+.strike-detail-sheet-backdrop[data-workspace='chain'] .strike-detail-bottom-sheet .detail-studio-rail .detail-disclosure-trigger {
+  color: var(--text) !important;
+}
+
+.strike-detail-sheet-backdrop[data-workspace='chain'] .strike-detail-bottom-sheet .detail-studio-rail .detail-disclosure-panel {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) !important;
+  gap: 8px !important;
+  padding: 8px 0 0 !important;
+  overflow: hidden !important;
+  scroll-margin-block: 12px !important;
+}
+
+/* ── Capsule placement ────────────────────────────────────────────────────
+   Geometry only. The capsule's own paint is owned by capsule-segmented.css
+   and ui-control-capsule-authority.css, which loads after this sheet. */
+.strike-detail-sheet-backdrop[data-workspace='chain'] .strike-detail-bottom-sheet :is(.detail-mode-capsule, .detail-position-capsule, .detail-greek-capsule) {
+  flex: 0 0 auto;
+}
+
+/* ── Tablet and narrow desktop ────────────────────────────────────────────
+   Below ~1060px the rail would squeeze the plane, so the two panes stack and
+   the figures go back to a row of cards across the bottom. */
+@media (max-width: 1059px) {
+  .strike-detail-sheet-backdrop[data-workspace='chain'] .strike-detail-bottom-sheet .detail-studio-body.detail-studio-body {
+    grid-template-columns: minmax(0, 1fr) !important;
+    grid-template-rows: minmax(0, 1fr) auto !important;
+    overflow-y: auto !important;
+  }
+
+  .strike-detail-sheet-backdrop[data-workspace='chain'] .strike-detail-bottom-sheet .detail-studio-rail {
+    border-left: 0;
+    border-top: 1px solid var(--line);
+    overflow: visible;
+  }
+
+  .strike-detail-sheet-backdrop[data-workspace='chain'] .strike-detail-bottom-sheet .detail-studio-rail .payoff-summary-strip {
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)) !important;
+  }
+
+  .strike-detail-sheet-backdrop[data-workspace='chain'] .strike-detail-bottom-sheet .detail-analysis-chart.detail-analysis-chart {
+    min-height: 320px !important;
+  }
+
+  /* The rail is a full-width band here, so two 400px-wide cells holding
+     "Delta −0.06" is not a grid, it is two very long rows. */
+  .strike-detail-sheet-backdrop[data-workspace='chain'] .strike-detail-bottom-sheet .detail-studio-rail .detail-analysis-metric-strip {
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)) !important;
+  }
+
+  .strike-detail-sheet-backdrop[data-workspace='chain'] .strike-detail-bottom-sheet .detail-studio-rail .detail-analysis-metric-strip > span {
+    border-top: 0 !important;
+  }
+
+  .strike-detail-sheet-backdrop[data-workspace='chain'] .strike-detail-bottom-sheet .detail-studio-rail .detail-analysis-metric-strip > span:last-child {
+    border-right: 0 !important;
+  }
+}
+
+/* ── Phone ────────────────────────────────────────────────────────────────
+   A bottom sheet again (contract §7 puts the boundary at 768px): full width,
+   flush with the bottom edge, one column, and the sheet itself scrolls.
+
+   Measured on a 390x844 phone before this pass: 278px of chrome — header 129,
+   strategy line 52, toolbar 97 — sat above a 388px plot, so a 1037px stack
+   was being poured into a 776px sheet and the chart, the reason the sheet
+   opens at all, got 37% of it. Three things paid for that: the toolbar spent
+   a whole second row on a "GREEK OVERLAY" caption (123px of a 390px line, and
+   the capsule it labelled still ran 41px past the right edge with 'Rho'
+   unreachable), the strategy line repeated the position name the capsule
+   above it was already printing, and every band carried desktop padding.
+
+   The chart chrome follows the the app Charts prototype: its `.ohlc` readout is
+   `position:absolute;top:8px;left:12px` over the plot on a translucent plate,
+   not a band above it, so the plot keeps the whole box. */
+@media (max-width: 768px) {
+  .strike-detail-sheet-backdrop[data-workspace='chain'].strike-detail-sheet-backdrop {
+    /* One gutter for every band in the sheet. They were 12, 14, 12, 12 and
+       12, so the strategy line's text hung 2px inside every other row. */
+    --sheet-gutter: 14px;
+    align-items: flex-end;
+    padding: 0;
+  }
+
+  .strike-detail-sheet-backdrop[data-workspace='chain'] .strike-detail-bottom-sheet.strike-detail-bottom-sheet {
+    width: 100%;
+    height: auto;
+    /* dvh, never vh — the mobile URL bar makes vh lie. */
+    max-height: 92dvh !important;
+    border-radius: var(--radius-xl, 16px) var(--radius-xl, 16px) 0 0;
+    border-bottom: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .strike-detail-sheet-backdrop[data-workspace='chain'] .strike-detail-bottom-sheet .strike-detail-studio.strike-detail-studio {
+    height: auto !important;
+    grid-template-rows: auto auto auto !important;
+    overflow: visible !important;
+  }
+
+  .strike-detail-sheet-backdrop[data-workspace='chain'] .strike-detail-bottom-sheet .detail-studio-body.detail-studio-body {
+    overflow: visible !important;
+  }
+
+  .strike-detail-sheet-backdrop[data-workspace='chain'] .strike-detail-bottom-sheet .detail-analysis-workspace.detail-analysis-workspace {
+    overflow: visible !important;
+  }
+
+  /* ── Header ─────────────────────────────────────────────────────────────
+     The sheet's anchor: the contract it belongs to and the direction control
+     stay reachable while the body scrolls under them. Three rows, each one
+     tight — identity, quote, direction. */
+  .strike-detail-sheet-backdrop[data-workspace='chain'] .strike-detail-bottom-sheet .detail-studio-header.detail-studio-header {
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 12 !important;
+    flex-wrap: wrap !important;
+    align-items: center !important;
+    gap: 8px var(--sheet-gutter) !important;
+    padding: 9px var(--sheet-gutter) 11px !important;
+  }
+
+  /* An explicit grid, not a wrapping row. Left to wrap, the five parts of the
+     contract line broke wherever they ran out of room — at 320px that put the
+     strike on a line of its own and the header reached four rows before the
+     direction capsule had been drawn. Identity on the first row, the quote on
+     the second with the dates pushed to its end.
+
+     The close button is pinned to the corner, so the two trailing columns of
+     row one are left empty for it to sit over; nothing is placed there. */
+  :is(#root > .app.app[data-active-tab='chain'], .strike-detail-sheet-backdrop[data-workspace='chain'])
+    .strike-detail-bottom-sheet .strike-detail-studio .detail-studio-contract {
+    flex: 1 1 100% !important;
+    display: grid !important;
+    grid-template-columns: auto auto minmax(0, 1fr) auto !important;
+    grid-template-areas:
+      'idx side .   .'
+      'ltp ltp exp dte' !important;
+    align-items: center !important;
+    column-gap: 8px !important;
+    row-gap: 5px !important;
+  }
+
+  :is(#root > .app.app[data-active-tab='chain'], .strike-detail-sheet-backdrop[data-workspace='chain'])
+    .strike-detail-bottom-sheet .strike-detail-studio .detail-index { grid-area: idx; }
+  :is(#root > .app.app[data-active-tab='chain'], .strike-detail-sheet-backdrop[data-workspace='chain'])
+    .strike-detail-bottom-sheet .strike-detail-studio :is(.detail-strike-side-chip, .strike-nav) { grid-area: side; justify-self: start; }
+  :is(#root > .app.app[data-active-tab='chain'], .strike-detail-sheet-backdrop[data-workspace='chain'])
+    .strike-detail-bottom-sheet .strike-detail-studio .detail-studio-ltp { grid-area: ltp; justify-self: start; }
+  :is(#root > .app.app[data-active-tab='chain'], .strike-detail-sheet-backdrop[data-workspace='chain'])
+    .strike-detail-bottom-sheet .strike-detail-studio .detail-expiry-chip { grid-area: exp; justify-self: end; }
+  :is(#root > .app.app[data-active-tab='chain'], .strike-detail-sheet-backdrop[data-workspace='chain'])
+    .strike-detail-bottom-sheet .strike-detail-studio .detail-dte-tag { grid-area: dte; justify-self: end; }
+
+  /* Expiry and days-to-expiry are provenance, not identity: as two bordered
+     chips they were as loud as the strike itself and cost 60px of a line that
+     has a quote to print. Plain muted type at the end of the quote row — the
+     same two figures, no boxes. */
+  :is(#root > .app.app[data-active-tab='chain'], .strike-detail-sheet-backdrop[data-workspace='chain'])
+    .strike-detail-bottom-sheet .strike-detail-studio :is(.detail-expiry-chip, .detail-dte-tag) {
+    min-height: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+    background: transparent !important;
+    color: var(--studio-muted) !important;
+    font-size: var(--text-meta, 11px) !important;
+    font-weight: 600 !important;
+    letter-spacing: .02em !important;
+  }
+
+  :is(#root > .app.app[data-active-tab='chain'], .strike-detail-sheet-backdrop[data-workspace='chain'])
+    .strike-detail-bottom-sheet .strike-detail-studio .detail-dte-tag::before {
+    margin-right: 8px;
+    display: inline-block;
+    height: 10px;
+    border-left: 1px solid var(--line-strong);
+    content: '';
+  }
+
+  :is(#root > .app.app[data-active-tab='chain'], .strike-detail-sheet-backdrop[data-workspace='chain'])
+    .strike-detail-bottom-sheet .strike-detail-studio .detail-strike-side-chip {
+    min-height: 26px !important;
+  }
+
+  :is(#root > .app.app[data-active-tab='chain'], .strike-detail-sheet-backdrop[data-workspace='chain'])
+    .strike-detail-bottom-sheet .strike-detail-studio .detail-studio-ltp {
+    margin-left: 0 !important;
+    padding-left: 0 !important;
+    border-left: 0 !important;
+  }
+
+  /* The pair needs the full width at 360px to print "Short Call" without
+     truncating; it takes its own row under the quote. The close button no
+     longer shares that row, so the capsule gets all of it. */
+  .strike-detail-sheet-backdrop[data-workspace='chain'] .strike-detail-bottom-sheet .detail-header-actions.detail-header-actions {
+    order: 3 !important;
+    flex: 1 1 100% !important;
+  }
+
+  .strike-detail-sheet-backdrop[data-workspace='chain'] .strike-detail-bottom-sheet .detail-position-capsule {
+    flex: 1 1 auto !important;
+    display: flex !important;
+    width: 100% !important;
+  }
+
+  .strike-detail-sheet-backdrop[data-workspace='chain'] .strike-detail-bottom-sheet .detail-position-capsule .ui-capsule__option {
+    flex: 1 1 0 !important;
+  }
+
+  /* Pinned to the sheet's own corner, at the 44px touch floor, rather than
+     laid out beside the direction capsule where it cost that control 44px of
+     a 362px line and sat 60px below the top edge it belongs to. */
+  .strike-detail-sheet-backdrop[data-workspace='chain'] .strike-detail-bottom-sheet .detail-close.detail-close {
+    position: absolute !important;
+    top: 3px !important;
+    right: calc(var(--sheet-gutter) - 9px) !important;
+    flex: 0 0 44px !important;
+    width: 44px !important;
+    height: 44px !important;
+  }
+
+  /* ── Strategy line ──────────────────────────────────────────────────────
+     "Long Call" is printed by the capsule directly above it, so the line
+     repeats itself out of a 390px budget. What is left is the three things
+     only this line says: the move needed, the risk shape, the probability. */
+  .strike-detail-sheet-backdrop[data-workspace='chain'] .strike-detail-bottom-sheet .detail-strategy-ribbon.detail-strategy-ribbon {
+    gap: 3px 9px !important;
+    padding: 7px var(--sheet-gutter) 8px !important;
+    font-size: 11.5px !important;
+  }
+
+  .strike-detail-sheet-backdrop[data-workspace='chain'] .strike-detail-bottom-sheet .detail-strategy-ribbon .detail-strategy-position {
+    display: none !important;
+  }
+
+  /* Without this the hidden name still leaves its separator, so the line
+     opened on a stray "·". */
+  .strike-detail-sheet-backdrop[data-workspace='chain'] .strike-detail-bottom-sheet .detail-strategy-ribbon .detail-strategy-position + span::before {
+    content: none !important;
+  }
+
+  /* ── Toolbar ────────────────────────────────────────────────────────────
+     One row. The caption is dropped: the capsule sits in the payoff view and
+     nowhere else, its options are the five greek names, and nothing else on
+     this screen could be mistaken for it — so it cost 123px to say what the
+     control already said. */
+  .strike-detail-sheet-backdrop[data-workspace='chain'] .strike-detail-bottom-sheet .detail-analysis-toolbar.detail-analysis-toolbar {
+    flex-wrap: nowrap !important;
+    gap: 8px !important;
+    padding: 8px var(--sheet-gutter) !important;
+  }
+
+  .strike-detail-sheet-backdrop[data-workspace='chain'] .strike-detail-bottom-sheet .detail-control-label {
+    display: none !important;
+  }
+
+  .strike-detail-sheet-backdrop[data-workspace='chain'] .strike-detail-bottom-sheet .detail-mode-capsule {
+    flex: 0 0 auto !important;
+  }
+
+  .strike-detail-sheet-backdrop[data-workspace='chain'] .strike-detail-bottom-sheet .detail-control-cluster--greeks {
+    position: relative !important;
+    flex: 1 1 0 !important;
+    min-width: 0 !important;
+    gap: 0 !important;
+  }
+
+  /* The pan affordance. Without it the strip simply ends mid-word at the
+     sheet's edge — "Veg" reads as a broken label, not as "there is more this
+     way". It fades to the capsule's own track, inside its border and round
+     end, and never takes a tap. */
+  .strike-detail-sheet-backdrop[data-workspace='chain'] .strike-detail-bottom-sheet .detail-control-cluster--greeks::after {
+    position: absolute;
+    z-index: 2;
+    top: 1px;
+    right: 1px;
+    bottom: 1px;
+    width: 20px;
+    border-radius: 0 999px 999px 0;
+    background: linear-gradient(90deg, transparent, var(--surface-card, var(--bg-surface)) 86%);
+    pointer-events: none;
+    content: '';
+  }
+
+  /* Five greeks do not fit what is left of a 390px row, so the capsule pans
+     and owns that gesture. `flex-basis: 0` is what makes it a scroller: at
+     `auto` it sized to its own content and ran off the sheet instead, which
+     put 'Rho' past the right edge where no scroll could reach it. */
+  .strike-detail-sheet-backdrop[data-workspace='chain'] .strike-detail-bottom-sheet .detail-greek-capsule {
+    flex: 1 1 0 !important;
+    display: flex !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    overflow-x: auto !important;
+    scroll-snap-type: x proximity;
+    scrollbar-width: none;
+    touch-action: pan-x pinch-zoom;
+    overscroll-behavior-x: contain;
+  }
+
+  .strike-detail-sheet-backdrop[data-workspace='chain'] .strike-detail-bottom-sheet .detail-greek-capsule::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Options keep their own width inside a scroller. Left to shrink they
+     printed "D", "G..", "T." — five truncated greeks instead of five that
+     scroll. */
+  .strike-detail-sheet-backdrop[data-workspace='chain'] .strike-detail-bottom-sheet .detail-greek-capsule .ui-capsule__option {
+    flex: 0 0 auto !important;
+    padding: 0 12px !important;
+    scroll-snap-align: center;
+  }
+
+  /* The intraday series key that used to sit in this row is gone: the chart's
+     own crosshair readout prints Premium, Volume and Open Interest with their
+     numbers, so the row of bare labels was the same words carrying less. Its
+     rules went with it rather than being left as dead selectors.
+
+     The timeframe capsule takes that space and pans like the greek one. */
+  .strike-detail-sheet-backdrop[data-workspace='chain'] .strike-detail-bottom-sheet .detail-control-cluster--chart {
+    flex: 1 1 0 !important;
+    min-width: 0 !important;
+    justify-content: flex-end !important;
+  }
+
+  .strike-detail-sheet-backdrop[data-workspace='chain'] .strike-detail-bottom-sheet .detail-timeframe-capsule {
+    flex: 1 1 0 !important;
+    display: flex !important;
+    min-width: 0 !important;
+    overflow-x: auto !important;
+    scroll-snap-type: x proximity;
+    scrollbar-width: none;
+    touch-action: pan-x pinch-zoom;
+    overscroll-behavior-x: contain;
+  }
+
+  .strike-detail-sheet-backdrop[data-workspace='chain'] .strike-detail-bottom-sheet .detail-timeframe-capsule::-webkit-scrollbar {
+    display: none;
+  }
+
+  .strike-detail-sheet-backdrop[data-workspace='chain'] .strike-detail-bottom-sheet .detail-timeframe-capsule .ui-capsule__option {
+    flex: 0 0 auto !important;
+    padding: 0 11px !important;
+    scroll-snap-align: center;
+  }
+
+  /* ── Chart plane ────────────────────────────────────────────────────────
+     Everything the bands above gave back lands here. */
+  .strike-detail-sheet-backdrop[data-workspace='chain'] .strike-detail-bottom-sheet .detail-analysis-chart.detail-analysis-chart {
+    min-height: clamp(300px, 54dvh, 470px) !important;
+    /* The vertical band is gone — the readout floats over the plot now — but
+       not the side gutters: at `padding: 0` the first time stamp was sliced
+       in half by the sheet's own edge. 8px is the prototype's `padL`. */
+    padding: 0 8px 2px !important;
+  }
+
+  .strike-detail-sheet-backdrop[data-workspace='chain'] .strike-detail-bottom-sheet .detail-analysis-chart > .detail-chart-content {
+    inset: 0 8px 2px !important;
+  }
+
+  /* The prototype's move: the readout rides over the plot on a translucent
+     plate instead of taking a band above it. At 320px that band was three
+     lines — ticker, session provenance, open-interest key — i.e. 72px of the
+     chart's own box spent on captions. */
+
+  /* `- 8px` is the plane's own side inset, so "Expiry P&L" and the fee note
+     land on the sheet gutter instead of 8px inside it. The bands were at 12,
+     14, 12, 12 and 12 before this pass; every one of them is on the gutter
+     now, which is the whole point of having the token. */
+  .strike-detail-sheet-backdrop[data-workspace='chain'] .strike-detail-bottom-sheet .payoff-plot-head {
+    padding: 7px calc(var(--sheet-gutter) - 8px) 6px !important;
+  }
+
+  .strike-detail-sheet-backdrop[data-workspace='chain'] .strike-detail-bottom-sheet .payoff-plot-foot {
+    min-height: 0 !important;
+    padding: 5px calc(var(--sheet-gutter) - 8px) 7px !important;
+  }
+
+  /* The x axis is named by its own tick stamps and by the Spot and Strike
+     markers standing on it; the caption under them was the third thing on
+     this screen saying so. The fee note is a disclosure and stays. */
+  .strike-detail-sheet-backdrop[data-workspace='chain'] .strike-detail-bottom-sheet .payoff-plot-foot > span:first-child {
+    display: none !important;
+  }
+
+  /* ── Rail ───────────────────────────────────────────────────────────────
+     A full-width band under the plot, not a column beside it. */
+  .strike-detail-sheet-backdrop[data-workspace='chain'] .strike-detail-bottom-sheet .detail-studio-rail {
+    gap: 9px !important;
+    padding: var(--sheet-gutter) !important;
+    /* Clears the home indicator: the disclosure row was the last thing in the
+       sheet and sat under it. */
+    padding-bottom: max(var(--sheet-gutter), env(safe-area-inset-bottom)) !important;
+  }
+
+  .strike-detail-sheet-backdrop[data-workspace='chain'] .strike-detail-bottom-sheet .detail-studio-rail .payoff-summary-strip {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+
+  /* The label is the long one ("Open Interest change"); it takes the row. */
+  .strike-detail-sheet-backdrop[data-workspace='chain'] .strike-detail-bottom-sheet .detail-studio-rail .payoff-summary-card:last-child:nth-child(odd) {
+    grid-column: 1 / -1 !important;
+  }
+
+  .strike-detail-sheet-backdrop[data-workspace='chain'] .strike-detail-bottom-sheet .detail-studio-rail .detail-analysis-metric-strip > span {
+    padding: 6px 10px !important;
+  }
+
+  /* A 44px row that reads as a row: the trigger spans the card and the
+     indicator sits at its end, instead of a label and a lone '+' with 280px
+     of nothing between them. */
+  .strike-detail-sheet-backdrop[data-workspace='chain'] .strike-detail-bottom-sheet .detail-studio-rail .detail-disclosure-trigger {
+    box-sizing: border-box !important;
+    width: 100% !important;
+    min-height: 44px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 10px !important;
+    padding: 0 12px !important;
+    border: 1px solid var(--line) !important;
+    border-radius: 10px !important;
+    background: var(--surface) !important;
+  }
+}
+
+/* ── Tablet and narrow desktop ────────────────────────────────────────────
+   Below ~1060px the rail would squeeze the plane, so the two panes stack and
+   the figures go back to a row of cards across the bottom. */
+@media (max-width: 1059px) {
+  .strike-detail-sheet-backdrop[data-workspace='chain'] .strike-detail-bottom-sheet .detail-studio-body.detail-studio-body {
+    grid-template-columns: minmax(0, 1fr) !important;
+    grid-template-rows: minmax(0, 1fr) auto !important;
+    overflow-y: auto !important;
+  }
+
+  .strike-detail-sheet-backdrop[data-workspace='chain'] .strike-detail-bottom-sheet .detail-studio-rail {
+    border-left: 0;
+    border-top: 1px solid var(--line);
+    overflow: visible;
+  }
+
+  .strike-detail-sheet-backdrop[data-workspace='chain'] .strike-detail-bottom-sheet .detail-studio-rail .payoff-summary-strip {
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)) !important;
+  }
+
+  .strike-detail-sheet-backdrop[data-workspace='chain'] .strike-detail-bottom-sheet .detail-analysis-chart.detail-analysis-chart {
+    min-height: 320px !important;
+  }
+
+  /* The rail is a full-width band here, so two 400px-wide cells holding
+     "Delta −0.06" is not a grid, it is two very long rows. */
+  .strike-detail-sheet-backdrop[data-workspace='chain'] .strike-detail-bottom-sheet .detail-studio-rail .detail-analysis-metric-strip {
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)) !important;
+  }
+
+  .strike-detail-sheet-backdrop[data-workspace='chain'] .strike-detail-bottom-sheet .detail-studio-rail .detail-analysis-metric-strip > span {
+    border-top: 0 !important;
+  }
+
+  .strike-detail-sheet-backdrop[data-workspace='chain'] .strike-detail-bottom-sheet .detail-studio-rail .detail-analysis-metric-strip > span:last-child {
+    border-right: 0 !important;
+  }
+}
+
+/* ── Narrow phone ─────────────────────────────────────────────────────────
+   320 and 360 are the widths qa:narrow owns. The gutter closes up and the
+   greek scroller gets its options back at their own width. 390 — the iPhone
+   reference — stays on the layout above: the quote and the dates share a line
+   there, which is one header row fewer. */
+@media (max-width: 380px) {
+  .strike-detail-sheet-backdrop[data-workspace='chain'].strike-detail-sheet-backdrop {
+    --sheet-gutter: 12px;
+  }
+
+  .strike-detail-sheet-backdrop[data-workspace='chain'] .strike-detail-bottom-sheet .detail-greek-capsule .ui-capsule__option {
+    padding: 0 10px !important;
+  }
+
+  /* "LTP 510.30 +37.05 (+7.83%)" and "22 Sept 2026 · 4 DTE" measure 311px
+     together; a 320px phone has 296px of line. The dates take their own row
+     rather than being squeezed to an ellipsis. */
+  :is(#root > .app.app[data-active-tab='chain'], .strike-detail-sheet-backdrop[data-workspace='chain'])
+    .strike-detail-bottom-sheet .strike-detail-studio .detail-studio-contract {
+    grid-template-columns: auto minmax(0, 1fr) !important;
+    grid-template-areas:
+      'idx side'
+      'exp dte'
+      'ltp ltp' !important;
+  }
+
+  :is(#root > .app.app[data-active-tab='chain'], .strike-detail-sheet-backdrop[data-workspace='chain'])
+    .strike-detail-bottom-sheet .strike-detail-studio :is(.detail-expiry-chip, .detail-dte-tag) {
+    justify-self: start !important;
+  }
+
+  .strike-detail-sheet-backdrop[data-workspace='chain'] .strike-detail-bottom-sheet .detail-analysis-chart.detail-analysis-chart {
+    min-height: clamp(280px, 50dvh, 400px) !important;
+  }
+}
+
+/* ── Finish: rail typography, hover and focus ─────────────────────────────
+   The greeks used a 11px sentence-case label while every figure card above
+   them runs the 10px tracked-caps eyebrow; they now share one label voice and
+   an 8px-grid cell. The disclosure row gets a hover wash (hover-capable
+   pointers only). */
+.strike-detail-sheet-backdrop[data-workspace='chain'] .strike-detail-bottom-sheet .detail-studio-rail .detail-analysis-metric-strip > span {
+  padding: 8px 12px !important;
+  gap: 4px !important;
+}
+
+.strike-detail-sheet-backdrop[data-workspace='chain'] .strike-detail-bottom-sheet .detail-studio-rail .detail-analysis-metric-strip > span > small {
+  color: var(--text-subtle);
+  font-size: var(--ui-type-min, 10px);
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.strike-detail-sheet-backdrop[data-workspace='chain'] .strike-detail-bottom-sheet .detail-studio-rail .detail-analysis-metric-strip > span > strong {
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: -0.006em;
+  font-variant-numeric: tabular-nums;
+}
+
+.strike-detail-sheet-backdrop[data-workspace='chain'] .strike-detail-bottom-sheet .detail-studio-rail .detail-disclosure-trigger {
+  border-radius: var(--radius, 9px);
+  transition: background var(--dur-tap, 120ms) var(--ease-ios-out, ease-out);
+}
+
+@media (hover: hover) {
+  .strike-detail-sheet-backdrop[data-workspace='chain'] .strike-detail-bottom-sheet .detail-studio-rail .detail-disclosure-trigger:hover {
+    background: var(--hover-wash, color-mix(in srgb, var(--text) 5%, transparent));
+  }
+}
+
+
+/* ── Studio finish ────────────────────────────────────────────────────────
+   Display polish for the dialog's header, strategy line, rail, contract data
+   and the chart's hover readout. DOM and class names are unchanged; every rule
+   is led by the dialog's own id, written twice. The older sheets scope with
+   `:is(#root > .app…, .strike-detail-sheet-backdrop…)`, and :is() takes the
+   specificity of its heaviest argument — so those rules carry an id's weight
+   even where they match the portaled dialog through the class branch. Two ids
+   outrank them, with or without `!important`.
+
+   TWO FONTS, by place:
+     Manrope (--font-display) — only the few high-impact moments: the LTP
+       in the header, the strategy name in the summary line and the big figure in
+       each rail card.
+     Manrope (--font-sans) — every label, row, chart text and control.
+   Every numeral is tabular. Hairlines are 1px --line; chips and cards sit on
+   the 8px grid (28/36px controls, 8/12px radii, 8/12/16px gaps). */
+#strike-decision-studio#strike-decision-studio,
+#strike-decision-studio#strike-decision-studio * {
+  font-variant-numeric: tabular-nums;
+}
+
+#strike-decision-studio#strike-decision-studio {
+  font-family: var(--font-sans);
+}
+
+#strike-decision-studio#strike-decision-studio .detail-sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  border: 0;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+/* Dialog edge: a visible hairline and a top highlight, no glow. */
+.strike-detail-sheet-backdrop[data-workspace='chain'] .strike-detail-bottom-sheet.strike-detail-bottom-sheet {
+  border-color: var(--line-strong);
+  box-shadow:
+    inset 0 1px 0 color-mix(in srgb, var(--text) 6%, transparent),
+    0 24px 64px color-mix(in srgb, var(--capital-black) 44%, transparent);
+}
+
+/* ── Header ── */
+#strike-decision-studio#strike-decision-studio .detail-studio-header {
+  padding: 12px 16px !important;
+  gap: 12px 16px !important;
+}
+
+#strike-decision-studio#strike-decision-studio .detail-studio-contract {
+  gap: 8px;
+}
+
+#strike-decision-studio#strike-decision-studio .detail-index {
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+/* One chip family: 28px, 8px radius, 1px hairline. The two controls beside
+   them (direction capsule, close) are the 36px family. */
+#strike-decision-studio#strike-decision-studio :is(.detail-expiry-chip, .detail-dte-tag) {
+  box-sizing: border-box;
+  height: 28px;
+  display: inline-flex;
+  align-items: center;
+  padding: 0 10px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: transparent;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+}
+
+#strike-decision-studio#strike-decision-studio :is(.detail-expiry-chip, .detail-dte-tag):not(.urgent) {
+  color: var(--text-muted);
+}
+
+#strike-decision-studio#strike-decision-studio .strike-nav > :nth-child(2),
+#strike-decision-studio#strike-decision-studio .detail-strike-side-chip {
+  box-sizing: border-box;
+  height: 28px;
+  border-radius: 8px;
+}
+
+#strike-decision-studio#strike-decision-studio .detail-strike-side-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 0 10px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+#strike-decision-studio#strike-decision-studio .detail-studio-ltp {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+#strike-decision-studio#strike-decision-studio .detail-studio-ltp small {
+  color: var(--text-subtle);
+  font-size: var(--text-meta, 11px);
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+/* Season moment 1: the quote. */
+#strike-decision-studio#strike-decision-studio .detail-studio-ltp strong {
+  color: var(--text);
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 500 !important;
+  letter-spacing: -0.014em !important;
+  line-height: 1;
+}
+
+#strike-decision-studio#strike-decision-studio .detail-studio-ltp > span {
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1;
+}
+
+#strike-decision-studio#strike-decision-studio .detail-studio-ltp > span.up { color: var(--up-ink); }
+#strike-decision-studio#strike-decision-studio .detail-studio-ltp > span.down { color: var(--down-ink); }
+#strike-decision-studio#strike-decision-studio .detail-studio-ltp > span.flat { color: var(--text-muted); }
+
+@media (min-width: 769px) {
+  /* The quote is its own group: a hairline divides it from the contract. */
+  #strike-decision-studio#strike-decision-studio .detail-studio-ltp {
+    margin-left: 4px;
+    padding-left: 16px;
+    border-left: 1px solid var(--line);
+  }
+}
+
+#strike-decision-studio#strike-decision-studio .detail-close {
+  box-sizing: border-box;
+  flex: 0 0 36px !important;
+  width: 36px !important;
+  height: 36px !important;
+  border: 1px solid var(--line) !important;
+  border-radius: 999px !important;
+  color: var(--text-muted);
+  transition: background var(--dur-tap, 120ms) var(--ease-ios-out, ease-out), color var(--dur-tap, 120ms) var(--ease-ios-out, ease-out);
+}
+
+@media (hover: hover) {
+  #strike-decision-studio#strike-decision-studio .detail-close:hover {
+    background: var(--hover-wash, color-mix(in srgb, var(--text) 5%, transparent)) !important;
+    color: var(--text);
+  }
+}
+
+#strike-decision-studio#strike-decision-studio :is(.detail-close, .detail-disclosure-trigger, .strike-nav button):focus-visible {
+  outline: 2px solid var(--accent) !important;
+  outline-offset: 2px !important;
+}
+
+/* ── Strategy line ──
+   Position (Season) · what the underlying has to do · the risk shape as a tag
+   · the one probability, pushed to the far edge. */
+#strike-decision-studio#strike-decision-studio .detail-strategy-ribbon.detail-strategy-ribbon {
+  align-items: center !important;
+  gap: 8px 16px !important;
+  padding: 12px 16px !important;
+  font-size: 13px !important;
+  line-height: 1.35 !important;
+}
+
+#strike-decision-studio#strike-decision-studio .detail-strategy-ribbon > span + span::before {
+  content: none;
+}
+
+#strike-decision-studio#strike-decision-studio .detail-strategy-ribbon .detail-strategy-position {
+  color: var(--text) !important;
+  font-family: var(--font-display);
+  font-size: 18px;
+  font-weight: 500 !important;
+  letter-spacing: -0.014em;
+  line-height: 1.1;
+}
+
+#strike-decision-studio#strike-decision-studio .detail-strategy-ribbon .detail-strategy-clause {
+  color: var(--text-muted);
+}
+
+#strike-decision-studio#strike-decision-studio .detail-strategy-ribbon .detail-strategy-risk {
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  height: 22px;
+  padding: 0 8px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  color: var(--text-muted);
+  font-size: var(--text-meta, 11px);
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+#strike-decision-studio#strike-decision-studio .detail-strategy-ribbon .detail-strategy-risk[data-risk='uncapped'] {
+  border-color: color-mix(in srgb, var(--down-ink) 40%, var(--line));
+  color: var(--down-ink);
+}
+
+#strike-decision-studio#strike-decision-studio .detail-strategy-ribbon .detail-strategy-risk[data-risk='margin'] {
+  border-color: color-mix(in srgb, var(--warning-text) 40%, var(--line));
+  color: var(--warning-text);
+}
+
+#strike-decision-studio#strike-decision-studio .detail-strategy-ribbon .detail-strategy-pop {
+  margin-left: auto;
+  color: var(--text-subtle);
+  font-size: var(--text-meta, 11px);
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+#strike-decision-studio#strike-decision-studio .detail-strategy-ribbon .detail-strategy-pop strong {
+  margin-left: 4px;
+  color: var(--text) !important;
+  font-size: 14px;
+  letter-spacing: -0.006em;
+}
+
+/* ── Toolbar and plane ── */
+#strike-decision-studio#strike-decision-studio .detail-analysis-toolbar.detail-analysis-toolbar {
+  padding: 12px 16px !important;
+}
+
+#strike-decision-studio#strike-decision-studio .detail-control-label,
+#strike-decision-studio#strike-decision-studio .detail-greek-status {
+  color: var(--text-subtle);
+  font-size: var(--text-meta, 11px);
+  font-weight: 600;
+  letter-spacing: 0.06em;
+}
+
+#strike-decision-studio#strike-decision-studio .payoff-plot-head {
+  padding: 12px 16px 10px;
+}
+
+#strike-decision-studio#strike-decision-studio .payoff-plot-head strong {
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: -0.006em;
+}
+
+#strike-decision-studio#strike-decision-studio .payoff-plot-head span,
+#strike-decision-studio#strike-decision-studio .payoff-plot-foot {
+  font-size: 11px;
+  font-weight: 500;
+}
+
+#strike-decision-studio#strike-decision-studio .payoff-chart-legends {
+  gap: 16px;
+}
+
+#strike-decision-studio#strike-decision-studio .payoff-direction-legend {
+  gap: 12px;
+}
+
+#strike-decision-studio#strike-decision-studio .payoff-overlay-legend small {
+  font-size: 11px;
+  font-weight: 500;
+}
+
+#strike-decision-studio#strike-decision-studio .payoff-plot-foot {
+  padding: 8px 16px 10px;
+  color: var(--text-subtle);
+}
+
+/* ── Hover readout ──
+   Placed by the chart (clamped inside the plot, so it can never reach either
+   axis gutter); this only sets how it reads: a title row (the underlying), a
+   hairline, then one row per figure, label muted and value in ink. */
+#strike-decision-studio#strike-decision-studio .payoff-hover-card {
+  box-sizing: border-box;
+  min-width: 0;
+  max-width: none;
+  display: grid;
+  gap: 6px;
+  padding: 10px 12px 12px;
+  transform: none !important;
+  border: 1px solid var(--line-strong);
+  border-radius: 10px;
+  background: var(--surface-raised);
+}
+
+#strike-decision-studio#strike-decision-studio .payoff-hover-card :is(.payoff-hover-title, .payoff-hover-row) {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+#strike-decision-studio#strike-decision-studio .payoff-hover-card .payoff-hover-title {
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--line);
+}
+
+#strike-decision-studio#strike-decision-studio .payoff-hover-card .payoff-hover-title span {
+  color: var(--text-subtle);
+  font-size: var(--text-meta, 11px);
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+#strike-decision-studio#strike-decision-studio .payoff-hover-card .payoff-hover-title b {
+  font-size: 14px;
+  font-weight: 700;
+}
+
+#strike-decision-studio#strike-decision-studio .payoff-hover-card .payoff-hover-row span {
+  color: var(--text-muted);
+  font-size: 12px;
+  font-weight: 500;
+}
+
+#strike-decision-studio#strike-decision-studio .payoff-hover-card .payoff-hover-row b {
+  font-size: 13px;
+  font-weight: 700;
+}
+
+/* ── Rail ── */
+#strike-decision-studio#strike-decision-studio .detail-studio-rail {
+  padding: 16px;
+  gap: 12px;
+  scrollbar-color: var(--line-strong) transparent;
+  /* Scroll edges: a soft shadow appears at whichever end has more to scroll
+     to, and is covered (by the `local` ground) when that end is reached. */
+  background:
+    linear-gradient(var(--surface-raised) 30%, transparent) 0 0 / 100% 28px no-repeat local,
+    linear-gradient(transparent, var(--surface-raised) 70%) 0 100% / 100% 28px no-repeat local,
+    radial-gradient(farthest-side at 50% 0, color-mix(in srgb, var(--text) 14%, transparent), transparent) 0 0 / 100% 10px no-repeat scroll,
+    radial-gradient(farthest-side at 50% 100%, color-mix(in srgb, var(--text) 14%, transparent), transparent) 0 100% / 100% 10px no-repeat scroll;
+  background-color: var(--surface-raised);
+}
+
+#strike-decision-studio#strike-decision-studio .detail-studio-rail .payoff-summary-strip {
+  gap: 8px !important;
+}
+
+#strike-decision-studio#strike-decision-studio .detail-studio-rail .payoff-summary-card {
+  gap: 6px !important;
+  padding: 12px 14px !important;
+  border-radius: 12px !important;
+}
+
+#strike-decision-studio#strike-decision-studio .detail-studio-rail .payoff-summary-card > span {
+  color: var(--text-subtle);
+  font-size: var(--text-meta, 11px);
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  line-height: 1.4;
+}
+
+/* Season moment 2: the four figures. One size, one weight, every card. */
+#strike-decision-studio#strike-decision-studio .detail-studio-rail .payoff-summary-card > strong {
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 500;
+  letter-spacing: -0.014em;
+  line-height: 1.1;
+}
+
+#strike-decision-studio#strike-decision-studio .detail-studio-rail .payoff-summary-card > small {
+  color: var(--text-muted);
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 1.3;
+}
+
+/* Greeks grid: label over figure, every divider a hairline, cells of one height. */
+#strike-decision-studio#strike-decision-studio .detail-studio-rail .detail-analysis-metric-strip {
+  border-radius: 12px !important;
+}
+
+#strike-decision-studio#strike-decision-studio .detail-studio-rail .detail-analysis-metric-strip > span {
+  min-height: 56px;
+  padding: 10px 14px !important;
+  gap: 6px !important;
+}
+
+#strike-decision-studio#strike-decision-studio .detail-studio-rail .detail-analysis-metric-strip > span > small {
+  font-size: var(--text-meta, 11px);
+  font-weight: 600;
+  letter-spacing: 0.06em;
+}
+
+#strike-decision-studio#strike-decision-studio .detail-studio-rail .detail-analysis-metric-strip > span > strong {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+/* ── More contract data ── */
+#strike-decision-studio#strike-decision-studio .detail-studio-rail .detail-disclosure-trigger {
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 14px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--surface);
+  color: var(--text) !important;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: -0.006em;
+  text-align: left;
+}
+
+#strike-decision-studio#strike-decision-studio .detail-disclosure-trigger[aria-expanded='true'] {
+  border-color: var(--line-strong);
+}
+
+#strike-decision-studio#strike-decision-studio .detail-disclosure-label {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+#strike-decision-studio#strike-decision-studio .detail-disclosure-hint {
+  flex: 0 0 auto;
+  color: var(--text-subtle);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0;
+}
+
+#strike-decision-studio#strike-decision-studio .detail-studio-rail .detail-disclosure-panel {
+  gap: 8px !important;
+  padding: 8px 0 0 !important;
+}
+
+#strike-decision-studio#strike-decision-studio .detail-compact-data-group {
+  display: block;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--surface);
+}
+
+#strike-decision-studio#strike-decision-studio .detail-compact-data-group > h4 {
+  margin: 0;
+  padding: 10px 14px 8px;
+  border-bottom: 1px solid var(--line);
+  background: color-mix(in srgb, var(--text) 3%, transparent);
+  color: var(--text-subtle);
+  font-size: var(--text-meta, 11px);
+  font-weight: 700 !important;
+  letter-spacing: 0.06em !important;
+  line-height: 1.2;
+  text-transform: uppercase;
+}
+
+#strike-decision-studio#strike-decision-studio .detail-compact-data-group .detail-stat {
+  box-sizing: border-box;
+  position: relative;
+  min-height: 32px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 16px !important;
+  margin: 0;
+  padding: 0 14px !important;
+  border: 0 !important;
+  border-radius: 0;
+  background: transparent;
+}
+
+#strike-decision-studio#strike-decision-studio .detail-compact-data-group .detail-stat + .detail-stat {
+  border-top: 1px solid var(--line) !important;
+}
+
+#strike-decision-studio#strike-decision-studio .detail-compact-data-group .stat-label {
+  min-width: 0;
+  color: var(--text-muted) !important;
+  font-size: 12px !important;
+  font-weight: 500 !important;
+  line-height: 1.3 !important;
+  white-space: normal !important;
+}
+
+#strike-decision-studio#strike-decision-studio .detail-compact-data-group .stat-value {
+  flex: 0 0 auto;
+  color: var(--text) !important;
+  font-size: 12px !important;
+  font-weight: 600 !important;
+  line-height: 1.3;
+  text-align: right;
+}
+
+@media (hover: hover) {
+  #strike-decision-studio#strike-decision-studio .detail-compact-data-group .detail-stat:hover {
+    background: var(--hover-wash, color-mix(in srgb, var(--text) 5%, transparent));
+  }
+}
+
+@media (max-width: 768px) {
+  #strike-decision-studio#strike-decision-studio .detail-studio-ltp strong {
+    font-size: 20px;
+  }
+
+  #strike-decision-studio#strike-decision-studio .detail-strategy-ribbon .detail-strategy-position {
+    font-size: 16px;
+  }
+
+  #strike-decision-studio#strike-decision-studio .detail-strategy-ribbon .detail-strategy-pop {
+    margin-left: 0;
+  }
+
+  #strike-decision-studio#strike-decision-studio .detail-studio-rail .payoff-summary-card > strong {
+    font-size: 18px;
+  }
+
+  #strike-decision-studio#strike-decision-studio .detail-studio-rail {
+    padding: 16px 14px;
+  }
+}
+
+
+/* Tablet (stacked, the dialog still a dialog): the plane takes its own height
+   and the body scrolls. Left to the older `minmax(0, 1fr) auto` rows the plane
+   was handed whatever the rail left it — 293px on a 1024x768 tablet, of which
+   the marker chips and axis took 190, leaving a ~100px plot. */
+@media (min-width: 769px) and (max-width: 1059px) {
+  #strike-decision-studio#strike-decision-studio .detail-studio-body {
+    display: block !important;
+  }
+
+  #strike-decision-studio#strike-decision-studio .detail-analysis-workspace {
+    height: auto !important;
+    grid-template-rows: auto auto !important;
+    overflow: visible !important;
+  }
+
+  #strike-decision-studio#strike-decision-studio .detail-analysis-chart.detail-analysis-chart {
+    height: 380px !important;
+    min-height: 380px !important;
+  }
+}
+
+/* Trade direction uses semantic ink on a quiet tint. Profit/loss figures keep
+   their own sign colours, independently of whether the premium is bought or sold. */
+#strike-decision-studio#strike-decision-studio {
+  --position-ink: var(--up-ink);
+  --position-fill: var(--up);
+}
+
+#strike-decision-studio#strike-decision-studio[data-action='SELL'] {
+  --position-ink: var(--down-ink);
+  --position-fill: var(--down);
+}
+
+#strike-decision-studio#strike-decision-studio .detail-position-capsule [data-value='BUY'] {
+  --direction-ink: var(--up-ink);
+  --direction-fill: var(--up);
+}
+
+#strike-decision-studio#strike-decision-studio .detail-position-capsule [data-value='SELL'] {
+  --direction-ink: var(--down-ink);
+  --direction-fill: var(--down);
+}
+
+#strike-decision-studio#strike-decision-studio .detail-position-capsule .ui-capsule__option {
+  color: var(--direction-ink) !important;
+  gap: 6px;
+  padding-inline: 12px;
+}
+
+#strike-decision-studio#strike-decision-studio .detail-position-capsule .ui-capsule__pill {
+  background: color-mix(in srgb, var(--direction-fill) 14%, var(--surface)) !important;
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--direction-ink) 45%, var(--line));
+}
+
+#strike-decision-studio#strike-decision-studio .detail-position-capsule .ui-capsule__badge {
+  font-size: var(--text-meta, 11px);
+  opacity: 1;
+  border: 0;
+  padding: 0 0 0 6px;
+  border-left: 1px solid color-mix(in srgb, currentColor 35%, transparent);
+  border-radius: 0;
+}
+
+#strike-decision-studio#strike-decision-studio .detail-strategy-ribbon .detail-strategy-position {
+  color: var(--position-ink) !important;
+}
+
+#strike-decision-studio#strike-decision-studio .detail-entry-summary {
+  flex: none;
+  display: grid;
+  gap: 6px;
+  padding: 12px 14px;
+  border: 1px solid color-mix(in srgb, var(--position-ink) 36%, var(--line));
+  border-radius: var(--radius-lg);
+  background: color-mix(in srgb, var(--position-fill) 6%, var(--surface));
+}
+
+#strike-decision-studio#strike-decision-studio .detail-entry-summary > span {
+  color: var(--position-ink);
+  font: 600 11px/1.4 var(--font-sans);
+}
+
+#strike-decision-studio#strike-decision-studio .detail-entry-summary > strong {
+  color: var(--position-ink) !important;
+  font: 500 22px/1.15 var(--font-display);
+}
+
+#strike-decision-studio#strike-decision-studio .detail-entry-summary > small,
+#strike-decision-studio#strike-decision-studio .detail-entry-summary > p {
+  margin: 0;
+  color: var(--text-muted);
+  font: 500 11px/1.4 var(--font-sans);
+}
+
+#strike-decision-studio#strike-decision-studio .detail-summary-heading {
+  flex: none;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 4px 8px;
+}
+
+#strike-decision-studio#strike-decision-studio .detail-summary-heading h3 {
+  margin: 0;
+  color: var(--text);
+  font: 600 12px/1.4 var(--font-sans);
+}
+
+#strike-decision-studio#strike-decision-studio .detail-summary-heading > span {
+  color: var(--text-muted);
+  font: 500 10px/1.4 var(--font-sans);
+}
+
+/* Preserve each figure's height when the rail needs to scroll. */
+#strike-decision-studio#strike-decision-studio .detail-studio-rail > * {
+  flex-shrink: 0;
+}
+
+@media (max-width: 768px) {
+  #strike-decision-studio#strike-decision-studio .detail-position-capsule {
+    height: 44px;
+  }
+
+  #strike-decision-studio#strike-decision-studio .detail-position-capsule .ui-capsule__option {
+    padding-inline: 8px;
+  }
+}

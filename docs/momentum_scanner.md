@@ -82,7 +82,7 @@ flowchart LR
 Check anytime:
 
 ```bash
-curl -s http://localhost:8000/api/timeline/stats | jq
+curl -s http://localhost:9000/api/timeline/stats | jq
 ```
 
 Typical fields: `profile_count`, `symbols_with_data`, `max_trade_date`, `candle_count`, `institutional_flow_count`, `derivative_snapshot_count`.

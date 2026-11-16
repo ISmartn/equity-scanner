@@ -1,0 +1,410 @@
+/*
+ * the app — control shape authority. One capsule language, every page.
+ * ===========================================================================
+ *
+ * THE PROBLEM THIS SETTLES.
+ *
+ * The app was running two segmented-control languages side by side:
+ *
+ *   - the OPTION CHAIN's (`CapsuleSegmented`, capsule-segmented.css): a fully
+ *     rounded track, and one capsule highlight in the TEXT INK that slides
+ *     between options with the label inverted on it. The chain's page bar and
+ *     the OI Heatmap draw this.
+ *   - the PAGE-BAR TRACK's (`.ui-seg__track`, ui-segmented-controls.css):
+ *     a flat macOS-style hairline rail whose selected option is a squarer
+ *     rounded rect in `--surface-raised` with a brighter border. Open
+ *     Interest, OI Spurts, Straddle and Implied Volatility draw this.
+ *
+ * Two shapes, two selection treatments, two ideas of what "selected" looks
+ * like — on the same row, one route apart. This sheet makes the chain's the
+ * one that everything speaks, and does the same for the dropdown triggers
+ * that stand in for a track when it cannot fit.
+ *
+ * WHY A SHEET AND NOT A REFACTOR. `.ui-seg__track` is rendered by exactly
+ * two components (SegRadioGroup in ViewSwitch.tsx and RadioRow in
+ * SpurtParts.tsx) but is STYLED from nine: the shared authority, PageBar.css
+ * and seven feature sheets, several of which are in lazily-loaded chunks that
+ * land in the document after everything main.tsx imports. Re-pointing those
+ * nine at a new shape one file at a time is how a language drifts apart
+ * again. One late sheet that outranks all of them is the pattern this repo
+ * already uses for exactly this (ui-market-line-authority.css,
+ * ui-light-surface-authority.css), and it is revertible in one line.
+ *
+ * SPECIFICITY. `ui-segmented-controls.css` writes
+ * `:root[data-theme] body #root > .app.app .ui-seg__track` — (1,5,1). A
+ * lazily-loaded feature sheet can tie that and win on order, so matching it
+ * is not enough. Every rule here doubles the final class, taking it to
+ * (1,6,1)+, which nothing in the tree reaches. Same trick, same reason, as
+ * `.ui-capsule.ui-capsule` in capsule-segmented.css.
+ *
+ * THE RECIPE IS NOT RESTATED. Every value below is the expression
+ * capsule-segmented.css already uses, token for token and fallback for
+ * fallback, so the chain's control and the rest cannot drift to different
+ * greys or different radii. If the chain's capsule changes, change it there
+ * and here together — there is no third definition.
+ *
+ * WHAT THIS SHEET DOES NOT TOUCH: `.ui-capsule` itself (the reference), and
+ * the phone's own navigation chrome (`.ui-mobile-chrome`), which is a
+ * different surface — glass, not a control on a card.
+ */
+
+/* ── The language, stated once ──────────────────────────────────────────── */
+:root[data-theme] body #root > .app.app {
+  /* The track and the inverted label on the selected pill are THE SAME
+     colour: the pill is the ink, so the label reads as a hole punched in it. */
+  --ui-cap-surface: var(--surface-card, var(--bg-surface));
+  --ui-cap-line: var(--line, var(--border-color));
+  --ui-cap-ink: var(--text, var(--text-primary));
+  --ui-cap-ink-rest: var(--text-muted);
+  --ui-cap-radius: 999px;
+}
+
+/* ── R1 · The segmented track ───────────────────────────────────────────── */
+
+:root[data-theme] body #root > .app.app :is(.ui-seg__track.ui-seg__track, .ui-gex-views.ui-gex-views) {
+  box-sizing: border-box;
+  /* `stretch` + `align-self` on the option is what lets the travelling
+     capsule fill the track's height exactly, whatever a page has pinned it
+     to — the previous sheet carried this pair and it came across with it. */
+  align-items: stretch;
+  gap: 2px;
+  padding: 3px;
+  border: 1px solid var(--ui-cap-line);
+  border-radius: var(--ui-cap-radius);
+  background: var(--selection-track);
+  background-image: none;
+  box-shadow: none;
+}
+
+:root[data-theme] body #root > .app.app :is(.ui-seg__track.ui-seg__track, .ui-gex-views.ui-gex-views) > button {
+  align-self: stretch;
+  /* `isolation` + a negative z-index on the pill is what puts the capsule
+     BEHIND the label without a wrapper element around the text — the same
+     construction as the chain's, so a label with an icon after it (the
+     Spurts tabs carry an ⓘ) needs no special case. */
+  position: relative;
+  isolation: isolate;
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 0 14px;
+  border: 0;
+  border-radius: var(--ui-cap-radius);
+  background: transparent;
+  box-shadow: none;
+  color: var(--ui-cap-ink-rest);
+  font: 600 12px/1 var(--font-sans);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  transition: color var(--dur-fast, 120ms) var(--ease-ios-out, ease);
+}
+
+/* SELECTED = black with white text in light mode; white with black text in dark mode.
+ *
+ * Two constructions reach this state and both have to work:
+ *
+ *   - SegRadioGroup and RadioRow render a `.ui-seg__pill` inside the chosen
+ *     option, so the fill can TRAVEL between options (framer-motion
+ *     `layoutId`). There the button must stay transparent — a fill on the
+ *     button as well would sit still while the pill moved, showing two
+ *     capsules for the length of every slide.
+ *   - GEX's view list and the Window switch are hand-rolled buttons with no
+ *     pill element at all. There the button IS the capsule, or selection
+ *     would have no paint whatsoever.
+ *
+ * `:has()` asks which one this is, so one rule serves both rather than a
+ * list of component classes that the next control would have to be added to. */
+:root[data-theme] body #root > .app.app :is(.ui-seg__track.ui-seg__track, .ui-gex-views.ui-gex-views) > button:is(.is-on, [aria-checked='true'], [aria-selected='true'], [aria-pressed='true']) {
+  border-color: transparent;
+  background: var(--selection-fill);
+  box-shadow: none;
+  color: var(--selection-text);
+}
+
+:root[data-theme] body #root > .app.app :is(.ui-seg__track.ui-seg__track, .ui-gex-views.ui-gex-views) > button:is(.is-on, [aria-checked='true'], [aria-selected='true'], [aria-pressed='true']):has(.ui-seg__pill) {
+  background: transparent;
+}
+
+/* Hover is pointer-only: on a phone a tapped segment keeps :hover until the
+   next tap lands somewhere else. Ink only — the capsule track already carries
+   the chrome, so a wash inside it is a second box. */
+@media (hover: hover) {
+  :root[data-theme] body #root > .app.app :is(.ui-seg__track.ui-seg__track, .ui-gex-views.ui-gex-views) > button:not(.is-on, [aria-checked='true']):hover {
+    background: transparent;
+    color: var(--ui-cap-ink);
+  }
+}
+
+:root[data-theme] body #root > .app.app :is(.ui-seg__track.ui-seg__track, .ui-gex-views.ui-gex-views) > button:active:not(:disabled) {
+  background: transparent;
+}
+
+:root[data-theme] body #root > .app.app :is(.ui-seg__track.ui-seg__track, .ui-gex-views.ui-gex-views) > button:focus-visible {
+  outline: 2px solid var(--selection-ink);
+  outline-offset: 1px;
+}
+
+:root[data-theme] body #root > .app.app :is(.ui-seg__track.ui-seg__track, .ui-gex-views.ui-gex-views) > button:is(:disabled, [aria-disabled='true']) {
+  opacity: .48;
+  background: transparent;
+  cursor: not-allowed;
+}
+
+/* The touch floors the previous authority raised stay exactly where they
+   were — this sheet changes the SHAPE of these controls, never their reach. */
+@media (pointer: coarse) {
+  :root[data-theme] body #root > .app.app :is(.ui-seg__track.ui-seg__track, .ui-gex-views.ui-gex-views) {
+    height: auto;
+    min-height: var(--ui-seg-track-min, 44px);
+  }
+
+  :root[data-theme] body #root > .app.app :is(.ui-seg__track.ui-seg__track, .ui-gex-views.ui-gex-views) > button {
+    min-height: var(--ui-seg-btn-min, 40px);
+  }
+}
+
+/* A phone's track is shorter and its options sit tighter, matching
+   `.ui-capsule--page` at <=768 (capsule-segmented.css). */
+@media (max-width: 768px) {
+  :root[data-theme] body #root > .app.app :is(.ui-seg__track.ui-seg__track, .ui-gex-views.ui-gex-views) > button {
+    padding: 0 10px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root[data-theme] body #root > .app.app :is(.ui-seg__track.ui-seg__track, .ui-gex-views.ui-gex-views) > button {
+    transition: none;
+  }
+}
+
+/* ── R2 · The dropdown trigger ──────────────────────────────────────────────
+ *
+ * When a track cannot fit its options, every page collapses it to a menu —
+ * and each page had drawn that trigger as its own rounded rect. A collapsed
+ * control is still the same control, so it takes the same capsule: hairline
+ * at rest, the page's surface behind it, and the ink only on the value.
+ *
+ * Listed by class rather than by a wildcard on purpose. `[class*='trigger']`
+ * would also catch the accordion rows, the strike-detail disclosure and the
+ * chain's own expiry capsule, none of which are this control.
+ */
+:root[data-theme] body #root > .app.app :is(.ui-oi-viewmenu__trigger, .ui-oi-menu, .ui-sp-viewpick__trigger, .ui-sp-dock__trigger, .ui-control-more__trigger, .shared-expiry__trigger, .ui-time-switch__trigger, .ui-show__trigger, .ui-hm-menu):not(.ui-capsule) {
+  box-sizing: border-box;
+  align-items: center;
+  gap: 6px;
+  padding-inline: 12px;
+  border: 1px solid var(--ui-cap-line);
+  border-radius: var(--ui-cap-radius);
+  background: var(--ui-cap-surface);
+  background-image: none;
+  box-shadow: none;
+  color: var(--ui-cap-ink);
+  font-family: var(--font-sans);
+  transition:
+    color var(--dur-fast, 120ms) var(--ease-ios-out, ease),
+    border-color var(--dur-fast, 120ms) var(--ease-ios-out, ease),
+    background-color var(--dur-fast, 120ms) var(--ease-ios-out, ease);
+}
+
+/* ── WHAT IS NOT IN THE TWO LISTS ABOVE AND BELOW, AND WHY ────────────────
+ *
+ * `.ui-show__menu`, `.ui-pcr-series__menu` and `.ui-straddle-series__menu`
+ * were in both, and all three are PANELS — the thing a trigger OPENS, not a
+ * capsule. From the last sheet in the cascade, carrying an id in its selector,
+ * they beat everything those panels declare for themselves. The consequences
+ * were not subtle:
+ *
+ *   display    `inline-flex` turns a panel's stacked rows into one ROW. The
+ *              Spurts display panel, unfolded inside the phone's Chart controls
+ *              sheet, laid its three sections side by side in a 290px box:
+ *              "Spurt bar" got 30px, its heading collapsed to a 0px grid column
+ *              and printed straight across "Trail length", and the third
+ *              section started 5px past the right edge. Measured at 320.
+ *   radius     `--ui-cap-radius` is 999px. On a 228px panel that is not a
+ *              capsule, it is a blob.
+ *   padding    a capsule's 12px inline padding, on a box that sets its own.
+ *
+ * Each panel already declares its own surface — border, radius, background,
+ * menu shadow — so leaving them out hands each back to the sheet that owns it.
+ * `.ui-hm-menu` STAYS: despite the name it is the heatmap's TRIGGER (flex,
+ * 999px, `cursor: pointer`), not its menu.
+ *
+ * The rule of thumb this cost: a class belongs here only if a capsule is what
+ * it IS. A name ending in `__menu` is a warning, not a licence.
+ */
+
+/* `display` IS SET SEPARATELY, AND ONE TRIGGER IS LEFT OUT OF IT.
+ *
+ * `.ui-time-switch__trigger` is not a control that exists at every width: it
+ * is the phone's STAND-IN for the segmented track. time-switch.css hides it at
+ * the base and reveals it under 768px, where the track is hidden instead —
+ * exactly one of the pair is ever drawn.
+ *
+ * Carrying `display: inline-flex` in the rule above, with no media query and
+ * from the last sheet in the cascade, overrode that `display: none` and
+ * resurrected the stand-in on every DESKTOP toolbar. Window then drew its
+ * track AND its collapsed replacement side by side — two controls for one
+ * setting — and the replacement rendered as a mashed "WindowDay", because
+ * every rule that spaces its eyebrow from its value lives inside that same
+ * 768px block and so never applied up here.
+ *
+ * A `min-width: 769px` guard would be the wrong repair: ControlStripMore
+ * collapses to its dock form at ANY width (`collapsed ?? matchMedia(...)`),
+ * so width alone does not decide whether a stand-in is wanted. Leaving this
+ * one trigger out of the declaration hands the question back to the sheet
+ * that owns the pair, which is the only place that knows.
+ */
+:root[data-theme] body #root > .app.app :is(.ui-oi-viewmenu__trigger, .ui-oi-menu, .ui-sp-viewpick__trigger, .ui-sp-dock__trigger, .ui-control-more__trigger, .shared-expiry__trigger, .ui-show__trigger, .ui-hm-menu):not(.ui-capsule) {
+  display: inline-flex;
+}
+
+/* The eyebrow inside a trigger ("View", "EXPIRY", "CHART") is the KEY, the
+   value beside it is the reading — one muted, one ink, as the chain's expiry
+   capsule prints them. */
+:root[data-theme] body #root > .app.app :is(.ui-oi-viewmenu__trigger, .ui-oi-menu, .ui-sp-viewpick__trigger, .ui-control-more__trigger, .shared-expiry__trigger, .ui-time-switch__trigger, .ui-show__trigger, .ui-show__menu, .ui-hm-menu) :is(.ui-strip__k, .ui-sp-viewpick__eyebrow) {
+  color: var(--ui-cap-ink-rest);
+}
+
+@media (hover: hover) {
+  :root[data-theme] body #root > .app.app :is(.ui-oi-viewmenu__trigger, .ui-oi-menu, .ui-sp-viewpick__trigger, .ui-sp-dock__trigger, .ui-control-more__trigger, .shared-expiry__trigger, .ui-time-switch__trigger, .ui-show__trigger, .ui-show__menu, .ui-hm-menu, .ui-pcr-series__menu, .ui-straddle-series__menu):not(.ui-capsule):hover {
+    border-color: var(--line-strong, var(--ui-cap-line));
+    background: var(--surface-hover, var(--hover-wash));
+  }
+}
+
+/* Open is a STATE, and it is the one a reader needs while the list is over
+   the page: the trigger fills so the menu reads as belonging to it. */
+:root[data-theme] body #root > .app.app :is(.ui-oi-viewmenu__trigger, .ui-oi-menu, .ui-sp-viewpick__trigger, .ui-sp-dock__trigger, .ui-control-more__trigger, .shared-expiry__trigger, .ui-time-switch__trigger, .ui-show__trigger, .ui-show__menu, .ui-hm-menu, .ui-pcr-series__menu, .ui-straddle-series__menu):not(.ui-capsule):is(.is-open, [aria-expanded='true']) {
+  border-color: transparent;
+  background: var(--ui-cap-ink);
+  color: var(--ui-cap-surface);
+  /* The text tokens, re-pointed on the open trigger. A global
+     `#root > .app :is(strong, b) { color: var(--text) !important }` holds a
+     trigger's bold label (the view menu's view name) at the ink — ink on the
+     ink fill, so the open view menu read as a blank pill in both themes. With
+     `--text` pointing at the surface here, that same rule prints the label in
+     the surface colour. The fill is unaffected: `--ui-cap-ink` is resolved
+     on `.app`, above this element. */
+  --text: var(--ui-cap-surface);
+  --text-primary: var(--ui-cap-surface);
+}
+
+:root[data-theme] body #root > .app.app :is(.ui-oi-viewmenu__trigger, .ui-oi-menu, .ui-sp-viewpick__trigger, .ui-control-more__trigger, .shared-expiry__trigger, .ui-time-switch__trigger, .ui-show__trigger, .ui-show__menu, .ui-hm-menu):is(.is-open, [aria-expanded='true']) :is(.ui-strip__k, .ui-sp-viewpick__eyebrow) {
+  color: currentColor;
+  opacity: .72;
+}
+
+:root[data-theme] body #root > .app.app :is(.ui-oi-viewmenu__trigger, .ui-oi-menu, .ui-sp-viewpick__trigger, .ui-sp-dock__trigger, .ui-control-more__trigger, .shared-expiry__trigger, .ui-time-switch__trigger, .ui-show__trigger, .ui-show__menu, .ui-hm-menu, .ui-pcr-series__menu, .ui-straddle-series__menu):not(.ui-capsule):focus-visible {
+  outline: 2px solid var(--selection-ink);
+  outline-offset: 1px;
+}
+
+/* ── R3 · The desktop top navbar ────────────────────────────────────────────
+ *
+ * The last controls in the app still drawn as rounded rects. They are the
+ * most visible ones — the instrument chip, the search button, the session
+ * clock and the icon actions sit above every workspace — so leaving them at
+ * `--radius-sm` was the one place a reader could still see two shapes at
+ * once: a 6px chip in the bar, a capsule in the page bar directly under it.
+ *
+ * SHAPE ONLY. These controls' colours, sizes and states are TopBar.css's and
+ * are already right in both themes; this sheet has no business repainting
+ * them, and every one of them is a hairline-on-surface control already. A
+ * square icon button at 999px becomes a circle, which is what the phone's
+ * chrome does with the same buttons (MobileNav.css).
+ *
+ * THE INDEX TAPE CELL was missed the first time through, and it is the one
+ * that fills the middle of the bar. With the instrument chip, Search and the
+ * clock already capsuled around them, the tape read as three 6px rects among
+ * three capsules — one row, two shapes. `.ui-index-market-link` is also
+ * what `.ui-top__inst` wears, and what the phone's workspace sheet prints
+ * its tape with, so naming it here settles the cell in all three mounts at
+ * once. The PRERENDERED header is outside `#root > .app` and keeps its own
+ * shape.
+ *
+ */
+:root[data-theme] body #root > .app.app :is(.ui-top__inst, .ui-top__pick, .ui-top__act, .ui-top__layoutsbtn, .ui-top__layoutbtn, .ui-index-market-link, .ui-clock) {
+  border-radius: var(--ui-cap-radius);
+}
+
+/* ── CALL / EXPIRY / PUT ROW — nothing here moves and nothing animates ──────
+ *
+ * The row is the Call button, the expiry capsule and the Put button: in the
+ * header of every layout, and the pinned copy of the pair on a phone.
+ *
+ * Tapping Call or Put replaces the whole chain in one commit. Every scrap of
+ * motion layered on top of that read as a flicker, because none of it was
+ * describing the change; it all played over it:
+ *
+ *   the active chip faded in from opacity 0, so the word under the thumb
+ *     blanked for 240ms (`ui-chip-in`, removed at its source);
+ *   the capsule scaled to .965 and travelled back, so the control moved while
+ *     the table behind it was being replaced;
+ *   the fill and ring cross-faded over --dur-quick on top of that;
+ *   the expiry capsule's caret turned over --dur-move, and its press scaled it.
+ *
+ * The row has nothing to animate. It is a state change with an instant,
+ * complete result: the other side of the book is simply there. So the controls
+ * paint their states (resting, pressed, active) and move between them in one
+ * frame. Colour marks the press, which is what a finger or a mouse needs;
+ * nothing travels, nothing fades. Re-introducing motion here means deciding
+ * what it would tell the reader that the new view does not already say.
+ *
+ * THE POSITION RULE, the reason a Call / Put click was being lost. On a pane
+ * wider than its window (any layout with many columns) the table places the
+ * button beside the expiry capsule by script, with an inline offset. A state
+ * rule that sets `transform` on the button (the press did: scale, then `none`)
+ * REPLACES that inline transform for as long as it applies, so at mousedown the
+ * button jumped back to its uncorrected place under the pointer, mouseup landed
+ * on the header cell, and the click never reached the button. So, on these
+ * buttons:
+ *
+ *   - no state rule may set `transform`, `scale` or `rotate` (the arrow and the
+ *     ✕ inside them are the exception, below: nothing positions them);
+ *   - anything that positions a button uses `translate`, which composes with a
+ *     transform instead of being replaced by one.
+ *
+ * sideSwitchContract.test.ts holds both rules; scripts/qa/side-switch.mjs
+ * measures them in a browser with a real pointer, in every layout.
+ *
+ * This is the authority sheet and the last import, and `#root#root` outranks
+ * the single `#root` every `!important` transition in the older chain sheets is
+ * written against, so this settles them rather than racing them. */
+:root[data-theme] body #root#root > .app.app[data-active-tab='chain'] .chain-table thead .chain-side-nav-row,
+:root[data-theme] body #root#root > .app.app[data-active-tab='chain'] .chain-table thead .chain-side-nav-row *,
+:root[data-theme] body #root#root > .app.app[data-active-tab='chain'] .chain-table thead .chain-side-nav-row *::before,
+:root[data-theme] body #root#root > .app.app[data-active-tab='chain'] .chain-table thead .chain-side-nav-row *::after,
+:root[data-theme] body #root#root > .app.app[data-active-tab='chain'] .chain-table-container .oc-side-nav-overlay,
+:root[data-theme] body #root#root > .app.app[data-active-tab='chain'] .chain-table-container .oc-side-nav-overlay *,
+:root[data-theme] body #root#root > .app.app[data-active-tab='chain'] .chain-table-container .oc-side-nav-overlay *::before,
+:root[data-theme] body #root#root > .app.app[data-active-tab='chain'] .chain-table-container .oc-side-nav-overlay *::after {
+  transition: none !important;
+  animation: none !important;
+}
+
+/* The arrow and the ✕ used to nudge, rotate and scale on keyboard focus. */
+:root[data-theme] body #root#root > .app.app[data-active-tab='chain'] .chain-table thead .chain-side-nav-row :is(.chain-side-nav-arrow, .chain-side-nav-close),
+:root[data-theme] body #root#root > .app.app[data-active-tab='chain'] .chain-table-container .oc-side-nav-overlay :is(.chain-side-nav-arrow, .chain-side-nav-close) {
+  transform: none !important;
+}
+
+/* ── INDEX CAPSULES: ONE HARD EDGE, THE REST SOFT ───────────────────────────
+ * The selected instrument (`.ui-top__inst`, or the tape link that is the
+ * current page) wears a firm 1px ink edge; every other reading sits on the
+ * soft divider tone and firms up only on hover/focus. Border WIDTH never
+ * changes between states, so nothing shifts when the selection moves. */
+:root[data-theme] body #root > .app.app :is(.ui-top__inst, .ui-index-market-link) {
+  border: 1px solid var(--line);
+}
+
+:root[data-theme] body #root > .app.app :is(.ui-top__inst, .ui-index-market-link.is-active, .ui-index-market-link[aria-current='page']) {
+  border-color: var(--text-primary);
+}
+
+@media (hover: hover) {
+  :root[data-theme] body #root > .app.app .ui-index-market-link:not(.is-active):not([aria-current='page']):hover {
+    border-color: var(--line-strong);
+  }
+}

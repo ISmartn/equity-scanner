@@ -14,10 +14,12 @@
     "@mui/icons-material": "^9.2.0",
     "@mui/material": "^9.2.0",
     "@mui/x-date-pickers": "^9.8.0",
+    "@phosphor-icons/react": "^2.1.10",
     "@tanstack/react-virtual": "^3.14.10",
     "dayjs": "^1.11.21",
     "lightweight-charts": "^4.2.2",
     "lucide-react": "^0.468.0",
+    "motion": "^12.43.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-router-dom": "^6.30.4"

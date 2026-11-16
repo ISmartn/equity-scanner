@@ -6,32 +6,41 @@ import math
 import statistics
 from typing import Any
 
-from ..scanner.fo_overlay import (
-    OI_DOWN_THRESHOLD_PCT,
-    OI_UP_THRESHOLD_PCT,
-    PRICE_UP_THRESHOLD_PCT,
-    QUADRANT_LABELS,
-)
+from datetime import datetime
+
+from ..scanner.fo_overlay import QUADRANT_LABELS
 from .baskets import default_baskets, index_reads
+from .clocks import IST
 
 TESTING_BAND = 0.003
 MIN_HISTORY_BARS = 10
 _CALL_RANK = {"buy": 0, "sell": 1, "wait": 2, "stand_aside": 3}
 # A completed daily candle is the signal. Price may only be this far through it
-# before the break is a chase rather than an entry. The day exit is two times
-# the intraday-sized risk. The multi-session target is further: the full candle's
-# 2R when that had to be cut to stay reachable today, otherwise four times the
-# day risk. The journal can hold that target past the cash close.
+# before the break is a chase rather than an entry. 0.15R is the gap the year
+# replay could still fill without chasing. The day exit stays two times the risk:
+# from 0.5R to 4R the average did not improve. The swing target is 2.5R. A 4R
+# and a 6R target both lost more on the booked path, and the journal can still
+# hold 2.5R past the cash close.
 _REWARD_R = 2.0
-_SWING_R = 4.0
-_ENTRY_WINDOW = 0.35
-# Stops are yesterday's candle, bounded by volatility. Inside a 0.5 ATR range the
-# stop sits in noise; beyond 1.5 ATR a 2R target is out of intraday reach.
+_SWING_R = 2.5
+_ENTRY_WINDOW = 0.15
+# Stops are yesterday's candle, bounded by volatility. A prior range under 0.8 ATR
+# is skipped: widening it to a 0.5 ATR floor made those trades the worst bucket.
+# Beyond 1.5 ATR a 2R target is out of intraday reach, so the stop is capped.
 _RISK_MIN_ATR = 0.5
 _RISK_MAX_ATR = 1.5
+_MIN_CANDLE_ATR = 0.8
 _RISK_MIN_SPREADS = 4.0
 # Kaufman efficiency below this is a range, not a trend, whatever the endpoints say.
 _MIN_EFFICIENCY = 0.2
+# Equities under ₹100 and names still within 2% of the 20-day average lost more
+# than the rest of the book, in both halves of the year. Indexes are exempt.
+_MIN_PRICE = 100.0
+_MIN_SMA_DISTANCE_PCT = 2.0
+# Futures build-up uses the order-flow daily noise floor (0.5% price, 2% open
+# interest). The options-chain 5% band is a different instrument.
+_FUT_PRICE_FLOOR_PCT = 0.5
+_FUT_OI_FLOOR_PCT = 2.0
 _REFERENCE_ATR_PCT = 2.0
 _ROLLOVER_DAYS = 2
 _MAX_SPREAD_PCT = 0.3
@@ -244,11 +253,17 @@ def rank_breakout(quote: dict[str, Any]) -> dict[str, Any]:
 
 
 def classify_oi(price_change_pct: float, oi_change_pct: float) -> str:
-    """Symmetric dead-band. A flat price with rising OI is neutral, not short build-up."""
-    price_up = price_change_pct > PRICE_UP_THRESHOLD_PCT
-    price_down = price_change_pct < -PRICE_UP_THRESHOLD_PCT
-    oi_up = oi_change_pct > OI_UP_THRESHOLD_PCT
-    oi_down = oi_change_pct < OI_DOWN_THRESHOLD_PCT
+    """Order-flow build-up. A move inside the daily noise floor is neutral.
+
+    Price up with open interest up is long build-up. Price down with open
+    interest up is short build-up. Price up with open interest down is short
+    covering. Price down with open interest down is long unwinding. A flat
+    price with rising open interest stays neutral.
+    """
+    price_up = price_change_pct > _FUT_PRICE_FLOOR_PCT
+    price_down = price_change_pct < -_FUT_PRICE_FLOOR_PCT
+    oi_up = oi_change_pct > _FUT_OI_FLOOR_PCT
+    oi_down = oi_change_pct < -_FUT_OI_FLOOR_PCT
     if price_up and oi_up:
         return "long_buildup"
     if price_up and oi_down:
@@ -362,7 +377,7 @@ def candle_plan(
     raw_exit = entry + reward_r * raw if side == "buy" else entry - reward_r * raw
     extended = entry + swing_r * risk if side == "buy" else entry - swing_r * risk
     # The uncapped candle is the multi-session target only when the day plan
-    # had to shrink it. Otherwise four R of the day risk is the further target.
+    # had to shrink it. Otherwise 2.5R of the day risk is the further target.
     if _beyond(side, raw_exit, exit_price):
         swing_exit, swing_basis = raw_exit, "candle"
     else:
@@ -378,6 +393,71 @@ def candle_plan(
     }
 
 
+def _weekend(now: float | None) -> bool:
+    """Saturday and Sunday, including the one-hour Muhurat session."""
+    if now is None:
+        return False
+    return datetime.fromtimestamp(now, IST).weekday() >= 5
+
+
+def _return_against(side: str, value: Any) -> bool:
+    """True when the 5-day move is known and does not go with the side."""
+    if not isinstance(value, (int, float)) or isinstance(value, bool):
+        return False
+    if side == "buy":
+        return float(value) <= 0
+    return float(value) >= 0
+
+
+def _sma_distance_pct(prev_close: float, sma: float) -> float:
+    if sma <= 0:
+        return 0.0
+    return abs(prev_close - sma) / sma * 100.0
+
+
+def _narrow_candle(prior_high: float | None, prior_low: float | None, atr: float | None) -> bool:
+    if atr is None or atr <= 0 or prior_high is None or prior_low is None:
+        return False
+    return (prior_high - prior_low) < _MIN_CANDLE_ATR * atr
+
+
+_FUTURES_LABEL = {
+    "long_buildup": "futures long build-up",
+    "short_buildup": "futures short build-up",
+    "short_covering": "futures short covering",
+    "long_unwinding": "futures long unwinding",
+    "neutral": "futures neutral",
+}
+
+
+def _futures_block(side: str, quadrant: str | None, rollover: bool) -> str | None:
+    """Veto only the two readings whose price sign fights the side.
+
+    A buy into short build-up, and a sell into long build-up, stand aside.
+    Short covering and long unwinding are labelled, not blocked: five live
+    sessions were not enough to show they help. Near-month open interest
+    during rollover week is a roll, so it is ignored. All-months open
+    interest is not on this feed.
+    """
+    if rollover or quadrant is None:
+        return None
+    trigger = "high" if side == "buy" else "low"
+    if side == "buy" and quadrant == "short_buildup":
+        return f"Yesterday's {trigger} is broken, but futures show short build-up"
+    if side == "sell" and quadrant == "long_buildup":
+        return f"Yesterday's {trigger} is broken, but futures show long build-up"
+    return None
+
+
+def _futures_label(quadrant: str | None, rollover: bool) -> str | None:
+    """The reading to show on a call. A roll is not a build-up."""
+    if rollover:
+        return "rollover week"
+    if quadrant is None:
+        return None
+    return _FUTURES_LABEL.get(quadrant)
+
+
 def _is_stale(tick_age: float | None, now: float | None) -> bool:
     """Without a clock (pure tests) nothing is stale. With one, no print or an old print is."""
     if now is None:
@@ -388,11 +468,14 @@ def _is_stale(tick_age: float | None, now: float | None) -> bool:
 def session_call(quote: dict[str, Any], progress: float, now: float | None = None) -> dict[str, Any]:
     """Buy or sell only on a break of yesterday's completed candle, not on tick color.
 
-    The 20-day trend chooses the side, and only when the 20-day path is
-    efficient enough to be a trend. Entry is that candle's high (buy) or low
-    (sell). Stop is the other side of the same candle, bounded by ATR. The day
-    exit is two times that risk. The swing exit is the multi-session target.
-    A print that is merely green or red stays on Wait.
+    The 20-day trend chooses the side, and only when the path is efficient,
+    the close is at least 2% through the 20-day average, and the 5-day move
+    agrees. Non-F&O names and prices under ₹100 stay aside. Entry is that
+    candle's high (buy) or low (sell), and only when the candle is at least
+    0.8 ATR wide. Stop is the other side, bounded by ATR. The day exit is two
+    times that risk. The swing exit is 2.5R. A buy into futures short build-up,
+    or a sell into long build-up, stands aside. Other futures readings are
+    labelled on the call. A print that is merely green or red stays on Wait.
     """
     ltp = float(quote.get("ltp") or 0)
     prev_close = float(quote.get("prev_close") or 0)
@@ -415,14 +498,18 @@ def session_call(quote: dict[str, Any], progress: float, now: float | None = Non
     sess = session_rvol(float(quote.get("vtt") or 0), quote.get("avg_volume_20"), progress)
     burst = _bursts(quote)
     rollover = _rollover(quote)
-    quadrant = None if is_index else _quote_quadrant(quote)
+    _, oi_change, quadrant = (None, None, None) if is_index else _oi_read(quote)
     tick_age = _tick_age(quote, now)
 
     stance = "stand_aside"
     phase = "none"
     reason = "Daily trend and the last candle do not agree"
     plan: dict[str, Any] | None = None
-    if history_bars < MIN_HISTORY_BARS or sma is None or prev_close <= 0 or ltp <= 0:
+    if _weekend(now):
+        reason = "Weekend session. A one-hour day does not fit this break"
+    elif not is_index and _segment(quote) == "cash":
+        reason = "Non-F&O names stay off the session call"
+    elif history_bars < MIN_HISTORY_BARS or sma is None or prev_close <= 0 or ltp <= 0:
         reason = "Not enough daily history for a call"
     else:
         trend = trend_side(prev_close, sma, trend_pct)
@@ -434,8 +521,6 @@ def session_call(quote: dict[str, Any], progress: float, now: float | None = Non
         participating = is_index or (sess is not None and sess >= 0.8) or (burst is not None and burst >= 1.2)
         max_spread = max(_MAX_SPREAD_PCT, 0.15 * (atr_pct or 0))
         wide_spread = not is_index and spread_pct is not None and spread_pct > max_spread
-        blocks_buy = quadrant == "short_buildup" and not rollover
-        blocks_sell = quadrant == "long_buildup" and not rollover
         side = "buy" if history_up else "sell" if history_down else None
         atr = (atr_pct / 100.0 * prev_close) if atr_pct else None
         spread = (spread_pct / 100.0 * ltp) if spread_pct else None
@@ -443,6 +528,8 @@ def session_call(quote: dict[str, Any], progress: float, now: float | None = Non
             plan = candle_plan("buy", prior_high, prior_low, atr=atr, spread=spread)
         elif side == "sell" and prior_high and prior_low:
             plan = candle_plan("sell", prior_low, prior_high, atr=atr, spread=spread)
+        futures_block = _futures_block(side or "", quadrant, rollover) if side else None
+        return_5d = quote.get("return_5d_pct")
 
         if side is not None and choppy:
             plan = None
@@ -453,6 +540,18 @@ def session_call(quote: dict[str, Any], progress: float, now: float | None = Non
         elif plan is None or side is None:
             if history_up or history_down:
                 reason = "The 20-day trend is there, but yesterday's candle has no usable range"
+        elif not is_index and prev_close < _MIN_PRICE:
+            plan = None
+            reason = "Price is under ₹100. That book lost more than the rest"
+        elif _return_against(side, return_5d):
+            plan = None
+            reason = "The 5-day move is against this side"
+        elif _sma_distance_pct(prev_close, sma) < _MIN_SMA_DISTANCE_PCT:
+            plan = None
+            reason = "Price is still within 2% of the 20-day average"
+        elif _narrow_candle(prior_high, prior_low, atr):
+            plan = None
+            reason = "Yesterday's range is under 0.8 ATR. The stop would sit in noise"
         else:
             entry = plan["entry"]
             risk = plan["risk"]
@@ -466,12 +565,9 @@ def session_call(quote: dict[str, Any], progress: float, now: float | None = Non
                     reason = "Uptrend. Green ticks are not an entry. Buy only through yesterday's high"
                 else:
                     reason = "Downtrend. Red ticks are not an entry. Sell only through yesterday's low"
-            elif in_window and side == "buy" and blocks_buy:
+            elif in_window and futures_block:
                 phase = "enter"
-                reason = "Yesterday's high is broken, but futures show short build-up"
-            elif in_window and side == "sell" and blocks_sell:
-                phase = "enter"
-                reason = "Yesterday's low is broken, but futures show long build-up"
+                reason = futures_block
             elif in_window and side == "buy" and not above_vwap:
                 stance = "wait"
                 phase = "enter"
@@ -492,14 +588,16 @@ def session_call(quote: dict[str, Any], progress: float, now: float | None = Non
                 stance = "buy"
                 phase = "enter"
                 reason = "Price is above the 20-day average. Buy the break of yesterday's high"
-                if quadrant == "long_buildup":
-                    reason += ", with futures long build-up"
+                label = _futures_label(quadrant, rollover)
+                if label:
+                    reason += f", {label}"
             elif in_window and side == "sell":
                 stance = "sell"
                 phase = "enter"
                 reason = "Price is below the 20-day average. Sell the break of yesterday's low"
-                if quadrant in {"short_buildup", "long_unwinding"}:
-                    reason += ", with futures supply"
+                label = _futures_label(quadrant, rollover)
+                if label:
+                    reason += f", {label}"
             else:
                 phase = "late"
                 reason = (
@@ -544,6 +642,7 @@ def session_call(quote: dict[str, Any], progress: float, now: float | None = Non
         "stop_basis": plan["basis"] if plan else None,
         "plan_phase": phase,
         "quadrant": quadrant,
+        "oi_change_pct": _round(oi_change, 2),
         "rollover_week": rollover,
         "on_last_scan": bool(quote.get("on_last_scan")),
         "tick_age_sec": _round(tick_age, 1),

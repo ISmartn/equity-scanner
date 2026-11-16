@@ -14,7 +14,7 @@ Historical OHLCV is fetched from **Upstox** (primary) with automatic **NSE API f
 ```
 React UI (Vite :5173)
     ↓ /api/*
-FastAPI backend (:8000)
+FastAPI backend (:9000)
     ├── Upstox HistoryV3Api (primary)
     ├── NSE historical APIs (fallback)
     ├── TimesFM 2.5 inference (in-process PyTorch)
@@ -35,7 +35,7 @@ pip install -r requirements.txt
 cp ../.env.example ../.env
 # Edit ../.env and set UPSTOX_ACCESS_TOKEN
 
-uvicorn app.main:app --reload --port 8000
+uvicorn app.main:app --reload --port 9000
 ```
 
 First forecast request downloads TimesFM weights from Hugging Face (~400MB). CPU inference works; GPU is used automatically when available.
@@ -145,3 +145,24 @@ Live ATM support-zone scanner using **rolling Upstox option-chain polls** (3–5
 | `POST /api/oi-momentum/stream/start` | Upstox WS live OI on ATM zone strikes |
 
 **Changelog (2026-06-30):** WebSocket live OI via Upstox Market Data Feed V3; hybrid with rolling 3m/5m engine.
+
+## Order Flow
+
+A whole-market F&O board on the lab's stored session: daily closes from `daily_candles` (index candles for Nifty, Bank Nifty and Sensex) and the same option-chain overlay the momentum scanner uses (`derivative_snapshots`). Names the overlay would reject stay on the tape; `fo_action` carries that decision.
+
+| Route | Description |
+|-------|-------------|
+| `/order-flow` | UI — Nifty 50 or all F&O, sector lean, build-up, conviction checks |
+| `GET /api/order-flow?scope=nifty50\|fno` | Board for the latest stored session (`refresh=true` recomputes) |
+
+Sync option-chain snapshots from **Market Info** when the board shows daily moves without a build-up.
+
+## Newsdesk
+
+Multi-source market headlines in the lab database. RSS from the Newsdesk source list is stored for 30 days, clustered into stories when headlines match, and tagged with lab tickers from the alias list. Summaries are extractive sentences from the feed blurb.
+
+| Route | Description |
+|-------|-------------|
+| `/newsdesk` | UI — story list, category and ticker filters, blurb summary |
+| `GET /api/newsdesk?days=3&refresh=true` | Refresh feeds and return clustered stories |
+| `GET /api/newsdesk/summary?link=` | Extractive summary of a stored article |

@@ -364,6 +364,8 @@ CREATE TABLE IF NOT EXISTS live_call_journal (
     swing_result_pct REAL,
     swing_closed_at TEXT,
     segment TEXT,
+    fut_quadrant TEXT,
+    fut_oi_change_pct REAL,
     PRIMARY KEY (session_date, symbol, side)
 );
 
@@ -452,6 +454,8 @@ class TimelineStore:
                 ("swing_result_pct", "REAL"),
                 ("swing_closed_at", "TEXT"),
                 ("segment", "TEXT"),
+                ("fut_quadrant", "TEXT"),
+                ("fut_oi_change_pct", "REAL"),
             ):
                 if journal_cols and column not in journal_cols:
                     conn.execute(f"ALTER TABLE live_call_journal ADD COLUMN {column} {decl}")
@@ -3298,7 +3302,8 @@ class TimelineStore:
                 SELECT session_date, symbol, side, kind, company_name, stance,
                        entry, stop, exit_price, status, opened_at, entry_at, closed_at,
                        last_price, result_pct, mfe_pct, mae_pct, updated_at, fill_price,
-                       swing_exit, swing_status, swing_result_pct, swing_closed_at, segment
+                       swing_exit, swing_status, swing_result_pct, swing_closed_at, segment,
+                       fut_quadrant, fut_oi_change_pct
                 FROM live_call_journal
                 WHERE session_date = ?
                    OR (
@@ -3319,7 +3324,8 @@ class TimelineStore:
                 SELECT session_date, symbol, side, kind, company_name, stance,
                        entry, stop, exit_price, status, opened_at, entry_at, closed_at,
                        last_price, result_pct, mfe_pct, mae_pct, updated_at, fill_price,
-                       swing_exit, swing_status, swing_result_pct, swing_closed_at, segment
+                       swing_exit, swing_status, swing_result_pct, swing_closed_at, segment,
+                       fut_quadrant, fut_oi_change_pct
                 FROM live_call_journal
                 WHERE session_date >= ? AND session_date <= ?
                 ORDER BY session_date, symbol, side
@@ -3523,6 +3529,8 @@ def _write_live_call_journal(conn: sqlite3.Connection, rows: list[dict[str, Any]
             row.get("swing_result_pct"),
             row.get("swing_closed_at"),
             row.get("segment"),
+            row.get("fut_quadrant"),
+            row.get("fut_oi_change_pct"),
         )
         for row in rows
     ]
@@ -3532,8 +3540,9 @@ def _write_live_call_journal(conn: sqlite3.Connection, rows: list[dict[str, Any]
             session_date, symbol, side, kind, company_name, stance,
             entry, stop, exit_price, status, opened_at, entry_at, closed_at,
             last_price, result_pct, mfe_pct, mae_pct, updated_at, fill_price,
-            swing_exit, swing_status, swing_result_pct, swing_closed_at, segment
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            swing_exit, swing_status, swing_result_pct, swing_closed_at, segment,
+            fut_quadrant, fut_oi_change_pct
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         ON CONFLICT(session_date, symbol, side) DO UPDATE SET
             kind = excluded.kind,
             company_name = excluded.company_name,
@@ -3551,7 +3560,9 @@ def _write_live_call_journal(conn: sqlite3.Connection, rows: list[dict[str, Any]
             swing_status = excluded.swing_status,
             swing_result_pct = excluded.swing_result_pct,
             swing_closed_at = excluded.swing_closed_at,
-            segment = COALESCE(excluded.segment, live_call_journal.segment)
+            segment = COALESCE(excluded.segment, live_call_journal.segment),
+            fut_quadrant = COALESCE(live_call_journal.fut_quadrant, excluded.fut_quadrant),
+            fut_oi_change_pct = COALESCE(live_call_journal.fut_oi_change_pct, excluded.fut_oi_change_pct)
         """,
         payload,
     )

@@ -17,12 +17,12 @@ type Segment = "fno" | "cash" | "all";
 const DEFAULTS = {
   side: "both",
   reward_r: 2,
-  swing_r: 4,
-  entry_window_r: 0.35,
+  swing_r: 2.5,
+  entry_window_r: 0.15,
   min_efficiency: 0.2,
   risk_min_atr: 0.5,
   risk_max_atr: 1.5,
-  max_swing_days: 20,
+  max_swing_days: 5,
   cost_pct: 0.05,
 } as const;
 
@@ -43,6 +43,12 @@ const FUNNEL_LABELS: [string, string][] = [
   ["sessions", "Symbol-days"],
   ["no_trend", "No trend"],
   ["choppy", "Range"],
+  ["cash", "Non-F&O"],
+  ["below_price", "Under ₹100"],
+  ["against_5d", "5-day against"],
+  ["near_average", "Near average"],
+  ["narrow_candle", "Narrow candle"],
+  ["weekend", "Weekend"],
   ["wrong_side", "Other side"],
   ["no_plan", "No candle"],
   ["through_stop", "Through stop"],

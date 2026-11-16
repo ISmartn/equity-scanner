@@ -38,7 +38,7 @@ export function logProxyError(
   if (code === "ECONNREFUSED" && !backendHintShown) {
     backendHintShown = true;
     const hint =
-      `[vite] Backend not reachable at http://localhost:8000 — run: npm run dev:backend (from repo root)\n` +
+      `[vite] Backend not reachable at http://localhost:9000 — run: npm run dev:backend (from repo root)\n` +
       `[vite] Proxy errors are appended to ${LOG_PATH}\n`;
     ensureLogDir();
     fs.appendFileSync(LOG_PATH, `${new Date().toISOString()}\tHINT\t-\t${hint.replace(/\n/g, " ")}\n`, "utf8");
@@ -57,7 +57,7 @@ export function configureApiProxy(proxy: {
     if (res && "writeHead" in res && !res.headersSent) {
       const body = JSON.stringify({
         error: "backend_unavailable",
-        message: "API backend is not running on port 8000. Start it with: npm run dev:backend",
+        message: "API backend is not running on port 9000. Start it with: npm run dev:backend",
         detail: nodeErr.message,
         path: url,
       });

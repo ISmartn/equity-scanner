@@ -1,0 +1,298 @@
+/*
+ * UiCharts prototype system
+ * --------------------------------------------------------------------------
+ * Final global visual authority. This intentionally loads after legacy style
+ * islands and translates the supplied UiCharts prototype language into the
+ * shared app tokens: typography, light/dark surfaces, navigation, cards,
+ * controls, tables, and chart colors.
+ */
+
+:root {
+  color-scheme: dark;
+
+  /* Font families — including the --font-ui / --font-mono / --mono aliases
+     that used to be repeated here — are defined once, in
+     src/styles/ui-typography.css. That sheet loads at main.tsx position 46
+     against this file's 27, so its identical definitions were already the
+     computed values; the copies here were a second place to have to keep in
+     sync. Design contract §3: one family authority, no exceptions. */
+
+  --ui-type-min: 10px;
+  --ui-type-2xs: 10px;
+  --ui-type-xs: 11px;
+  --ui-type-sm: 12px;
+  --ui-type-md: 13px;
+  --ui-type-lg: 14px;
+  --ui-type-xl: 16px;
+  --ui-type-2xl: 20px;
+  --ui-line-tight: 1.15;
+  --ui-line-ui: 1.28;
+  --ui-line-copy: 1.45;
+
+  --ui-prototype-white: #FFFFFF;
+  --ui-prototype-panel: #FEF1FA;
+  --ui-prototype-panel-2: #EEFDF5;
+  --ui-prototype-line: #FDE6F7;
+  --ui-prototype-line-2: #FEF1FA;
+  --ui-prototype-ink: #3D0920;
+  --ui-prototype-ink-2: #727272;
+  --ui-prototype-muted: #A3A3A3;
+  --ui-prototype-purple: #A50F66;
+  --ui-prototype-purple-soft: #FEF1FA;
+  --ui-prototype-lavender: #FEA3E5;
+  --ui-prototype-green: var(--up);
+  --ui-prototype-red: var(--down);
+  --ui-prototype-amber: #C5AA84;
+  --ui-prototype-cyan: #40E897;
+
+  --ui-bg-0: #0F0F0F;
+  --ui-bg-1: #3D0920;
+  --ui-bg-2: #3D0920;
+  --ui-surface-1: #3D0920;
+  --ui-surface-2: #3D0920;
+  --ui-surface-3: #3D0920;
+  --ui-border-soft: #3D0920;
+  --ui-border-strong: #3D0920;
+  --ui-text-1: #FEF1FA;
+  --ui-text-2: #B5F5D6;
+  --ui-text-3: #A3A3A3;
+  --ui-accent: var(--ui-prototype-purple);
+  --ui-accent-2: var(--ui-prototype-lavender);
+  --ui-positive: var(--ui-prototype-green);
+  --ui-positive-strong: #40E897;
+  --ui-negative: var(--ui-prototype-red);
+  --ui-negative-strong: #FAD0CE;
+  --ui-attentive: var(--ui-prototype-amber);
+  --ui-oi-call: var(--ui-prototype-red);
+  --ui-oi-call-ink: #FAD0CE;
+  --ui-oi-put: var(--ui-prototype-cyan);
+  --ui-oi-put-ink: #40E897;
+
+  --bg: var(--ui-bg-0);
+  --bg1: var(--ui-bg-1);
+  --bg2: var(--ui-bg-1);
+  --bg3: var(--ui-bg-2);
+  --surface: var(--ui-surface-1);
+  --surface2: var(--ui-surface-2);
+  --surface3: var(--ui-surface-3);
+  --bg-card: var(--surface);
+  --bg-panel: var(--surface);
+  --bg-input: var(--ui-bg-0);
+  --terminal-panel: var(--surface);
+  --terminal-panel-strong: var(--bg);
+  --terminal-panel-soft: color-mix(in srgb, var(--surface) 88%, transparent);
+  --terminal-divider: var(--ui-border-soft);
+  --border: var(--ui-border-soft);
+  --border2: var(--ui-border-strong);
+  --text: var(--ui-text-1);
+  --text1: var(--ui-text-1);
+  --text2: var(--ui-text-2);
+  --text3: var(--ui-text-3);
+  --text4: var(--ui-text-3);
+  --muted: var(--ui-text-3);
+  --accent: var(--ui-accent);
+  --purple: var(--ui-accent);
+  --blue: var(--ui-accent);
+  --cyan: var(--ui-prototype-cyan);
+  --green: var(--ui-positive);
+  --red: var(--ui-negative);
+  --yellow: var(--ui-attentive);
+  --positive: var(--ui-positive);
+  --negative: var(--ui-negative);
+  --attentive: var(--ui-attentive);
+
+  --components-button-primary-surface-top: #A50F66;
+  --components-button-primary-surface-bottom: #A50F66;
+  --ui-cta-gradient: linear-gradient(180deg, var(--components-button-primary-surface-top), var(--components-button-primary-surface-bottom));
+
+  --chip-surface-unselected: var(--ui-surface-3);
+  --chip-surface-selected: #3D0920;
+  --chip-stroke-unselected: var(--border);
+  --chip-stroke-selected: #3D0920;
+  --components-Chip-surface-unselected: var(--chip-surface-unselected);
+  --components-Chip-surface-selected: var(--chip-surface-selected);
+  --components-Chip-stroke-unselected: var(--chip-stroke-unselected);
+  --components-Chip-stroke-selected: var(--chip-stroke-selected);
+
+  --components-Navigation-surface-L1: var(--bg);
+  --components-Navigation-surface-L2: var(--surface);
+  --components-Navigation-stroke-top: var(--border);
+  --components-Navigation-stroke-bottom: var(--border);
+
+  --toast-neutral-bg: color-mix(in srgb, var(--text3) 14%, transparent);
+  --toast-neutral-border: color-mix(in srgb, var(--text3) 28%, transparent);
+  --toast-neutral-text: var(--text2);
+  --toast-positive-bg: color-mix(in srgb, var(--ui-positive) 15%, transparent);
+  --toast-positive-border: color-mix(in srgb, var(--ui-positive) 34%, transparent);
+  --toast-positive-text: var(--ui-positive-strong);
+  --toast-negative-bg: color-mix(in srgb, var(--ui-negative) 15%, transparent);
+  --toast-negative-border: color-mix(in srgb, var(--ui-negative) 34%, transparent);
+  --toast-negative-text: var(--ui-negative-strong);
+  --toast-attentive-bg: color-mix(in srgb, var(--ui-attentive) 15%, transparent);
+  --toast-attentive-border: color-mix(in srgb, var(--ui-attentive) 34%, transparent);
+  --toast-attentive-text: #C5AA84;
+
+  --radius-sm: 6px;
+  --radius: 9px;
+  --radius-lg: 10px;
+  --radius-xl: 16px;
+  --shadow-smooth-L1: 0 2px 8px rgba(0, 0, 0, .12);
+  --shadow-smooth-L2: 0 8px 30px rgba(0, 0, 0, .22);
+  --shadow-smooth-L3: 0 18px 48px rgba(0, 0, 0, .28);
+  --focus-ring: 0 0 0 3px color-mix(in srgb, var(--ui-accent) 24%, transparent);
+
+  --chart-bg: var(--surface);
+  --chart-panel: var(--surface2);
+  --chart-grid: color-mix(in srgb, var(--border) 72%, transparent);
+  --chart-axis: var(--text3);
+  --chart-text: var(--text2);
+  --chart-line-primary: var(--ui-prototype-purple);
+  --chart-line-secondary: var(--ui-prototype-lavender);
+  --chart-line-positive: var(--ui-prototype-green);
+  --chart-line-negative: var(--ui-prototype-red);
+  --chart-line-attentive: var(--ui-prototype-amber);
+  --chart-bar-primary: var(--ui-prototype-purple);
+  --chart-bar-secondary: var(--ui-prototype-lavender);
+  --chart-bar-positive: var(--ui-prototype-green);
+  --chart-bar-negative: var(--ui-prototype-red);
+  --chart-fill-primary: color-mix(in srgb, var(--ui-prototype-purple) 16%, transparent);
+  --chart-fill-positive: color-mix(in srgb, var(--ui-prototype-green) 16%, transparent);
+  --chart-fill-negative: color-mix(in srgb, var(--ui-prototype-red) 16%, transparent);
+  --oi-chart-surface: linear-gradient(180deg, var(--surface), var(--bg));
+  --oi-chart-border: var(--border);
+  --oi-chart-muted: var(--text3);
+}
+
+/* This block is radius + type-step authority ONLY (contract §0). It used to
+   also declare the --ui-* surface/ink bridge and the chip/toast semantics —
+   and because it sits at (0,2,0) while ui-colour-system.css publishes that
+   bridge at plain (0,1,0), SPECIFICITY BEAT IMPORT ORDER and this file silently
+   owned the entire light theme. The symptoms were real and visible:
+     --ui-bg-1/--ui-surface-2  = #FEF1FA  → pink panels on a cream page
+     --ui-bg-2/--ui-surface-3  = #EEFDF5  → green panels
+     --ui-text-1                 = #3D0920  → plum body ink, not near-black
+     --ui-text-3                 = #A3A3A3  → 2.5:1, the exact value the
+                                                palette rejected for AA
+     --toast-attentive-text        = #C4342E  → warning toasts painted as
+                                                errors, a third direction
+                                                colour that §4 forbids
+     --toast-positive-text         = #727272  → success toasts with no green
+   All of it deleted. The palette authority already defines every one of these
+   correctly; it just needed to stop being outranked. Do NOT re-add a colour
+   declaration to this selector — there is no fourth authority (§0). */
+:root[data-theme='light'] {
+  color-scheme: light;
+  --shadow-smooth-L1: 0 2px 8px rgba(61, 9, 32, .05);
+  --shadow-smooth-L2: 0 8px 30px rgba(61, 9, 32, .10);
+  --shadow-smooth-L3: 0 18px 48px rgba(61, 9, 32, .14);
+  --oi-chart-surface: linear-gradient(180deg, #FFFFFF, #EEFDF5);
+}
+
+html,
+body,
+#root,
+#root > .app {
+  font-family: var(--font-sans) !important;
+  background: var(--bg) !important;
+  color: var(--text) !important;
+  font-size: var(--ui-type-md);
+}
+
+#root > .app :is(button, input, select, textarea, table, svg text) {
+  font-family: var(--font-sans) !important;
+}
+
+#root > .app :is(h1, h2, h3, h4, h5, h6, strong, b) {
+  color: var(--text) !important;
+  font-family: var(--font-sans) !important;
+  letter-spacing: -.015em;
+}
+
+
+
+#root > .app :is(.dashboard-shell, .dashboard-body, .main-area, .main-content) {
+  background: var(--bg) !important;
+  color: var(--text) !important;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#root > .app :is(.call, .ce, .th-ce, .chain-side-nav-label-ce) {
+  --chart-side-color: var(--ui-oi-call);
+}
+
+#root > .app :is(.put, .pe, .th-pe, .chain-side-nav-label-pe) {
+  --chart-side-color: var(--ui-oi-put);
+}
+
+
+
+
+
+/* Left rail: remove the active left strip/marker while retaining the active fill. */
+
+
+/* Option chain: remove the remaining ATM strike side strip/marker. */
+#root > .app.app[data-active-tab='chain'] .chain-table :is(.strike-cell.atm-strike, .atm-row .strike-cell, .strike-cell.maxpain-strike) {
+  box-shadow: none !important;
+}
+
+#root > .app.app[data-active-tab='chain'] .chain-table :is(.strike-cell.atm-strike, .atm-row .strike-cell)::before,
+#root > .app.app[data-active-tab='chain'] .chain-table :is(.strike-cell.atm-strike, .atm-row .strike-cell)::after {
+  display: none !important;
+  content: none !important;
+  width: 0 !important;
+  box-shadow: none !important;
+}
+
+/* Removed: the two `.header.ui-context-header` blocks that used to define a
+   `--ui-control-*` family here.
+   Doubly dead. `.ui-context-header` is rendered nowhere in src (the top bar
+   is `.ui-top-shell`), so neither selector ever matched; and no rule in the
+   app reads a single `var(--ui-control-bg / -line / -text / -muted /
+   -purple / -purple-soft / -green)`, so the tokens had no consumer either.
+   They also carried the retired prototype palette as literal hexes and painted
+   the chain header with `linear-gradient(180deg, #FFFFFF, #EEFDF5)` — a broad
+   mint fill that design contract §4 does not allow. It never rendered, and now
+   it cannot come back by accident. */
+
+/* Latest header cleanup: no duplicate quote logo, no workspace grid button. */
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* Global Font Enforcer */
+table,
+span,
+.mono {
+  font-variant-numeric: tabular-nums;
+}

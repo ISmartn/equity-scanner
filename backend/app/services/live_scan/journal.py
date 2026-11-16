@@ -326,6 +326,8 @@ def public_row(record: dict[str, Any]) -> dict[str, Any]:
         "entry_at": record.get("entry_at"),
         "closed_at": record.get("closed_at"),
         "swing_closed_at": record.get("swing_closed_at"),
+        "fut_quadrant": record.get("fut_quadrant"),
+        "fut_oi_change_pct": record.get("fut_oi_change_pct"),
     }
 
 
@@ -334,6 +336,7 @@ _PERSIST_KEYS = (
     "exit_price", "status", "opened_at", "entry_at", "closed_at", "last_price", "result_pct",
     "mfe_pct", "mae_pct", "updated_at", "fill_price",
     "swing_exit", "swing_status", "swing_result_pct", "swing_closed_at", "segment",
+    "fut_quadrant", "fut_oi_change_pct",
 )
 
 
@@ -478,6 +481,8 @@ class CallJournal:
             "mfe_pct": None,
             "mae_pct": None,
             "updated_at": now,
+            "fut_quadrant": call.get("quadrant"),
+            "fut_oi_change_pct": call.get("oi_change_pct"),
         }
         if status == "open":
             _track_extremes(record, side, ltp, ltp)

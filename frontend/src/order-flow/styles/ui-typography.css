@@ -1,0 +1,126 @@
+:root {
+  /* Order Flow reads in Manrope (bundled, OFL): clear at 10–12px, with tabular
+     figures, so columns of moves line up without a code-style face. The
+     system face covers anything Manrope does not (₹). */
+  --font-display: "Manrope Variable", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-sans: "Manrope Variable", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-figures: var(--font-sans);
+
+  /* Canonical the app Typography Font Size Scale */
+  --font-size-micro: 10px;
+  --font-size-caption: 12px;
+  --font-size-small: 14px;
+  --font-size-body: 16px;
+  --font-size-body-lg: 18px;
+  --font-size-h4: 20px;
+  --font-size-h3: 24px;
+  --font-size-h2: 32px;
+  --font-size-h1: 44px;
+
+  /* Legacy aliases intentionally resolve to Manrope. Numeric alignment is
+     retained with tabular figures rather than a third monospace face. */
+  --font-ui: var(--font-sans);
+  --font-mono: var(--font-sans);
+  --mono: var(--font-sans);
+  --oi-mono: var(--font-sans);
+  --font-num: var(--font-figures);
+  --ui-proto-font: var(--font-sans);
+  --oc-approved-font: var(--font-sans);
+}
+
+html,
+body,
+#root,
+.app {
+  font-family: var(--font-sans);
+}
+
+button,
+input,
+select,
+textarea,
+table {
+  font-family: var(--font-sans) !important;
+}
+
+/* Manrope is reserved for true display hierarchy. Dense dashboard section
+   labels continue to use Manrope at their existing sizes. */
+h1,
+h2,
+[data-ui-type="display"] {
+  font-family: var(--font-display);
+}
+
+code,
+pre,
+kbd,
+samp,
+[data-numeric] {
+  font-family: var(--font-sans);
+  font-variant-numeric: tabular-nums;
+}
+
+svg text {
+  font-family: var(--font-sans);
+}
+
+/* ---------------------------------------------------------------------------
+   Tabular numerals — SYSTEMATIC, not per-feature.
+   Contract §3 rule 3: "Every numeral gets font-variant-numeric: tabular-nums."
+   There is no numeric face in this app; columnar alignment comes from this
+   property alone, so it has to be declared in one place that covers every
+   medium numbers appear in — HTML text, table cells, form controls and SVG
+   chart labels.
+
+   `table, span, .mono` previously lived in ui-cards.css; it was folded in
+   here (the type authority, and a later import) and widened. Nothing in `src`
+   sets `font-variant-numeric: normal`, so this can only add alignment, never
+   remove it. `span` stays in the list deliberately — it is the element almost
+   every rendered figure in this codebase is wrapped in.
+   --------------------------------------------------------------------------- */
+table,
+thead,
+tbody,
+tr,
+th,
+td,
+span,
+output,
+data,
+time,
+input,
+.mono,
+.tabular,
+[data-numeric],
+svg text {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1, "lnum" 1;
+}
+
+/* ---------------------------------------------------------------------------
+   Mobile end of the type scale (contract §7 breakpoints: 768 then 480).
+   Headings step DOWN so a 44px h1 does not eat a 360px viewport; the small end
+   of the scale (body / small / caption / micro) is deliberately NOT touched —
+   `--font-size-micro` is the 10px floor and `audit:typography` gates the build
+   on it, so it must stay pinned at every width. Nothing here goes below 16px.
+   --------------------------------------------------------------------------- */
+@media (max-width: 768px) {
+  :root {
+    --font-size-h1: 32px;
+    --font-size-h2: 26px;
+    --font-size-h3: 22px;
+    --font-size-h4: 18px;
+    --font-size-body-lg: 17px;
+  }
+}
+
+@media (max-width: 480px) {
+  :root {
+    --font-size-h1: 28px;
+    --font-size-h2: 24px;
+    --font-size-h3: 20px;
+    --font-size-h4: 18px;
+    --font-size-body-lg: 16px;
+  }
+}
+

@@ -88,24 +88,25 @@ def test_trend_side_is_the_session_call_rule() -> None:
     assert trend_side(100, None, 5) is None
     quote = {
         "symbol": "X",
-        "ltp": 99.0,
-        "prev_close": 98.0,
+        "ltp": 105.0,
+        "prev_close": 104.0,
         "sma20": 90.0,
         "trend_20_pct": 6.0,
         "efficiency_20": 0.5,
-        "prior_high": 100.0,
-        "prior_low": 96.0,
+        "return_5d_pct": 4.0,
+        "prior_high": 106.0,
+        "prior_low": 100.0,
         "atr_pct": 3.0,
         "history_bars": 20,
     }
     call = session_call(quote, 0.5)
-    plan = candle_plan("buy", 100.0, 96.0, atr=0.03 * 98.0)
+    plan = candle_plan("buy", 106.0, 100.0, atr=0.03 * 104.0)
     assert call["entry"] == round(plan["entry"], 2)
     assert call["stop"] == round(plan["stop"], 2)
 
 
 def test_candle_plan_knobs_default_to_live_constants() -> None:
-    assert candle_plan("buy", 100, 95, atr=5) == candle_plan("buy", 100, 95, atr=5, reward_r=2.0, swing_r=4.0)
+    assert candle_plan("buy", 100, 95, atr=5) == candle_plan("buy", 100, 95, atr=5, reward_r=2.0, swing_r=2.5)
     wide = candle_plan("buy", 100, 95, atr=5, reward_r=3.0)
     assert wide["exit"] == pytest.approx(115.0)
 
@@ -178,7 +179,7 @@ def test_gap_beyond_window_is_a_chase_unless_price_returns() -> None:
 def test_gap_inside_window_fills_at_the_open() -> None:
     history = _uptrend()
     plan = _plan_for(history)
-    gap = plan["entry"] + 0.2 * plan["risk"]
+    gap = plan["entry"] + 0.1 * plan["risk"]
     bars, day = _with_today(history, (gap, gap + 0.3, gap - 0.1, gap + 0.1))
     trade = simulate_symbol(_ITEM, bars, _params(day), Funnel())[0]
     assert trade.fill_type == "open"
@@ -361,9 +362,10 @@ def test_journal_scorecard_converts_results_to_r() -> None:
 def test_run_backtest_reads_the_store(tmp_path) -> None:
     store = TimelineStore(tmp_path / "bt.db")
     history = _uptrend(40)
-    plan_bars = history[:30]
+    # Index 30 is a Saturday. The replay skips weekend sessions, so use the Friday before it.
+    plan_bars = history[:29]
     plan = _plan_for(plan_bars)
-    day = history[30][0]
+    day = history[29][0]
     bars = plan_bars + [(day, plan["entry"] - 0.5, plan["exit"] + 0.1, plan["entry"] - 0.4, plan["exit"])]
     store.upsert_candles(
         [
@@ -387,3 +389,28 @@ def test_run_backtest_reads_the_store(tmp_path) -> None:
     assert result["curve"]["final_r"] == pytest.approx(2.0)
     assert result["trades"][0]["symbol"] == "TEST"
     assert {group["key"] for group in result["breakdowns"]} >= {"side", "efficiency", "year"}
+
+
+def test_replay_skips_the_buckets_the_live_call_skips() -> None:
+    history = _uptrend()
+    plan = _plan_for(history)
+    bars, day = _with_today(history, (plan["entry"] - 0.5, plan["entry"] + 1.0, plan["entry"] - 0.4, plan["entry"] + 0.4))
+
+    cash = BacktestSymbol(symbol="TEST", token="NSE_EQ|TEST", segment="cash")
+    funnel = Funnel()
+    assert simulate_symbol(cash, bars, _params(day), funnel) == []
+    assert funnel.cash == 1
+
+    saturday = "2026-01-24"
+    weekend_bars = bars[:-1] + [(saturday, *bars[-1][1:])]
+    funnel = Funnel()
+    assert simulate_symbol(_ITEM, weekend_bars, _params(saturday), funnel) == []
+    assert funnel.weekend == 1
+
+    squeezed = list(history)
+    last = squeezed[-1]
+    squeezed[-1] = (last[0], last[4], last[4] + 0.05, last[4] - 0.05, last[4])
+    narrow_bars, narrow_day = _with_today(squeezed, (last[4], last[4] + 1.0, last[4] - 1.0, last[4] + 0.2))
+    funnel = Funnel()
+    assert simulate_symbol(_ITEM, narrow_bars, _params(narrow_day), funnel) == []
+    assert funnel.narrow_candle == 1

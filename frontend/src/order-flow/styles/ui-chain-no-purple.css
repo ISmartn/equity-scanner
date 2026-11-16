@@ -1,0 +1,203 @@
+/*
+ * Option chain — no purple.
+ * --------------------------------------------------------------------------
+ * The the app accent is the pink/magenta `--brand-*` ramp (`--capital-purple`,
+ * `--accent`, `--accent-text`, focus rings). In the option chain that family
+ * is switched off: the accent becomes the theme's own ink and the brand ramp
+ * is remapped to the neutral scale step for step, so anything in the chain that
+ * asks for a brand colour (labels, rings, dots, the Delta/Vega lines, the
+ * Customise panel) gets a neutral of the same lightness instead.
+ *
+ * Scoped, not global: it applies to the chain workspace (`data-active-tab=
+ * 'chain'`) and to the strike sheet, which is portaled to <body> under
+ * `data-workspace='chain'`. Every other page keeps the brand palette, and the
+ * shared tokens on :root are untouched — this only re-declares them on the
+ * chain's own elements. Semantic colour (green up, red down, amber levels) is
+ * not part of the purple family and is left alone.
+ *
+ * To restore the brand colours in the chain, delete this file and its import in
+ * main.tsx.
+ */
+
+:root[data-theme] #root > .app[data-active-tab='chain'],
+:root[data-theme] [data-workspace='chain'] {
+  --brand-50: var(--neutral-50);
+  --brand-100: var(--neutral-100);
+  --brand-200: var(--neutral-200);
+  --brand-300: var(--neutral-300);
+  --brand-400: var(--neutral-400);
+  --brand-500: var(--neutral-500);
+  --brand-600: var(--neutral-600);
+  --brand-700: var(--neutral-700);
+  --brand-800: var(--neutral-800);
+  --brand-900: var(--neutral-700);
+  --brand-950: var(--neutral-800);
+  --brand-1000: var(--neutral-950);
+  --capital-purple: var(--neutral-700);
+}
+
+/* The accent itself: the theme's ink, so an outline, ring or dot that used to be
+   magenta is now plainly visible in either theme. */
+:root[data-theme='dark'] #root > .app[data-active-tab='chain'],
+:root[data-theme='dark'] [data-workspace='chain'] {
+  --accent: var(--neutral-50);
+  --accent-hover: var(--neutral-200);
+  --accent-text: var(--neutral-300);
+  --accent-ring: var(--neutral-50);
+  --accent-wash: color-mix(in srgb, var(--neutral-50) 10%, transparent);
+}
+
+:root[data-theme='light'] #root > .app[data-active-tab='chain'],
+:root[data-theme='light'] [data-workspace='chain'] {
+  --accent: var(--neutral-950);
+  --accent-hover: var(--neutral-800);
+  --accent-text: var(--neutral-700);
+  --accent-ring: var(--neutral-950);
+  --accent-wash: color-mix(in srgb, var(--neutral-950) 8%, transparent);
+}
+
+
+/* ── Legacy and per-surface aliases ───────────────────────────────────────────
+   Older stylesheets kept their own purple-family names (`--brand`, `--purple`,
+   `--pink`, `--series-2`, `--btn-primary-*`, `--chain-*`, the chart-canvas and
+   chrome tokens, …). Several alias straight to the brand pink, so remapping the
+   ramp above was not enough on its own: any component that reached for one of
+   these would have brought the colour back. They are re-declared here, on the
+   chain only, as neutrals of the same role. */
+:root[data-theme='dark'] #root > .app[data-active-tab='chain'],
+:root[data-theme='dark'] [data-workspace='chain'] {
+  --brand: var(--neutral-50);
+  --brand2: var(--neutral-400);
+  --ui-accent: var(--neutral-50);
+  --ui-accent-2: var(--neutral-400);
+  --accent-primary: var(--neutral-50);
+  --ui-prototype-purple: var(--neutral-50);
+  --ui-prototype-purple-soft: var(--neutral-800);
+  --context-header-accent: var(--neutral-50);
+  --chip-stroke-selected: var(--neutral-50);
+  --components-Chip-stroke-selected: var(--neutral-50);
+  --purple: var(--neutral-400);
+  --ui-purple: var(--neutral-400);
+  --brand-purple: var(--neutral-400);
+  --pink: var(--neutral-400);
+  --blue: var(--neutral-400);
+  --cyan: var(--neutral-400);
+  --purple-bg: var(--neutral-800);
+  --blue-bg: var(--neutral-800);
+  --btn-primary-top: var(--neutral-700);
+  --btn-primary-bottom: var(--neutral-800);
+  --components-button-primary-surface-top: var(--neutral-700);
+  --components-button-primary-surface-bottom: var(--neutral-800);
+  --series-2: var(--neutral-400);
+  --chart-line-secondary: var(--neutral-400);
+  --chart-bar-secondary: var(--neutral-400);
+  --chain-panel-2: var(--neutral-850);
+  --chain-panel-3: var(--neutral-900);
+  --chain-page-bg: var(--neutral-950);
+  --chain-text: var(--neutral-50);
+  --chain-text-soft: color-mix(in srgb, var(--neutral-50) 82%, transparent);
+  --chain-muted: var(--neutral-400);
+  --chain-border: color-mix(in srgb, var(--neutral-50) 14%, transparent);
+  --chain-border-strong: color-mix(in srgb, var(--neutral-50) 24%, transparent);
+  --ui-chrome-ink: color-mix(in srgb, var(--neutral-50) 94%, transparent);
+  --ui-chrome-border: color-mix(in srgb, var(--neutral-50) 12%, transparent);
+  --ui-chrome-border-strong: color-mix(in srgb, var(--neutral-50) 20%, transparent);
+  --ui-chart-canvas-line: color-mix(in srgb, var(--neutral-50) 14%, transparent);
+  --ui-chart-canvas-line-strong: color-mix(in srgb, var(--neutral-50) 22%, transparent);
+  --ui-chart-canvas-grid: color-mix(in srgb, var(--neutral-50) 10%, transparent);
+  --ui-chart-canvas-muted: color-mix(in srgb, var(--neutral-50) 72%, transparent);
+  --ui-chart-canvas-text: color-mix(in srgb, var(--neutral-50) 94%, transparent);
+  --oi-kpi-card-border: color-mix(in srgb, var(--neutral-50) 12%, transparent);
+  --oi-kpi-label: color-mix(in srgb, var(--neutral-50) 66%, transparent);
+  --oi-kpi-muted: color-mix(in srgb, var(--neutral-50) 68%, transparent);
+  --oi-kpi-value: color-mix(in srgb, var(--neutral-50) 96%, transparent);
+}
+
+:root[data-theme='light'] #root > .app[data-active-tab='chain'],
+:root[data-theme='light'] [data-workspace='chain'] {
+  --brand: var(--neutral-950);
+  --brand2: var(--neutral-600);
+  --ui-accent: var(--neutral-950);
+  --ui-accent-2: var(--neutral-600);
+  --accent-primary: var(--neutral-950);
+  --ui-prototype-purple: var(--neutral-950);
+  --ui-prototype-purple-soft: var(--neutral-100);
+  --context-header-accent: var(--neutral-950);
+  --chip-stroke-selected: var(--neutral-950);
+  --components-Chip-stroke-selected: var(--neutral-950);
+  --purple: var(--neutral-600);
+  --ui-purple: var(--neutral-600);
+  --brand-purple: var(--neutral-600);
+  --pink: var(--neutral-600);
+  --blue: var(--neutral-600);
+  --cyan: var(--neutral-600);
+  --purple-bg: var(--neutral-100);
+  --blue-bg: var(--neutral-100);
+  --btn-primary-top: var(--neutral-950);
+  --btn-primary-bottom: var(--neutral-800);
+  --components-button-primary-surface-top: var(--neutral-950);
+  --components-button-primary-surface-bottom: var(--neutral-800);
+  --series-2: var(--neutral-600);
+  --chart-line-secondary: var(--neutral-600);
+  --chart-bar-secondary: var(--neutral-600);
+  --chain-light-page: var(--capital-white);
+  --chain-light-border: color-mix(in srgb, var(--neutral-950) 12%, transparent);
+  --chain-light-ink: var(--neutral-950);
+  --chain-page-bg: var(--capital-white);
+  --chain-panel-3: var(--neutral-100);
+  --chain-text-soft: color-mix(in srgb, var(--neutral-950) 84%, transparent);
+  --chain-border: color-mix(in srgb, var(--neutral-950) 12%, transparent);
+  --chain-border-strong: color-mix(in srgb, var(--neutral-950) 18%, transparent);
+  --ui-chrome-ink: var(--neutral-950);
+  --ui-chrome-border: color-mix(in srgb, var(--neutral-950) 10%, transparent);
+  --ui-chrome-border-strong: color-mix(in srgb, var(--neutral-950) 16%, transparent);
+  --ui-chart-canvas-bg: var(--capital-white);
+  --ui-chart-canvas-panel-soft: color-mix(in srgb, var(--capital-white) 90%, transparent);
+  --ui-chart-canvas-line: color-mix(in srgb, var(--neutral-950) 10%, transparent);
+  --ui-chart-canvas-line-strong: color-mix(in srgb, var(--neutral-950) 16%, transparent);
+  --ui-chart-canvas-grid: color-mix(in srgb, var(--neutral-950) 7%, transparent);
+  --ui-chart-canvas-text: color-mix(in srgb, var(--neutral-950) 92%, transparent);
+  --oi-kpi-card-border: color-mix(in srgb, var(--neutral-950) 9%, transparent);
+  --oi-kpi-label: color-mix(in srgb, var(--neutral-950) 68%, transparent);
+  --oi-kpi-value: color-mix(in srgb, var(--neutral-950) 92%, transparent);
+  --oi-kpi-pe: var(--neutral-950);
+}
+
+/* ── Derived tokens: focus ring, gradients, shadows ────────────────────────────
+   A custom property declared on :root in terms of another token is resolved AT
+   :root, so remapping `--brand-500` on the chain does not reach `--focus-ring`,
+   the selection/CTA gradients or the light-theme shadows built from the wine
+   ink (`rgba(61, 9, 32, x)`). They are declared here directly. */
+:root[data-theme='dark'] #root > .app[data-active-tab='chain'],
+:root[data-theme='dark'] [data-workspace='chain'] {
+  --focus-ring: 0 0 0 3px var(--neutral-50);
+  --brand-grad: linear-gradient(180deg, var(--neutral-700), var(--neutral-800));
+  --ui-cta-gradient: linear-gradient(180deg, var(--neutral-700), var(--neutral-800));
+  --ui-selection-gradient: linear-gradient(180deg, var(--neutral-700), var(--neutral-800));
+  --ui-selection-gradient-horizontal: linear-gradient(90deg, var(--neutral-700), var(--neutral-800));
+}
+
+:root[data-theme='light'] #root > .app[data-active-tab='chain'],
+:root[data-theme='light'] [data-workspace='chain'] {
+  --focus-ring: 0 0 0 3px var(--neutral-950);
+  --brand-grad: linear-gradient(180deg, var(--neutral-950), var(--neutral-800));
+  --ui-cta-gradient: linear-gradient(180deg, var(--neutral-950), var(--neutral-800));
+  --ui-selection-gradient: linear-gradient(180deg, var(--neutral-950), var(--neutral-800));
+  --ui-selection-gradient-horizontal: linear-gradient(90deg, var(--neutral-950), var(--neutral-800));
+  --shadow-smooth-L1: 0 2px 8px rgba(15, 15, 15, .05);
+  --shadow-smooth-L2: 0 8px 30px rgba(15, 15, 15, .10);
+  --shadow-smooth-L3: 0 18px 48px rgba(15, 15, 15, .14);
+  --context-header-shadow: 0 2px 8px rgba(15, 15, 15, .05);
+  --chain-shadow: 0 12px 28px rgba(15, 15, 15, .075), inset 0 1px 0 rgba(255, 255, 255, .96);
+  --oi-kpi-card-bg: linear-gradient(180deg, rgba(255, 255, 255, .99), rgba(245, 245, 245, .90)), #FFFFFF;
+  --oi-kpi-card-bg-soft: linear-gradient(180deg, rgba(255, 255, 255, .98), rgba(245, 245, 245, .88)), #F5F5F5;
+  --oi-kpi-card-shadow: inset 0 1px 0 rgba(255, 255, 255, .88), 0 6px 16px rgba(15, 15, 15, .045);
+  --oi-kpi-card-shadow-hover: inset 0 1px 0 rgba(255, 255, 255, .94), 0 8px 20px rgba(15, 15, 15, .065);
+}
+
+/* The Customise panel's light-theme shadow is a literal (`rgb(61 9 32 / 18%)`,
+   ui-columns-panel.css) shared with the other pages' panels, so it is
+   overridden here for the chain only. */
+:root[data-theme='light'] body #root > .app.app:is([data-active-tab='chain'], [data-active-tab='oi-heatmap'], [data-active-tab='open-interest'], [data-active-tab='oi-spurts'], [data-active-tab='pcr'], [data-active-tab='straddle'], [data-active-tab='gex'], [data-active-tab='implied-volatility'], [data-active-tab='strategy-builder'], [data-active-tab='options-scanner']) .workspace-columns-host .ui-customize-panel {
+  box-shadow: 0 18px 48px rgb(15 15 15 / 18%) !important;
+}

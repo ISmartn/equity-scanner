@@ -1,0 +1,105 @@
+/* Shared structural edges. Shapes, fills, market colours and elevation remain
+   with their components. Loaded after the finish sheets so lazy feature styles
+   cannot reintroduce a second border weight. */
+:root[data-theme] body #root#root > .app.app {
+  --ui-border-width: 1px;
+  --ui-border-subtle: color-mix(in srgb, var(--text) 12%, transparent);
+  --ui-border-card: var(--ui-border-subtle);
+  --ui-border-active: color-mix(in srgb, var(--text) 22%, transparent);
+  --ui-border-divider: var(--ui-border-subtle);
+  --ui-border-focus: var(--text-muted);
+  --ui-card-border: var(--ui-border-width) solid var(--ui-border-card);
+  --ui-divider-border: var(--ui-border-width) solid var(--ui-border-divider);
+  --ui-cap-line: var(--ui-border-subtle);
+  --ui-widget-outline: var(--ui-border-card);
+  --ui-widget-divider: var(--ui-border-divider);
+}
+:root[data-theme='light'] body #root#root > .app.app {
+  /* Exact neutral card edge from the the app options reference. */
+  --ui-border-card: var(--neutral-300);
+}
+
+/* Existing shared components consume the same roles without changing markup. */
+:root[data-theme] body #root#root > .app.app .ui-aisum {
+  --aisum-edge: var(--ui-border-card);
+}
+:root[data-theme] body #root#root > .app.app .ui-customize-panel.ui-customize-panel {
+  --cz-line: var(--ui-border-card);
+}
+:root[data-theme] body #root#root > .app.app .sb-page {
+  --st-line: var(--ui-border-subtle);
+  --st-line-strong: var(--ui-border-active);
+  --st-rule: var(--ui-border-divider);
+}
+
+/* Map real visible frame owners, not borderless layout wrappers. Only the
+   colour is unified; fullscreen, embedded and compact border widths survive. */
+
+/* One container corner for every tool's main surface (owner, 10 Oct: the
+   same container on every tool, desktop and phone). The radius had drifted to
+   6, 8, 10 and 12px across tools. A chart on stage (fullscreen) keeps its
+   square edges. */
+
+/* One quieter edge inside an outer frame. Semantic BUY/SELL and warning
+   outlines keep their meaning and are deliberately outside this mapping. */
+:root[data-theme] body #root#root > .app.app :is(.cw-cell, .tw-snap__tile, .sb-price-chart, .sb-greek-legs, .os-pricing, .os-hedge, .os-scenarios) {
+  border-color: var(--ui-border-subtle);
+}
+:root[data-theme] body #root#root > .app.app :is(.ui-gex-card__head, .ui-price-oi-panel__head, .tw-frame__head, .ui-customize-panel .scp-header) {
+  border-bottom-color: var(--ui-border-divider) !important;
+}
+:root[data-theme] body #root#root > .app.app .ui-customize-panel .cz-card > * + *::before {
+  height: var(--ui-border-width);
+  background: var(--ui-border-divider);
+}
+
+/* Decorative separators use the same single hairline as grouped lists.
+   Text punctuation and chart reference/series patterns keep their meaning. */
+:root[data-theme] body #root#root > .app.app :is(
+  .sb-hb-filter-word, .os-st-picker__word, .os-screen-trigger__word
+)::after,
+:root[data-theme] body #root#root > .app.app :is(
+  .ui-oi-card__distance,
+  .sb-leg-note > span + span,
+  .os-ct-head__status > :is(span, strong) + :is(span, strong),
+  .os-ct-screen__note,
+  .os-sx-chip.is-scope + .os-sx-chip.is-scope
+)::before {
+  content: '';
+  display: inline-block;
+  flex: none;
+  width: 1px;
+  height: 12px;
+  margin: 0 8px;
+  padding: 0;
+  border-radius: 0;
+  background: var(--ui-border-divider);
+  vertical-align: -1px;
+}
+
+@media (min-width: 1024px) {
+  :root[data-theme] body #root#root > .app.app .os-sx-results-heading .os-sx-tabs__status::before {
+    content: '';
+    width: 1px;
+    height: 12px;
+    background: var(--ui-border-divider);
+  }
+}
+
+/* Capsule borders share a tone; their travelling/inverted pills remain intact. */
+:root[data-theme] body #root#root > .app.app :is(.ui-capsule.ui-capsule, .ui-seg__track.ui-seg__track, .ui-gex-views.ui-gex-views, .chain-breadcrumb-customize) {
+  border-color: var(--ui-border-subtle) !important;
+}
+/* Focus must survive removal of decorative shadows. Never rely on a glow as
+   the sole keyboard signal. The cockpit's inset focus treatment stays owned
+   by its frame so it cannot clip against the terminal grid. */
+:root[data-theme] body #root#root > .app.app :is(.chain-breadcrumb-customize, .ui-aisum__toggle, .ui-customize-panel .scp-reset-btn, .ui-customize-panel .scp-close-btn, .ui-customize-panel .cz-col-action):focus-visible {
+  outline: 2px solid var(--ui-border-focus) !important;
+  outline-offset: 2px;
+}
+
+/* A selected scan gets one edge, rather than a border plus an inset ring. */
+:root[data-theme] body #root#root > .app.app .os-sx-scan.is-lit {
+  border-color: var(--ui-border-active);
+  box-shadow: none;
+}

@@ -1,0 +1,140 @@
+/* Wide-screen tiers (2560+ and 3200+ CSS px: QHD ultrawide, 4K at 100% scale).
+ *
+ * WHY TOKENS AND NOT `zoom` ON <html>
+ * The option chain is virtualised on pixel arithmetic: CHAIN_ROW_H (52) is the
+ * one JS constant, written to --chain-row-h and multiplied against scrollTop,
+ * offsetHeight and getBoundingClientRect. Under CSS zoom those APIs disagree
+ * (layout px vs zoomed px, differing by browser), so the row window, the ATM
+ * "return" pill and the sticky lanes would drift. Row height therefore stays
+ * 52px; only tokens that are pure presentation scale here (type scale, rail
+ * width, page-width caps). Public pages (guides/learn/tools) carry their own
+ * caps in their own sheets.
+ *
+ * Loaded LAST from main.tsx. Tokens only; no colours. */
+
+@media (min-width: 2560px) {
+  :root {
+    --text-dense: 15px;
+    --text-caption: 14px;
+    --text-meta: 13px;
+    --text-body-sm: 16px;
+    --text-body: 18px;
+    --text-body-lg: 20px;
+  }
+  .os-page { width: 100%; max-width: min(2200px, 100%); margin-inline: auto; }
+}
+
+@media (min-width: 3200px) {
+  :root {
+    --text-dense: 17px;
+    --text-caption: 16px;
+    --text-meta: 15px;
+    --text-body-sm: 18px;
+    --text-body: 20px;
+    --text-body-lg: 22px;
+  }
+  .os-page { max-width: min(2800px, 100%); }
+}
+
+/* Tall + wide: let the GEX plot use the height a 2160px panel offers. */
+@media (min-height: 1500px) {
+  :root { --gex-plot-max: 960px; }
+}
+
+/* NAVIGATION CHROME AT 4K
+ * "4K" here means every part of the frame reads as clearly on a 3840px screen
+ * as it does on a laptop: bar heights, capsule heights, type and glyphs all step
+ * up together, tier by tier, so nothing is left tiny beside something that grew.
+ *
+ * Geometry only. No colour overrides or transforms that re-raster text.
+ * Each tier sets the same names, so the two tiers cannot drift apart. */
+
+@media (min-width: 2560px) {
+  .app {
+    --pagebar-h: 56px;
+    --nav-capsule-h: 40px;
+    --nav-text: 15px;
+    --nav-text-sm: 13px;
+    --nav-glyph: 22px;
+    --nav-theme-w: 80px;
+    --nav-knob: 32px;
+    --nav-knob-travel: 38px;
+  }
+}
+
+@media (min-width: 3200px) {
+  .app {
+    --pagebar-h: 64px;
+    --nav-capsule-h: 44px;
+    --nav-text: 17px;
+    --nav-text-sm: 15px;
+    --nav-glyph: 26px;
+    --nav-theme-w: 92px;
+    --nav-knob: 38px;
+    --nav-knob-travel: 44px;
+  }
+}
+
+/* --topbar-h is published on .ui-top-shell itself (chrome-design-tokens.css),
+ * so it has to be re-published there; setting it on .app would be shadowed.
+ * The strip variant is the bar plus the market-cadence row above it. */
+
+/* The page bar publishes --ui-pagebar-action-h on itself (PageBar.css), so a
+ * value set on .app would be shadowed: set it on the bar. */
+@media (min-width: 2560px) { .app .ui-pagebar { --ui-pagebar-action-h: 40px; } }
+@media (min-width: 3200px) { .app .ui-pagebar { --ui-pagebar-action-h: 48px; } }
+
+@media (min-width: 2560px) {
+  /* Top bar */
+  .app .ui-top__logo { width: var(--nav-glyph); height: var(--nav-glyph); }
+  .app .ui-top__sym,
+.app .ui-top__px,
+.app .ui-top__clock,
+.app .ui-index-market-link { font-size: var(--nav-text); }
+  .app .ui-top__chg,
+.app .ui-top__pick { font-size: var(--nav-text-sm); }
+  .app .ui-top__pick > svg:first-child { font-size: var(--nav-glyph); }
+  .app .ui-top { gap: 16px; }
+
+  /* Page bar: the action capsules and the crumbs */
+  .app .ui-pagebar__crumbs a,
+.app .ui-pagebar__crumbs .ui-pagebar__current { font-size: var(--nav-text); }
+
+  .app .ui-theme.is-sm .ui-theme__track { width: 52px; height: 28px; }
+  .app .ui-theme.is-sm .ui-theme__knob { width: 18px; height: 18px; left: 4px; }
+  .app .ui-theme.is-sm.is-dark .ui-theme__knob { transform: translate(24px, -50%); }
+}
+
+@media (min-width: 3200px) {
+  .app .ui-theme.is-sm .ui-theme__track { width: 60px; height: 32px; }
+  .app .ui-theme.is-sm .ui-theme__knob { width: 20px; height: 20px; left: 5px; }
+  .app .ui-theme.is-sm.is-dark .ui-theme__knob { transform: translate(28px, -50%); }
+}
+
+/* ---------------------------------------------------------------------------
+ * Option Chain table at 2560 and 3200+.
+ * The scale itself (1 / 1.25 / 1.5) is chainScaleFor() in
+ * features/option-chain/chainColumnLayout.ts; useChainScale publishes the
+ * --chain-* custom properties (row, header, control height, five font steps)
+ * on :root, so the JS row window and these sheets read ONE value. The chain
+ * sheets carry the old px as the var() fallback, so below 2560 nothing moves.
+ * Only what cannot be a plain token lives here.
+ * ------------------------------------------------------------------------ */
+@media (min-width: 2560px) {
+  .app[data-active-tab='chain'] .chain-table .chain-row td {
+    height: calc(var(--chain-row-h) - 2px) !important;
+    min-height: calc(var(--chain-row-h) - 2px) !important;
+    padding-inline: calc(7px * var(--chain-scale, 1)) !important;
+  }
+}
+
+/* The chain cells (OI, volume, build-up, header chips) read the shared
+ * --text-tick / --text-meta tokens; inside the chain tab they follow the
+ * chain scale so every figure steps up together. */
+@media (min-width: 2560px) {
+  .app[data-active-tab='chain'] {
+    --text-tick: var(--chain-font-xs);
+    --text-meta: var(--chain-font-sm);
+    --ui-type-min: var(--chain-font-xs);
+  }
+}

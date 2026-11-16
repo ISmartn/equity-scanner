@@ -1,0 +1,640 @@
+.ui-pagebar {
+  --ui-pagebar-action-h: 36px;
+  --ui-border-focus: var(--selection-ink);
+  box-sizing: border-box;
+  position: sticky;
+  top: 0;
+  /* The option-chain table uses sticky cells up to 48. The workspace bar must
+     stay above that scrolling layer now that it is sticky itself. */
+  z-index: 49;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  height: var(--pagebar-h, 48px);
+  min-height: var(--pagebar-h, 48px);
+  flex: none;
+  padding: 4px 16px;
+  border-bottom: 1px solid var(--line, var(--border-color));
+  /* The page ground. This is a band of the page, not a card tier — its own
+     hairline separates it. One ground, app-wide (owner, 2026-09-24). */
+  background: var(--bg);
+  color: var(--text-primary, var(--text));
+  font-family: var(--font-sans);
+}
+
+/* Lift the bar one final layer while Customise is open so the anchored panel
+   remains above the pinned workspace bar and the table headings. */
+.ui-pagebar:has(.chain-breadcrumb-customize[aria-expanded='true']) {
+  z-index: 50;
+}
+
+.ui-pagebar__crumbs {
+  min-width: 0;
+}
+
+.ui-pagebar__crumbs ol {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ui-pagebar__crumbs li {
+  display: inline-flex;
+  align-items: center;
+  min-width: 0;
+  color: var(--text-muted);
+  font-size: 11px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+/* "Home" is the back affordance on every page in this shell and it measured
+   30×14 — under the 32px fine-pointer floor and far under the touch one. The
+   padding is symmetric so the crumb's ink does not move: the target grows
+   around the word rather than the word moving down the row. */
+.ui-pagebar__crumbs a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 32px;
+  padding-block: 9px;
+  border-radius: var(--radius-sm);
+  color: inherit;
+  text-decoration: none;
+  transition: color var(--dur-fast, 120ms) var(--ease-out, var(--ease-ios-out));
+}
+
+@media (hover: hover) {
+  .ui-pagebar__crumbs a:hover {
+    color: var(--text-primary, var(--text));
+  }
+}
+
+.ui-pagebar__crumbs a:focus-visible {
+  outline: 2px solid var(--selection-ink);
+  outline-offset: 2px;
+}
+
+.ui-pagebar__chev {
+  width: 5px;
+  height: 5px;
+  flex: none;
+  border-top: 1px solid currentColor;
+  border-right: 1px solid currentColor;
+  transform: rotate(45deg);
+}
+
+.ui-pagebar__crumbs .ui-pagebar__current {
+  overflow: hidden;
+  color: var(--text-primary, var(--text));
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: -.01em;
+  text-overflow: ellipsis;
+}
+
+.ui-pagebar__title-compact { display: none; }
+
+.ui-pagebar__actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 8px;
+  min-width: 0;
+}
+
+.ui-pagebar__actions .chain-breadcrumb-settings-host {
+  position: relative;
+  width: auto;
+  min-width: 0;
+  height: var(--ui-pagebar-action-h);
+  flex: 0 0 auto;
+}
+
+.ui-pagebar__secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-width: 92px;
+  height: var(--ui-pagebar-action-h);
+  min-height: var(--ui-pagebar-action-h);
+  padding: 0 12px;
+  border: 1px solid var(--line, var(--border-color));
+  border-radius: 999px;
+  background: var(--surface-card, var(--bg-surface));
+  color: var(--text-primary, var(--text));
+  /* 600, not 650: only 400/500/600/700 load, so 650 silently rounded here. */
+  font: 600 var(--nav-text-sm, 12px)/1 var(--font-sans);
+  cursor: pointer;
+  transition: border-color var(--dur-fast, 120ms) var(--ease-out, var(--ease-ios-out)),
+              background var(--dur-fast, 120ms) var(--ease-out, var(--ease-ios-out)),
+              color var(--dur-fast, 120ms) var(--ease-out, var(--ease-ios-out));
+}
+
+/* Hover and selected were one declaration block, so the bar could not show
+   you which view you were actually on. Hover is a neutral wash; selected is
+   a firmer neutral one. */
+@media (hover: hover) {
+  .ui-pagebar__secondary:hover {
+    border-color: var(--hairline-hover);
+    background: var(--hover-wash);
+    color: var(--text-primary, var(--text));
+  }
+}
+
+.ui-pagebar__secondary.is-active {
+  border-color: var(--selection-line);
+  background: var(--selection-fill);
+  color: var(--selection-text);
+}
+
+.ui-pagebar__secondary:active { transform: none; }
+
+.ui-pagebar__secondary:focus-visible {
+  outline: 2px solid var(--selection-ink);
+  outline-offset: 2px;
+  box-shadow: none;
+}
+
+/* Touch. The trail links and the segmented steps are the two targets in this
+   bar that collapse to their line box on a coarse pointer. */
+@media (pointer: coarse) {
+  .ui-pagebar { --ui-pagebar-action-h: 44px; }
+  .ui-pagebar__crumbs a {
+    min-height: 44px;
+  }
+}
+
+/* ── Mobile ────────────────────────────────────────────────────────────────
+ *
+ * 768 is the contract's single mobile boundary (§7), and this whole treatment
+ * used to start at 520 — so 520…768 kept the 60px desktop bar on what is
+ * already a phone-shaped viewport. It starts at the boundary now.
+ */
+@media (max-width: 768px) {
+  .ui-pagebar__secondary {
+    display: none;
+  }
+
+  /* padding-block: 0. The tab strip's buttons are --tap-min (44px) tall, so
+     any vertical padding here is added ON TOP of a row that is already at the
+     touch floor — 4px top and bottom is how a 44px bar renders 52px. The bar
+     is exactly its tallest child. */
+  .ui-pagebar {
+    --ui-pagebar-action-h: 44px;
+    height: var(--pagebar-h, 48px);
+    min-height: var(--pagebar-h, 48px);
+    gap: 10px;
+    padding: 0 10px;
+  }
+
+  .ui-pagebar__crumbs li:not(.ui-pagebar__current),
+  .ui-pagebar__chev {
+    display: none;
+  }
+
+  /* R6 — DETAIL HEADER: a back chevron, then the title.
+   *
+   * Every trail segment but the current one was hidden here, which left a
+   * phone with no back affordance in the page bar at all — the only way up was
+   * the bottom dock. The reference puts a large back target immediately left
+   * of a large title, so the last LINK in the trail is brought back as exactly
+   * that: `nth-last-child(3)` is the segment before the final chevron and the
+   * current page, i.e. the parent when one is passed and Home otherwise. No
+   * DOM change, so the trail a screen reader reads is untouched.
+   *
+   * The label is indented out of view rather than `display: none`d — the
+   * anchor keeps its accessible name ("Home" / "Open Interest"), so the button
+   * is announced as where it goes, not as an unnamed chevron. */
+  .ui-pagebar__crumbs li:nth-last-child(3) {
+    display: inline-flex;
+  }
+
+  /* …unless that segment is the page you are already on. PageBar renders such
+     a crumb as text rather than a link (a breadcrumb never links to itself),
+     and a back chevron that goes nowhere is worse than no chevron: it is the
+     one control a phone reader trusts to get out. Dropping it also hands its
+     42px to the actions strip, which is where this row actually runs short. */
+  .ui-pagebar__crumbs li:nth-last-child(3):not(:has(a)) {
+    display: none;
+  }
+
+  /* With the chevron gone the title becomes the first thing in the row, and it
+     has to start on the same optical margin as the cards below it rather than
+     on the bar's own gutter — the chevron's box was doing that job by
+     accident. 14px total: the bar's 10 plus this. */
+  .ui-pagebar__crumbs:has(li:nth-last-child(3):not(:has(a))) {
+    padding-inline-start: 4px;
+  }
+
+  .ui-pagebar__crumbs li:nth-last-child(3) a {
+    position: relative;
+    overflow: hidden;
+    box-sizing: border-box;
+    width: var(--tap-min, 44px);
+    height: var(--tap-min, 44px);
+    flex: none;
+    /* Reclaims the bar's own inline padding so the glyph sits optically on the
+       screen edge the way the reference's does, without shrinking the target. */
+    margin-inline-start: -8px;
+    color: var(--text-primary, var(--text));
+    text-indent: -999px;
+  }
+
+  .ui-pagebar__crumbs li:nth-last-child(3) a::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 9px;
+    height: 9px;
+    border-bottom: 1.5px solid currentColor;
+    border-left: 1.5px solid currentColor;
+    transform: translate(-30%, -50%) rotate(45deg);
+  }
+
+  /* THE TITLE MUST NOT TRUNCATE.
+   *
+   * "Open Interest" rendered as "Open Inter" because the crumbs and the tab
+   * strip shared one row: the crumbs carry `min-width: 0`, the actions carried
+   * `flex: 1 1 auto`, and the Open Interest segmented control asks for four
+   * 123px-min buttons (~500px) on a ~492px viewport. A flex item shrinks below
+   * its content before its parent will scroll, so the row balanced itself by
+   * eating the only shrinkable thing — the page title.
+   *
+   * Chosen fix: keep ONE row and make the crumbs unshrinkable, handing every
+   * pixel of overflow to the actions strip, which is already an overscroll-
+   * contained pan surface built to carry it. The alternative — dropping the
+   * tabs to their own full-width second row — also fixes the truncation, but
+   * it spends ~40px of vertical space on a screen where defect 2 is that the
+   * chrome already eats the fold before any data appears. A title that is
+   * always whole plus tabs that pan costs nothing vertically. */
+  .ui-pagebar__crumbs {
+    min-width: 0;
+    flex: none;
+  }
+
+  .ui-pagebar__crumbs ol {
+    min-width: 0;
+  }
+
+  /* R6 wants the title to be the loudest thing in the header. 13px was quieter
+     than the 14px it carries on a desktop, on the viewport where it matters
+     most; 15/700 reads as a page title next to a 12px tab strip. */
+  .ui-pagebar__crumbs .ui-pagebar__current {
+    overflow: visible;
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: -.01em;
+    text-overflow: clip;
+    white-space: nowrap;
+  }
+
+  /* A horizontally-panned surface has to own the axis up front, or the browser
+     burns the first frames of every swipe deciding who does — that hesitation
+     is what reads as heaviness.
+     *
+     * `justify-content: flex-start` with an auto margin on the first child,
+     * NOT `flex-end`. They look identical while the contents fit — an auto
+     * margin eats the free space and parks the strip against the right edge
+     * the same way — but they part company the moment they do not.
+     *
+     * Overflow only becomes scrollable past a box's END edge: there is no
+     * negative scroll offset, so whatever a `flex-end` row pushes past its
+     * START edge is not merely off screen, it is UNREACHABLE, and even
+     * `scrollWidth` does not report it. That is what amputated the chain's
+     * Simple | Advanced switch — 6px of it at 390, 36px at 360 and 76px at
+     * 320, where "Simple" disappeared outright and the chain could not be put
+     * back into its default view on that phone at all. An auto margin
+     * collapses to zero the instant there is no free space, so the strip
+     * left-aligns and every pixel of it can be panned to. */
+  .ui-pagebar__actions {
+    min-width: 0;
+    flex: 1 1 auto;
+    justify-content: flex-start;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    -webkit-overflow-scrolling: touch;
+    touch-action: pan-x pan-y pinch-zoom;
+    scrollbar-width: none;
+  }
+
+  .ui-pagebar__actions > :first-child {
+    margin-inline-start: auto;
+  }
+
+  .ui-pagebar__actions::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* …EXCEPT when the switch has collapsed to its menu form. `ViewMenu`
+     (ViewSwitch.tsx) opens an absolutely positioned listbox under its
+     trigger, and a box with `overflow-x: auto` computes `overflow-y` to auto
+     as well — so on every phone the listbox was clipped to this 60px bar.
+     Implied Volatility, Straddle and Open Interest all showed one sliver of
+     the first option ("…y through the session") and no way to reach the
+     rest by touch; the trigger's focus ring was sliced to a bracket by the
+     same clip. The menu form exists precisely because the tabs did not fit,
+     so there is nothing left in the strip to pan. */
+  .ui-pagebar__actions:has(.ui-oi-viewmenu) {
+    overflow: visible;
+  }
+
+  /* …AND while the chain's Customise sheet is open. The sheet is
+     `position: fixed`, but it is mounted inside this strip, and this strip is
+     a touch scroller (`-webkit-overflow-scrolling: touch`). Desktop engines
+     let a fixed box escape a scroller, which is why a narrowed browser always
+     showed it; a phone's scroller layer need not, and there the full-height
+     sheet is cut to this 34px strip — the gear lights up and nothing opens.
+     With the sheet up there is nothing in the strip to pan. Every page's
+     Customise sheet (.ui-customize-panel) is mounted the same way. */
+  .ui-pagebar__actions:has(#table-settings-dialog, .ui-customize-panel) {
+    overflow: visible;
+  }
+
+  /* The page name already says which workspace this is. Compact view menus
+     can spend that space on the selected view and its caret instead. */
+  .ui-pagebar .ui-oi-viewmenu__trigger > .ui-strip__k {
+    display: none;
+  }
+}
+
+@media (max-width: 520px) {
+  .ui-pagebar {
+    gap: 8px;
+    padding-inline: 8px;
+  }
+
+  .ui-pagebar__title-full {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
+
+  .ui-pagebar__title-compact { display: inline; }
+}
+
+/* ── 360 and below ─────────────────────────────────────────────────────────
+ *
+ * The commonest Android width in this product's market, and the width at which
+ * this row stops fitting. The budget at 320, measured rather than guessed:
+ * 304px of content box against a 95px title, a 32px help button, an 8px gap
+ * and a 171px switch. The three values below are what close the last ~12px —
+ * the title steps down ONE point, the gaps give back 4, and the bar's own
+ * gutter gives back 4 — so the row fits whole instead of panning. Nothing that
+ * a finger presses is shrunk: the touch floors below are untouched. */
+@media (max-width: 360px) {
+  .ui-pagebar {
+    gap: 6px;
+    padding-inline: 6px;
+  }
+
+  .ui-pagebar.ui-pagebar .ui-pagebar__crumbs {
+    gap: 4px;
+  }
+
+  .ui-pagebar__crumbs ol {
+    gap: 4px;
+  }
+
+  .ui-pagebar__crumbs .ui-pagebar__current {
+    font-size: 14px;
+  }
+}
+
+/* The help button beside the title is 32px of paint, which is under the touch
+   floor and was the only target in this bar that failed it. The paint stays at
+   32 — a 44px circle here would outweigh the title next to it — and the TARGET
+   grows around it, which is the same trick the dock and the capsule use. */
+@media (pointer: coarse) {
+  .ui-page-info > button { position: relative; }
+
+  .ui-page-info > button::after {
+    content: '';
+    position: absolute;
+    inset: calc((32px - var(--tap-min, 44px)) / 2);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ui-pagebar *,
+  .ui-pagebar *::before,
+  .ui-pagebar *::after {
+    /* 0s: never a transition on every element (ui-motion.css, reduced motion). */
+    transition-duration: 0s !important;
+    animation-duration: 1ms !important;
+  }
+}
+
+/* Breadcrumb help stays beside the title; desktop views occupy the far edge. */
+.ui-pagebar.ui-pagebar .ui-pagebar__crumbs { display: flex; align-items: center; gap: 6px; }
+.ui-page-info { display: inline-flex; flex: none; }
+.ui-page-info > button { display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; padding: 0; border: 0; border-radius: 50%; background: transparent; color: var(--text-muted); cursor: pointer; }
+.ui-page-info > button[aria-expanded='true'] { color: var(--text); background: var(--surface-sunken); }
+@media (hover: hover) { .ui-page-info > button:hover { color: var(--text); background: var(--surface-sunken); } }
+/* The full explanation is a dialog, not an anchored popover — see
+   PageInfo.css. It has no position relative to this trigger any more, so
+   there is nothing left to style here for its content. */
+@media (min-width: 769px) {
+  /* flex-start with an auto margin on the first child, never flex-end: past the start edge a flex-end row is unreachable (see the phone block below). */
+  :root body #root .ui-pagebar.ui-pagebar .ui-pagebar__actions { margin-left: auto; justify-content: flex-start; }
+  :root body #root .ui-pagebar.ui-pagebar .ui-pagebar__actions > :first-child { margin-inline-start: auto; }
+  :root body #root .ui-pagebar.ui-pagebar .ui-oi-viewtools { margin-left: auto; justify-content: flex-start; }
+  :root body #root .ui-pagebar.ui-pagebar .ui-oi-viewtools > :first-child { margin-inline-start: auto; }
+}
+
+/* ── Phone: no breadcrumb, just the page's own control ──────────────────────
+ *
+ * Owner, 2026-09-25: "it is not important to show a breadcrumb on mobile ...
+ * it is blocking the view and space for charts." On a phone the breadcrumb
+ * was drawn as a back chevron, the page title and its info button — a row
+ * that repeated what the bottom dock's lit tab already says, and that pushed
+ * the view capsule to a second row on four pages. The trail is gone at this
+ * width; the bar keeps only what DOES something on the page: its view
+ * capsule (Simple | Advanced, Open Interest's four views, ...), centred, and
+ * panning when it is wider than the screen (Straddle's five). Customise is
+ * the top bar's gear here, and "How to use" each page is in the More sheet.
+ *
+ * A page whose bar has nothing left but the Customise host (PCR) loses the
+ * bar entirely, so its chart starts right under the insight card. The
+ * Customise panel is drawn INSIDE that host, so while it is open the bar
+ * stays rendered, out of the flow and without a box: the panel is the fixed
+ * bottom sheet, and the chart does not move. (A hidden bar hid the sheet too,
+ * so the top bar's gear opened nothing on PCR.) */
+@media (max-width: 768px) {
+  :root body #root .ui-pagebar.ui-pagebar > .ui-pagebar__crumbs {
+    display: none;
+  }
+
+  :root body #root .ui-pagebar.ui-pagebar:not(:has(> .ui-pagebar__actions > :not(.settings-gear-container))):not(:has(.ui-customize-panel)) {
+    display: none;
+  }
+
+  :root body #root .ui-pagebar.ui-pagebar:not(:has(> .ui-pagebar__actions > :not(.settings-gear-container))):has(.ui-customize-panel) {
+    position: absolute;
+    inset: 0 auto auto 0;
+    width: 0;
+    height: 0;
+    min-height: 0;
+    padding: 0;
+    margin: 0;
+    border: 0;
+    overflow: visible;
+  }
+
+  /* The strip is the whole bar now. Open Interest sizes its strip to 48vw for
+     the desktop's right-hand instrument, which on a phone was 187px. */
+  :root body #root .ui-pagebar.ui-pagebar > .ui-pagebar__actions {
+    flex: 1 1 auto;
+    width: auto;
+    margin-inline-start: 0;
+  }
+
+  /* Centred by two auto margins, which collapse to zero the moment the strip
+     overflows — so a wide capsule starts at the edge and pans, instead of
+     spilling past its START edge where no scroll can reach it (the rule the
+     `margin-inline-start: auto` above exists for). */
+  :root body #root .ui-pagebar.ui-pagebar > .ui-pagebar__actions > :first-child {
+    margin-inline: auto;
+  }
+
+  /* Measure the available slot, not the capsule's natural width, so wide
+     navigation can collapse. Auto margins centre controls that fit and
+     become zero when they overflow, keeping the first item reachable. */
+  :root body #root .ui-pagebar.ui-pagebar > .ui-pagebar__actions > :is(.ui-oi-viewtools, .ui-gex-viewtools, .ui-iv-viewtools, .ui-sp-viewtools, .ui-straddle-viewtools) {
+    display: flex;
+    flex: 1 1 0;
+    width: auto;
+    justify-content: flex-start;
+  }
+
+  :root body #root .ui-pagebar.ui-pagebar > .ui-pagebar__actions > :is(.ui-oi-viewtools, .ui-gex-viewtools, .ui-iv-viewtools, .ui-sp-viewtools, .ui-straddle-viewtools) > * {
+    margin-inline: auto;
+  }
+}
+
+/* ── FINISH PASS ─────────────────────────────────────────────────────────
+ * The current page title is the bar's one display moment (Manrope, as
+ * the guides' headings); everything else stays Manrope. Actions share the
+ * pill radius and neutral edges of the top bar. Visual only. */
+.ui-pagebar .ui-pagebar__crumbs .ui-pagebar__current {
+  font-family: var(--font-display, var(--font-sans));
+  font-size: 18px;
+  font-weight: 500;
+  letter-spacing: -.012em;
+}
+
+.ui-pagebar {
+  box-shadow: inset 0 -1px 0 0 color-mix(in srgb, var(--line) 60%, transparent);
+}
+
+.ui-pagebar .ui-pagebar__secondary {
+  border-radius: var(--radius-pill, 999px);
+}
+
+.ui-pagebar__crumbs a {
+  transition: color var(--dur-fast, 120ms) var(--ease-out, var(--ease-ios-out)),
+              background-color var(--dur-fast, 120ms) var(--ease-out, var(--ease-ios-out));
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ui-pagebar .ui-pagebar__secondary { transition-duration: 1ms; }
+}
+
+/* ── CAPSULE FINISH (page bar) ────────────────────────────────────────────
+ * Breadcrumb, info button, the Simple/Advanced track and Customise are one
+ * family: 36px for a mouse, 44px for touch, 999px and a shared hairline,
+ * neutral hover edges, pressed wash and a clear keyboard outline.
+ * The segmented track keeps its ink thumb (the capsule reference). */
+
+.ui-pagebar .ui-pagebar__secondary,
+.ui-pagebar .ui-capsule.ui-capsule {
+  border-color: var(--line-strong);
+  box-shadow: none;
+  transition: border-color var(--dur-quick, 180ms) var(--ease-ios-out, ease),
+              background var(--dur-fast, 120ms) var(--ease-ios-out, ease),
+              color var(--dur-fast, 120ms) var(--ease-ios-out, ease);
+}
+
+@media (hover: hover) {
+  .ui-pagebar .ui-capsule.ui-capsule:hover {
+    border-color: var(--selection-line);
+    box-shadow: none;
+  }
+  .ui-pagebar .ui-pagebar__secondary:hover {
+    box-shadow: none;
+  }
+}
+
+/* The per-tab authority sheets pin the Customise edge to --line with
+   !important; the recipe's resting hairline is --line-strong. */
+:root[data-theme] body #root > .app.app .ui-pagebar.ui-pagebar .ui-pagebar__secondary.chain-breadcrumb-customize.chain-breadcrumb-customize[class][class] {
+  border-color: var(--line-strong) !important;
+}
+@media (hover: hover) {
+  :root[data-theme] body #root > .app.app .ui-pagebar.ui-pagebar .ui-pagebar__secondary.chain-breadcrumb-customize.chain-breadcrumb-customize[class][class]:hover:not(:disabled) {
+    border-color: var(--selection-line) !important;
+  }
+}
+
+.ui-pagebar .ui-pagebar__secondary:active:not(:disabled) {
+  background: var(--press-wash);
+  transform: none;
+}
+
+.ui-pagebar .ui-pagebar__secondary:focus-visible,
+.ui-pagebar .ui-capsule__option:focus-visible {
+  outline: 2px solid var(--selection-ink);
+  outline-offset: 2px;
+  box-shadow: none;
+}
+
+.ui-pagebar .ui-capsule__option:active:not(.is-active) {
+  background: var(--press-wash);
+}
+
+/* Breadcrumb: a pill plate on hover (was a 4px rect), label 500 muted. */
+.ui-pagebar__crumbs a {
+  height: 32px;
+  padding-block: 0;
+  padding-inline: 12px;
+  border-radius: 999px;
+  font-weight: 500;
+}
+@media (hover: hover) {
+  .ui-pagebar__crumbs a:hover {
+    background: var(--hover-wash);
+  }
+}
+.ui-pagebar__crumbs a:focus-visible {
+  box-shadow: none;
+}
+
+.ui-page-info > button {
+  border: 1px solid var(--line-strong);
+  box-shadow: none;
+  transition: border-color var(--dur-quick, 180ms) var(--ease-ios-out, ease),
+              background var(--dur-fast, 120ms) var(--ease-ios-out, ease);
+}
+@media (hover: hover) {
+  .ui-page-info > button:hover {
+    border-color: var(--selection-line);
+    box-shadow: none;
+  }
+}
+.ui-page-info > button:active { background: var(--press-wash); }
+.ui-page-info > button:focus-visible {
+  outline: 2px solid var(--selection-ink);
+  outline-offset: 2px;
+  box-shadow: none;
+}

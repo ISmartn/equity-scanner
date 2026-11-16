@@ -13,7 +13,9 @@ import { LiveScanPage } from "@/pages/LiveScanPage";
 import { DarvasScreenerPage } from "@/pages/DarvasScreenerPage";
 import { MultiYearBreakoutPage } from "@/pages/MultiYearBreakoutPage";
 import { NewsImpactPage } from "@/pages/NewsImpactPage";
+import { NewsdeskPage } from "@/pages/NewsdeskPage";
 import { OiMomentumPage } from "@/pages/OiMomentumPage";
+import { OrderFlowPage } from "@/pages/OrderFlowPage";
 import { MtfRsiPage } from "@/pages/MtfRsiPage";
 import { NiftyChartPage } from "@/pages/NiftyChartPage";
 import { IndicatorAnalysisPage } from "@/pages/IndicatorAnalysisPage";
@@ -29,8 +31,10 @@ const NAV_TABS = [
   { label: "Timeline Movers", path: "/timeline" },
   { label: "Stock Research", path: "/stock-research" },
   { label: "News Impact", path: "/news-impact" },
+  { label: "Newsdesk", path: "/newsdesk" },
   { label: "Market Info", path: "/market-info" },
   { label: "OI Momentum", path: "/oi-momentum" },
+  { label: "Order Flow", path: "/order-flow" },
   { label: "MTF RSI", path: "/mtf-rsi" },
   { label: "Nifty Chart", path: "/nifty" },
   { label: "Indicator Analysis", path: "/indicator-analysis" },
@@ -180,8 +184,10 @@ export default function App() {
           <Route path="/timeline" element={<TimelineMoversPage />} />
           <Route path="/stock-research" element={<StockResearchPage />} />
           <Route path="/news-impact" element={<NewsImpactPage />} />
+          <Route path="/newsdesk" element={<NewsdeskPage />} />
           <Route path="/market-info" element={<MarketInfoPage />} />
           <Route path="/oi-momentum" element={<OiMomentumPage />} />
+          <Route path="/order-flow" element={<OrderFlowPage />} />
           <Route path="/mtf-rsi" element={<MtfRsiPage />} />
           <Route path="/nifty" element={<NiftyChartPage />} />
           <Route path="/indicator-analysis" element={<IndicatorAnalysisPage />} />

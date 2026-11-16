@@ -1,0 +1,1597 @@
+{
+  "SENSEX": {
+    "file": "SENSEX.svg",
+    "name": "Sensex",
+    "kind": "index",
+    "wikidata": "Q638398",
+    "commons": "BSE logo.svg",
+    "source": "https://commons.wikimedia.org/wiki/File:BSE_logo.svg",
+    "via": "commons"
+  },
+  "TCS": {
+    "file": "TCS.svg",
+    "name": "Tata Consultancy Services",
+    "kind": "stock",
+    "wikidata": "Q13227919",
+    "commons": "TATA Consultancy Services Logo.svg",
+    "source": "https://commons.wikimedia.org/wiki/File:TATA_Consultancy_Services_Logo.svg",
+    "via": "commons"
+  },
+  "ITC": {
+    "file": "ITC.svg",
+    "name": "ITC",
+    "kind": "stock",
+    "wikidata": "Q1655008",
+    "commons": "ITC Limited Logo.svg",
+    "source": "https://commons.wikimedia.org/wiki/File:ITC_Limited_Logo.svg",
+    "via": "commons"
+  },
+  "BEL": {
+    "file": "BEL.jpg",
+    "name": "Bharat Electronics",
+    "kind": "stock",
+    "wikidata": "Q3630918",
+    "commons": "Bel logo.jpg",
+    "source": "https://commons.wikimedia.org/wiki/File:Bel_logo.jpg",
+    "via": "commons"
+  },
+  "LT": {
+    "file": "LT.svg",
+    "name": "Larsen & Toubro",
+    "kind": "stock",
+    "wikidata": "Q638231",
+    "commons": "Larsen-&-Toubro-Logo.svg",
+    "source": "https://commons.wikimedia.org/wiki/File:Larsen-%26-Toubro-Logo.svg",
+    "via": "commons"
+  },
+  "ONGC": {
+    "file": "ONGC.svg",
+    "name": "Oil & Natural Gas Corp",
+    "kind": "stock",
+    "wikidata": "Q1430541",
+    "commons": "ONGC Logo.svg",
+    "source": "https://commons.wikimedia.org/wiki/File:ONGC_Logo.svg",
+    "via": "commons"
+  },
+  "SBIN": {
+    "file": "SBIN.svg",
+    "name": "State Bank of India",
+    "kind": "stock",
+    "wikidata": "Q1340361",
+    "commons": "State Bank of India.svg",
+    "source": "https://commons.wikimedia.org/wiki/File:State_Bank_of_India.svg",
+    "via": "commons"
+  },
+  "BANKEX": {
+    "file": "BANKEX.svg",
+    "name": "Bankex",
+    "kind": "index",
+    "wikidata": "Q638398",
+    "commons": "BSE logo.svg",
+    "source": "https://commons.wikimedia.org/wiki/File:BSE_logo.svg",
+    "via": "commons"
+  },
+  "FOCIT": {
+    "file": "FOCIT.svg",
+    "name": "FOCIT",
+    "kind": "index",
+    "wikidata": "Q638398",
+    "commons": "BSE logo.svg",
+    "source": "https://commons.wikimedia.org/wiki/File:BSE_logo.svg",
+    "via": "commons"
+  },
+  "SENSEX50": {
+    "file": "SENSEX50.svg",
+    "name": "Sensex 50",
+    "kind": "index",
+    "wikidata": "Q638398",
+    "commons": "BSE logo.svg",
+    "source": "https://commons.wikimedia.org/wiki/File:BSE_logo.svg",
+    "via": "commons"
+  },
+  "ASHOKLEY": {
+    "file": "ASHOKLEY.jpg",
+    "name": "Ashok Leyland",
+    "kind": "stock",
+    "wikidata": "Q726193",
+    "commons": "Ashok Leyland Logo.JPG",
+    "source": "https://commons.wikimedia.org/wiki/File:Ashok_Leyland_Logo.JPG",
+    "via": "commons"
+  },
+  "BAJAJ-AUTO": {
+    "file": "BAJAJ-AUTO.svg",
+    "name": "Bajaj Auto",
+    "kind": "stock",
+    "wikidata": "Q10910065",
+    "commons": "Bajaj Auto Ltd logo.svg",
+    "source": "https://commons.wikimedia.org/wiki/File:Bajaj_Auto_Ltd_logo.svg",
+    "via": "commons"
+  },
+  "BAJAJFINSV": {
+    "file": "BAJAJFINSV.jpg",
+    "name": "Bajaj Finserv",
+    "kind": "stock",
+    "wikidata": "Q18636352",
+    "commons": "Bajaj-Finserv-Logo.jpg",
+    "source": "https://commons.wikimedia.org/wiki/File:Bajaj-Finserv-Logo.jpg",
+    "via": "commons"
+  },
+  "BANDHANBNK": {
+    "file": "BANDHANBNK.svg",
+    "name": "Bandhan Bank",
+    "kind": "stock",
+    "wikidata": "Q19882235",
+    "commons": "Bandhan Bank Svg Logo.svg",
+    "source": "https://commons.wikimedia.org/wiki/File:Bandhan_Bank_Svg_Logo.svg",
+    "via": "commons"
+  },
+  "BHEL": {
+    "file": "BHEL.svg",
+    "name": "Bharat Heavy Electricals",
+    "kind": "stock",
+    "wikidata": "Q854820",
+    "commons": "BHEL logo.svg",
+    "source": "https://commons.wikimedia.org/wiki/File:BHEL_logo.svg",
+    "via": "commons"
+  },
+  "BSE": {
+    "file": "BSE.svg",
+    "name": "BSE",
+    "kind": "stock",
+    "wikidata": "Q638398",
+    "commons": "BSE logo.svg",
+    "source": "https://commons.wikimedia.org/wiki/File:BSE_logo.svg",
+    "via": "commons"
+  },
+  "ETERNAL": {
+    "file": "ETERNAL.png",
+    "name": "Zomato",
+    "kind": "stock",
+    "wikidata": "Q8073715",
+    "commons": "Zomato logo.png",
+    "source": "https://commons.wikimedia.org/wiki/File:Zomato_logo.png",
+    "via": "commons"
+  },
+  "FEDERALBNK": {
+    "file": "FEDERALBNK.svg",
+    "name": "Federal Bank",
+    "kind": "stock",
+    "wikidata": "Q2044983",
+    "commons": "Federal bank.logo.svg",
+    "source": "https://commons.wikimedia.org/wiki/File:Federal_bank.logo.svg",
+    "via": "commons"
+  },
+  "FORCEMOT": {
+    "file": "FORCEMOT.svg",
+    "name": "Force Motors",
+    "kind": "stock",
+    "wikidata": "Q1436646",
+    "commons": "Force Motors Logo.svg",
+    "source": "https://commons.wikimedia.org/wiki/File:Force_Motors_Logo.svg",
+    "via": "commons"
+  },
+  "HEROMOTOCO": {
+    "file": "HEROMOTOCO.svg",
+    "name": "Hero MotoCorp",
+    "kind": "stock",
+    "wikidata": "Q1613763",
+    "commons": "Hero MotoCorp.svg",
+    "source": "https://commons.wikimedia.org/wiki/File:Hero_MotoCorp.svg",
+    "via": "commons"
+  },
+  "HINDZINC": {
+    "file": "HINDZINC.png",
+    "name": "Hindustan Zinc",
+    "kind": "stock",
+    "wikidata": "Q5766843",
+    "commons": "HZL Logo.png",
+    "source": "https://commons.wikimedia.org/wiki/File:HZL_Logo.png",
+    "via": "commons"
+  },
+  "IDFCFIRSTB": {
+    "file": "IDFCFIRSTB.svg",
+    "name": "IDFC First Bank",
+    "kind": "stock",
+    "wikidata": "Q22031467",
+    "commons": "Logo of IDFC First Bank.svg",
+    "source": "https://commons.wikimedia.org/wiki/File:Logo_of_IDFC_First_Bank.svg",
+    "via": "commons"
+  },
+  "IOC": {
+    "file": "IOC.svg",
+    "name": "Indian Oil Corp",
+    "kind": "stock",
+    "wikidata": "Q1289348",
+    "commons": "Indian Oil Logo.svg",
+    "source": "https://commons.wikimedia.org/wiki/File:Indian_Oil_Logo.svg",
+    "via": "commons"
+  },
+  "JUBLFOOD": {
+    "file": "JUBLFOOD.jpg",
+    "name": "Jubilant Foodworks",
+    "kind": "stock",
+    "wikidata": "Q6301764",
+    "commons": "Jubilant FoodWorks.jpg",
+    "source": "https://commons.wikimedia.org/wiki/File:Jubilant_FoodWorks.jpg",
+    "via": "commons"
+  },
+  "KPITTECH": {
+    "file": "KPITTECH.png",
+    "name": "KPIT Technologies",
+    "kind": "stock",
+    "wikidata": "Q15822351",
+    "commons": "KPIT Technologies New Brand Visual Identity 2019.png",
+    "source": "https://commons.wikimedia.org/wiki/File:KPIT_Technologies_New_Brand_Visual_Identity_2019.png",
+    "via": "commons"
+  },
+  "LUPIN": {
+    "file": "LUPIN.svg",
+    "name": "Lupin",
+    "kind": "stock",
+    "wikidata": "Q104082429",
+    "commons": "Lupin Series logo only letters.svg",
+    "source": "https://commons.wikimedia.org/wiki/File:Lupin_Series_logo_only_letters.svg",
+    "via": "commons"
+  },
+  "MUTHOOTFIN": {
+    "file": "MUTHOOTFIN.png",
+    "name": "Muthoot Finance",
+    "kind": "stock",
+    "wikidata": "Q6943861",
+    "commons": "Muthoot-finance-logo.png",
+    "source": "https://commons.wikimedia.org/wiki/File:Muthoot-finance-logo.png",
+    "via": "commons"
+  },
+  "NTPC": {
+    "file": "NTPC.svg",
+    "name": "NTPC",
+    "kind": "stock",
+    "wikidata": "Q1967805",
+    "commons": "National Thermal Power logo.svg",
+    "source": "https://commons.wikimedia.org/wiki/File:National_Thermal_Power_logo.svg",
+    "via": "commons"
+  },
+  "OIL": {
+    "file": "OIL.png",
+    "name": "Oil India",
+    "kind": "stock",
+    "wikidata": "Q7081342",
+    "commons": "Logo of Oil India Limited.png",
+    "source": "https://commons.wikimedia.org/wiki/File:Logo_of_Oil_India_Limited.png",
+    "via": "commons"
+  },
+  "PFC": {
+    "file": "PFC.svg",
+    "name": "Power Finance Corp",
+    "kind": "stock",
+    "wikidata": "Q7236317",
+    "commons": "Power Finance Corporation Logo.svg",
+    "source": "https://commons.wikimedia.org/wiki/File:Power_Finance_Corporation_Logo.svg",
+    "via": "commons"
+  },
+  "PNB": {
+    "file": "PNB.svg",
+    "name": "Punjab National Bank",
+    "kind": "stock",
+    "wikidata": "Q2743499",
+    "commons": "Punjab National Bank.svg",
+    "source": "https://commons.wikimedia.org/wiki/File:Punjab_National_Bank.svg",
+    "via": "commons"
+  },
+  "POLYCAB": {
+    "file": "POLYCAB.png",
+    "name": "Polycab India",
+    "kind": "stock",
+    "wikidata": "Q131286598",
+    "commons": "Polycab India logo.png",
+    "source": "https://commons.wikimedia.org/wiki/File:Polycab_India_logo.png",
+    "via": "commons"
+  },
+  "RVNL": {
+    "file": "RVNL.png",
+    "name": "Rail Vikas Nigam",
+    "kind": "stock",
+    "wikidata": "Q3630472",
+    "commons": "RvnlLOGO.png",
+    "source": "https://commons.wikimedia.org/wiki/File:RvnlLOGO.png",
+    "via": "commons"
+  },
+  "SAIL": {
+    "file": "SAIL.svg",
+    "name": "Steel Authority of India",
+    "kind": "stock",
+    "wikidata": "Q1371239",
+    "commons": "Steel Authority of India logo.svg",
+    "source": "https://commons.wikimedia.org/wiki/File:Steel_Authority_of_India_logo.svg",
+    "via": "commons"
+  },
+  "SUZLON": {
+    "file": "SUZLON.svg",
+    "name": "Suzlon Energy",
+    "kind": "stock",
+    "wikidata": "Q1402563",
+    "commons": "Suzlon Energy logo.svg",
+    "source": "https://commons.wikimedia.org/wiki/File:Suzlon_Energy_logo.svg",
+    "via": "commons"
+  },
+  "TMPV": {
+    "file": "TMPV.svg",
+    "name": "Tata Motors",
+    "kind": "stock",
+    "wikidata": "Q188514",
+    "commons": "Tata Motors Logo.svg",
+    "source": "https://commons.wikimedia.org/wiki/File:Tata_Motors_Logo.svg",
+    "via": "commons"
+  },
+  "UNIONBANK": {
+    "file": "UNIONBANK.svg",
+    "name": "Union Bank of India",
+    "kind": "stock",
+    "wikidata": "Q2004078",
+    "commons": "Union Bank of India Logo.svg",
+    "source": "https://commons.wikimedia.org/wiki/File:Union_Bank_of_India_Logo.svg",
+    "via": "commons"
+  },
+  "VOLTAS": {
+    "file": "VOLTAS.png",
+    "name": "Voltas",
+    "kind": "stock",
+    "wikidata": "Q2330976",
+    "commons": "Voltas-Limited-Logo.png",
+    "source": "https://commons.wikimedia.org/wiki/File:Voltas-Limited-Logo.png",
+    "via": "commons"
+  },
+  "NIFTY": {
+    "file": "nifty-50-logo.svg",
+    "name": "Nifty 50",
+    "kind": "index",
+    "source": "https://en.wikipedia.org/wiki/File%3ANifty_50_Logo.svg",
+    "via": "wikipedia",
+    "licence": "Fair use"
+  },
+  "BANKNIFTY": {
+    "file": "nse-indices-logo.png",
+    "name": "Nifty Bank",
+    "kind": "index",
+    "source": "https://en.wikipedia.org/wiki/File%3ANSE_Indices_logo.svg",
+    "via": "wikipedia",
+    "licence": "Fair use"
+  },
+  "FINNIFTY": {
+    "file": "nse-indices-logo.png",
+    "name": "Nifty Fin Service",
+    "kind": "index",
+    "source": "https://en.wikipedia.org/wiki/File%3ANSE_Indices_logo.svg",
+    "via": "wikipedia",
+    "licence": "Fair use"
+  },
+  "MIDCPNIFTY": {
+    "file": "nse-indices-logo.png",
+    "name": "NIFTY MID SELECT",
+    "kind": "index",
+    "source": "https://en.wikipedia.org/wiki/File%3ANSE_Indices_logo.svg",
+    "via": "wikipedia",
+    "licence": "Fair use"
+  },
+  "NIFTYNXT50": {
+    "file": "nse-indices-logo.png",
+    "name": "Nifty Next 50",
+    "kind": "index",
+    "source": "https://en.wikipedia.org/wiki/File%3ANSE_Indices_logo.svg",
+    "via": "wikipedia",
+    "licence": "Fair use"
+  },
+  "ADANIENSOL": {
+    "file": "ADANIENSOL.jpg",
+    "name": "Adani Energy Solutions",
+    "kind": "stock",
+    "wikidata": "Q83472792",
+    "source": "https://en.wikipedia.org/wiki/File%3AAdani_Energy_Solution_Logo_Four_Colour_Wd.jpg",
+    "via": "wikipedia",
+    "licence": "Public domain"
+  },
+  "ADANIENT": {
+    "file": "ADANIENT.svg",
+    "name": "Adani Enterprises",
+    "kind": "stock",
+    "wikidata": "Q107646415",
+    "source": "https://en.wikipedia.org/wiki/File%3AAdani_logo_2012.svg",
+    "via": "wikipedia",
+    "licence": "Public domain"
+  },
+  "ADANIGREEN": {
+    "file": "ADANIGREEN.png",
+    "name": "Adani Green Energy",
+    "kind": "stock",
+    "wikidata": "Q83473736",
+    "source": "https://en.wikipedia.org/wiki/File%3AAdani_Green_Energy_logo.svg",
+    "via": "wikipedia",
+    "licence": "Public domain"
+  },
+  "ADANIPORTS": {
+    "file": "ADANIPORTS.svg",
+    "name": "Adani Ports & SEZ",
+    "kind": "stock",
+    "wikidata": "Q16058076",
+    "source": "https://en.wikipedia.org/wiki/File%3AAdani_Ports_Logo.svg",
+    "via": "wikipedia",
+    "licence": "Public domain"
+  },
+  "ADANIPOWER": {
+    "file": "ADANIPOWER.svg",
+    "name": "Adani Power",
+    "kind": "stock",
+    "wikidata": "Q1852211",
+    "source": "https://en.wikipedia.org/wiki/File%3AAdani_logo_2012.svg",
+    "via": "wikipedia",
+    "licence": "Public domain"
+  },
+  "AMBUJACEM": {
+    "file": "AMBUJACEM.svg",
+    "name": "Ambuja Cements",
+    "kind": "stock",
+    "wikidata": "Q459976",
+    "source": "https://en.wikipedia.org/wiki/File%3AAmbuja_Cements.svg",
+    "via": "wikipedia",
+    "licence": "Fair use"
+  },
+  "ASIANPAINT": {
+    "file": "ASIANPAINT.svg",
+    "name": "Asian Paints",
+    "kind": "stock",
+    "wikidata": "Q28171825",
+    "source": "https://en.wikipedia.org/wiki/File%3AAsian_Paints_Logo.svg",
+    "via": "wikipedia",
+    "licence": "Public domain"
+  },
+  "AXISBANK": {
+    "file": "AXISBANK.svg",
+    "name": "Axis Bank",
+    "kind": "stock",
+    "wikidata": "Q2003549",
+    "source": "https://en.wikipedia.org/wiki/File%3AAXISBank_Logo.svg",
+    "via": "wikipedia",
+    "licence": "Public domain"
+  },
+  "BAJFINANCE": {
+    "file": "BAJFINANCE.svg",
+    "name": "Bajaj Finance",
+    "kind": "stock",
+    "wikidata": "Q28173355",
+    "source": "https://en.wikipedia.org/wiki/File%3ABajaj_Finance_Logo_2025.svg",
+    "via": "wikipedia",
+    "licence": "Fair use"
+  },
+  "BANKBARODA": {
+    "file": "BANKBARODA.svg",
+    "name": "Bank of Baroda",
+    "kind": "stock",
+    "wikidata": "Q2003797",
+    "source": "https://en.wikipedia.org/wiki/File%3ABankOfBarodaLogo.svg",
+    "via": "wikipedia",
+    "licence": "Fair use"
+  },
+  "BANKINDIA": {
+    "file": "BANKINDIA.png",
+    "name": "Bank of India",
+    "kind": "stock",
+    "wikidata": "Q2004439",
+    "source": "https://en.wikipedia.org/wiki/File%3ABank_of_India.png",
+    "via": "wikipedia",
+    "licence": "CC0"
+  },
+  "BDL": {
+    "file": "BDL.png",
+    "name": "Bharat Dynamics",
+    "kind": "stock",
+    "wikidata": "Q3530250",
+    "source": "https://en.wikipedia.org/wiki/File%3ABharat_Dynamics_Logo.svg",
+    "via": "wikipedia",
+    "licence": "Fair use"
+  },
+  "BHARTIARTL": {
+    "file": "BHARTIARTL.svg",
+    "name": "Bharti Airtel",
+    "kind": "stock",
+    "wikidata": "Q854867",
+    "source": "https://en.wikipedia.org/wiki/File%3ABharti_Airtel_Logo.svg",
+    "via": "wikipedia",
+    "licence": "Public domain"
+  },
+  "BIOCON": {
+    "file": "BIOCON.svg",
+    "name": "Biocon",
+    "kind": "stock",
+    "wikidata": "Q487694",
+    "source": "https://en.wikipedia.org/wiki/File%3ABiocon_Logo.svg",
+    "via": "wikipedia",
+    "licence": "Fair use"
+  },
+  "BRITANNIA": {
+    "file": "BRITANNIA.png",
+    "name": "Britannia Industries",
+    "kind": "stock",
+    "wikidata": "Q4969284",
+    "source": "https://en.wikipedia.org/wiki/File%3ABritannia_Industries_logo.svg",
+    "via": "wikipedia",
+    "licence": "Fair use"
+  },
+  "CDSL": {
+    "file": "CDSL.svg",
+    "name": "Central Depository Services",
+    "kind": "stock",
+    "wikidata": "Q5060704",
+    "source": "https://en.wikipedia.org/wiki/File%3ACentral_Depository_Services_(India)_Limited.svg",
+    "via": "wikipedia",
+    "licence": "CC BY-SA 4.0"
+  },
+  "CIPLA": {
+    "file": "CIPLA.svg",
+    "name": "Cipla",
+    "kind": "stock",
+    "wikidata": "Q905572",
+    "source": "https://en.wikipedia.org/wiki/File%3ACipla_logo.svg",
+    "via": "wikipedia",
+    "licence": "Public domain"
+  },
+  "COALINDIA": {
+    "file": "COALINDIA.svg",
+    "name": "Coal India",
+    "kind": "stock",
+    "wikidata": "Q124976",
+    "source": "https://en.wikipedia.org/wiki/File%3ACoal_India_Logo.svg",
+    "via": "wikipedia",
+    "licence": "Fair use"
+  },
+  "COCHINSHIP": {
+    "file": "COCHINSHIP.png",
+    "name": "Cochin Shipyard",
+    "kind": "stock",
+    "wikidata": "Q5139314",
+    "source": "https://en.wikipedia.org/wiki/File%3ACochin_Shipyard_SVG_Logo.svg",
+    "via": "wikipedia",
+    "licence": "Fair use"
+  },
+  "DRREDDY": {
+    "file": "DRREDDY.svg",
+    "name": "Dr Reddy's Laboratories",
+    "kind": "stock",
+    "wikidata": "Q908961",
+    "source": "https://en.wikipedia.org/wiki/File%3ADr._Reddy's_Laboratories_logo.svg",
+    "via": "wikipedia",
+    "licence": "PD"
+  },
+  "EICHERMOT": {
+    "file": "EICHERMOT.svg",
+    "name": "Eicher Motors",
+    "kind": "stock",
+    "wikidata": "Q1301821",
+    "source": "https://en.wikipedia.org/wiki/File%3AEicher_Logo.svg",
+    "via": "wikipedia",
+    "licence": "Fair use"
+  },
+  "FORTIS": {
+    "file": "FORTIS.svg",
+    "name": "Fortis Healthcare",
+    "kind": "stock",
+    "wikidata": "Q7810035",
+    "source": "https://en.wikipedia.org/wiki/File%3AFortis_Healthcare_logo.svg",
+    "via": "wikipedia",
+    "licence": "Fair use"
+  },
+  "GLENMARK": {
+    "file": "GLENMARK.png",
+    "name": "Glenmark Pharma",
+    "kind": "stock",
+    "wikidata": "Q5568612",
+    "source": "https://en.wikipedia.org/wiki/File%3AGlenmark_Pharmaceuticals_logo.png",
+    "via": "wikipedia",
+    "licence": "PD"
+  },
+  "GODREJCP": {
+    "file": "GODREJCP.png",
+    "name": "Godrej Consumer Products",
+    "kind": "stock",
+    "wikidata": "Q5576809",
+    "source": "https://en.wikipedia.org/wiki/File%3AGodrej_Consumer_Products_New_Logo.png",
+    "via": "wikipedia",
+    "licence": "CC BY-SA 4.0"
+  },
+  "GODREJPROP": {
+    "file": "GODREJPROP.svg",
+    "name": "Godrej Properties",
+    "kind": "stock",
+    "wikidata": "Q5576812",
+    "source": "https://en.wikipedia.org/wiki/File%3AGodrej_Properties.svg",
+    "via": "wikipedia",
+    "licence": "Fair use"
+  },
+  "GRASIM": {
+    "file": "GRASIM.png",
+    "name": "Grasim Industries",
+    "kind": "stock",
+    "wikidata": "Q906943",
+    "source": "https://en.wikipedia.org/wiki/File%3AAditya_Birla_Grasim_Logo.svg",
+    "via": "wikipedia",
+    "licence": "Fair use"
+  },
+  "HAL": {
+    "file": "HAL.png",
+    "name": "Hindustan Aeronautics",
+    "kind": "stock",
+    "wikidata": "Q357095",
+    "source": "https://en.wikipedia.org/wiki/File%3AHindustan_Aeronautics_Limited_Logo.svg",
+    "via": "wikipedia",
+    "licence": "Fair use"
+  },
+  "HDFCBANK": {
+    "file": "HDFCBANK.svg",
+    "name": "HDFC Bank",
+    "kind": "stock",
+    "wikidata": "Q631047",
+    "source": "https://en.wikipedia.org/wiki/File%3AHDFC_Bank_Logo.svg",
+    "via": "wikipedia",
+    "licence": "Public domain"
+  },
+  "HINDALCO": {
+    "file": "HINDALCO.png",
+    "name": "Hindalco Industries",
+    "kind": "stock",
+    "wikidata": "Q1619261",
+    "source": "https://en.wikipedia.org/wiki/File%3AHindalco_Logo.svg",
+    "via": "wikipedia",
+    "licence": "Fair use"
+  },
+  "INDIANB": {
+    "file": "INDIANB.png",
+    "name": "Indian Bank",
+    "kind": "stock",
+    "wikidata": "Q2003789",
+    "source": "https://en.wikipedia.org/wiki/File%3AIndian_Bank_logo_2023.png",
+    "via": "wikipedia",
+    "licence": "Fair use"
+  },
+  "INDUSTOWER": {
+    "file": "INDUSTOWER.svg",
+    "name": "Indus Towers",
+    "kind": "stock",
+    "wikidata": "Q6027444",
+    "source": "https://en.wikipedia.org/wiki/File%3AIndus_Towers_logo.svg",
+    "via": "wikipedia",
+    "licence": "Fair use"
+  },
+  "KOTAKBANK": {
+    "file": "KOTAKBANK.svg",
+    "name": "Kotak Mahindra Bank",
+    "kind": "stock",
+    "wikidata": "Q2040404",
+    "source": "https://en.wikipedia.org/wiki/File%3AKotak_Mahindra_Bank_logo.svg",
+    "via": "wikipedia",
+    "licence": "Fair use"
+  },
+  "LAURUSLABS": {
+    "file": "LAURUSLABS.png",
+    "name": "Laurus Labs",
+    "kind": "stock",
+    "wikidata": "Q96387060",
+    "source": "https://en.wikipedia.org/wiki/File%3ALaurus_Labs_Logo.png",
+    "via": "wikipedia",
+    "licence": "CC BY-SA 4.0"
+  },
+  "M&M": {
+    "file": "M&M.svg",
+    "name": "Mahindra & Mahindra",
+    "kind": "stock",
+    "wikidata": "Q848059",
+    "source": "https://en.wikipedia.org/wiki/File%3AMahindra_Rise_New_Logo.svg",
+    "via": "wikipedia",
+    "licence": "Public domain"
+  },
+  "MANKIND": {
+    "file": "MANKIND.png",
+    "name": "Mankind Pharma",
+    "kind": "stock",
+    "wikidata": "Q6750540",
+    "source": "https://en.wikipedia.org/wiki/File%3AMankind_Pharma_Corporate_Logo.png",
+    "via": "wikipedia",
+    "licence": "CC0"
+  },
+  "MARUTI": {
+    "file": "MARUTI.svg",
+    "name": "Maruti Suzuki India",
+    "kind": "stock",
+    "wikidata": "Q963718",
+    "source": "https://en.wikipedia.org/wiki/File%3AMaruti_Suzuki_logo.svg",
+    "via": "wikipedia",
+    "licence": "Public domain"
+  },
+  "MAZDOCK": {
+    "file": "MAZDOCK.svg",
+    "name": "Mazagon Dock Shipbuilders",
+    "kind": "stock",
+    "wikidata": "Q2956390",
+    "source": "https://en.wikipedia.org/wiki/File%3AMazagon_Dock_Shipbuilders.svg",
+    "via": "wikipedia",
+    "licence": "Fair use"
+  },
+  "MCX": {
+    "file": "MCX.svg",
+    "name": "Multi Commodity Exchange of India",
+    "kind": "stock",
+    "wikidata": "Q6934544",
+    "source": "https://en.wikipedia.org/wiki/File%3AMulti_Commodity_Exchange%2C_India_logo.svg",
+    "via": "wikipedia",
+    "licence": "Fair use"
+  },
+  "MOTHERSON": {
+    "file": "MOTHERSON.svg",
+    "name": "Samvardhana Motherson Int",
+    "kind": "stock",
+    "wikidata": "Q6917594",
+    "source": "https://en.wikipedia.org/wiki/File%3ASamvardhana_Motherson.svg",
+    "via": "wikipedia",
+    "licence": "Fair use"
+  },
+  "NAUKRI": {
+    "file": "NAUKRI.png",
+    "name": "Info Edge (India)",
+    "kind": "stock",
+    "wikidata": "Q96382142",
+    "source": "https://en.wikipedia.org/wiki/File%3AInfoedgelogo.png",
+    "via": "wikipedia",
+    "licence": "Public domain"
+  },
+  "PAGEIND": {
+    "file": "PAGEIND.png",
+    "name": "Page Industries",
+    "kind": "stock",
+    "wikidata": "Q18386006",
+    "source": "https://en.wikipedia.org/wiki/File%3APage_Industries_logo.png",
+    "via": "wikipedia",
+    "licence": "Fair use"
+  },
+  "PERSISTENT": {
+    "file": "PERSISTENT.svg",
+    "name": "Persistent Systems",
+    "kind": "stock",
+    "wikidata": "Q7170401",
+    "source": "https://en.wikipedia.org/wiki/File%3APersistent_Systems_Logo.svg",
+    "via": "wikipedia",
+    "licence": "Public domain"
+  },
+  "RELIANCE": {
+    "file": "RELIANCE.svg",
+    "name": "Reliance Industries",
+    "kind": "stock",
+    "wikidata": "Q908931",
+    "source": "https://en.wikipedia.org/wiki/File%3AReliance_Industries.svg",
+    "via": "wikipedia",
+    "licence": "Fair use"
+  },
+  "SHREECEM": {
+    "file": "SHREECEM.svg",
+    "name": "Shree Cement",
+    "kind": "stock",
+    "wikidata": "Q7503476",
+    "source": "https://en.wikipedia.org/wiki/File%3AShree_cement_logo.svg",
+    "via": "wikipedia",
+    "licence": "Fair use"
+  },
+  "SHRIRAMFIN": {
+    "file": "SHRIRAMFIN.svg",
+    "name": "Shriram Finance",
+    "kind": "stock",
+    "wikidata": "Q17074288",
+    "source": "https://en.wikipedia.org/wiki/File%3AShriram_Group.svg",
+    "via": "wikipedia",
+    "licence": "Fair use"
+  },
+  "SUPREMEIND": {
+    "file": "SUPREMEIND.svg",
+    "name": "Supreme Industries",
+    "kind": "stock",
+    "wikidata": "Q7645042",
+    "source": "https://en.wikipedia.org/wiki/File%3ASupreme_Industries_logo.svg",
+    "via": "wikipedia",
+    "licence": "Fair use"
+  },
+  "SWIGGY": {
+    "file": "SWIGGY.svg",
+    "name": "Swiggy",
+    "kind": "stock",
+    "wikidata": "Q65944364",
+    "source": "https://en.wikipedia.org/wiki/File%3ASwiggy_Logo.svg",
+    "via": "wikipedia",
+    "licence": "Fair use"
+  },
+  "TATACONSUM": {
+    "file": "TATACONSUM.png",
+    "name": "Tata Consumer Products",
+    "kind": "stock",
+    "wikidata": "Q795622",
+    "source": "https://en.wikipedia.org/wiki/File%3ATATA-CONSUMER-PRODUCTS_BLUE_LOGO_Feb_13.png",
+    "via": "wikipedia",
+    "licence": "CC BY-SA 4.0"
+  },
+  "TATASTEEL": {
+    "file": "TATASTEEL.svg",
+    "name": "Tata Steel",
+    "kind": "stock",
+    "wikidata": "Q963101",
+    "source": "https://en.wikipedia.org/wiki/File%3ATata_Steel_Logo.svg",
+    "via": "wikipedia",
+    "licence": "Public domain"
+  },
+  "ULTRACEMCO": {
+    "file": "ULTRACEMCO.svg",
+    "name": "UltraTech Cement",
+    "kind": "stock",
+    "wikidata": "Q7880419",
+    "source": "https://en.wikipedia.org/wiki/File%3AUltratech_Cement_Logo.svg",
+    "via": "wikipedia",
+    "licence": "Fair use"
+  },
+  "UNITDSPR": {
+    "file": "UNITDSPR.png",
+    "name": "United Spirits",
+    "kind": "stock",
+    "wikidata": "Q17086814",
+    "source": "https://en.wikipedia.org/wiki/File%3AUnited-spirits-logo_2.png",
+    "via": "wikipedia",
+    "licence": "Public domain"
+  },
+  "YESBANK": {
+    "file": "YESBANK.svg",
+    "name": "Yes Bank",
+    "kind": "stock",
+    "wikidata": "Q2040394",
+    "source": "https://en.wikipedia.org/wiki/File%3AYes_Bank_logo.svg",
+    "via": "wikipedia",
+    "licence": "Fair use"
+  },
+  "ALKEM": {
+    "file": "ALKEM.svg",
+    "name": "Alkem Laboratories",
+    "kind": "stock",
+    "wikidata": "Q23679985",
+    "source": "https://en.wikipedia.org/wiki/File%3AAlkem_Laboratories.svg",
+    "via": "wikipedia",
+    "licence": "Fair use"
+  },
+  "AUBANK": {
+    "file": "AUBANK.png",
+    "name": "AU Small Finance Bank",
+    "kind": "stock",
+    "wikidata": "Q48729722",
+    "source": "https://en.wikipedia.org/wiki/File%3AAU-Bank-new-logo-for-GBM_1024X1024_(cropped).png",
+    "via": "wikipedia",
+    "licence": "CC BY-SA 4.0"
+  },
+  "AUROPHARMA": {
+    "file": "AUROPHARMA.png",
+    "name": "Aurobindo Pharma",
+    "kind": "stock",
+    "wikidata": "Q4822431",
+    "source": "https://en.wikipedia.org/wiki/File%3AAurobindo_Pharma_logo.svg",
+    "via": "wikipedia",
+    "licence": "Fair use"
+  },
+  "BHARATFORG": {
+    "file": "BHARATFORG.svg",
+    "name": "Bharat Forge",
+    "kind": "stock",
+    "wikidata": "Q4901117",
+    "source": "https://en.wikipedia.org/wiki/File%3ABharat_Forge_Logo.svg",
+    "via": "wikipedia",
+    "licence": "Fair use"
+  },
+  "BOSCHLTD": {
+    "file": "BOSCHLTD.svg",
+    "name": "Bosch",
+    "kind": "stock",
+    "wikidata": "Q234021",
+    "source": "https://en.wikipedia.org/wiki/File%3ABosch-logo.svg",
+    "via": "wikipedia",
+    "licence": "Public domain"
+  },
+  "CAMS": {
+    "file": "CAMS.svg",
+    "name": "Computer Age Management Services",
+    "kind": "stock",
+    "wikidata": "Q18348627",
+    "source": "https://en.wikipedia.org/wiki/File%3AC.A.M.S._logo.svg",
+    "via": "wikipedia",
+    "licence": "Fair use"
+  },
+  "CANBK": {
+    "file": "CANBK.png",
+    "name": "Canara Bank",
+    "kind": "stock",
+    "wikidata": "Q2003777",
+    "source": "https://en.wikipedia.org/wiki/File%3ACanara_bank_logo.svg",
+    "via": "wikipedia",
+    "licence": "Fair use"
+  },
+  "DELHIVERY": {
+    "file": "DELHIVERY.svg",
+    "name": "Delhivery",
+    "kind": "stock",
+    "wikidata": "Q55609321",
+    "source": "https://en.wikipedia.org/wiki/File%3ADelhivery_logo.svg",
+    "via": "wikipedia",
+    "licence": "Fair use"
+  },
+  "DIVISLAB": {
+    "file": "DIVISLAB.svg",
+    "name": "Divi's Laboratories",
+    "kind": "stock",
+    "wikidata": "Q52751473",
+    "source": "https://en.wikipedia.org/wiki/File%3ADivi's_Laboratories_Logo.svg",
+    "via": "wikipedia",
+    "licence": "Fair use"
+  },
+  "GODFRYPHLP": {
+    "file": "GODFRYPHLP.png",
+    "name": "Godfrey Phillips India",
+    "kind": "stock",
+    "wikidata": "Q17053668",
+    "source": "https://en.wikipedia.org/wiki/File%3AGodfrey_phillips_logo.png",
+    "via": "wikipedia",
+    "licence": "Fair use"
+  },
+  "HCLTECH": {
+    "file": "HCLTECH.svg",
+    "name": "HCL Technologies",
+    "kind": "stock",
+    "wikidata": "Q5629103",
+    "source": "https://en.wikipedia.org/wiki/File%3AHCL_Technologies_logo.svg",
+    "via": "wikipedia",
+    "licence": "Public domain"
+  },
+  "HINDUNILVR": {
+    "file": "HINDUNILVR.svg",
+    "name": "Hindustan Unilever",
+    "kind": "stock",
+    "wikidata": "Q1619376",
+    "source": "https://en.wikipedia.org/wiki/File%3AHindustan_Unilever_Logo.svg",
+    "via": "wikipedia",
+    "licence": "Fair use"
+  },
+  "HYUNDAI": {
+    "file": "HYUNDAI.svg",
+    "name": "Hyundai Motor India",
+    "kind": "stock",
+    "wikidata": "Q1525445",
+    "source": "https://en.wikipedia.org/wiki/File%3AHyundai_Motor_Company_logo.svg",
+    "via": "wikipedia",
+    "licence": "Public domain"
+  },
+  "ICICIBANK": {
+    "file": "ICICIBANK.png",
+    "name": "ICICI Bank",
+    "kind": "stock",
+    "wikidata": "Q1653258",
+    "source": "https://en.wikipedia.org/wiki/File%3AICICI_Bank_Logo.svg",
+    "via": "wikipedia",
+    "licence": "Public domain"
+  },
+  "ICICIGI": {
+    "file": "ICICIGI.svg",
+    "name": "ICICI Lombard General Ins",
+    "kind": "stock",
+    "wikidata": "Q5969591",
+    "source": "https://en.wikipedia.org/wiki/File%3AICICI_Lombard.svg",
+    "via": "wikipedia",
+    "licence": "Fair use"
+  },
+  "IDEA": {
+    "file": "IDEA.svg",
+    "name": "Vodafone Idea",
+    "kind": "stock",
+    "wikidata": "Q1656673",
+    "source": "https://en.wikipedia.org/wiki/File%3AVodafone_Idea_logo_(2026).svg",
+    "via": "wikipedia",
+    "licence": "Public domain"
+  },
+  "INDUSINDBK": {
+    "file": "INDUSINDBK.svg",
+    "name": "IndusInd Bank",
+    "kind": "stock",
+    "wikidata": "Q2040323",
+    "source": "https://en.wikipedia.org/wiki/File%3AIndusInd_Bank_SVG_Logo.svg",
+    "via": "wikipedia",
+    "licence": "Public domain"
+  },
+  "INFY": {
+    "file": "INFY.svg",
+    "name": "Infosys",
+    "kind": "stock",
+    "wikidata": "Q26989",
+    "source": "https://en.wikipedia.org/wiki/File%3AInfosys_logo.svg",
+    "via": "wikipedia",
+    "licence": "Public domain"
+  },
+  "JINDALSTEL": {
+    "file": "JINDALSTEL.png",
+    "name": "Jindal Steel & Power",
+    "kind": "stock",
+    "wikidata": "Q1509905",
+    "source": "https://en.wikipedia.org/wiki/File%3AJindal_Steel_Limited_Logo.png",
+    "via": "wikipedia",
+    "licence": "CC BY 4.0"
+  },
+  "JSWENERGY": {
+    "file": "JSWENERGY.svg",
+    "name": "JSW Energy",
+    "kind": "stock",
+    "wikidata": "Q6108971",
+    "source": "https://en.wikipedia.org/wiki/File%3AJSW_Group_logo.svg",
+    "via": "wikipedia",
+    "licence": "Public domain"
+  },
+  "JSWSTEEL": {
+    "file": "JSWSTEEL.svg",
+    "name": "JSW Steel",
+    "kind": "stock",
+    "wikidata": "Q6108978",
+    "source": "https://en.wikipedia.org/wiki/File%3AJSW_Steel_logo.svg",
+    "via": "wikipedia",
+    "licence": "Fair use"
+  },
+  "LICHSGFIN": {
+    "file": "LICHSGFIN.png",
+    "name": "LIC Housing Finance",
+    "kind": "stock",
+    "wikidata": "Q6458611",
+    "source": "https://en.wikipedia.org/wiki/File%3ALIC_Housing_Finance_logo.png",
+    "via": "wikipedia",
+    "licence": "Fair use"
+  },
+  "MPHASIS": {
+    "file": "MPHASIS.svg",
+    "name": "Mphasis",
+    "kind": "stock",
+    "wikidata": "Q3764687",
+    "source": "https://en.wikipedia.org/wiki/File%3AMphasis_logo.svg",
+    "via": "wikipedia",
+    "licence": "Fair use"
+  },
+  "PETRONET": {
+    "file": "PETRONET.svg",
+    "name": "Petronet LNG",
+    "kind": "stock",
+    "wikidata": "Q7179027",
+    "source": "https://en.wikipedia.org/wiki/File%3APetronet_LNG.svg",
+    "via": "wikipedia",
+    "licence": "Fair use"
+  },
+  "PIDILITIND": {
+    "file": "PIDILITIND.svg",
+    "name": "Pidilite Industries",
+    "kind": "stock",
+    "wikidata": "Q7191297",
+    "source": "https://en.wikipedia.org/wiki/File%3APidilite_logo.svg",
+    "via": "wikipedia",
+    "licence": "Fair use"
+  },
+  "RBLBANK": {
+    "file": "RBLBANK.png",
+    "name": "RBL Bank",
+    "kind": "stock",
+    "wikidata": "Q13120398",
+    "source": "https://en.wikipedia.org/wiki/File%3ARBL_Bank_SVG_Logo.svg",
+    "via": "wikipedia",
+    "licence": "Public domain"
+  },
+  "SIEMENS": {
+    "file": "SIEMENS.svg",
+    "name": "Siemens",
+    "kind": "stock",
+    "wikidata": "Q81230",
+    "source": "https://en.wikipedia.org/wiki/File%3ASiemens_AG_logo.svg",
+    "via": "wikipedia",
+    "licence": "Public domain"
+  },
+  "TATAELXSI": {
+    "file": "TATAELXSI.svg",
+    "name": "Tata Elxsi",
+    "kind": "stock",
+    "wikidata": "Q7687803",
+    "source": "https://en.wikipedia.org/wiki/File%3ATata_logo.svg",
+    "via": "wikipedia",
+    "licence": "Public domain"
+  },
+  "TITAN": {
+    "file": "TITAN.svg",
+    "name": "Titan Company",
+    "kind": "stock",
+    "wikidata": "Q3536932",
+    "source": "https://en.wikipedia.org/wiki/File%3ALogo_of_Titan_Company%2C_May_2018.svg",
+    "via": "wikipedia",
+    "licence": "Fair use"
+  },
+  "TORNTPHARM": {
+    "file": "TORNTPHARM.svg",
+    "name": "Torrent Pharma",
+    "kind": "stock",
+    "wikidata": "Q12430250",
+    "source": "https://en.wikipedia.org/wiki/File%3ATorrentPharmalogonew.svg",
+    "via": "wikipedia",
+    "licence": "CC BY-SA 4.0"
+  },
+  "TVSMOTOR": {
+    "file": "TVSMOTOR.svg",
+    "name": "TVS Motor Company",
+    "kind": "stock",
+    "wikidata": "Q3300084",
+    "source": "https://en.wikipedia.org/wiki/File%3ATVS_Motor_logo.svg",
+    "via": "wikipedia",
+    "licence": "Fair use"
+  },
+  "WIPRO": {
+    "file": "WIPRO.svg",
+    "name": "Wipro",
+    "kind": "stock",
+    "wikidata": "Q1364176",
+    "source": "https://en.wikipedia.org/wiki/File%3AWipro_new_logo.svg",
+    "via": "wikipedia",
+    "licence": "CC BY-SA 4.0"
+  },
+  "ZYDUSLIFE": {
+    "file": "ZYDUSLIFE.svg",
+    "name": "Zydus Lifesciences",
+    "kind": "stock",
+    "wikidata": "Q5016462",
+    "source": "https://en.wikipedia.org/wiki/File%3AZydus_Lifesciences.svg",
+    "via": "wikipedia",
+    "licence": "Fair use"
+  },
+  "TECHM": {
+    "file": "TECHM.svg",
+    "name": "Tech Mahindra",
+    "kind": "stock",
+    "wikidata": "Q1131463",
+    "source": "https://en.wikipedia.org/wiki/File%3AMahindra_Rise_New_Logo.svg",
+    "via": "wikipedia",
+    "licence": "Public domain"
+  },
+  "ABCAPITAL": {
+    "file": "ABCAPITAL.png",
+    "name": "Aditya Birla Capital",
+    "kind": "stock",
+    "wikidata": "Q54621374",
+    "source": "https://en.wikipedia.org/wiki/File%3AAditya_Birla_Group_Logo.svg",
+    "via": "wikipedia",
+    "licence": "Fair use"
+  },
+  "CHOLAFIN": {
+    "file": "CHOLAFIN.svg",
+    "name": "Cholamandalam Investment",
+    "kind": "stock",
+    "wikidata": "Q60785563",
+    "source": "https://en.wikipedia.org/wiki/File%3ACholamandalam_Investment_and_Finance_Company.svg",
+    "via": "wikipedia",
+    "licence": "Fair use"
+  },
+  "COFORGE": {
+    "file": "COFORGE.png",
+    "name": "Coforge",
+    "kind": "stock",
+    "wikidata": "Q104864251",
+    "source": "https://en.wikipedia.org/wiki/File%3ACoforge-Logo.png",
+    "via": "wikipedia",
+    "licence": "CC BY-SA 4.0"
+  },
+  "CROMPTON": {
+    "file": "CROMPTON.svg",
+    "name": "Crompton Greaves Consumer",
+    "kind": "stock",
+    "wikidata": "Q111949752",
+    "source": "https://en.wikipedia.org/wiki/File%3ACrompton_Greaves_Consumer_Electricals.svg",
+    "via": "wikipedia",
+    "licence": "Fair use"
+  },
+  "DALBHARAT": {
+    "file": "DALBHARAT.svg",
+    "name": "Dalmia Bharat",
+    "kind": "stock",
+    "wikidata": "Q20164396",
+    "source": "https://en.wikipedia.org/wiki/File%3ADalmia_Group.svg",
+    "via": "wikipedia",
+    "licence": "Fair use"
+  },
+  "IRFC": {
+    "file": "IRFC.png",
+    "name": "Indian Railway Fin Corp",
+    "kind": "stock",
+    "wikidata": "Q6021310",
+    "source": "https://en.wikipedia.org/wiki/File%3AIndian_Railway_Finance_Corporation.png",
+    "via": "wikipedia",
+    "licence": "CC BY-SA 4.0"
+  },
+  "NHPC": {
+    "file": "NHPC.svg",
+    "name": "NHPC",
+    "kind": "stock",
+    "wikidata": "Q6954097",
+    "source": "https://en.wikipedia.org/wiki/File%3ANHPC_official_logo.svg",
+    "via": "wikipedia",
+    "licence": "Fair use"
+  },
+  "PNBHOUSING": {
+    "file": "PNBHOUSING.png",
+    "name": "PNB Housing Finance",
+    "kind": "stock",
+    "wikidata": "Q19776436",
+    "source": "https://en.wikipedia.org/wiki/File%3APNB_Housing_Finance.png",
+    "via": "wikipedia",
+    "licence": "Fair use"
+  },
+  "VBL": {
+    "file": "VBL.svg",
+    "name": "Varun Beverages",
+    "kind": "stock",
+    "wikidata": "Q96413546",
+    "source": "https://en.wikipedia.org/wiki/File%3AVarun_Beverages.svg",
+    "via": "wikipedia",
+    "licence": "Fair use"
+  },
+  "DLF": {
+    "file": "DLF.png",
+    "name": "DLF",
+    "kind": "stock",
+    "wikidata": "Q3011374",
+    "source": "http://www.dlf.in",
+    "via": "site-icon",
+    "wordmarkSkipped": "DLF logo.svg"
+  },
+  "ICICIPRULI": {
+    "file": "ICICIPRULI.ico",
+    "name": "ICICI Prudential Life Ins",
+    "kind": "stock",
+    "wikidata": "Q5969602",
+    "source": "http://www.iciciprulife.com/",
+    "via": "site-icon"
+  },
+  "IEX": {
+    "file": "IEX.png",
+    "name": "Indian Energy Exchange",
+    "kind": "stock",
+    "wikidata": "Q6020258",
+    "source": "http://www.iexindia.com/",
+    "via": "site-icon"
+  },
+  "OBEROIRLTY": {
+    "file": "OBEROIRLTY.png",
+    "name": "Oberoi Realty",
+    "kind": "stock",
+    "wikidata": "Q7074787",
+    "source": "https://www.oberoirealty.com/",
+    "via": "site-icon"
+  },
+  "PHOENIXLTD": {
+    "file": "PHOENIXLTD.png",
+    "name": "Phoenix Mills",
+    "kind": "stock",
+    "wikidata": "Q5627344",
+    "source": "https://phoenixpalladium.com",
+    "via": "site-icon"
+  },
+  "VEDL": {
+    "file": "VEDL.png",
+    "name": "Vedanta",
+    "kind": "stock",
+    "wikidata": "Q3958138",
+    "source": "https://www.vedantalimited.com",
+    "via": "site-icon"
+  },
+  "VMM": {
+    "file": "VMM.png",
+    "name": "Vishal Mega Mart",
+    "kind": "stock",
+    "wikidata": "Q126895037",
+    "source": "https://www.vishalmegamart.com/",
+    "via": "site-icon"
+  },
+  "360ONE": {
+    "file": "360ONE.png",
+    "name": "360 One Wealth Asset Mgmt",
+    "kind": "stock",
+    "source": "https://360.one",
+    "via": "site-icon"
+  },
+  "ABB": {
+    "file": "ABB.ico",
+    "name": "ABB India",
+    "kind": "stock",
+    "source": "https://abb.com",
+    "via": "site-icon"
+  },
+  "ANGELONE": {
+    "file": "ANGELONE.png",
+    "name": "Angel One",
+    "kind": "stock",
+    "source": "https://angelone.in",
+    "via": "site-icon"
+  },
+  "APLAPOLLO": {
+    "file": "APLAPOLLO.png",
+    "name": "APL Apollo Tubes",
+    "kind": "stock",
+    "source": "https://aplapollo.com",
+    "via": "site-icon"
+  },
+  "BLUESTARCO": {
+    "file": "BLUESTARCO.ico",
+    "name": "Blue Star",
+    "kind": "stock",
+    "source": "https://bluestarindia.com",
+    "via": "site-icon"
+  },
+  "BPCL": {
+    "file": "BPCL.png",
+    "name": "Bharat Petroleum Corp.",
+    "kind": "stock",
+    "source": "https://bharatpetroleum.in",
+    "via": "site-icon"
+  },
+  "CONCOR": {
+    "file": "CONCOR.ico",
+    "name": "Container Corp. of India",
+    "kind": "stock",
+    "source": "https://concorindia.co.in",
+    "via": "site-icon"
+  },
+  "CUMMINSIND": {
+    "file": "CUMMINSIND.png",
+    "name": "Cummins India",
+    "kind": "stock",
+    "source": "https://cumminsindia.com",
+    "via": "site-icon"
+  },
+  "DABUR": {
+    "file": "DABUR.png",
+    "name": "Dabur India",
+    "kind": "stock",
+    "source": "https://dabur.com",
+    "via": "site-icon"
+  },
+  "DIXON": {
+    "file": "DIXON.png",
+    "name": "Dixon Technologies India",
+    "kind": "stock",
+    "source": "https://dixoninfo.com",
+    "via": "site-icon"
+  },
+  "GMRAIRPORT": {
+    "file": "GMRAIRPORT.png",
+    "name": "GMR Airports Infra",
+    "kind": "stock",
+    "source": "https://gmrgroup.in",
+    "via": "site-icon"
+  },
+  "GVT&D": {
+    "file": "GVT&D.png",
+    "name": "GE T&D India",
+    "kind": "stock",
+    "source": "https://gevernova.com",
+    "via": "site-icon"
+  },
+  "HAVELLS": {
+    "file": "HAVELLS.png",
+    "name": "Havells India",
+    "kind": "stock",
+    "source": "https://havells.com",
+    "via": "site-icon"
+  },
+  "HDFCAMC": {
+    "file": "HDFCAMC.png",
+    "name": "HDFC Asset Mgmt. Company",
+    "kind": "stock",
+    "source": "https://hdfcfund.com",
+    "via": "site-icon"
+  },
+  "HDFCLIFE": {
+    "file": "HDFCLIFE.png",
+    "name": "HDFC Life Ins. Company",
+    "kind": "stock",
+    "source": "https://hdfclife.com",
+    "via": "site-icon"
+  },
+  "HINDPETRO": {
+    "file": "HINDPETRO.png",
+    "name": "Hindustan Petroleum Corp",
+    "kind": "stock",
+    "source": "https://hindustanpetroleum.com",
+    "via": "site-icon"
+  },
+  "INDIGO": {
+    "file": "INDIGO.ico",
+    "name": "InterGlobe Aviation",
+    "kind": "stock",
+    "source": "https://goindigo.in",
+    "via": "site-icon"
+  },
+  "INOXWIND": {
+    "file": "INOXWIND.ico",
+    "name": "Inox Wind",
+    "kind": "stock",
+    "source": "https://inoxwind.com",
+    "via": "site-icon"
+  },
+  "KEI": {
+    "file": "KEI.png",
+    "name": "KEI Industries",
+    "kind": "stock",
+    "source": "https://kei-ind.com",
+    "via": "site-icon"
+  },
+  "KFINTECH": {
+    "file": "KFINTECH.png",
+    "name": "Kfin Technologies",
+    "kind": "stock",
+    "source": "https://kfintech.com",
+    "via": "site-icon"
+  },
+  "LICI": {
+    "file": "LICI.png",
+    "name": "LIC",
+    "kind": "stock",
+    "source": "https://licindia.in",
+    "via": "site-icon"
+  },
+  "LTF": {
+    "file": "LTF.png",
+    "name": "L&T Finance Holdings",
+    "kind": "stock",
+    "source": "https://ltfs.com",
+    "via": "site-icon"
+  },
+  "MANAPPURAM": {
+    "file": "MANAPPURAM.ico",
+    "name": "Manappuram Finance",
+    "kind": "stock",
+    "source": "https://manappuram.com",
+    "via": "site-icon"
+  },
+  "MARICO": {
+    "file": "MARICO.png",
+    "name": "Marico",
+    "kind": "stock",
+    "source": "https://marico.com",
+    "via": "site-icon"
+  },
+  "MAXHEALTH": {
+    "file": "MAXHEALTH.png",
+    "name": "Max Healthcare Institute",
+    "kind": "stock",
+    "source": "https://maxhealthcare.in",
+    "via": "site-icon"
+  },
+  "MOTILALOFS": {
+    "file": "MOTILALOFS.png",
+    "name": "Motilal Oswal Fin",
+    "kind": "stock",
+    "source": "https://motilaloswal.com",
+    "via": "site-icon"
+  },
+  "NATIONALUM": {
+    "file": "NATIONALUM.png",
+    "name": "National Aluminium Co.",
+    "kind": "stock",
+    "source": "https://nalcoindia.com",
+    "via": "site-icon"
+  },
+  "NESTLEIND": {
+    "file": "NESTLEIND.ico",
+    "name": "Nestle India",
+    "kind": "stock",
+    "source": "https://nestle.in",
+    "via": "site-icon"
+  },
+  "NYKAA": {
+    "file": "NYKAA.png",
+    "name": "FSN E-Commerce Ventures",
+    "kind": "stock",
+    "source": "https://nykaa.com",
+    "via": "site-icon"
+  },
+  "OFSS": {
+    "file": "OFSS.png",
+    "name": "Oracle Fin Services",
+    "kind": "stock",
+    "source": "https://oracle.com",
+    "via": "site-icon"
+  },
+  "PATANJALI": {
+    "file": "PATANJALI.png",
+    "name": "Patanjali Foods",
+    "kind": "stock",
+    "source": "https://patanjalifoods.com",
+    "via": "site-icon"
+  },
+  "PAYTM": {
+    "file": "PAYTM.png",
+    "name": "One 97 Communications",
+    "kind": "stock",
+    "source": "https://paytm.com",
+    "via": "site-icon"
+  },
+  "PIIND": {
+    "file": "PIIND.ico",
+    "name": "PI Industries",
+    "kind": "stock",
+    "source": "https://piindustries.com",
+    "via": "site-icon"
+  },
+  "POLICYBZR": {
+    "file": "POLICYBZR.png",
+    "name": "PB Fintech",
+    "kind": "stock",
+    "source": "https://policybazaar.com",
+    "via": "site-icon"
+  },
+  "POWERGRID": {
+    "file": "POWERGRID.ico",
+    "name": "Power Grid Corp. of India",
+    "kind": "stock",
+    "source": "https://powergrid.in",
+    "via": "site-icon"
+  },
+  "PREMIERENE": {
+    "file": "PREMIERENE.png",
+    "name": "Premier Energies",
+    "kind": "stock",
+    "source": "https://premierenergies.com",
+    "via": "site-icon"
+  },
+  "RECLTD": {
+    "file": "RECLTD.png",
+    "name": "REC",
+    "kind": "stock",
+    "source": "https://recindia.nic.in",
+    "via": "site-icon"
+  },
+  "SBICARD": {
+    "file": "SBICARD.png",
+    "name": "SBI Cards & Payment Svcs",
+    "kind": "stock",
+    "source": "https://sbicard.com",
+    "via": "site-icon"
+  },
+  "SUNPHARMA": {
+    "file": "SUNPHARMA.png",
+    "name": "Sun Pharma Industries",
+    "kind": "stock",
+    "source": "https://sunpharma.com",
+    "via": "site-icon"
+  },
+  "TATAPOWER": {
+    "file": "TATAPOWER.png",
+    "name": "Tata Power Co.",
+    "kind": "stock",
+    "source": "https://tatapower.com",
+    "via": "site-icon"
+  },
+  "TIINDIA": {
+    "file": "TIINDIA.png",
+    "name": "Tube Investments of India",
+    "kind": "stock",
+    "source": "https://tiindia.com",
+    "via": "site-icon"
+  },
+  "UPL": {
+    "file": "UPL.png",
+    "name": "UPL",
+    "kind": "stock",
+    "source": "https://upl-ltd.com",
+    "via": "site-icon"
+  },
+  "WAAREEENER": {
+    "file": "WAAREEENER.png",
+    "name": "Waaree Energies",
+    "kind": "stock",
+    "source": "https://waaree.com",
+    "via": "site-icon"
+  }
+}

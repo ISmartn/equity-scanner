@@ -48,7 +48,10 @@ from .clocks import SESSION_CLOSE, now_ist
 from .journal import CallJournal, advance_plan
 from .ranker import (
     _ENTRY_WINDOW,
+    _MIN_CANDLE_ATR,
     _MIN_EFFICIENCY,
+    _MIN_PRICE,
+    _MIN_SMA_DISTANCE_PCT,
     _REWARD_R,
     _RISK_MAX_ATR,
     _RISK_MIN_ATR,
@@ -95,7 +98,7 @@ class BacktestParams:
     min_efficiency: float = _MIN_EFFICIENCY
     risk_min_atr: float = _RISK_MIN_ATR
     risk_max_atr: float = _RISK_MAX_ATR
-    max_swing_days: int = 20
+    max_swing_days: int = 5
     cost_pct: float = 0.05
 
     def checked(self) -> "BacktestParams":
@@ -180,6 +183,12 @@ class Funnel:
     sessions: int = 0
     no_trend: int = 0
     choppy: int = 0
+    cash: int = 0
+    below_price: int = 0
+    against_5d: int = 0
+    near_average: int = 0
+    narrow_candle: int = 0
+    weekend: int = 0
     no_plan: int = 0
     wrong_side: int = 0
     through_stop: int = 0
@@ -350,6 +359,12 @@ def simulate_symbol(
         if day > params.end:
             break
         funnel.sessions += 1
+        if date.fromisoformat(day).weekday() >= 5:
+            funnel.weekend += 1
+            continue
+        if item.segment == "cash":
+            funnel.cash += 1
+            continue
         prev_close = closes[t - 1]
         sma = sma_a[t]
         trend = trend_a[t]
@@ -364,10 +379,23 @@ def simulate_symbol(
         if not math.isnan(eff) and eff < params.min_efficiency:
             funnel.choppy += 1
             continue
+        if item.kind != "index" and prev_close < _MIN_PRICE:
+            funnel.below_price += 1
+            continue
+        ret5 = ret5_a[t]
+        if not math.isnan(ret5) and ((side == "buy" and ret5 <= 0) or (side == "sell" and ret5 >= 0)):
+            funnel.against_5d += 1
+            continue
+        if sma and sma > 0 and abs(prev_close - sma) / sma * 100.0 < _MIN_SMA_DISTANCE_PCT:
+            funnel.near_average += 1
+            continue
         atr_pct = atr_a[t]
         atr = atr_pct / 100.0 * prev_close if not math.isnan(atr_pct) and atr_pct > 0 else None
         prior_high = highs[t - 1]
         prior_low = lows[t - 1]
+        if atr and (prior_high - prior_low) < _MIN_CANDLE_ATR * atr:
+            funnel.narrow_candle += 1
+            continue
         plan = candle_plan(
             side,
             prior_high if side == "buy" else prior_low,

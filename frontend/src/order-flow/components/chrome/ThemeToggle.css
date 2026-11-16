@@ -1,0 +1,71 @@
+/* Theme switch: a quiet neutral capsule with a contrasting moving disc.
+   Keep the same geometry in the top bar and sidebar; animate only the disc. */
+.ui-theme {
+  --theme-dark-surface: var(--capital-black);
+  --theme-light-surface: var(--neutral-200);
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  flex: none;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  font: inherit;
+  -webkit-tap-highlight-color: transparent;
+}
+.ui-theme__track {
+  position: relative;
+  display: block;
+  box-sizing: border-box;
+  overflow: hidden;
+  border: 1px solid var(--ui-border-subtle, var(--line));
+  border-radius: var(--radius-pill, 999px);
+  background: var(--theme-light-surface);
+}
+.ui-theme.is-dark .ui-theme__track { background: var(--theme-dark-surface); }
+@media (hover: hover) {
+  .ui-theme:hover .ui-theme__track { border-color: var(--ui-border-active, var(--line-strong)); }
+}
+/* A larger invisible target keeps the compact switch easy to press. */
+.ui-theme::before { content: ''; position: absolute; inset: -6px -2px; }
+@media (pointer: coarse) { .ui-theme::before { inset: -10px -2px; } }
+.ui-theme:focus-visible { outline: none; }
+.ui-theme:focus-visible .ui-theme__track {
+  outline: 2px solid var(--ui-border-focus, var(--text-muted));
+  outline-offset: 2px;
+}
+.ui-theme__knob {
+  position: absolute;
+  top: 50%;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  box-sizing: border-box;
+  border: 1px solid color-mix(in srgb, var(--capital-black) 12%, transparent);
+  border-radius: var(--radius-pill, 999px);
+  background: var(--capital-white);
+  color: var(--capital-black);
+  box-shadow: 0 1px 2px color-mix(in srgb, var(--capital-black) 16%, transparent);
+  transform: translate(0, -50%);
+  transition: transform var(--dur-slide, 220ms) var(--ease-ios-out, ease-out);
+}
+.ui-theme__knob-mark { width: 14px; height: 14px; pointer-events: none; }
+.ui-theme.is-sm .ui-theme__knob-mark { width: 11px; height: 11px; }
+/* Travel = inner width minus the disc and its two insets. */
+.ui-theme.is-sm .ui-theme__track { width: 44px; height: 24px; }
+.ui-theme.is-sm .ui-theme__knob { width: 16px; height: 16px; left: 3px; }
+.ui-theme.is-sm.is-dark .ui-theme__knob { transform: translate(20px, -50%); }
+.ui-theme.is-md .ui-theme__track { width: 56px; height: 30px; }
+.ui-theme.is-md .ui-theme__knob { width: 22px; height: 22px; left: 3px; }
+.ui-theme.is-md.is-dark .ui-theme__knob { transform: translate(24px, -50%); }
+.ui-theme.is-lg .ui-theme__track { width: 68px; height: 36px; }
+.ui-theme.is-lg .ui-theme__knob { width: 28px; height: 28px; left: 3px; }
+.ui-theme.is-lg.is-dark .ui-theme__knob { transform: translate(30px, -50%); }
+@media (pointer: coarse) {
+  .ui-theme.is-sm .ui-theme__track { height: 32px; }
+  .ui-theme.is-md .ui-theme__track { height: 34px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ui-theme__knob { transition: none; }
+}

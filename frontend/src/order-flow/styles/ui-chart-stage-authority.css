@@ -1,0 +1,311 @@
+/*
+ * The chart stage: a workspace page shown full screen with ONE chart on it.
+ *
+ * `chartStage.tsx` makes the page root the full-screen element and marks the
+ * chart on stage with `data-chart-staged`. This sheet owns what that looks
+ * like: the stage bar on top, the staged chart filling the rest, and every
+ * other part of the page — the insight card, the control bar, the other
+ * cards, the ranked side panel — gone.
+ *
+ * Page stylesheets load with their route's chunk, after this one, and several
+ * of them size their charts with `!important` or with a `:not(:fullscreen)`
+ * chain of six classes. Layout here is therefore `!important` throughout —
+ * this sheet is the authority on the staged layout and nothing else. It never
+ * repaints a chart, a capsule or a card: geometry only.
+ */
+
+/* A slot wrapper is not a box off stage: the card and legend inside it keep
+   the places the page's own layout gives them. */
+.ui-chart-slot {
+  display: contents;
+}
+
+/* ── The page, full screen ───────────────────────────────────────────────── */
+[data-chart-stage-root][data-chart-stage-active] {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 8px !important;
+  width: 100% !important;
+  height: 100% !important;
+  max-width: none !important;
+  margin: 0 !important;
+  padding: max(10px, env(safe-area-inset-top, 0px)) max(10px, env(safe-area-inset-right, 0px)) max(10px, env(safe-area-inset-bottom, 0px)) max(10px, env(safe-area-inset-left, 0px)) !important;
+  box-sizing: border-box;
+  overflow: hidden !important;
+  background: var(--bg, var(--surface));
+}
+
+[data-chart-stage-root]::backdrop {
+  background: var(--bg, var(--surface));
+}
+
+/* A view whose chart has not mounted yet — still reading, or empty — has no
+   stage to claim. Its own state message shows under the bar instead of a
+   blank screen, and scrolls if it has to. */
+[data-chart-stage-active]:not(:has([data-chart-staged])) {
+  overflow: auto !important;
+}
+
+[data-chart-stage-active]:not(:has([data-chart-staged])) > :not(.ui-chart-stagebar) {
+  margin-inline: 16px !important;
+}
+
+/* Everything that is neither the bar, nor the staged chart, nor on the way
+   down to it, goes. */
+[data-chart-stage-active]:has([data-chart-staged])
+  :not(.ui-chart-stagebar, .ui-chart-stagebar *, [data-chart-staged], [data-chart-staged] *, :has([data-chart-staged])) {
+  display: none !important;
+}
+
+/* The wrappers between the page and the staged chart stop being boxes, so
+   their grids, gaps and paddings cannot squeeze it: the staged element
+   becomes a direct flex child of the page. */
+[data-chart-stage-active] :has([data-chart-staged]):not([data-chart-staged]) {
+  display: contents !important;
+}
+
+/* ── The stage bar ───────────────────────────────────────────────────────── */
+.ui-chart-stagebar {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-height: 58px;
+  padding: 0 10px 0 16px;
+  border-bottom: 1px solid var(--line);
+  background: var(--surface);
+}
+
+/* The page bar's controls at the page bar's sizes, in the chain's ink: the
+   view tabs are the page-size capsule (42px), Customise is the page bar's
+   42px button, and the accent is the theme's ink — as the page bar sets it
+   (oi-customise.css, "Page bar: the chain's controls"), so the open button
+   and the panel's focus rings do not paint brand pink. Same values. */
+:root[data-theme='dark'] .ui-chart-stagebar {
+  --accent: var(--neutral-50);
+  --accent-hover: var(--neutral-200);
+  --accent-text: var(--neutral-300);
+  --accent-ring: var(--neutral-50);
+  --accent-wash: color-mix(in srgb, var(--neutral-50) 10%, transparent);
+}
+:root[data-theme='light'] .ui-chart-stagebar {
+  --accent: var(--neutral-950);
+  --accent-hover: var(--neutral-800);
+  --accent-text: var(--neutral-700);
+  --accent-ring: var(--neutral-950);
+  --accent-wash: color-mix(in srgb, var(--neutral-950) 8%, transparent);
+}
+
+.ui-chart-stagebar .chain-breadcrumb-customize.ui-pagebar__secondary.chain-breadcrumb-customize {
+  box-sizing: border-box !important;
+  width: auto !important;
+  min-width: 108px !important;
+  height: 42px !important;
+  min-height: 42px !important;
+  padding: 0 16px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 7px !important;
+  border: 1px solid var(--line) !important;
+  border-radius: 999px !important;
+  background: var(--surface) !important;
+  background-image: none !important;
+  color: var(--text) !important;
+  font: 600 var(--nav-text-sm, 12px)/1 var(--font-sans) !important;
+  letter-spacing: 0 !important;
+  box-shadow: none !important;
+  cursor: pointer !important;
+}
+
+.ui-chart-stagebar .chain-breadcrumb-customize > :is(svg, .app-settings-button__icon) {
+  color: var(--text-muted) !important;
+}
+
+@media (hover: hover) {
+  .ui-chart-stagebar .chain-breadcrumb-customize.ui-pagebar__secondary.chain-breadcrumb-customize:hover {
+    border-color: color-mix(in srgb, var(--accent) 42%, var(--line-strong)) !important;
+    background: var(--surface-hover, var(--hover-wash)) !important;
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 14%, transparent), 0 0 18px color-mix(in srgb, var(--accent) 16%, transparent) !important;
+  }
+}
+
+.ui-chart-stagebar .chain-breadcrumb-customize.ui-pagebar__secondary.chain-breadcrumb-customize:focus-visible {
+  outline: none !important;
+  box-shadow: 0 0 0 2px var(--surface), 0 0 0 4px var(--accent-ring) !important;
+}
+
+.ui-chart-stagebar .chain-breadcrumb-customize.ui-pagebar__secondary.chain-breadcrumb-customize[aria-expanded='true'] {
+  border-color: color-mix(in srgb, var(--accent) 58%, var(--line)) !important;
+  background: var(--accent-wash) !important;
+  color: var(--accent-text) !important;
+}
+
+/* Phone: the page bar hands Customise to the top bar's gear, but a
+   full-screen page has no top bar — so here it stays, as its icon. */
+@media (max-width: 768px) {
+  .ui-chart-stagebar .chain-breadcrumb-customize.ui-pagebar__secondary.chain-breadcrumb-customize {
+    display: inline-flex !important;
+    min-width: 42px !important;
+    width: 42px !important;
+    padding: 0 !important;
+  }
+  .ui-chart-stagebar .chain-breadcrumb-customize > span:not(.app-settings-button__icon) {
+    position: absolute !important;
+    width: 1px !important;
+    height: 1px !important;
+    margin: -1px !important;
+    overflow: hidden !important;
+    clip-path: inset(50%) !important;
+    white-space: nowrap !important;
+  }
+  .ui-chart-stagebar__title { display: none; }
+}
+
+.ui-chart-stagebar__title {
+  flex: none;
+  color: var(--text);
+  font-family: var(--font-sans);
+  font-size: 13px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.ui-chart-stagebar__views {
+  flex: 0 1 auto;
+  min-width: 0;
+  max-width: 100%;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.ui-chart-stagebar__views::-webkit-scrollbar { display: none; }
+.ui-chart-stagebar__views .ui-capsule__option { flex: 0 0 auto; }
+
+.ui-chart-stagebar__exit {
+  margin-left: auto;
+}
+
+/* The page's Customise, carried into full screen: at the bar's end, beside
+   the exit. It keeps its own host, so its panel opens as it does from the
+   page bar — anchored under the button, over the chart. */
+.ui-chart-stagebar__actions {
+  position: relative;
+  z-index: 30;
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ui-chart-stagebar__actions + .ui-chart-stagebar__exit {
+  margin-left: 0;
+}
+
+/* ── The chart on stage ──────────────────────────────────────────────────── */
+[data-chart-stage-active] [data-chart-staged] {
+  flex: 1 1 auto !important;
+  min-height: 0 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  width: auto !important;
+  height: auto !important;
+  max-width: none !important;
+  max-height: none !important;
+  margin: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  overflow: auto !important;
+}
+
+/* A card inside a staged wrapper (the Straddle overview stages its card with
+   the legend under it) fills what the legend leaves. */
+[data-chart-stage-active] [data-chart-staged] .ui-oi-card {
+  flex: 1 1 auto !important;
+  min-height: 0 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  width: auto !important;
+  height: auto !important;
+  max-height: none !important;
+  margin: 0 !important;
+  border: 1px solid var(--line) !important;
+  border-radius: 12px !important;
+  box-shadow: none !important;
+  background: var(--surface) !important;
+  overflow: hidden !important;
+}
+
+.ui-chart-cardtools { flex: none; display: flex; align-items: center; justify-content: space-between; gap: 8px; min-height: 36px; padding: 0 10px; border-bottom: 1px solid var(--line); color: var(--text); font: 600 12px/1.4 var(--font-sans); }
+[data-chart-stage-active] .ui-chart-cardtools { display: none !important; }
+
+/* Analytical plots use their measured body room, with one vertical scroller. */
+[data-chart-stage-active] [data-chart-staged] .ui-oi-planerow {
+  --oi-plot-h: max(160px, calc(var(--chart-stage-room, 70dvh) - var(--oi-head-height, 100px) - var(--oi-rail-height, 26px))) !important;
+  flex: 1 1 auto !important;
+  min-height: 0 !important;
+}
+[data-chart-stage-active] [data-chart-staged] .ui-hm-surface {
+  flex: 1 1 auto !important;
+  height: var(--chart-stage-room, 70dvh) !important;
+  min-height: 0 !important;
+  overflow: hidden !important;
+}
+[data-chart-stage-active] [data-chart-staged] .ui-hm-split {
+  height: 100% !important;
+  max-height: none !important;
+  overflow: auto !important;
+  overscroll-behavior: contain;
+}
+[data-chart-stage-active] [data-chart-staged] .ui-hm-wing:not(.is-split) {
+  display: flex !important;
+  flex-direction: column !important;
+  min-height: 0 !important;
+}
+[data-chart-stage-active] [data-chart-staged] .ui-hm-wing:not(.is-split) .ui-hm-scroll {
+  flex: 1 1 auto !important;
+  min-height: 0 !important;
+  max-height: none !important;
+  overflow: auto !important;
+}
+[data-chart-stage-active] [data-chart-staged] .ui-hm-legend { flex: none !important; padding: 8px 10px !important; }
+@media (max-width: 768px) {
+  [data-chart-stage-root][data-chart-stage-active] { padding: max(6px, env(safe-area-inset-top, 0px)) max(6px, env(safe-area-inset-right, 0px)) max(6px, env(safe-area-inset-bottom, 0px)) max(6px, env(safe-area-inset-left, 0px)) !important; gap: 6px !important; }
+  .ui-chart-stagebar { min-height: 48px; gap: 6px; padding-inline: 8px; }
+  .ui-chart-stagebar__exit { min-width: 44px; min-height: 44px; }
+}
+
+/* Every box on the way down to a chart grows, as a column: the IV card's
+   `.ui-iv-plot`, the Price vs Open Interest panel's body. Without this the
+   chart sat at the bottom of a chain of block boxes, sized to nothing, and
+   collapsed to its 260px floor under an empty screen. */
+[data-chart-stage-active] [data-chart-staged] :has(.ui-chart-shell-host):not(.ui-chart-shell-host) {
+  flex: 1 1 auto !important;
+  min-height: 0 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  height: auto !important;
+  max-height: none !important;
+}
+
+/* Every chart body grows into the space; the fixed heights the pages give it
+   for the scrolling layout (clamp(420px, 58dvh, 640px), 100dvh − 20px in the
+   old full screen) do not apply on stage. */
+[data-chart-stage-active] [data-chart-staged] .ui-chart-shell-host {
+  flex: 1 1 auto !important;
+  min-height: 260px !important;
+  height: auto !important;
+  max-height: none !important;
+}
+
+/* Legends, notes and figure rows under a staged chart keep their own size. */
+[data-chart-stage-active] [data-chart-staged] :is(footer, .ui-iv-cone__legend, .ui-iv-gapgrid, .ui-iv-gapnote) {
+  flex: none !important;
+}
+
+/* The page's own padding went with the wrappers; the rows below the chart
+   get a gutter back so they do not touch the screen edge. */
+[data-chart-stage-active] [data-chart-staged] > :is(footer, .ui-iv-cone__legend, .ui-iv-gapgrid, .ui-iv-gapnote, .ui-straddle-sessionnote) {
+  padding-inline: 16px !important;
+}

@@ -294,25 +294,26 @@ def test_session_call_buy_sell_and_stand_aside():
     assert buy["entry"] == 101.0
     assert buy["stop"] == 94.0
     assert buy["exit"] == 115.0
-    assert buy["swing_exit"] == 129.0
+    assert buy["swing_exit"] == 118.5
     assert buy["swing_basis"] == "multi_r"
 
     sell = session_call(
         _history_quote(
-            ltp=97.0,
-            prev_close=100.0,
-            atp=99.0,
-            sma20=110.0,
+            ltp=197.2,
+            prev_close=200.0,
+            atp=198.0,
+            sma20=220.0,
             trend_20_pct=-6.0,
-            prior_low=98.0,
-            prior_high=104.0,
+            return_5d_pct=-4.0,
+            prior_low=198.0,
+            prior_high=206.0,
         ),
         0.5,
     )
     assert sell["stance"] == "sell"
     assert sell["stance_label"] == "Sell"
 
-    aside = session_call(_history_quote(ltp=99.0, atp=99.5), 0.5)
+    aside = session_call(_history_quote(ltp=100.2, atp=100.5), 0.5)
     assert aside["stance"] == "wait"
     assert aside["stance_label"] == "Wait"
     assert aside["entry"] == 101.0
@@ -477,6 +478,26 @@ def test_journal_round_trip(tmp_path):
     assert row["side"] == "sell"
     assert row["fill_price"] == 99.0
     assert row["result_pct"] == 11.11
+
+
+def test_journal_keeps_the_futures_reading_from_the_open(tmp_path):
+    store = TimelineStore(tmp_path / "journal.db")
+    journal = CallJournal("2026-11-06")
+    call = {**_plan("RELIANCE", 101.0), "quadrant": "long_buildup", "oi_change_pct": 4.5}
+    journal.advance([call], "2026-11-06T09:30:00")
+    assert journal.rows()[0]["fut_quadrant"] == "long_buildup"
+    assert journal.rows()[0]["fut_oi_change_pct"] == 4.5
+    store.upsert_live_call_journal(journal.persist_rows())
+    later = {**call, "quadrant": "short_covering", "oi_change_pct": -8.0}
+    journal.advance([later], "2026-11-06T10:00:00")
+    assert journal.rows()[0]["fut_quadrant"] == "long_buildup"
+    rewritten = journal.persist_rows()
+    rewritten[0]["fut_quadrant"] = "short_covering"
+    rewritten[0]["fut_oi_change_pct"] = -8.0
+    store.upsert_live_call_journal(rewritten)
+    saved = store.list_live_call_journal("2026-11-06")[0]
+    assert saved["fut_quadrant"] == "long_buildup"
+    assert saved["fut_oi_change_pct"] == 4.5
 
 
 def test_required_daily_session_is_the_last_completed_close():
@@ -827,4 +848,83 @@ def test_candle_budget_blocks_a_second_burst_inside_the_window():
 def test_cash_segment_is_kept_on_the_session_call():
     call = session_call(_history_quote(segment="cash"), 0.5)
     assert call["segment"] == "cash"
+    assert call["stance"] == "stand_aside"
+    assert "Non-F&O" in call["reason"]
     assert session_call(_history_quote(), 0.5)["segment"] == "fno"
+
+
+def test_quality_gates_stand_aside():
+    from datetime import datetime
+
+    from app.services.live_scan.clocks import IST
+
+    sunday = datetime(2026, 11, 8, 14, 30, tzinfo=IST).timestamp()
+    assert "Weekend" in session_call(_history_quote(), 0.5, sunday)["reason"]
+    cheap = session_call(_history_quote(ltp=82.0, prev_close=80.0, sma20=70.0), 0.5)
+    assert cheap["stance"] == "stand_aside"
+    assert "₹100" in cheap["reason"]
+    against = session_call(_history_quote(return_5d_pct=-2.0), 0.5)
+    assert against["stance"] == "stand_aside"
+    assert "5-day" in against["reason"]
+    near = session_call(_history_quote(sma20=99.0, trend_20_pct=1.0), 0.5)
+    assert near["stance"] == "stand_aside"
+    assert "2%" in near["reason"]
+    narrow = session_call(_history_quote(atr_pct=2.0, prior_low=100.8), 0.5)
+    assert narrow["stance"] == "stand_aside"
+    assert "0.8 ATR" in narrow["reason"]
+
+
+def test_futures_build_up_blocks_only_the_opposing_sign():
+    covering = dict(fut_ltp=103.0, fut_prev_close=100.0, fut_oi=9_000, fut_poi=10_000)
+    covered = session_call(_history_quote(**covering), 0.5)
+    assert covered["stance"] == "buy"
+    assert covered["quadrant"] == "short_covering"
+    assert "short covering" in covered["reason"]
+    unwinding = session_call(
+        _history_quote(fut_ltp=97.0, fut_prev_close=100.0, fut_oi=8_000, fut_poi=10_000),
+        0.5,
+    )
+    assert unwinding["stance"] == "buy"
+    assert "long unwinding" in unwinding["reason"]
+    sell_cover = session_call(
+        _history_quote(
+            ltp=197.2,
+            prev_close=200.0,
+            atp=198.0,
+            sma20=220.0,
+            trend_20_pct=-6.0,
+            return_5d_pct=-4.0,
+            prior_low=198.0,
+            prior_high=206.0,
+            **covering,
+        ),
+        0.5,
+    )
+    assert sell_cover["stance"] == "sell"
+    assert "short covering" in sell_cover["reason"]
+    confirmed = session_call(
+        _history_quote(fut_ltp=103.0, fut_prev_close=100.0, fut_oi=12_000, fut_poi=10_000),
+        0.5,
+    )
+    assert confirmed["stance"] == "buy"
+    assert confirmed["oi_change_pct"] == 20.0
+    assert "long build-up" in confirmed["reason"]
+    long_against_sell = session_call(
+        _history_quote(
+            ltp=197.2,
+            prev_close=200.0,
+            atp=198.0,
+            sma20=220.0,
+            trend_20_pct=-6.0,
+            return_5d_pct=-4.0,
+            prior_low=198.0,
+            prior_high=206.0,
+            fut_ltp=103.0,
+            fut_prev_close=100.0,
+            fut_oi=12_000,
+            fut_poi=10_000,
+        ),
+        0.5,
+    )
+    assert long_against_sell["stance"] == "stand_aside"
+    assert "long build-up" in long_against_sell["reason"]

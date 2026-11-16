@@ -2283,6 +2283,7 @@ export interface LiveCallRow {
   swing_basis?: "candle" | "multi_r" | string | null;
   plan_phase?: "wait" | "enter" | "late" | "none" | string;
   quadrant: string | null;
+  oi_change_pct?: number | null;
   on_last_scan: boolean;
   score: number | null;
   breadth_up?: number;
@@ -2323,6 +2324,8 @@ export interface LiveJournalRow {
   entry_at: string | null;
   closed_at: string | null;
   swing_closed_at: string | null;
+  fut_quadrant?: string | null;
+  fut_oi_change_pct?: number | null;
 }
 
 export interface LiveJournalSummary {
@@ -2533,6 +2536,77 @@ export async function fetchLiveJournalStats(
   costPct: number,
 ): Promise<LiveJournalScorecard> {
   const res = await fetch(`/api/live-scan/journal-stats?segment=${segment}&cost_pct=${costPct}`);
+  return parseJson(res);
+}
+
+export interface NewsdeskSource {
+  id: string;
+  name: string;
+  color: string;
+}
+
+export interface NewsdeskItem {
+  title: string;
+  description: string;
+  link: string;
+  published_at: number;
+  image: string | null;
+  category: string;
+  companies: string[];
+  source: NewsdeskSource;
+}
+
+export interface NewsdeskOther {
+  id: string;
+  name: string;
+  color: string;
+  title: string;
+  link: string;
+}
+
+export interface NewsdeskStory {
+  id: string;
+  time: number;
+  category: string;
+  companies: string[];
+  company_names: Record<string, string>;
+  coverage: number;
+  lead: NewsdeskItem;
+  others: NewsdeskOther[];
+}
+
+export interface NewsdeskBoard {
+  window_days: number;
+  retention_days: number;
+  refreshed_at: string | null;
+  article_count: number;
+  story_count: number;
+  sources: { id: string; name: string; category: string; color: string }[];
+  categories: { id: string; count: number }[];
+  stories: NewsdeskStory[];
+  notes: string[];
+}
+
+export interface NewsdeskSummary {
+  status: string;
+  title: string;
+  summary: string[];
+  figures: string[];
+  link: string;
+  source: string;
+  description: string;
+}
+
+export async function fetchNewsdesk(days = 3, refresh = false): Promise<NewsdeskBoard> {
+  const params = new URLSearchParams({ days: String(days) });
+  if (refresh) params.set("refresh", "true");
+  const res = await fetch(`/api/newsdesk?${params}`);
+  return parseJson(res);
+}
+
+export async function fetchNewsdeskSummary(link: string): Promise<NewsdeskSummary> {
+  const params = new URLSearchParams({ link });
+  const res = await fetch(`/api/newsdesk/summary?${params}`);
   return parseJson(res);
 }
 

@@ -1,0 +1,103 @@
+/* Shared selection-bar finish: the dropdown PANELS these controls open.
+ *
+ * ── WHAT MOVED OUT OF THIS FILE, AND WHY ────────────────────────────────────
+ *
+ * This sheet used to paint the selection TRACKS as well — `.ui-analysis-
+ * switch`, `.ui-gex-views` and the page-bar `.ui-seg__track` — giving the
+ * selected option a raised face, a `--line-strong` border and a drop shadow,
+ * every declaration `!important`.
+ *
+ * That treatment is not the one the option chain's own control uses, and the
+ * chain's is now the app's (ui-control-capsule-authority.css): a capsule
+ * track with ONE capsule highlight in the text ink that slides between
+ * options, label inverted on it. Two authorities cannot both own the same
+ * pixels — with the `!important`s in place the selected label resolved to
+ * `--text` ON TOP of a `--text`-coloured pill, i.e. white on white, invisible
+ * on four page bars.
+ *
+ * So the track rules are gone from here rather than being fought with more
+ * `!important`. The geometry they carried (gap, padding, the 36/40/44px touch
+ * floors) moved WITH them, into that sheet, so nothing was lost in the move.
+ *
+ * What remains below is the part that never conflicted: the panels those
+ * controls open — one quiet surface, scannable rows, consistent focus. Panels
+ * are not capsules and are not claimed by the capsule authority.
+ *
+ * `--selection-track` stays declared here: the popover rows' hover and
+ * selected washes read it, and so do the stepper and as-of controls.
+ */
+:root[data-theme] {
+  --selection-track: color-mix(in srgb, var(--text) 8%, var(--surface-raised));
+  --selection-face: var(--surface-raised);
+}
+:root[data-theme='dark'] { --selection-track:color-mix(in srgb, var(--text) 5%, var(--surface-raised)); --selection-face:color-mix(in srgb, var(--text) 10%, var(--surface-raised)); }
+:root[data-theme] body #root > .app.app :is(.ui-oi-toolbar, .ui-sp-toolbar) :is(.ui-stepper, .ui-asof__control) {
+  border-radius:999px !important; overflow:hidden; background:var(--selection-track) !important;
+}
+@media (pointer:coarse) {
+  :root[data-theme] body #root > .app.app :is(.ui-analysis-switch, .ui-gex-views, .ui-pagebar .ui-seg__track, .ui-oi-toolbar .ui-seg__track) > button { min-height:40px; }
+  :root[data-theme] body #root > .app.app :is(.ui-analysis-switch, .ui-gex-views, .ui-pagebar .ui-seg__track, .ui-oi-toolbar .ui-seg__track) { height:auto; min-height:44px; }
+}
+@media (prefers-reduced-motion:reduce) {
+  :root[data-theme] body #root > .app.app :is(.ui-analysis-switch, .ui-gex-views, .ui-pagebar .ui-seg__track, .ui-oi-toolbar .ui-seg__track) > button { transition:none; }
+}
+
+/* Dropdowns share a quiet panel surface; rows remain easy to scan. */
+:root[data-theme] :is(.ui-time-switch__sheet, .shared-expiry__pop, .ui-oi-menu__pop, .ui-pcr-series__menu, .ui-straddle-series__menu, .ui-show__menu) {
+  box-sizing:border-box; border:1px solid var(--line) !important; background:var(--surface-raised) !important;
+  color:var(--text); box-shadow:0 4px 16px rgb(0 0 0 / 12%) !important;
+  overscroll-behavior:contain; scrollbar-width:thin; scrollbar-color:var(--line-strong) transparent;
+}
+@media(min-width:769px) {
+  :root[data-theme] :is(.ui-time-switch__sheet, .shared-expiry__pop, .ui-oi-menu__pop, .ui-pcr-series__menu, .ui-straddle-series__menu, .ui-show__menu) { border-radius:14px !important; padding:8px; }
+  :root[data-theme] .ui-time-switch__sheet { max-height:var(--window-max-height, 430px); }
+}
+:root[data-theme] :is(.ui-time-switch__sheet, .shared-expiry__pop) > header {
+  min-height:36px; box-sizing:border-box; align-items:center; font-size:11px; font-weight:600;
+  letter-spacing:.02em; text-transform:none; color:var(--text-muted);
+}
+:root[data-theme] :is(.ui-time-switch__sheet [role='radiogroup'], .shared-expiry__pop section, .ui-oi-menu__pop, .ui-pcr-series__menu, .ui-straddle-series__menu) > button {
+  box-sizing:border-box; min-height:40px; border-radius:8px; padding:8px 10px; cursor:pointer; box-shadow:none !important;
+}
+@media (hover: hover) { :root[data-theme] :is(.ui-time-switch__sheet, .shared-expiry__pop, .ui-oi-menu__pop, .ui-pcr-series__menu, .ui-straddle-series__menu) button:not(:disabled):hover { background:var(--selection-track); } }
+:root[data-theme] :is(.ui-time-switch__sheet, .shared-expiry__pop, .ui-oi-menu__pop) button:is([aria-checked='true'], [aria-selected='true']) {
+  background:var(--selection-track) !important; color:var(--text); box-shadow:none !important;
+}
+:root[data-theme] :is(.ui-time-switch__sheet, .shared-expiry__pop, .ui-oi-menu__pop, .ui-pcr-series__menu, .ui-straddle-series__menu, .ui-show__menu) button:focus-visible {
+  outline:2px solid var(--text-muted); outline-offset:-2px; box-shadow:none !important;
+}
+:root[data-theme] :is(.ui-time-switch__sheet, .shared-expiry__pop, .ui-oi-menu__pop) button:disabled { opacity:.5; cursor:not-allowed; }
+:root[data-theme] .ui-time-switch__sheet [role='radiogroup'] > button { gap:16px; }
+:root[data-theme] .ui-time-switch__sheet [role='radiogroup'] > button > span { min-width:0; }
+@media(pointer:coarse) {
+  :root[data-theme] :is(.ui-time-switch__sheet [role='radiogroup'], .shared-expiry__pop section, .ui-oi-menu__pop, .ui-pcr-series__menu, .ui-straddle-series__menu) > button { min-height:44px; }
+}
+
+/* Page-view pills use a compact, consistent 12px label across workspaces. */
+:root[data-theme] body #root > .app.app .ui-pagebar :is(.ui-seg__track, .ui-analysis-switch) > button {
+  font-size: 12px !important;
+  line-height: 16px;
+  letter-spacing: 0;
+}
+:root[data-theme] body #root > .app.app .ui-pagebar :is(.ui-oi-menu, .ui-sp-viewpick__trigger) {
+  font-size: 12px;
+}
+@media (min-width: 769px) and (pointer: fine) {
+  :root[data-theme] body #root > .app.app .ui-pagebar :is(.ui-seg__track, .ui-analysis-switch) {
+    width: max-content;
+    max-width: 100%;
+    height: 36px;
+    min-height: 36px;
+    grid-template-columns: none;
+    grid-auto-columns: max-content;
+    gap: 2px;
+  }
+  :root[data-theme] body #root > .app.app .ui-pagebar :is(.ui-seg__track, .ui-analysis-switch) > button {
+    min-width: 0;
+    min-height: 32px;
+    padding: 4px 14px;
+  }
+}
+@media (min-width: 769px) {
+  :root[data-theme] body #root > .app.app .ui-pagebar :is(.ui-seg__track, .ui-analysis-switch) { margin-left: auto; }
+}

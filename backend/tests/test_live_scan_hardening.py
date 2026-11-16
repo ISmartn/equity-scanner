@@ -729,8 +729,11 @@ def test_burst_is_read_against_time_of_day():
 
 def test_flat_price_with_rising_oi_is_neutral_not_short_buildup():
     assert classify_oi(0.2, 8.0) == "neutral"
+    assert classify_oi(1.0, 1.5) == "neutral"
+    assert classify_oi(1.0, 3.0) == "long_buildup"
     assert classify_oi(-1.0, 8.0) == "short_buildup"
     assert classify_oi(1.0, 8.0) == "long_buildup"
+    assert classify_oi(1.0, -8.0) == "short_covering"
     assert classify_oi(-1.0, -8.0) == "long_unwinding"
 
 
@@ -756,7 +759,7 @@ def test_plan_risk_is_bounded_by_atr():
     narrow = candle_plan("buy", 100.0, 99.8, atr=2.0)
     assert narrow is not None and narrow["basis"] == "atr_floor"
     assert narrow["stop"] == 99.0 and narrow["exit"] == 102.0
-    assert narrow["swing_exit"] == 104.0 and narrow["swing_basis"] == "multi_r"
+    assert narrow["swing_exit"] == 102.5 and narrow["swing_basis"] == "multi_r"
     wide = candle_plan("buy", 100.0, 90.0, atr=2.0)
     assert wide is not None and wide["basis"] == "atr_cap"
     assert wide["stop"] == 97.0 and wide["exit"] == 106.0
@@ -764,8 +767,8 @@ def test_plan_risk_is_bounded_by_atr():
     spread_floor = candle_plan("sell", 100.0, 100.3, atr=0.2, spread=0.5)
     assert spread_floor is not None and spread_floor["stop"] == 102.0
     call = session_call(_quote(atr_pct=2.0, prior_low=100.8), 0.5)
-    assert call["stop_basis"] == "atr_floor"
-    assert call["stop"] == 100.0
+    assert call["stance"] == "stand_aside"
+    assert "0.8 ATR" in call["reason"]
 
 
 def test_choppy_twenty_day_path_stands_aside():

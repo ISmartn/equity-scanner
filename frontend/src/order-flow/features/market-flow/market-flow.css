@@ -1,0 +1,1277 @@
+/* Order Flow: one surface. On a desktop the sectors rail and the chart on the
+   left, the Bullish half over the Bearish half on the right, the zero rule
+   running level with the divider between the halves. Palette tokens only
+   (color-mix of tokens is fine); direction colour on figures, lines and marks,
+   washes kept faint; nothing under 10.5px; figures tabular. The layout comes
+   from `data-layout`, written from the same media queries the page reads. */
+
+.ui-flow {
+  --flow-pad: 16px;
+  --flow-hair: var(--hairline, color-mix(in srgb, var(--line-strong) 70%, transparent));
+  --flow-up: var(--up);
+  --flow-down: var(--down);
+  --flow-up-ink: var(--up-ink, var(--up-text, var(--up)));
+  --flow-down-ink: var(--down-ink, var(--down-text, var(--down)));
+  --flow-up-wash: color-mix(in srgb, var(--up) 7%, var(--surface-raised));
+  --flow-down-wash: color-mix(in srgb, var(--down) 7%, var(--surface-raised));
+  --flow-tile: color-mix(in srgb, var(--text) 2.5%, var(--surface-raised));
+  --flow-faint: 0.2;
+  --flow-dim: 0.22;
+  --flow-dur: 120ms;
+  --rail-w: 190px;
+  --side-w: clamp(460px, 40%, 760px);
+  color: var(--text);
+  font-family: var(--font-sans);
+  min-width: 0;
+  box-sizing: border-box;
+  padding: 0 max(var(--flow-pad), env(safe-area-inset-right, 0px)) calc(var(--flow-pad) + env(safe-area-inset-bottom, 0px)) max(var(--flow-pad), env(safe-area-inset-left, 0px));
+}
+:where(.ui-flow, .ui-flow *, .ui-flow *::before, .ui-flow *::after) { box-sizing: border-box; }
+:where(.ui-flow h1, .ui-flow h2, .ui-flow h3, .ui-flow h4, .ui-flow p, .ui-flow ol, .ui-flow ul, .ui-flow dl, .ui-flow dd, .ui-flow figure) { margin: 0; }
+:where(.ui-flow ol, .ui-flow ul) { padding: 0; list-style: none; }
+:where(.ui-flow button) { font: inherit; cursor: pointer; color: inherit; }
+.ui-flow .is-visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.ui-flow-pagebar .ui-flow-window { margin-right: 4px; }
+.ui-flow :focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; border-radius: 4px; }
+
+.mf-tone.is-bullish, .mf-tone.is-up { color: var(--flow-up-ink); }
+.mf-tone.is-bearish, .mf-tone.is-down { color: var(--flow-down-ink); }
+.mf-tone.is-rangebound, .mf-tone.is-flat { color: var(--text-muted); }
+.mf-num { font-variant-numeric: tabular-nums; font-weight: 600; white-space: nowrap; }
+.mf-num.is-up { color: var(--flow-up-ink); }
+.mf-num.is-down { color: var(--flow-down-ink); }
+.mf-num.is-flat { color: var(--text-muted); }
+
+/* ── Desktop: the page is the window's height, the board takes the rest ── */
+.ui-flow[data-fit='true'] { height: var(--ui-page-fit-h, calc(100dvh - 130px)); display: flex; flex-direction: column; overflow: hidden; padding-bottom: 14px; }
+.ui-flow[data-fit='true'] .ui-flow-pagebar { flex: none; margin-bottom: 8px; }
+
+.mf-board[data-layout='desktop'] {
+  position: relative;
+  flex: 1 1 auto;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: var(--rail-w) minmax(0, 1fr) var(--side-w);
+  grid-template-rows: 40px minmax(0, 1fr);
+  grid-template-areas: 'rail head side' 'rail chart side';
+  border: 1px solid var(--flow-hair);
+  border-radius: 12px;
+  background: var(--surface-raised);
+  overflow: hidden;
+}
+@media (min-width: 1800px) { .ui-flow { --side-w: 36%; --rail-w: 188px; } }
+@media (max-width: 1320px) { .ui-flow { --side-w: 41%; --rail-w: 178px; } }
+@media (max-width: 1200px) { .ui-flow { --rail-w: 160px; } }
+/* The zero rule of the chart, carried across the rail and the column as the divider between the halves. */
+.mf-board[data-layout='desktop']::after {
+  content: ''; position: absolute; left: 0; right: 0; top: 50%; height: 1px; margin-top: -0.5px;
+  background: color-mix(in srgb, var(--text-muted) 70%, transparent); pointer-events: none; z-index: 2;
+}
+.mf-board[data-layout='desktop'] .mf-head { grid-area: head; }
+.mf-board[data-layout='desktop'] .mf-chartcell { grid-area: chart; min-width: 0; min-height: 0; position: relative; }
+.mf-board[data-layout='desktop'] .mf-side { grid-area: side; }
+.mf-board[data-layout='desktop'] .mf-rail { grid-area: rail; }
+
+.mf-head { display: flex; align-items: center; gap: 6px 16px; min-width: 0; padding: 0 14px 0 4px; }
+.mf-head__title { flex: none; font-size: 14px; font-weight: 700; line-height: 1.2; letter-spacing: -0.005em; color: var(--text); }
+
+/* ── Status ─────────────────────────────────────────────────────────── */
+.mf-status { display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: 2px 14px; min-width: 0; margin-left: auto; font-size: 12px; line-height: 1.35; color: var(--text-muted); font-variant-numeric: tabular-nums; }
+.mf-status b { font-weight: 700; }
+.mf-status__counts { white-space: nowrap; color: var(--text); }
+.mf-status__time, .mf-status__load { white-space: nowrap; }
+.mf-status__load { display: inline-flex; align-items: center; gap: 8px; }
+.mf-status__bar { display: inline-block; width: 64px; height: 3px; border-radius: 2px; overflow: hidden; background: color-mix(in srgb, var(--line-strong) 70%, transparent); }
+.mf-status__bar i { display: block; height: 100%; background: var(--accent); transform-origin: left; transition: transform 300ms ease; }
+.mf-status.is-updating .mf-status__counts { opacity: 0.72; }
+.mf-status__warn { color: var(--warn-text, var(--text)); }
+.mf-status__aged { padding: 1px 8px; border-radius: 6px; font-weight: 600; color: var(--warn-text, var(--text)); background: color-mix(in srgb, var(--warn, var(--accent)) 14%, transparent); }
+
+/* ── The sectors rail ───────────────────────────────────────────────── */
+.mf-rail { min-width: 0; min-height: 0; border-right: 1px solid var(--flow-hair); }
+.mf-sectors.is-split { display: grid; grid-template-rows: minmax(0, 1fr) minmax(0, 1fr); height: 100%; }
+.mf-sectors__half { display: flex; flex-direction: column; min-height: 0; overflow-y: auto; overscroll-behavior: contain; scrollbar-width: none; padding: 0 8px; }
+.mf-sectors__half::-webkit-scrollbar { display: none; }
+.mf-sectors__half.is-up { padding-bottom: 6px; }
+.mf-sectors__end { margin-top: auto; }
+.mf-sectors__half.is-up .mf-sectors__title { position: static; }
+.mf-sectors__half.is-down { padding-top: 6px; padding-bottom: 8px; }
+.mf-sectors__title { position: sticky; top: 0; z-index: 1; display: flex; align-items: baseline; gap: 6px; padding: 10px 4px 6px; font-size: 12px; font-weight: 700; color: var(--text); background: var(--surface-raised); }
+.mf-sectors__title small { font-size: 11px; font-weight: 500; color: var(--text-muted); }
+.mf-spread { display: grid; gap: 4px; padding: 12px 4px 4px; }
+.mf-spread__title { font-size: 12px; font-weight: 700; color: var(--text); margin-bottom: 4px; }
+.mf-spread svg { display: block; }
+.mf-spread rect.is-up { fill: var(--flow-up); }
+.mf-spread rect.is-down { fill: var(--flow-down); }
+.mf-spread rect.is-flat { fill: color-mix(in srgb, var(--text-muted) 55%, transparent); }
+.mf-spread line { stroke: var(--text-muted); stroke-width: 1; vector-effect: non-scaling-stroke; }
+.mf-spread__axis { display: flex; justify-content: space-between; margin-top: -10px; font-size: 10.5px; color: var(--text-muted); font-variant-numeric: tabular-nums; }
+.mf-spread__bar { display: flex; height: 4px; margin-top: 4px; border-radius: 2px; overflow: hidden; background: color-mix(in srgb, var(--line-strong) 50%, transparent); }
+.mf-spread__bar i { display: block; height: 100%; }
+.mf-spread__bar .is-up { background: var(--flow-up); }
+.mf-spread__bar .is-down { background: var(--flow-down); }
+.mf-spread__bar .is-flat { background: color-mix(in srgb, var(--text-muted) 45%, transparent); }
+.mf-sectors__list { display: grid; grid-template-columns: minmax(0, 1fr); gap: 2px; }
+.mf-sectors__none { padding: 4px; font-size: 11px; color: var(--text-muted); }
+.mf-sector { position: relative; display: flex; align-items: center; gap: 6px; width: 100%; min-height: 22px; padding: 2px 5px; border: 0; border-radius: 5px; background: transparent; text-align: left; isolation: isolate; transition: opacity var(--flow-dur) ease; }
+.mf-sector__bar { position: absolute; inset: 2px auto 2px 0; z-index: -1; border-radius: 4px; background: color-mix(in srgb, var(--text-muted) 12%, transparent); }
+.mf-sector.is-up .mf-sector__bar { background: color-mix(in srgb, var(--flow-up) 15%, transparent); }
+.mf-sector.is-down .mf-sector__bar { background: color-mix(in srgb, var(--flow-down) 14%, transparent); }
+.mf-sector__name { flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 11px; font-weight: 500; line-height: 1.3; color: var(--text); }
+.mf-sector__pct { flex: none; font-size: 11px; font-weight: 600; font-variant-numeric: tabular-nums; color: var(--text-muted); }
+.mf-sector.is-up .mf-sector__pct { color: var(--flow-up-ink); }
+.mf-sector.is-down .mf-sector__pct { color: var(--flow-down-ink); }
+.mf-sector:hover, .mf-sector.is-lit { background: color-mix(in srgb, var(--text) 7%, transparent); }
+.mf-sector.is-lit { box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--text) 35%, transparent); }
+.mf-board[data-focus-kind='sector'] .mf-sector:not(.is-lit) { opacity: 0.55; }
+
+/* ── The right column: two halves ───────────────────────────────────── */
+.mf-side { position: relative; display: grid; grid-template-rows: minmax(0, 1fr) minmax(0, 1fr); min-width: 0; min-height: 0; border-left: 1px solid var(--flow-hair); }
+.mf-half { display: grid; grid-template-rows: auto minmax(0, max-content) minmax(146px, 1fr); min-width: 0; min-height: 0; }
+.mf-half__head { display: flex; align-items: baseline; gap: 4px 10px; min-width: 0; padding: 11px 14px 7px; }
+.mf-half__title { font-size: 14px; font-weight: 700; line-height: 1.2; white-space: nowrap; }
+.mf-half__count { font-variant-numeric: tabular-nums; font-weight: 700; }
+.mf-half__sub { font-size: 11.5px; color: var(--text-muted); white-space: nowrap; }
+.mf-half__key { display: flex; gap: 12px; margin-left: auto; font-size: 11px; color: var(--text-muted); white-space: nowrap; }
+.mf-half__key span { display: inline-flex; align-items: center; gap: 5px; }
+.mf-half__empty { align-self: start; padding: 4px 14px; font-size: 12.5px; color: var(--text-muted); }
+
+.mf-tiles {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(116px, 1fr)); grid-auto-rows: 40px; gap: 5px; align-content: start;
+  min-height: 0; padding: 1px 14px 12px; overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin;
+  /* The last row fades into the cards: there is more below. */
+  -webkit-mask-image: linear-gradient(to bottom, #0F0F0F calc(100% - 16px), transparent);
+  mask-image: linear-gradient(to bottom, #0F0F0F calc(100% - 16px), transparent);
+}
+.mf-tile {
+  display: flex; flex-direction: column; justify-content: center; gap: 1px; height: 40px; min-width: 0; padding: 3px 7px 3px 8px;
+  border: 1px solid transparent; border-radius: 6px; background: var(--flow-tile); text-align: left;
+  transition: opacity var(--flow-dur) ease, border-color var(--flow-dur) ease;
+}
+.mf-tile.is-up { background: var(--flow-up-wash); }
+.mf-tile.is-down { background: var(--flow-down-wash); }
+.mf-tile__row { display: flex; align-items: center; gap: 5px; min-width: 0; }
+.mf-tile__sym { flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 11.5px; font-weight: 700; line-height: 1.25; color: var(--text); }
+.mf-tile__rk { flex: none; font-size: 10px; font-weight: 600; font-variant-numeric: tabular-nums; color: var(--text-muted); }
+.mf-tile__pct { flex: none; font-size: 12px; line-height: 1.25; }
+.mf-tile .mf-mark { flex: none; }
+.mf-tile__spark { flex: 1 1 auto; display: flex; justify-content: flex-end; min-width: 0; }
+.mf-tile__spark small { font-size: 10.5px; color: var(--text-muted); }
+.mf-tile.is-spot { background: transparent; border: 1px dashed var(--flow-hair); }
+.mf-tile.is-spot .mf-tile__sym { color: var(--text-muted); }
+.mf-tile:hover { border-color: color-mix(in srgb, var(--text) 30%, transparent); }
+.mf-tile.is-lit { border-color: var(--text); }
+.mf-tile.is-up.is-lit { border-color: var(--flow-up-ink); box-shadow: inset 0 0 0 1px var(--flow-up-ink); }
+.mf-tile.is-down.is-lit { border-color: var(--flow-down-ink); box-shadow: inset 0 0 0 1px var(--flow-down-ink); }
+.mf-board[data-focus-kind='sector'] .mf-tile:not(.is-lit) { opacity: 0.3; }
+.mf-tile.is-skeleton { display: block; border: 0; background: color-mix(in srgb, var(--line-strong) 40%, transparent); }
+
+.mf-mark { display: inline-block; width: 6px; height: 6px; border-radius: 50%; }
+.mf-mark.is-opened { background: currentColor; }
+.mf-mark.is-closed { border: 1.5px solid currentColor; }
+.mf-mark.is-none { visibility: hidden; }
+.is-up .mf-mark, .mf-half.is-bullish .mf-half__key .mf-mark { color: var(--flow-up-ink); }
+.is-down .mf-mark, .mf-half.is-bearish .mf-half__key .mf-mark { color: var(--flow-down-ink); }
+.mf-half__key .mf-mark { color: var(--text-muted); }
+
+.mf-spark { display: block; overflow: visible; }
+.mf-spark__line { fill: none; stroke: var(--text-muted); stroke-width: 1.2; stroke-linejoin: round; stroke-linecap: round; }
+.mf-spark.is-up .mf-spark__line { stroke: var(--flow-up-ink); }
+.mf-spark.is-down .mf-spark__line { stroke: var(--flow-down-ink); }
+.mf-spark__dot { fill: var(--text); }
+.mf-spark.is-up .mf-spark__dot { fill: var(--flow-up-ink); }
+.mf-spark.is-down .mf-spark__dot { fill: var(--flow-down-ink); }
+.mf-spark__base { stroke: var(--text-muted); stroke-width: 1; stroke-dasharray: 2 3; opacity: 0.8; }
+.mf-spark__zone { fill: color-mix(in srgb, var(--text) 10%, transparent); }
+.mf-spark.is-up .mf-spark__zone { fill: color-mix(in srgb, var(--flow-up) 20%, transparent); }
+.mf-spark.is-down .mf-spark__zone { fill: color-mix(in srgb, var(--flow-down) 20%, transparent); }
+
+/* ── Large cards ────────────────────────────────────────────────────── */
+.mf-featured { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); grid-template-rows: minmax(0, 1fr); gap: 8px; padding: 2px 14px 12px; min-height: 0; }
+.mf-card { min-width: 0; min-height: 132px; max-height: 280px; align-self: end; height: 100%; border: 1px solid var(--flow-hair); border-radius: 9px; background: var(--surface-raised); overflow: hidden; transition: border-color var(--flow-dur) ease, opacity var(--flow-dur) ease; }
+.mf-card.is-up { background: linear-gradient(180deg, color-mix(in srgb, var(--up) 9%, var(--surface-raised)), var(--surface-raised) 70%); }
+.mf-card.is-down { background: linear-gradient(180deg, color-mix(in srgb, var(--down) 9%, var(--surface-raised)), var(--surface-raised) 70%); }
+.mf-card__main { display: grid; grid-template-rows: auto auto 1fr auto; gap: 4px; width: 100%; height: 100%; margin: 0; padding: 9px 11px 9px; border: 0; background: transparent; text-align: left; }
+.mf-card__head { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.mf-card__sym { font-size: 14px; font-weight: 700; letter-spacing: 0.01em; color: var(--text); white-space: nowrap; }
+.mf-card__meta { display: grid; min-width: 0; line-height: 1.3; }
+.mf-card__bu { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 11.5px; font-weight: 600; }
+.mf-card__head .mf-dots { margin-left: auto; }
+.mf-card__figs { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.mf-card__pct { font-size: 22px; font-weight: 700; line-height: 1.1; letter-spacing: -0.01em; }
+.mf-card__price { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 12px; font-variant-numeric: tabular-nums; color: var(--text-muted); }
+.mf-card__spark { display: block; min-height: 0; align-self: stretch; }
+.mf-card__spark { position: relative; }
+.mf-card__spark .mf-spark { position: absolute; inset: 0; height: 100%; }
+.mf-card__levels { display: grid; grid-template-columns: auto 1fr auto; gap: 8px; font-variant-numeric: tabular-nums; }
+.mf-card__levels > span { display: grid; min-width: 0; }
+.mf-card__levels > span:nth-child(2) { justify-items: center; }
+.mf-card__levels > span:nth-child(3) { justify-items: end; }
+.mf-card__levels i { font-style: normal; font-size: 10.5px; color: var(--text-muted); }
+.mf-card__levels b { font-size: 12px; font-weight: 600; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
+.mf-card:hover { border-color: color-mix(in srgb, var(--text) 30%, transparent); }
+.mf-card.is-up.is-lit { border-color: var(--flow-up-ink); }
+.mf-card.is-down.is-lit { border-color: var(--flow-down-ink); }
+.mf-board[data-focus-kind='sector'] .mf-card:not(.is-lit) { opacity: 0.4; }
+.mf-card.is-holding { display: grid; place-items: center; font-size: 12px; color: var(--text-muted); background: color-mix(in srgb, var(--line-strong) 22%, transparent); border-style: dashed; }
+
+.mf-dots { display: inline-flex; align-items: center; gap: 3px; }
+.mf-dots i { display: inline-block; width: 7px; height: 7px; border-radius: 50%; border: 1px solid var(--text-muted); }
+.mf-dots i.is-held { background: var(--text); border-color: var(--text); }
+.mf-dots i.is-unknown { border-style: dotted; opacity: 0.55; }
+.is-up .mf-dots i.is-held { background: var(--flow-up-ink); border-color: var(--flow-up-ink); }
+.is-down .mf-dots i.is-held { background: var(--flow-down-ink); border-color: var(--flow-down-ink); }
+.mf-dots b { margin-left: 4px; font-size: 11px; font-weight: 600; font-variant-numeric: tabular-nums; color: var(--text-muted); white-space: nowrap; }
+
+/* ── The chart ──────────────────────────────────────────────────────── */
+.mf-chartcell { overflow: hidden; }
+.mf-chart { position: relative; }
+.mf-chart__svg { display: block; }
+.mf-chart__floor { fill: color-mix(in srgb, var(--text) 4.5%, transparent); }
+.mf-chart__grid { stroke: color-mix(in srgb, var(--line-strong) 45%, transparent); stroke-width: 1; }
+.mf-chart__grid.is-time { stroke: color-mix(in srgb, var(--line-strong) 30%, transparent); }
+.mf-chart__tick { font-size: 11px; fill: var(--text-muted); font-variant-numeric: tabular-nums; }
+.mf-chart__tick.is-zero { font-weight: 700; fill: var(--text); }
+.mf-chart__zero { stroke: color-mix(in srgb, var(--text-muted) 70%, transparent); stroke-width: 1; shape-rendering: crispEdges; }
+.mf-chart__now line, .mf-dg__clock line { stroke: #f5c542; stroke-width: 1.5; }
+.mf-chart__now-label, .mf-dg__clock text { font-size: 10.5px; font-weight: 600; fill: #f5c542; font-variant-numeric: tabular-nums; }
+.mf-chart__origin { fill: var(--surface-raised); stroke: var(--text); stroke-width: 1.5; }
+.mf-fan, .mf-named, .mf-chart__labels { transition: opacity var(--flow-dur) ease; }
+.mf-chart__faint { fill: none; stroke-width: 1; stroke-linejoin: round; opacity: var(--flow-faint); }
+.mf-chart__faint.is-up { stroke: var(--flow-up); }
+.mf-chart__faint.is-down { stroke: var(--flow-down); }
+.mf-chart__faint.is-flat { stroke: var(--text-muted); opacity: calc(var(--flow-faint) * 0.8); }
+.mf-chart__band { fill: color-mix(in srgb, var(--text-muted) 16%, transparent); }
+.mf-chart__median { fill: none; stroke: var(--text-muted); stroke-width: 1.5; stroke-dasharray: 4 3; }
+.mf-chart__bold { fill: none; stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; }
+.mf-chart__bold.is-up { stroke: var(--flow-up-ink); }
+.mf-chart__bold.is-down { stroke: var(--flow-down-ink); }
+.mf-chart__bold.is-index { stroke: var(--text); stroke-width: 2; }
+.mf-chart__lit path { fill: none; stroke-width: 2.6; stroke-linejoin: round; stroke-linecap: round; }
+.mf-chart__lit .is-up { stroke: var(--flow-up-ink); }
+.mf-chart__lit .is-down { stroke: var(--flow-down-ink); }
+.mf-chart__lit .is-flat { stroke: var(--text); }
+.mf-chart__lit.is-sector path { stroke-width: 1.5; }
+.has-focus .mf-fan { opacity: var(--flow-dim); }
+.has-focus .mf-named { opacity: 0.3; }
+.has-focus .mf-chart__label:not(.is-lit) { opacity: 0.35; }
+.mf-chart__label { cursor: pointer; }
+.mf-chart__label circle { fill: var(--text); stroke: var(--surface-raised); stroke-width: 1.5; }
+.mf-chart__label.is-up circle { fill: var(--flow-up-ink); }
+.mf-chart__label.is-down circle { fill: var(--flow-down-ink); }
+.mf-chart__leader { fill: none; stroke: var(--text-muted); stroke-width: 1; opacity: 0.55; }
+.mf-chart__label text { font-size: 11.5px; font-weight: 700; fill: var(--text); font-variant-numeric: tabular-nums; paint-order: stroke; stroke: var(--surface-raised); stroke-width: 3px; stroke-linejoin: round; }
+.mf-chart__label text tspan { font-weight: 500; }
+.mf-chart__label.is-up text { fill: var(--flow-up-ink); }
+.mf-chart__label.is-down text { fill: var(--flow-down-ink); }
+.mf-chart__vline { stroke: var(--text-muted); stroke-width: 1; stroke-dasharray: 2 3; }
+.mf-chart__ttag, .mf-chart__vtag { fill: var(--text); }
+.mf-chart__ttext, .mf-chart__vtext { font-size: 11px; font-weight: 600; fill: var(--surface-raised); font-variant-numeric: tabular-nums; }
+.mf-chart__cdot { fill: var(--text); stroke: var(--surface-raised); stroke-width: 1.5; }
+.mf-chart__cdot.is-up { fill: var(--flow-up-ink); }
+.mf-chart__cdot.is-down { fill: var(--flow-down-ink); }
+.mf-chart__hit { fill: transparent; cursor: crosshair; }
+.mf-chart__legend { position: absolute; bottom: 6px; right: 12px; display: flex; flex-wrap: wrap; gap: 2px 14px; font-size: 11px; line-height: 1.3; color: var(--text-muted); pointer-events: none; }
+.mf-chart__legend span { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
+.mf-chart__legend i { display: inline-block; width: 16px; height: 0; border-top: 2px solid var(--text-muted); }
+.mf-chart__legend i.is-up { border-color: var(--flow-up-ink); }
+.mf-chart__legend i.is-down { border-color: var(--flow-down-ink); }
+.mf-chart__legend i.is-index { border-color: var(--text); }
+.mf-chart__legend i.is-faint { border-top-width: 1px; border-color: color-mix(in srgb, var(--text-muted) 60%, transparent); }
+.mf-chart__legend i.is-band { height: 8px; border: 0; border-radius: 2px; background: color-mix(in srgb, var(--text-muted) 22%, transparent); }
+.mf-chart__legend i.is-floor { height: 8px; border: 0; border-radius: 2px; background: color-mix(in srgb, var(--text) 9%, transparent); }
+
+/* ── The detail ─────────────────────────────────────────────────────── */
+.mf-popup {
+  position: absolute; left: 10px; right: 10px; z-index: 5; display: flex; flex-direction: column; gap: 8px; min-height: 0;
+  padding: 11px 14px 10px; border: 1px solid var(--flow-hair); border-radius: 10px; background: var(--surface-raised);
+  box-shadow: 0 10px 32px color-mix(in srgb, #0F0F0F 22%, transparent), 0 1px 3px color-mix(in srgb, #0F0F0F 12%, transparent);
+  pointer-events: none; animation: mf-in 120ms ease-out both;
+}
+.mf-popup.is-top { top: 10px; bottom: calc(50% + 10px); }
+.mf-popup.is-bottom { top: calc(50% + 10px); bottom: 10px; }
+.mf-popup.is-pinned { pointer-events: auto; }
+/* The pinned detail: the whole column, in the the app box (panel fill, card edge,
+   12px corners), its build-up colour along the top. */
+.mf-popup.is-full {
+  top: 10px; bottom: 10px; gap: 10px; padding: 14px 16px 12px;
+  border-color: var(--hairline, var(--flow-hair)); border-radius: var(--box-radius, 12px); background: var(--surface);
+  box-shadow: 0 18px 48px color-mix(in srgb, #000000 40%, transparent);
+  animation: mf-sheet-in 200ms var(--ease-ios-out, ease-out) both;
+}
+.mf-popup.is-full .mf-mini { min-height: 180px; }
+.mf-popup__tools { display: inline-flex; flex: none; align-items: center; gap: 2px; margin: -4px -6px 0 0; }
+.mf-popup__tool {
+  display: grid; place-items: center; width: 30px; height: 30px; border: 0; border-radius: 8px;
+  background: transparent; color: var(--text-muted); cursor: pointer;
+}
+.mf-popup__tool:hover:not(:disabled) { background: color-mix(in srgb, var(--text) 8%, transparent); color: var(--text); }
+.mf-popup__tool:disabled { opacity: .35; cursor: default; }
+.mf-popup__tool:focus-visible { outline: 2px solid var(--accent-ring, var(--text)); outline-offset: -2px; }
+.mf-popup__count { min-width: 34px; font-size: 11px; font-weight: 600; text-align: center; font-variant-numeric: tabular-nums; color: var(--text-muted); }
+.mf-popup__checks { display: grid; gap: 6px; padding-top: 10px; border-top: 1px solid var(--flow-hair); }
+.mf-popup__checks h4 { margin: 0; font-size: 12px; font-weight: 600; color: var(--text-muted); }
+.mf-popup__checks ul { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px 14px; margin: 0; padding: 0; list-style: none; }
+.mf-popup__checks li { display: flex; align-items: flex-start; gap: 8px; min-width: 0; }
+.mf-popup__checks li > span:last-child { display: grid; gap: 1px; min-width: 0; }
+.mf-popup__checks b { font-size: 12px; font-weight: 600; color: var(--text); }
+.mf-popup__checks small { font-size: 11px; line-height: 1.35; color: var(--text-muted); }
+.mf-popup__mark { display: grid; place-items: center; flex: none; width: 18px; height: 18px; margin-top: 1px; border-radius: 50%; }
+.mf-popup__checks li.is-held .mf-popup__mark { background: color-mix(in srgb, var(--up) 18%, transparent); color: var(--up-ink, var(--up)); }
+.mf-popup__checks li.is-open .mf-popup__mark { background: color-mix(in srgb, var(--down) 18%, transparent); color: var(--down-ink, var(--down)); }
+.mf-popup__checks li.is-unknown .mf-popup__mark { background: color-mix(in srgb, var(--text) 10%, transparent); color: var(--text-muted); }
+.mf-popup.is-full .mf-popup__foot { padding-top: 10px; border-top: 1px solid var(--flow-hair); }
+.mf-popup.is-full .mf-link { min-height: 34px; padding: 0 14px; border-radius: 999px; }
+.mf-popup.is-up { border-top: 2px solid var(--flow-up-ink); }
+.mf-popup.is-down { border-top: 2px solid var(--flow-down-ink); }
+.mf-popup__head { display: flex; align-items: flex-start; gap: 12px; min-width: 0; }
+.mf-popup__id { display: grid; min-width: 0; flex: 1 1 auto; }
+.mf-popup__id b { font-size: 15px; font-weight: 700; color: var(--text); }
+.mf-popup__id span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 11.5px; color: var(--text-muted); }
+.mf-popup__price { display: flex; align-items: baseline; gap: 8px; flex: none; font-size: 13px; font-variant-numeric: tabular-nums; }
+.mf-popup__price b { font-size: 15px; font-weight: 700; color: var(--text); }
+.mf-popup__close { flex: none; width: 26px; height: 26px; margin: -3px -6px 0 0; border: 0; border-radius: 6px; background: transparent; font-size: 18px; line-height: 1; color: var(--text-muted); }
+.mf-popup__close:hover { background: color-mix(in srgb, var(--text) 8%, transparent); color: var(--text); }
+.mf-mini { flex: 1 1 auto; min-height: 90px; position: relative; }
+.mf-mini > svg { position: absolute; inset: 0; display: block; }
+.mf-mini__note { display: grid; place-items: center; height: 100%; font-size: 12px; color: var(--text-muted); border: 1px dashed var(--flow-hair); border-radius: 8px; }
+.mf-mini__line { fill: none; stroke: var(--text); stroke-width: 1.5; stroke-linejoin: round; }
+.mf-popup.is-up .mf-mini__line { stroke: var(--flow-up-ink); }
+.mf-popup.is-down .mf-mini__line { stroke: var(--flow-down-ink); }
+.mf-mini__dot { fill: var(--text); stroke: var(--surface-raised); stroke-width: 1.5; }
+.mf-mini__zone { fill: color-mix(in srgb, var(--text) 9%, transparent); stroke: color-mix(in srgb, var(--text) 30%, transparent); stroke-width: 1; }
+.mf-popup.is-up .mf-mini__zone { fill: color-mix(in srgb, var(--flow-up) 16%, transparent); stroke: color-mix(in srgb, var(--flow-up) 50%, transparent); }
+.mf-popup.is-down .mf-mini__zone { fill: color-mix(in srgb, var(--flow-down) 16%, transparent); stroke: color-mix(in srgb, var(--flow-down) 50%, transparent); }
+.mf-mini__base { stroke: var(--text-muted); stroke-width: 1; stroke-dasharray: 3 3; }
+.mf-mini__level { stroke-width: 1; stroke-dasharray: 5 3; }
+.mf-mini__level.is-put, .mf-mini__tag.is-put { stroke: var(--dash-put, var(--flow-up)); }
+.mf-mini__level.is-call, .mf-mini__tag.is-call { stroke: var(--dash-call, var(--flow-down)); }
+.mf-mini__tag { font-size: 10.5px; font-weight: 600; font-variant-numeric: tabular-nums; stroke: none !important; fill: var(--text-muted); }
+.mf-mini__tag.is-put { fill: var(--dash-put-text, var(--flow-up-ink)); }
+.mf-mini__tag.is-call { fill: var(--dash-call-text, var(--flow-down-ink)); }
+.mf-mini__time { font-size: 10.5px; fill: var(--text-muted); font-variant-numeric: tabular-nums; }
+.mf-popup__facts { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 7px 12px; padding-top: 8px; border-top: 1px solid var(--flow-hair); }
+.mf-popup__facts > div { display: grid; gap: 1px; min-width: 0; }
+.mf-popup__facts > div.is-wide { grid-column: span 2; }
+.mf-popup__facts dt { font-size: 10.5px; font-weight: 600; color: var(--text-muted); }
+.mf-popup__facts dd { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 12px; font-weight: 600; font-variant-numeric: tabular-nums; color: var(--text); }
+.mf-popup__facts dd small { font-size: 11px; font-weight: 500; color: var(--text-muted); }
+.mf-popup__facts dd.is-put { color: var(--dash-put-text, var(--text)); }
+.mf-popup__facts dd.is-call { color: var(--dash-call-text, var(--text)); }
+.mf-popup__foot { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; font-size: 11px; color: var(--text-muted); }
+.mf-popup__foot span { margin-left: auto; }
+.mf-popup__hint { font-size: 11px; color: var(--text-muted); }
+.mf-link { display: inline-flex; align-items: center; min-height: 30px; padding: 0 10px; border: 1px solid var(--flow-hair); border-radius: 7px; background: var(--surface); color: var(--text); font-size: 12px; font-weight: 600; text-decoration: none; }
+.mf-link:hover { border-color: var(--text-muted); }
+
+/* ── Before anything is read ────────────────────────────────────────── */
+.mf-skel { border-radius: 8px; background: color-mix(in srgb, var(--line-strong) 35%, transparent); }
+.mf-skel.is-chart { position: absolute; inset: 12px 16px 46px 44px; }
+.mf-sectors.is-skeleton { height: 100%; }
+
+/* ── Tablet and phone: stacked, the page scrolls ────────────────────── */
+.mf-board[data-layout='tablet'], .mf-board[data-layout='phone'] { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+:is(.mf-board[data-layout='tablet'], .mf-board[data-layout='phone']) .mf-head { padding: 6px 2px 0; }
+:is(.mf-board[data-layout='tablet'], .mf-board[data-layout='phone']) .mf-status { justify-content: flex-start; margin-left: 0; }
+:is(.mf-board[data-layout='tablet'], .mf-board[data-layout='phone']) .mf-chartwrap,
+:is(.mf-board[data-layout='tablet'], .mf-board[data-layout='phone']) .mf-half { border: 1px solid var(--flow-hair); border-radius: 12px; background: var(--surface-raised); overflow: hidden; }
+:is(.mf-board[data-layout='tablet'], .mf-board[data-layout='phone']) .mf-chartwrap { display: grid; gap: 4px; padding: 10px 0 10px; }
+:is(.mf-board[data-layout='tablet'], .mf-board[data-layout='phone']) .mf-chartwrap > .mf-head__title { padding: 0 14px; }
+:is(.mf-board[data-layout='tablet'], .mf-board[data-layout='phone']) .mf-chartcell { position: relative; min-width: 0; }
+:is(.mf-board[data-layout='tablet'], .mf-board[data-layout='phone']) .mf-skel.is-chart { position: static; margin: 0 12px; }
+:is(.mf-board[data-layout='tablet'], .mf-board[data-layout='phone']) .mf-chart__legend { position: static; padding: 0 12px; }
+:is(.mf-board[data-layout='tablet'], .mf-board[data-layout='phone']) .mf-chart { height: auto !important; }
+:is(.mf-board[data-layout='tablet'], .mf-board[data-layout='phone']) .mf-sectors { padding: 6px 12px 0; }
+:is(.mf-board[data-layout='tablet'], .mf-board[data-layout='phone']) .mf-sectors__title { position: static; min-height: 0; padding: 4px 4px 6px; }
+:is(.mf-board[data-layout='tablet'], .mf-board[data-layout='phone']) .mf-sectors__list { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); column-gap: 10px; }
+:is(.mf-board[data-layout='tablet'], .mf-board[data-layout='phone']) .mf-half { display: flex; flex-direction: column; }
+:is(.mf-board[data-layout='tablet'], .mf-board[data-layout='phone']) .mf-featured { order: 1; padding-top: 0; }
+:is(.mf-board[data-layout='tablet'], .mf-board[data-layout='phone']) .mf-tiles { order: 2; overflow: visible; }
+:is(.mf-board[data-layout='tablet'], .mf-board[data-layout='phone']) .mf-half__key { display: none; }
+.mf-board[data-layout='phone'] .mf-featured { grid-template-columns: minmax(0, 1fr); }
+.mf-board[data-layout='phone'] .mf-tiles { grid-template-columns: repeat(auto-fill, minmax(104px, 1fr)); padding-left: 10px; padding-right: 10px; }
+.mf-board[data-layout='phone'] .mf-tile__sym { font-size: 11px; }
+.mf-board[data-layout='phone'] .mf-tile { padding-left: 7px; padding-right: 6px; }
+.ui-flow[data-layout='phone'] { --flow-pad: 12px; }
+.mf-switch { margin: 0; }
+
+.mf-popup.is-sheet {
+  position: fixed; left: 0; right: 0; bottom: 0; top: auto; z-index: 60; max-height: 82dvh; overflow-y: auto;
+  max-width: 560px; margin: 0 auto; padding-bottom: calc(12px + env(safe-area-inset-bottom, 0px));
+  border-radius: 14px 14px 0 0; pointer-events: auto;
+}
+.mf-popup.is-sheet .mf-mini { flex: none; height: 170px; }
+.mf-popup.is-sheet .mf-popup__facts { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+
+/* ── Motion ─────────────────────────────────────────────────────────── */
+@keyframes mf-in { from { opacity: 0; transform: translateY(3px); } to { opacity: 1; transform: none; } }
+@keyframes mf-sheet-in { from { opacity: 0; transform: translateY(8px) scale(.985); } to { opacity: 1; transform: none; } }
+@keyframes mf-fade { from { opacity: 0.25; } to { opacity: 1; } }
+@keyframes mf-pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.55; } }
+@keyframes mf-draw { to { stroke-dashoffset: 0; } }
+@keyframes mf-flow { to { stroke-dashoffset: -7; } }
+@keyframes mf-breathe { 0%, 100% { opacity: 0.35; } 50% { opacity: 1; } }
+@keyframes mf-ping { 0% { transform: scale(1); opacity: 1; } 70% { transform: scale(1.9); opacity: 0.35; } 100% { transform: scale(1); opacity: 1; } }
+@keyframes mf-halo { 0% { transform: scale(0.5); opacity: 0.9; } 100% { transform: scale(1.8); opacity: 0; } }
+@keyframes mf-spin { to { transform: rotate(360deg); } }
+@keyframes mf-rise { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+@keyframes mf-countpop { 0% { transform: scale(0.6); opacity: 0; } 60% { transform: scale(1.12); opacity: 1; } 100% { transform: none; } }
+.mf-chart, .mf-half:not(.is-skeleton) { animation: mf-fade 150ms ease-out both; }
+.mf-skel, .mf-tile.is-skeleton, .mf-card.is-holding { animation: mf-pulse 1.4s ease-in-out infinite; }
+/* Last, so it wins over every rule above. */
+@media (prefers-reduced-motion: reduce) {
+  .ui-flow { --flow-dur: 0ms; }
+  .mf-chart, .mf-half, .mf-popup, .mf-popup.is-full, .mf-skel, .mf-tile.is-skeleton, .mf-card.is-holding { animation: none; }
+  .mf-status__bar i { transition: none; }
+}
+:root[data-theme='dark'] .ui-flow { --flow-faint: 0.16; }
+/* The status takes its two lines from the start on narrow screens, so the board below it does not move when the counts arrive. */
+.mf-board[data-layout='phone'] .mf-status { min-height: 34px; align-content: flex-start; }
+
+/* ── The wide desktop: one continuous diagram ───────────────────────── */
+.mf-board[data-layout='diagram'] { position: relative; flex: 1 1 auto; min-height: 0; border: 1px solid var(--flow-hair); border-radius: 12px; background: var(--surface-raised); overflow: hidden; }
+.mf-dg { position: absolute; inset: 0; overflow: hidden; }
+.mf-dg__under, .mf-dg__over { position: absolute; left: 0; top: 0; display: block; }
+.mf-dg__under { z-index: 0; }
+.mf-dg__over { z-index: 3; pointer-events: none; overflow: visible; }
+.mf-dg__over .mf-chart__hit { pointer-events: all; }
+.mf-dg__spine.is-up { fill: var(--flow-up); }
+.mf-dg__spine.is-down { fill: var(--flow-down); }
+.mf-dg__floor { fill: color-mix(in srgb, var(--text) 4%, transparent); }
+.mf-dg__grid { stroke: color-mix(in srgb, var(--line-strong) 40%, transparent); stroke-width: 1; }
+.mf-dg__grid.is-time { stroke: color-mix(in srgb, var(--line-strong) 26%, transparent); }
+.mf-dg__tick { font-size: 10.5px; fill: var(--text-muted); font-variant-numeric: tabular-nums; }
+.mf-dg__tick.is-zero { font-weight: 700; fill: var(--text); }
+.mf-dg__fan { will-change: opacity; transition: opacity var(--flow-dur) ease; pointer-events: none; }
+.mf-dg__frame { pointer-events: none; }
+.has-focus .mf-dg__fan { opacity: 0.22; }
+.mf-dg__over { will-change: transform; }
+.mf-dg__medians line { stroke: var(--accent); stroke-width: 1.5; opacity: 0.22; }
+.mf-dg__medians line.is-lit { opacity: 0.8; stroke-width: 2; }
+.mf-dg__funnel { fill: color-mix(in srgb, var(--text-muted) 11%, transparent); }
+.mf-dg__faint { fill: none; stroke-width: 0.9; stroke-linejoin: round; opacity: calc(var(--flow-faint) * 0.8); }
+.mf-dg__faint.is-up { stroke: var(--flow-up); }
+.mf-dg__faint.is-down { stroke: var(--flow-down); }
+.mf-dg__faint.is-flat { stroke: var(--text-muted); opacity: calc(var(--flow-faint) * 0.8); }
+.mf-dg__bold { fill: none; stroke-width: 1.8; stroke-linejoin: round; opacity: 0.9; }
+.mf-dg__bold.is-up { stroke: var(--flow-up-ink); }
+.mf-dg__bold.is-down { stroke: var(--flow-down-ink); }
+.mf-dg__bold.is-index { stroke: var(--text); stroke-width: 1.8; opacity: 1; }
+.mf-dg__conn { fill: none; stroke-width: 1; opacity: 0.4; }
+.mf-dg__conn.is-up { stroke: var(--flow-up); }
+.mf-dg__conn.is-down { stroke: var(--flow-down); }
+.mf-dg__gate rect { fill: color-mix(in srgb, var(--text) 3%, transparent); }
+.mf-dg__gate.is-up rect { fill: color-mix(in srgb, var(--flow-up) 9%, transparent); }
+.mf-dg__gate.is-down rect { fill: color-mix(in srgb, var(--flow-down) 9%, transparent); }
+.mf-dg__gate path { fill: none; stroke-width: 1.8; }
+.mf-dg__gate.is-up path { stroke: var(--flow-up-ink); }
+.mf-dg__gate.is-down path { stroke: var(--flow-down-ink); }
+.mf-dg__zero { fill: none; stroke: color-mix(in srgb, var(--text) 55%, transparent); stroke-width: 1.4; }
+.mf-dg__node { fill: var(--surface-raised); stroke: color-mix(in srgb, var(--text) 60%, transparent); stroke-width: 1.5; }
+.mf-dg__index { font-size: 11px; font-weight: 700; fill: var(--text); paint-order: stroke; stroke: var(--surface-raised); stroke-width: 3px; font-variant-numeric: tabular-nums; }
+.mf-dg__lit path { fill: none; stroke-linejoin: round; stroke-linecap: round; }
+.mf-dg__lit .is-halo { stroke: var(--surface-raised); stroke-width: 5; opacity: 0.85; }
+.mf-dg__lit .is-line { stroke: var(--text); stroke-width: 2.2; }
+.mf-dg__lit .is-dash { stroke: var(--text); stroke-width: 1; stroke-dasharray: 4 3; transform: translateY(3.5px); opacity: 0.55; animation: mf-flow 0.9s linear infinite; }
+
+/* ── Motion (owner, 26 Oct 2026: OrderBlock's life, in the app's colours) ──
+   Each effect is slow and small, so the board breathes rather than flickers;
+   all of it stops under prefers-reduced-motion (below). */
+/* The lead paths draw in once, one after another. */
+.mf-dg__bold { stroke-dasharray: 1; stroke-dashoffset: 1; animation: mf-draw 1.1s var(--ease-ios-out, ease-out) forwards; animation-delay: calc(var(--i, 0) * 70ms); }
+/* A comet on each lead path: a bright head with a soft glow of its colour. */
+.mf-dg__comet { pointer-events: none; }
+.mf-dg__comet.is-up { fill: var(--flow-up-ink); filter: drop-shadow(0 0 4px var(--flow-up-ink)); }
+.mf-dg__comet.is-down { fill: var(--flow-down-ink); filter: drop-shadow(0 0 4px var(--flow-down-ink)); }
+.mf-dg__comet.is-flat { fill: var(--text); filter: drop-shadow(0 0 3px var(--text)); }
+/* The "now" edge breathes; the lead paths' last readings pulse on it. */
+.mf-dg__now { stroke: color-mix(in srgb, var(--text) 40%, transparent); stroke-width: 1; stroke-dasharray: 2 4; animation: mf-breathe 3s ease-in-out infinite; }
+.mf-dg__live { stroke: var(--surface-raised); stroke-width: 1.2; transform-box: fill-box; transform-origin: center; animation: mf-ping 2.4s ease-out infinite; }
+.mf-dg__live.is-up { fill: var(--flow-up-ink); }
+.mf-dg__live.is-down { fill: var(--flow-down-ink); }
+.mf-dg__live.is-flat { fill: var(--text); }
+/* The origin: a halo that swells and fades, and a dashed ring turning slowly. */
+.mf-dg__origin circle { fill: none; transform-box: fill-box; transform-origin: center; pointer-events: none; }
+.mf-dg__origin .is-halo { fill: color-mix(in srgb, var(--text) 18%, transparent); animation: mf-halo 3s ease-out infinite; }
+.mf-dg__origin .is-ring { stroke: color-mix(in srgb, var(--text) 35%, transparent); stroke-width: 1; stroke-dasharray: 3 5; animation: mf-spin 24s linear infinite; }
+/* Tiles rise into place, column by column, on the first paint. */
+.mf-tile.is-dg { animation: mf-rise 360ms var(--ease-ios-out, ease-out) both; animation-delay: calc(min(var(--i, 0), 24) * 16ms); }
+/* A count that changes pops once. */
+.mf-pop { display: inline-block; animation: mf-countpop 460ms var(--ease-ios-out, ease-out) both; }
+.mf-dg__lit.is-up .is-line { stroke: color-mix(in srgb, var(--flow-up-ink) 70%, var(--text)); }
+.mf-dg__lit.is-down .is-line { stroke: color-mix(in srgb, var(--flow-down-ink) 70%, var(--text)); }
+.mf-dg__lit.is-sector .is-line { stroke-width: 1.4; stroke: var(--accent); }
+.mf-dg__lit.is-sector .is-dash, .mf-dg__lit.is-sector .is-halo { display: none; }
+
+.mf-strip { position: absolute; z-index: 1; display: grid; grid-template-columns: minmax(0, 1fr) 184px; grid-template-rows: auto 62px; column-gap: 12px; margin: 0; }
+.mf-strip__head { grid-column: 1 / -1; min-width: 0; }
+.mf-strip__head .mf-status { flex-wrap: nowrap; justify-content: flex-start; margin-left: 0; overflow: hidden; font-size: 11.5px; }
+.mf-strip__head .mf-status__time { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+.mf-strip svg { display: block; overflow: visible; }
+.mf-strip circle.is-up { fill: var(--flow-up); }
+.mf-strip circle.is-down { fill: var(--flow-down); }
+.mf-strip circle.is-flat { fill: color-mix(in srgb, var(--text-muted) 60%, transparent); }
+.mf-strip__base { stroke: var(--text-muted); stroke-width: 1; stroke-dasharray: 3 3; opacity: 0.7; }
+.mf-strip__zero { stroke: var(--text-muted); stroke-width: 1; }
+.mf-strip__index { fill: var(--text); stroke: var(--surface-raised); stroke-width: 1.2; }
+.mf-strip__tick { font-size: 10px; fill: var(--text-muted); font-variant-numeric: tabular-nums; }
+.mf-strip__side { display: grid; align-content: center; gap: 1px; min-width: 0; font-size: 11px; font-weight: 600; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.mf-strip__side > span { overflow: hidden; text-overflow: ellipsis; }
+.mf-strip__sec { font-weight: 500; color: var(--text-muted); }
+.mf-strip__sec b { font-weight: 600; color: var(--text); }
+
+.mf-pills { position: absolute; z-index: 4; top: 0; width: var(--pill-w, 132px); height: 0; }
+.mf-pills ul { position: relative; }
+.mf-pills li { position: absolute; left: 0; width: var(--pill-w, 132px); }
+.mf-pill { display: grid; align-content: center; gap: 2px; width: 100%; height: 100%; padding: 1px 6px; border: 1px solid var(--flow-hair); border-radius: 5px;
+  background: color-mix(in srgb, var(--surface-raised) 88%, transparent); text-align: left; transition: opacity var(--flow-dur) ease; }
+.mf-pill__row { display: flex; align-items: center; gap: 4px; min-width: 0; }
+.mf-pill__name { flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 10.5px; font-weight: 600; color: var(--text); }
+.mf-pill__pct { flex: none; font-size: 10.5px; font-weight: 600; font-variant-numeric: tabular-nums; color: var(--text-muted); }
+.mf-pill.is-up .mf-pill__pct { color: var(--flow-up-ink); }
+.mf-pill.is-down .mf-pill__pct { color: var(--flow-down-ink); }
+.mf-pill__bar { display: flex; gap: 1px; height: 3px; }
+.mf-pill__bar i { flex: 1 1 0; border-radius: 1px; background: color-mix(in srgb, var(--text-muted) 35%, transparent); }
+.mf-pill__bar i.is-up { background: var(--flow-up); }
+.mf-pill__bar i.is-down { background: var(--flow-down); }
+.mf-pill:hover, .mf-pill.is-lit { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); }
+.has-focus .mf-pill:not(.is-lit) { opacity: 0.4; }
+
+.mf-dg-tiles { position: absolute; inset: 0; z-index: 1; pointer-events: none; }
+.mf-dg-tiles > * { pointer-events: auto; }
+.mf-tile.is-dg { position: absolute; height: auto; justify-content: center; gap: 2px; border-color: color-mix(in srgb, var(--flow-hair) 80%, transparent); }
+.mf-tile.is-dg.is-up { background: color-mix(in srgb, var(--up) 8%, var(--surface-raised)); border-color: color-mix(in srgb, var(--up) 22%, transparent); }
+.mf-tile.is-dg.is-down { background: color-mix(in srgb, var(--down) 8%, var(--surface-raised)); border-color: color-mix(in srgb, var(--down) 22%, transparent); }
+.mf-tile__bu { font-size: 10px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.mf-tile.is-more { display: grid; place-content: center; justify-items: center; gap: 0; background: transparent; border: 1px dashed var(--flow-hair); color: var(--text-muted); font-size: 11px; }
+.mf-tile.is-more b { font-size: 14px; color: var(--text); font-variant-numeric: tabular-nums; }
+.has-focus .mf-tile.is-dg:not(.is-lit), .has-focus .mf-tall:not(.is-lit), .has-focus .mf-dgcard:not(.is-lit) { opacity: 0.35; }
+
+.mf-tall { position: absolute; z-index: 1; display: flex; flex-direction: column; gap: 4px; padding: 7px 8px 8px; border: 1px solid var(--flow-hair); border-radius: 8px; background: var(--surface-raised); text-align: left; overflow: hidden; transition: opacity var(--flow-dur) ease; }
+.mf-tall.is-up { background: linear-gradient(180deg, color-mix(in srgb, var(--up) 10%, var(--surface-raised)), var(--surface-raised)); border-color: color-mix(in srgb, var(--up) 30%, transparent); }
+.mf-tall.is-down { background: linear-gradient(180deg, color-mix(in srgb, var(--down) 10%, var(--surface-raised)), var(--surface-raised)); border-color: color-mix(in srgb, var(--down) 30%, transparent); }
+.mf-tall__head { display: grid; gap: 1px; }
+.mf-tall__sym { font-size: 13px; font-weight: 700; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.mf-tall__row { display: flex; align-items: center; justify-content: space-between; gap: 6px; min-width: 0; }
+.mf-tall__row b { font-size: 12.5px; font-weight: 700; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.mf-tall__row .mf-num { font-size: 14px; }
+.mf-tall__bu { font-size: 10.5px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.mf-tall__row .mf-dots i { width: 6px; height: 6px; }
+.mf-tall__profile { display: block; flex: none; }
+.mf-tall__profile .is-put { fill: color-mix(in srgb, var(--dash-put, var(--flow-up)) 70%, transparent); }
+.mf-tall__profile .is-call { fill: color-mix(in srgb, var(--dash-call, var(--flow-down)) 60%, transparent); }
+.mf-tall__axis { stroke: color-mix(in srgb, var(--text-muted) 50%, transparent); stroke-width: 1; }
+.mf-tall__spot { stroke: var(--text); stroke-width: 1; stroke-dasharray: 2 2; }
+.mf-tall__tag { fill: var(--text); }
+.mf-tall__tagtext { font-size: 10px; font-weight: 700; fill: var(--surface-raised); font-variant-numeric: tabular-nums; }
+/* Lit or hovered, a card glows in its own direction's colour (OrderBlock's
+   neon, in the app's green and red), so the eye lands on it without a white ring. */
+.mf-tall.is-lit, .mf-tall:hover,
+.mf-dgcard.is-lit, .mf-dgcard:hover { box-shadow: 0 0 0 1.5px var(--text); }
+.mf-tall.is-up:is(.is-lit, :hover), .mf-dgcard.is-up:is(.is-lit, :hover) {
+  border-color: var(--flow-up-ink);
+  box-shadow: 0 0 0 1px var(--flow-up-ink), 0 0 22px color-mix(in srgb, var(--up) 32%, transparent);
+}
+.mf-tall.is-down:is(.is-lit, :hover), .mf-dgcard.is-down:is(.is-lit, :hover) {
+  border-color: var(--flow-down-ink);
+  box-shadow: 0 0 0 1px var(--flow-down-ink), 0 0 22px color-mix(in srgb, var(--down) 32%, transparent);
+}
+
+.mf-dgcard { position: absolute; z-index: 1; border: 1px solid var(--flow-hair); border-radius: 10px; overflow: hidden; transition: opacity var(--flow-dur) ease; }
+.mf-dgcard.is-up { background: linear-gradient(135deg, color-mix(in srgb, var(--up) 16%, var(--surface-raised)), var(--surface-raised) 62%); border-color: color-mix(in srgb, var(--up) 38%, transparent); }
+.mf-dgcard.is-down { background: linear-gradient(135deg, color-mix(in srgb, var(--down) 16%, var(--surface-raised)), var(--surface-raised) 62%); border-color: color-mix(in srgb, var(--down) 38%, transparent); }
+.mf-dgcard, .mf-tall { transition: opacity var(--flow-dur) ease, box-shadow var(--dur-quick, 180ms) var(--ease-ios-out, ease-out), border-color var(--dur-quick, 180ms) var(--ease-ios-out, ease-out); }
+.mf-dgcard__main { display: grid; grid-template-columns: minmax(0, 1fr) auto; grid-template-rows: minmax(0, 1fr) auto; column-gap: 10px; row-gap: 6px; width: 100%; height: 100%; margin: 0; padding: 10px 10px 10px 12px; border: 0; background: transparent; text-align: left; }
+.mf-dgcard__left { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.mf-dgcard__id { display: flex; align-items: baseline; gap: 6px; min-width: 0; }
+/* The stock's name is the card's point: it keeps its width and the sector
+   beside it gives way (COFORGE and MANKIND were cut to "COFOR…" and "MA…"
+   while "IT Services" kept its room). */
+.mf-dgcard__id b { flex: none; max-width: 100%; min-width: 0; overflow: hidden; text-overflow: ellipsis; font-size: 14px; font-weight: 700; color: var(--text); white-space: nowrap; }
+.mf-dgcard__id small { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 10.5px; color: var(--text-muted); }
+.mf-dgcard__badges { display: flex; align-items: center; gap: 6px; }
+.mf-badge { display: inline-block; padding: 3px 8px; border-radius: 5px; font-size: 11px; font-weight: 700; letter-spacing: 0.02em; color: var(--surface-raised); }
+.mf-badge.is-bullish { background: var(--flow-up-ink); }
+.mf-badge.is-bearish { background: var(--flow-down-ink); }
+.mf-ring { display: inline-flex; }
+.mf-ring__track { fill: none; stroke: color-mix(in srgb, var(--text-muted) 30%, transparent); stroke-width: 2.5; }
+.mf-ring__arc { fill: none; stroke: var(--text); stroke-width: 2.5; stroke-linecap: round; }
+.is-up .mf-ring__arc { stroke: var(--flow-up-ink); }
+.is-down .mf-ring__arc { stroke: var(--flow-down-ink); }
+.mf-ring text { font-size: 10px; font-weight: 700; fill: var(--text); font-variant-numeric: tabular-nums; }
+.mf-dgcard__pct { font-size: 24px; font-weight: 700; line-height: 1.05; letter-spacing: -0.01em; }
+.mf-dgcard__price { font-size: 11.5px; color: var(--text-muted); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.mf-dgcard__levels { grid-column: 1 / -1; display: grid; grid-template-columns: repeat(3, auto); justify-content: space-between; gap: 8px; padding-top: 5px; border-top: 1px solid var(--flow-hair); font-variant-numeric: tabular-nums; }
+.mf-dgcard__levels > span { display: grid; min-width: 0; }
+.mf-dgcard__levels i { font-style: normal; font-size: 10px; font-weight: 600; letter-spacing: 0.02em; color: var(--text-muted); }
+.mf-dgcard__levels b { font-size: 11.5px; font-weight: 600; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.mf-dgcard__chart { display: block; align-self: stretch; border-radius: 6px; background: color-mix(in srgb, var(--surface-raised) 70%, transparent); }
+.mf-range { position: relative; display: block; height: 5px; border-radius: 3px; background: linear-gradient(90deg, color-mix(in srgb, var(--dash-put, var(--flow-up)) 60%, transparent), color-mix(in srgb, var(--line-strong) 60%, transparent) 50%, color-mix(in srgb, var(--dash-call, var(--flow-down)) 60%, transparent)); }
+.mf-range.is-empty { background: transparent; }
+.mf-range__zone { position: absolute; top: -2px; height: 9px; border-radius: 2px; background: color-mix(in srgb, var(--text) 22%, transparent); }
+.mf-range__spot { position: absolute; top: -3px; width: 2px; height: 11px; margin-left: -1px; background: var(--text); border-radius: 1px; }
+
+.mf-candles { display: block; overflow: visible; }
+.mf-candles.is-empty { display: grid; place-items: center; height: 100%; font-size: 11px; color: var(--text-muted); }
+.mf-candles .is-up .mf-candles__body { fill: var(--flow-up); }
+.mf-candles .is-down .mf-candles__body { fill: var(--flow-down); }
+.mf-candles .is-up .mf-candles__wick { stroke: var(--flow-up); }
+.mf-candles .is-down .mf-candles__wick { stroke: var(--flow-down); }
+.mf-candles__wick { stroke-width: 1; }
+.mf-candles__zone { fill: color-mix(in srgb, var(--accent) 16%, transparent); stroke: color-mix(in srgb, var(--accent) 45%, transparent); stroke-width: 1; }
+.mf-candles__base { stroke: var(--text-muted); stroke-width: 1; stroke-dasharray: 3 3; }
+.mf-candles__level { stroke-width: 1; stroke-dasharray: 4 3; }
+.mf-candles .is-put .mf-candles__level { stroke: var(--dash-put, var(--flow-up)); }
+.mf-candles .is-call .mf-candles__level { stroke: var(--dash-call, var(--flow-down)); }
+.mf-candles__tag { font-size: 10px; font-weight: 600; font-variant-numeric: tabular-nums; fill: var(--text-muted); }
+.mf-candles .is-put .mf-candles__tag { fill: var(--dash-put-text, var(--flow-up-ink)); }
+.mf-candles .is-call .mf-candles__tag { fill: var(--dash-call-text, var(--flow-down-ink)); }
+.mf-candles__last { fill: var(--text); stroke: var(--surface-raised); stroke-width: 1.2; }
+
+.mf-mini .is-up .mf-mini__body { fill: var(--flow-up); }
+.mf-mini .is-down .mf-mini__body { fill: var(--flow-down); }
+.mf-mini .is-up .mf-mini__wick { stroke: var(--flow-up); }
+.mf-mini .is-down .mf-mini__wick { stroke: var(--flow-down); }
+.mf-popup__spark { flex: none; align-self: center; }
+
+.mf-dg__popzone { position: absolute; z-index: 5; pointer-events: none; }
+.mf-dg__popzone .mf-popup { left: 0; right: 0; }
+.mf-dg__popzone .mf-popup.is-pinned { pointer-events: auto; }
+
+.mf-more { position: absolute; z-index: 6; display: flex; flex-direction: column; border: 1px solid var(--flow-hair); border-radius: 10px; background: var(--surface-raised); box-shadow: 0 10px 30px color-mix(in srgb, #0F0F0F 20%, transparent); overflow: hidden; }
+.mf-more header { display: flex; align-items: baseline; gap: 8px; padding: 9px 12px 7px; border-bottom: 1px solid var(--flow-hair); font-size: 12px; color: var(--text-muted); }
+.mf-more header b { font-size: 13px; }
+.mf-more header .mf-popup__close { margin-left: auto; }
+.mf-more ol { flex: 1 1 auto; min-height: 0; overflow-y: auto; padding: 4px 6px 8px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); align-content: start; column-gap: 8px; }
+.mf-more li button { display: grid; grid-template-columns: 24px minmax(0, 1fr) auto 10px; grid-template-rows: auto auto; align-items: center; column-gap: 6px; width: 100%; padding: 4px 6px; border: 0; border-radius: 6px; background: transparent; text-align: left; font-size: 12px; }
+.mf-more li button:hover, .mf-more li button.is-lit { background: color-mix(in srgb, var(--text) 7%, transparent); }
+.mf-more__rk { font-size: 10.5px; color: var(--text-muted); font-variant-numeric: tabular-nums; }
+.mf-more li b { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.mf-more__bu { grid-column: 2 / -1; font-size: 10.5px; color: var(--text-muted); }
+.mf-skel.is-diagram { position: absolute; inset: 12px; }
+.mf-dg.is-skeleton { display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: auto 1fr 1fr; gap: 8px; padding: 12px; }
+.mf-dg.is-skeleton .mf-dg__skelhead { grid-column: 1 / -1; }
+.mf-dg.is-skeleton .mf-half { grid-column: 2; }
+.mf-dg__popzone .mf-popup__facts { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.mf-dg__popzone .mf-popup__facts > div.is-wide { grid-column: span 3; }
+
+.mf-tile.is-dg { flex-direction: row; align-items: center; gap: 4px; padding: 4px 5px 4px 7px; }
+.mf-tile__main { display: flex; flex-direction: column; justify-content: center; gap: 1px; flex: 1 1 auto; min-width: 0; }
+.mf-tile.is-dg .mf-tile__sym { flex: none; }
+.mf-tile.is-dg.is-inline .mf-tile__main { flex: 1 1 auto; min-width: 0; }
+.mf-tile.is-dg.is-inline .mf-tile__sym { flex: 0 1 auto; max-width: 100%; }
+.mf-tile.is-dg.is-inline .mf-tile__row .mf-miniprof { margin-left: auto; }
+.mf-miniprof { flex: none; display: block; }
+.mf-miniprof .is-put { fill: color-mix(in srgb, var(--dash-put, var(--flow-up)) 70%, transparent); }
+.mf-miniprof .is-call { fill: color-mix(in srgb, var(--dash-call, var(--flow-down)) 60%, transparent); }
+.mf-miniprof.is-empty { width: 26px; }
+.mf-dg__dots circle.is-up { fill: var(--flow-up-ink); }
+.mf-dg__dots circle.is-down { fill: var(--flow-down-ink); }
+.mf-dg__dots circle.is-flat { fill: var(--text-muted); }
+.mf-dg__dots circle.is-lit { r: 3.5; }
+.mf-tile.is-dg .mf-tile__bu { font-size: 10px; }
+
+/* ═══ THE STAGE (owner, 26 Oct 2026) ═══════════════════════════════════
+   Compared side by side with OrderBlock's board: it reads as a lit
+   instrument, ours read as a page. The difference is the stage, not the data:
+   - the board is ALWAYS a dark stage, in either site theme (the app's own dark
+     palette, so the look is ours);
+   - the paths glow and the fan is denser;
+   - tiles are dark with a neon edge in their direction's colour;
+   - the big cards are saturated green or red panels with a solid badge and
+     a standing glow.
+   Every token the board reads is pinned here, so the popup, the tiles and
+   the plane all take the stage together. */
+.mf-board[data-layout='diagram'] {
+  color-scheme: dark;
+  /* The stage: where the board sits, the base under each tile's tint, the deep wells (chart panes, the wedge), the bar. */
+  --stage: #050506;
+  --stage-tile: #0b0b0d;
+  --stage-deep: #000000;
+  --stage-bar: #26272d;
+  --badge-ink: #04130c;
+  --badge-ink-down: #1a0307;
+  --surface: #0f0f12;
+  --surface-raised: #0b0b0d;
+  --surface-high: #1f2026;
+  --text: #f4f4f6;
+  --text-muted: #9a9ca6;
+  --text-secondary: #c4c6ce;
+  --line: #2c2d33;
+  --line-strong: #4a4c55;
+  --hairline: #22232a;
+  --up: #16d98a;
+  --down: #ff3d5f;
+  --up-ink: #46f2ad;
+  --down-ink: #ff6f88;
+  --accent: var(--brand-600);
+  --accent-ring: var(--brand-500);
+  --flow-hair: #24252b;
+  --flow-tile: var(--stage-tile);
+  --flow-faint: 0.34;
+  /* The board tokens resolve on .ui-flow from the page theme, so the stage restates them. */
+  --flow-up: var(--up);
+  --flow-down: var(--down);
+  --flow-up-ink: var(--up-ink);
+  --flow-down-ink: var(--down-ink);
+  --flow-up-wash: color-mix(in srgb, var(--up) 9%, var(--stage-tile));
+  --flow-down-wash: color-mix(in srgb, var(--down) 9%, var(--stage-tile));
+  --dash-put: var(--up);
+  --dash-call: var(--down);
+  --dash-put-text: var(--up-ink);
+  --dash-call-text: var(--down-ink);
+  --glass-edge: rgba(255, 255, 255, 0.16);
+  --glass-sheen: rgba(255, 255, 255, 0.07);
+  --glow: 1;
+  background: var(--stage);
+  border-color: var(--hairline);
+  color: var(--text);
+}
+/* Light: a paper-white stage, deeper inks so green and red read on white, softer glows. */
+:root[data-theme='light'] .mf-board[data-layout='diagram'] {
+  color-scheme: light;
+  --stage: #f6f7f9;
+  --stage-tile: #ffffff;
+  --stage-deep: #eceef2;
+  --stage-bar: #c7ccd4;
+  --badge-ink: #ffffff;
+  --badge-ink-down: #ffffff;
+  --surface: #ffffff;
+  --surface-raised: #ffffff;
+  --surface-high: #eef0f3;
+  --text: #15171c;
+  --text-muted: #5d6470;
+  --text-secondary: #3a404a;
+  --line: #dde1e7;
+  --line-strong: #b9c0ca;
+  --hairline: #e2e5ea;
+  --up: #0a9f63;
+  --down: #e0284a;
+  --up-ink: #067a4b;
+  --down-ink: #c01d3c;
+  --flow-hair: #dde1e7;
+  --flow-faint: 0.42;
+  --glass-edge: rgba(255, 255, 255, 0.95);
+  --glass-sheen: rgba(255, 255, 255, 0.55);
+  --glow: 0.45;
+}
+/* Paths: brighter, each tone's fan lit by a soft glow of its own colour. */
+.mf-board[data-layout='diagram'] .mf-dg__faint { stroke-width: 0.85; }
+.mf-board[data-layout='diagram'] .mf-dg__faint.is-up { filter: drop-shadow(0 0 2px color-mix(in srgb, var(--up) 70%, transparent)); }
+.mf-board[data-layout='diagram'] .mf-dg__faint.is-down { filter: drop-shadow(0 0 2px color-mix(in srgb, var(--down) 70%, transparent)); }
+.mf-board[data-layout='diagram'] .mf-dg__bold.is-up { filter: drop-shadow(0 0 4px color-mix(in srgb, var(--up) 80%, transparent)); }
+.mf-board[data-layout='diagram'] .mf-dg__bold.is-down { filter: drop-shadow(0 0 4px color-mix(in srgb, var(--down) 80%, transparent)); }
+.mf-board[data-layout='diagram'] .mf-dg__conn { opacity: 0.7; }
+.mf-board[data-layout='diagram'] .mf-dg__conn.is-up { filter: drop-shadow(0 0 2px var(--up)); }
+.mf-board[data-layout='diagram'] .mf-dg__conn.is-down { filter: drop-shadow(0 0 2px var(--down)); }
+/* The lens between the plane and the tiers: a black hole the fan pours through. */
+.mf-board[data-layout='diagram'] .mf-dg__funnel { fill: var(--stage-deep); stroke: color-mix(in srgb, var(--text) 18%, transparent); stroke-width: 1; }
+.mf-board[data-layout='diagram'] .mf-dg__gate path { filter: drop-shadow(0 0 3px currentColor); }
+.mf-board[data-layout='diagram'] .mf-dg__gate.is-up path { color: var(--up); }
+.mf-board[data-layout='diagram'] .mf-dg__gate.is-down path { color: var(--down); }
+.mf-board[data-layout='diagram'] .mf-dg__spine.is-up { filter: drop-shadow(0 0 4px var(--up)); }
+.mf-board[data-layout='diagram'] .mf-dg__spine.is-down { filter: drop-shadow(0 0 4px var(--down)); }
+.mf-board[data-layout='diagram'] .mf-dg__grid { stroke: color-mix(in srgb, var(--text) 7%, transparent); }
+.mf-board[data-layout='diagram'] .mf-dg__grid.is-time { stroke: color-mix(in srgb, var(--text) 5%, transparent); }
+/* Tiles: dark glass with a neon edge and a faint inner light of their colour. */
+.mf-board[data-layout='diagram'] .mf-tile.is-dg.is-up {
+  background: linear-gradient(180deg, color-mix(in srgb, var(--up) 14%, var(--stage-tile)), var(--stage-tile));
+  border-color: color-mix(in srgb, var(--up) 55%, transparent);
+  box-shadow: inset 0 0 10px color-mix(in srgb, var(--up) 10%, transparent);
+}
+.mf-board[data-layout='diagram'] .mf-tile.is-dg.is-down {
+  background: linear-gradient(180deg, color-mix(in srgb, var(--down) 14%, var(--stage-tile)), var(--stage-tile));
+  border-color: color-mix(in srgb, var(--down) 55%, transparent);
+  box-shadow: inset 0 0 10px color-mix(in srgb, var(--down) 10%, transparent);
+}
+.mf-board[data-layout='diagram'] .mf-tile.is-dg.is-up:is(:hover, .is-lit) { border-color: var(--up); box-shadow: 0 0 16px color-mix(in srgb, var(--up) 45%, transparent), inset 0 0 10px color-mix(in srgb, var(--up) 18%, transparent); }
+.mf-board[data-layout='diagram'] .mf-tile.is-dg.is-down:is(:hover, .is-lit) { border-color: var(--down); box-shadow: 0 0 16px color-mix(in srgb, var(--down) 45%, transparent), inset 0 0 10px color-mix(in srgb, var(--down) 18%, transparent); }
+/* Tall tiles and the big cards: saturated panels with a standing glow. */
+.mf-board[data-layout='diagram'] .mf-tall.is-up { background: linear-gradient(180deg, color-mix(in srgb, var(--up) 28%, var(--stage-tile)), var(--stage-tile) 70%); border-color: color-mix(in srgb, var(--up) 65%, transparent); }
+.mf-board[data-layout='diagram'] .mf-tall.is-down { background: linear-gradient(180deg, color-mix(in srgb, var(--down) 28%, var(--stage-tile)), var(--stage-tile) 70%); border-color: color-mix(in srgb, var(--down) 65%, transparent); }
+.mf-board[data-layout='diagram'] .mf-dgcard.is-up {
+  background: linear-gradient(135deg, color-mix(in srgb, var(--up) 42%, var(--stage-tile)), color-mix(in srgb, var(--up) 10%, var(--stage-tile)) 58%, var(--stage-tile));
+  border-color: color-mix(in srgb, var(--up) 75%, transparent);
+  box-shadow: 0 0 22px color-mix(in srgb, var(--up) 22%, transparent), inset 0 1px 0 color-mix(in srgb, var(--up) 40%, transparent);
+}
+.mf-board[data-layout='diagram'] .mf-dgcard.is-down {
+  background: linear-gradient(135deg, color-mix(in srgb, var(--down) 42%, var(--stage-tile)), color-mix(in srgb, var(--down) 10%, var(--stage-tile)) 58%, var(--stage-tile));
+  border-color: color-mix(in srgb, var(--down) 75%, transparent);
+  box-shadow: 0 0 22px color-mix(in srgb, var(--down) 22%, transparent), inset 0 1px 0 color-mix(in srgb, var(--down) 40%, transparent);
+}
+.mf-board[data-layout='diagram'] .mf-dgcard.is-up:is(:hover, .is-lit) { box-shadow: 0 0 0 1px var(--up), 0 0 34px color-mix(in srgb, var(--up) 42%, transparent); }
+.mf-board[data-layout='diagram'] .mf-dgcard.is-down:is(:hover, .is-lit) { box-shadow: 0 0 0 1px var(--down), 0 0 34px color-mix(in srgb, var(--down) 42%, transparent); }
+.mf-board[data-layout='diagram'] .mf-dgcard__chart { background: color-mix(in srgb, var(--stage-deep) 55%, transparent); border: 1px solid color-mix(in srgb, var(--text) 8%, transparent); }
+/* The badge: solid, upper case, the loudest word on the board. */
+.mf-board[data-layout='diagram'] .mf-badge { padding: 4px 10px; border-radius: 6px; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--badge-ink); }
+.mf-board[data-layout='diagram'] .mf-badge.is-bullish { background: var(--up); box-shadow: 0 0 12px color-mix(in srgb, var(--up) 55%, transparent); }
+.mf-board[data-layout='diagram'] .mf-badge.is-bearish { background: var(--down); box-shadow: 0 0 12px color-mix(in srgb, var(--down) 55%, transparent); }
+/* The sector rail and the strip sit on the stage too. */
+.mf-board[data-layout='diagram'] .mf-pill { background: color-mix(in srgb, var(--text) 4%, var(--stage-tile)); border-color: var(--hairline); }
+.mf-board[data-layout='diagram'] .mf-strip circle.is-up { filter: drop-shadow(0 0 2px var(--up)); }
+.mf-board[data-layout='diagram'] .mf-strip circle.is-down { filter: drop-shadow(0 0 2px var(--down)); }
+
+/* ── Finish ────────────────────────────────────────────────────────────────
+   Type: Manrope throughout, figures tabular, so a column of moves lines up
+   digit for digit. Colour: each tile, card and sector pill carries
+   `--heat` (0–1, heatStyle in FlowParts), and its wash and edge deepen with
+   it, so the biggest movers stand out before a single number is read. */
+.ui-flow, .mf-popup, .mf-more { font-family: var(--font-sans); }
+.ui-flow :is(.mf-num, .mf-status b, .mf-half__count, .mf-tile__rk, .mf-tile.is-more b, .mf-sector__pct, .mf-pill__pct,
+  .mf-dgcard__price, .mf-dgcard__levels b, .mf-card__price, .mf-card__levels b, .mf-popup__count, .mf-pop),
+.ui-flow svg :is(.mf-dg__tick, .mf-chart__tick, .mf-chart__ttext, .mf-chart__vtext, .mf-tall__tagtext, .mf-candles__tag),
+.ui-flow .mf-ring text, .ui-flow .mf-strip text, .mf-popup .mf-num {
+  font-family: var(--font-figures);
+  font-variant-numeric: tabular-nums lining-nums;
+  letter-spacing: 0;
+}
+.ui-flow :is(.mf-tile__sym, .mf-tall__sym, .mf-dgcard__id b, .mf-card__sym) { font-weight: 600; letter-spacing: 0.015em; }
+.ui-flow :is(.mf-head__title, .mf-half__title, .mf-sectors__title, .mf-spread__title) { font-weight: 600; letter-spacing: -0.01em; }
+.ui-flow :is(.mf-dgcard__levels i, .mf-card__levels i) { font-size: 9.5px; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; }
+
+/* Tiles: a soft top-lit wash whose depth follows the move. */
+.ui-flow .mf-tile:is(.is-up, .is-down) { border-radius: 8px; }
+.ui-flow .mf-tile.is-up {
+  background: linear-gradient(165deg, color-mix(in srgb, var(--up) calc(6% + var(--heat, 0) * 24%), var(--surface-raised)), color-mix(in srgb, var(--up) calc(var(--heat, 0) * 8%), var(--surface-raised)) 90%);
+  border-color: color-mix(in srgb, var(--up) calc(18% + var(--heat, 0) * 45%), transparent);
+}
+.ui-flow .mf-tile.is-down {
+  background: linear-gradient(165deg, color-mix(in srgb, var(--down) calc(6% + var(--heat, 0) * 24%), var(--surface-raised)), color-mix(in srgb, var(--down) calc(var(--heat, 0) * 8%), var(--surface-raised)) 90%);
+  border-color: color-mix(in srgb, var(--down) calc(18% + var(--heat, 0) * 45%), transparent);
+}
+.mf-board[data-layout='diagram'] .mf-tile.is-dg.is-up {
+  background: linear-gradient(165deg, color-mix(in srgb, var(--up) calc(10% + var(--heat, 0) * 30%), var(--stage-tile)), color-mix(in srgb, var(--up) calc(var(--heat, 0) * 10%), var(--stage-tile)) 90%);
+  border-color: color-mix(in srgb, var(--up) calc(30% + var(--heat, 0) * 50%), transparent);
+  box-shadow: inset 0 1px 0 color-mix(in srgb, var(--up) calc(12% + var(--heat, 0) * 30%), transparent);
+}
+.mf-board[data-layout='diagram'] .mf-tile.is-dg.is-down {
+  background: linear-gradient(165deg, color-mix(in srgb, var(--down) calc(10% + var(--heat, 0) * 30%), var(--stage-tile)), color-mix(in srgb, var(--down) calc(var(--heat, 0) * 10%), var(--stage-tile)) 90%);
+  border-color: color-mix(in srgb, var(--down) calc(30% + var(--heat, 0) * 50%), transparent);
+  box-shadow: inset 0 1px 0 color-mix(in srgb, var(--down) calc(12% + var(--heat, 0) * 30%), transparent);
+}
+.ui-flow .mf-tile__pct { font-size: 12.5px; font-weight: 600; }
+
+/* Tall tiles and big cards: rounder, the same heat ramp, a lit top edge. */
+.mf-board[data-layout='diagram'] .mf-tall { border-radius: 10px; }
+.mf-board[data-layout='diagram'] .mf-tall.is-up { background: linear-gradient(180deg, color-mix(in srgb, var(--up) calc(16% + var(--heat, 0) * 24%), var(--stage-tile)), var(--stage-tile) 72%); }
+.mf-board[data-layout='diagram'] .mf-tall.is-down { background: linear-gradient(180deg, color-mix(in srgb, var(--down) calc(16% + var(--heat, 0) * 24%), var(--stage-tile)), var(--stage-tile) 72%); }
+.ui-flow .mf-dgcard { border-radius: 12px; }
+.mf-board[data-layout='diagram'] .mf-dgcard.is-up {
+  background:
+    radial-gradient(120% 90% at 0% 0%, color-mix(in srgb, var(--up) calc(22% + var(--heat, 0) * 26%), transparent), transparent 62%),
+    var(--stage-tile);
+  box-shadow: 0 0 calc(12px + var(--heat, 0) * 18px) color-mix(in srgb, var(--up) 22%, transparent), inset 0 1px 0 color-mix(in srgb, var(--up) 45%, transparent);
+}
+.mf-board[data-layout='diagram'] .mf-dgcard.is-down {
+  background:
+    radial-gradient(120% 90% at 0% 0%, color-mix(in srgb, var(--down) calc(22% + var(--heat, 0) * 26%), transparent), transparent 62%),
+    var(--stage-tile);
+  box-shadow: 0 0 calc(12px + var(--heat, 0) * 18px) color-mix(in srgb, var(--down) 22%, transparent), inset 0 1px 0 color-mix(in srgb, var(--down) 45%, transparent);
+}
+.ui-flow .mf-dgcard__pct { font-size: 26px; font-weight: 600; letter-spacing: -0.02em; }
+.ui-flow .mf-card { border-radius: 12px; }
+.ui-flow .mf-card.is-up { background: radial-gradient(120% 90% at 0% 0%, color-mix(in srgb, var(--up) calc(12% + var(--heat, 0) * 18%), transparent), transparent 65%), var(--surface-raised); }
+.ui-flow .mf-card.is-down { background: radial-gradient(120% 90% at 0% 0%, color-mix(in srgb, var(--down) calc(12% + var(--heat, 0) * 18%), transparent), transparent 65%), var(--surface-raised); }
+.ui-flow .mf-card__pct { font-size: 24px; font-weight: 600; letter-spacing: -0.02em; }
+
+/* The badge: a tinted chip in the side's colour rather than a solid glowing block. */
+.mf-board[data-layout='diagram'] .mf-badge { padding: 3px 9px; border-radius: 999px; font-size: 10px; font-weight: 600; letter-spacing: 0.1em; box-shadow: none; }
+.mf-board[data-layout='diagram'] .mf-badge.is-bullish { color: var(--flow-up-ink); background: color-mix(in srgb, var(--up) 18%, transparent); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--up) 50%, transparent); }
+.mf-board[data-layout='diagram'] .mf-badge.is-bearish { color: var(--flow-down-ink); background: color-mix(in srgb, var(--down) 18%, transparent); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--down) 50%, transparent); }
+
+/* Sector pills pick up their median's colour too. */
+.ui-flow .mf-pill { border-radius: 7px; }
+.mf-board[data-layout='diagram'] .mf-pill.is-up { background: color-mix(in srgb, var(--up) calc(var(--heat, 0) * 26%), var(--stage-tile)); border-color: color-mix(in srgb, var(--up) calc(14% + var(--heat, 0) * 36%), var(--hairline)); }
+.mf-board[data-layout='diagram'] .mf-pill.is-down { background: color-mix(in srgb, var(--down) calc(var(--heat, 0) * 26%), var(--stage-tile)); border-color: color-mix(in srgb, var(--down) calc(14% + var(--heat, 0) * 36%), var(--hairline)); }
+.ui-flow .mf-pill__name { font-weight: 500; }
+
+/* ── Motion ────────────────────────────────────────────────────────────────
+   One entrance, then stillness. On the first paint the lead lines draw (0–1.1s),
+   the sector pills slide in from the rail (from 150ms), the tiles rise (from
+   250ms) and the big cards settle last (from 450ms). After that the only
+   ambient motion is the comets along the lead lines; everything else moves
+   only when the data does. */
+.ui-flow {
+  --mf-ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --mf-ease-soft: cubic-bezier(0.33, 1, 0.68, 1);
+}
+/* Fill the window: the standalone page has no shell above it to measure. */
+.ui-flow[data-fit='true'] { height: var(--ui-page-fit-h, 100dvh); }
+
+/* Retired loops: the turning ring, the swelling halo, the breathing edge, a ping on every live dot. */
+.mf-dg__origin .is-ring { animation: none; opacity: 0.5; }
+.mf-dg__origin .is-halo { animation: mf-halo 1.6s var(--mf-ease) 1 both; }
+.mf-dg__now { animation: none; opacity: 0.7; }
+.mf-dg__live { animation: none; }
+
+.mf-dg__bold { animation: mf-draw 1.1s var(--mf-ease) forwards; animation-delay: calc(min(var(--i, 0), 12) * 55ms); }
+.mf-pills li { animation: mf-slide 420ms var(--mf-ease) both; animation-delay: calc(150ms + min(var(--i, 0), 20) * 22ms); }
+.mf-tile.is-dg { animation: mf-rise 420ms var(--mf-ease) both; animation-delay: calc(250ms + min(var(--i, 0), 24) * 18ms); }
+.mf-tall, .mf-dgcard { animation: mf-settle 520ms var(--mf-ease) 450ms both; }
+.mf-strip { animation: mf-fade 500ms var(--mf-ease) both; }
+@keyframes mf-slide { from { opacity: 0; transform: translateX(-10px); } to { opacity: 1; transform: none; } }
+@keyframes mf-rise { from { opacity: 0; transform: translateY(8px) scale(0.97); } to { opacity: 1; transform: none; } }
+@keyframes mf-settle { from { opacity: 0; transform: translateY(10px) scale(0.985); } to { opacity: 1; transform: none; } }
+
+/* Hover and focus: eased, and the lit tile lifts a pixel. */
+.ui-flow :is(.mf-tile, .mf-tall, .mf-dgcard, .mf-pill, .mf-sector, .mf-card) {
+  transition: opacity 220ms var(--mf-ease-soft), translate 220ms var(--mf-ease), scale 120ms var(--mf-ease), border-color 220ms var(--mf-ease-soft), box-shadow 220ms var(--mf-ease-soft), background-color 220ms var(--mf-ease-soft);
+}
+.ui-flow .mf-tile:is(:hover, .is-lit):not(.is-more, .is-skeleton) { translate: 0 -1px; }
+.ui-flow .mf-tile:active:not(.is-more) { translate: 0 0; scale: 0.98; }
+
+/* A move that changed: the tile flashes once in that direction. */
+.ui-flow :is(.mf-tile:not(.is-dg), .mf-card) { position: relative; }
+.mf-tick { position: absolute; inset: 0; z-index: 0; border-radius: inherit; pointer-events: none; animation: mf-tick 900ms var(--mf-ease-soft) both; }
+.mf-tick.is-up { background: color-mix(in srgb, var(--up) 34%, transparent); box-shadow: inset 0 0 0 1px var(--up); }
+.mf-tick.is-down { background: color-mix(in srgb, var(--down) 34%, transparent); box-shadow: inset 0 0 0 1px var(--down); }
+@keyframes mf-tick { 0% { opacity: 0; } 15% { opacity: 1; } 100% { opacity: 0; } }
+.ui-flow :is(.mf-tile__main, .mf-tile__row, .mf-tall__head, .mf-dgcard__main, .mf-card__main) { position: relative; z-index: 1; }
+
+/* Waiting for futures: a card-shaped shimmer with the count, not a grey slab. */
+.ui-flow .mf-card.is-holding {
+  border: 1px solid var(--flow-hair); border-style: solid; border-radius: 12px; font-size: 12px; color: var(--text-muted);
+  background: linear-gradient(100deg, transparent 30%, color-mix(in srgb, var(--text) 6%, transparent) 50%, transparent 70%) 0 0 / 220% 100%, color-mix(in srgb, var(--text) 2.5%, var(--surface-raised));
+  animation: mf-shimmer 1.8s linear infinite;
+}
+.ui-flow .mf-card.is-holding b { color: var(--text); font-weight: 600; }
+@keyframes mf-shimmer { from { background-position: 120% 0, 0 0; } to { background-position: -120% 0, 0 0; } }
+
+/* Demo cards: the slots filled while futures load. Same card, a dashed edge
+   and a "Demo" chip, so a sample is never mistaken for a reading. */
+.mf-dgcard__id .mf-demo { align-self: center; }
+.mf-demo {
+  display: inline-flex; align-items: center; flex: none; padding: 2px 7px; border-radius: 999px;
+  font-size: 9.5px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; line-height: 1.3;
+  color: var(--text-muted); background: color-mix(in srgb, var(--text) 8%, transparent); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--text) 18%, transparent);
+}
+.ui-flow :is(.mf-tall, .mf-dgcard, .mf-card).is-demo { border-style: dashed; }
+.mf-board[data-layout='diagram'] :is(.mf-tall, .mf-dgcard).is-demo { box-shadow: none; filter: saturate(0.75); }
+
+/* ── Palette and glass ─────────────────────────────────────────────────────
+   Emerald and crimson, brighter on the dark stage, deeper on light. Tiles and
+   cards are near-transparent glass: a tint that deepens with the move
+   (--heat), a backdrop blur over the lines behind, a bright top edge and a
+   soft sheen. The tunnels are lit bands the whole market squeezes through. */
+.ui-flow.oi-design {
+  --up: #16d98a; --down: #ff3d5f;
+  --up-ink: #46f2ad; --down-ink: #ff6f88;
+  --glass-edge: rgba(255, 255, 255, 0.16);
+  --glass-sheen: rgba(255, 255, 255, 0.07);
+}
+:root[data-theme='light'] .ui-flow.oi-design {
+  --up: #079e63; --down: #dc2747; --up-ink: #05804f; --down-ink: #bd1b38;
+  --glass-edge: rgba(255, 255, 255, 0.7); --glass-sheen: rgba(255, 255, 255, 0.35);
+}
+
+/* Lines: the fan reads as a flow, the connectors as its continuation. */
+.mf-board[data-layout='diagram'] { --flow-faint: 0.34; }
+.mf-board[data-layout='diagram'] .mf-dg__conn { opacity: 0.55; stroke-width: 0.9; }
+.mf-board[data-layout='diagram'] .mf-dg__funnel { fill: color-mix(in srgb, var(--stage-deep) 72%, transparent); stroke: color-mix(in srgb, var(--text) 16%, transparent); stroke-width: 0.6; }
+
+/* The tunnels: a lit band and bright brackets. */
+.mf-board[data-layout='diagram'] .mf-dg__gate.is-up rect { fill: color-mix(in srgb, var(--up) 16%, transparent); }
+.mf-board[data-layout='diagram'] .mf-dg__gate.is-down rect { fill: color-mix(in srgb, var(--down) 16%, transparent); }
+.mf-board[data-layout='diagram'] .mf-dg__gate path { stroke-width: 2; }
+.mf-board[data-layout='diagram'] .mf-dg__gate.is-up path { filter: drop-shadow(0 0 4px var(--up)); }
+.mf-board[data-layout='diagram'] .mf-dg__gate.is-down path { filter: drop-shadow(0 0 4px var(--down)); }
+
+/* Glass tiles. */
+/* No backdrop blur on the board: a blurred pane re-renders on every frame
+   the streams behind it move. The glass is the tint, the edge and the sheen;
+   the toolbar and the popovers, with nothing moving behind them, are frosted. */
+.mf-board[data-layout='diagram'] .mf-tile.is-dg.is-up {
+  background: linear-gradient(160deg, color-mix(in srgb, var(--up) calc(12% + var(--heat, 0) * 22%), transparent), color-mix(in srgb, var(--up) calc(3% + var(--heat, 0) * 6%), transparent) 75%);
+  border-color: color-mix(in srgb, var(--up) calc(40% + var(--heat, 0) * 45%), transparent);
+  box-shadow: inset 0 1px 0 var(--glass-edge), 0 0 calc(var(--heat, 0) * 14px) color-mix(in srgb, var(--up) 30%, transparent);
+}
+.mf-board[data-layout='diagram'] .mf-tile.is-dg.is-down {
+  background: linear-gradient(160deg, color-mix(in srgb, var(--down) calc(12% + var(--heat, 0) * 22%), transparent), color-mix(in srgb, var(--down) calc(3% + var(--heat, 0) * 6%), transparent) 75%);
+  border-color: color-mix(in srgb, var(--down) calc(40% + var(--heat, 0) * 45%), transparent);
+  box-shadow: inset 0 1px 0 var(--glass-edge), 0 0 calc(var(--heat, 0) * 14px) color-mix(in srgb, var(--down) 30%, transparent);
+}
+.mf-board[data-layout='diagram'] .mf-tall.is-up {
+  background: linear-gradient(180deg, color-mix(in srgb, var(--up) calc(22% + var(--heat, 0) * 18%), transparent), color-mix(in srgb, var(--up) 5%, transparent) 70%);
+  border-color: color-mix(in srgb, var(--up) 75%, transparent);
+  box-shadow: inset 0 1px 0 var(--glass-edge), 0 0 18px color-mix(in srgb, var(--up) 22%, transparent);
+}
+.mf-board[data-layout='diagram'] .mf-tall.is-down {
+  background: linear-gradient(180deg, color-mix(in srgb, var(--down) calc(22% + var(--heat, 0) * 18%), transparent), color-mix(in srgb, var(--down) 5%, transparent) 70%);
+  border-color: color-mix(in srgb, var(--down) 75%, transparent);
+  box-shadow: inset 0 1px 0 var(--glass-edge), 0 0 18px color-mix(in srgb, var(--down) 22%, transparent);
+}
+
+/* The big cards: saturated, near-transparent glass with a sheen across the top. */
+.mf-board[data-layout='diagram'] .mf-dgcard.is-up {
+  background:
+    linear-gradient(180deg, var(--glass-sheen), transparent 38%),
+    linear-gradient(125deg, color-mix(in srgb, var(--up) calc(46% + var(--heat, 0) * 18%), transparent), color-mix(in srgb, var(--up) 16%, transparent) 55%, color-mix(in srgb, var(--up) 5%, transparent));
+  border-color: color-mix(in srgb, var(--up) 80%, transparent);
+  box-shadow: inset 0 1px 0 var(--glass-edge), inset 0 0 24px color-mix(in srgb, var(--up) 14%, transparent), 0 0 calc(16px + var(--heat, 0) * 18px) color-mix(in srgb, var(--up) 26%, transparent);
+}
+.mf-board[data-layout='diagram'] .mf-dgcard.is-down {
+  background:
+    linear-gradient(180deg, var(--glass-sheen), transparent 38%),
+    linear-gradient(125deg, color-mix(in srgb, var(--down) calc(46% + var(--heat, 0) * 18%), transparent), color-mix(in srgb, var(--down) 16%, transparent) 55%, color-mix(in srgb, var(--down) 5%, transparent));
+  border-color: color-mix(in srgb, var(--down) 80%, transparent);
+  box-shadow: inset 0 1px 0 var(--glass-edge), inset 0 0 24px color-mix(in srgb, var(--down) 14%, transparent), 0 0 calc(16px + var(--heat, 0) * 18px) color-mix(in srgb, var(--down) 26%, transparent);
+}
+.mf-board[data-layout='diagram'] .mf-dgcard__chart { background: color-mix(in srgb, var(--stage-deep) 35%, transparent); border-color: var(--glass-edge); }
+.mf-board[data-layout='diagram'] :is(.mf-tall, .mf-dgcard).is-demo { filter: saturate(0.8); }
+
+/* The side badge: solid, as bright as the side, dark letters. */
+.mf-board[data-layout='diagram'] .mf-badge.is-bullish { color: var(--badge-ink); background: var(--up); box-shadow: 0 0 14px color-mix(in srgb, var(--up) 55%, transparent); }
+.mf-board[data-layout='diagram'] .mf-badge.is-bearish { color: var(--badge-ink-down); background: var(--down); box-shadow: 0 0 14px color-mix(in srgb, var(--down) 55%, transparent); }
+
+/* ── Flow ──────────────────────────────────────────────────────────────────
+   The board keeps moving the way the market does: points of light run from
+   each line's last minute into its tunnel and on out to its tile, a light
+   sweeps through each tunnel, and the comets ride the lead lines. */
+.mf-dg__motion { pointer-events: none; will-change: transform; }
+.mf-dg__frame { will-change: transform; }
+.mf-dg__stream { fill: none; stroke-width: 2.2; stroke-linecap: round; stroke-dasharray: 0.1 28; animation: mf-stream 2.6s linear infinite; pointer-events: none; }
+.mf-dg__stream.is-up { stroke: var(--up-ink); opacity: 0.85; }
+.mf-dg__stream.is-down { stroke: var(--down-ink); opacity: 0.85; animation-duration: 3s; }
+@keyframes mf-stream { to { stroke-dashoffset: -28.1; } }
+.has-focus .mf-dg__stream { opacity: 0.25; }
+
+.mf-dg__sweep { pointer-events: none; transform-box: view-box; animation: mf-sweep 2.8s var(--mf-ease-soft) infinite; }
+.mf-dg__gate.is-up .mf-dg__sweep { fill: color-mix(in srgb, var(--up-ink) 45%, transparent); }
+.mf-dg__gate.is-down .mf-dg__sweep { fill: color-mix(in srgb, var(--down-ink) 45%, transparent); animation-delay: 1.4s; }
+@keyframes mf-sweep {
+  0% { transform: translateX(0); opacity: 0; }
+  25% { opacity: 1; }
+  100% { transform: translateX(calc(var(--gw, 72px) - 18px)); opacity: 0; }
+}
+.mf-board[data-layout='diagram'] .mf-dg__gate path { animation: mf-glow 3.2s ease-in-out infinite; }
+@keyframes mf-glow { 0%, 100% { opacity: 0.75; } 50% { opacity: 1; } }
+
+/* ── macOS finish ──────────────────────────────────────────────────────────
+   The board sits in a window: a translucent toolbar with the traffic lights
+   and a centred title, a hairline edge, continuous corners and a deep soft
+   shadow, on a faintly lit desktop. Popovers are frosted the same way. */
+.ui-flow.oi-design {
+  --mac-edge: rgba(255, 255, 255, 0.12);
+  --mac-hair: rgba(255, 255, 255, 0.07);
+  --mac-bar: rgba(30, 30, 34, 0.62);
+  --mac-shadow: 0 0 0 0.5px rgba(0, 0, 0, 0.8), 0 22px 70px rgba(0, 0, 0, 0.6), 0 6px 18px rgba(0, 0, 0, 0.35);
+  --mac-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --mac-desk: #000000;
+}
+:root[data-theme='light'] .ui-flow.oi-design {
+  --mac-edge: rgba(0, 0, 0, 0.12); --mac-hair: rgba(0, 0, 0, 0.08); --mac-bar: rgba(246, 246, 248, 0.72);
+  --mac-shadow: 0 0 0 0.5px rgba(0, 0, 0, 0.12), 0 22px 70px rgba(0, 0, 0, 0.18), 0 6px 18px rgba(0, 0, 0, 0.08);
+}
+.ui-flow.oi-design[data-fit='true'] {
+  padding-top: 14px;
+  background:
+    radial-gradient(1100px 520px at 18% -8%, color-mix(in srgb, var(--up) 9%, transparent), transparent 62%),
+    radial-gradient(1000px 560px at 92% 112%, color-mix(in srgb, var(--down) 8%, transparent), transparent 60%),
+    var(--mac-desk);
+}
+:root[data-theme='light'] .ui-flow.oi-design { --mac-desk: #e8e9ee; }
+
+.ui-flow .ui-flow-pagebar.ui-pagebar {
+  position: relative; margin: 0; min-height: 46px; padding: 0 10px 0 88px;
+  border: 0.5px solid var(--mac-edge); border-bottom-color: var(--mac-hair); border-radius: 12px 12px 0 0;
+  background: var(--mac-bar);
+  -webkit-backdrop-filter: blur(28px) saturate(180%); backdrop-filter: blur(28px) saturate(180%);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+/* The traffic lights: decoration, as on a macOS window. */
+.ui-flow .ui-flow-pagebar.ui-pagebar::before {
+  content: ""; position: absolute; left: 16px; top: 50%; width: 12px; height: 12px; margin-top: -6px; border-radius: 50%;
+  background: #ff5f57; box-shadow: inset 0 0 0 0.5px rgba(0, 0, 0, 0.25), 20px 0 0 #febc2e, 40px 0 0 #28c840;
+}
+.ui-flow .ui-flow-pagebar.ui-pagebar::after {
+  content: "Order Flow"; position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);
+  font: 600 13px/1 var(--font-sans); letter-spacing: -0.01em; color: var(--text); opacity: 0.85; pointer-events: none;
+}
+.ui-flow[data-fit='true'] .mf-board {
+  border: 0.5px solid var(--mac-edge); border-top: 0; border-radius: 0 0 12px 12px;
+  box-shadow: var(--mac-shadow);
+  background: var(--stage);
+}
+.ui-flow[data-fit='true'] .ui-flow-pagebar.ui-pagebar { box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06), 0 -10px 40px rgba(0, 0, 0, 0.25); }
+
+/* The segmented control: a macOS capsule, the chosen segment a raised pill that slides. */
+.ui-flow .ui-flow-universe { border-radius: 8px; }
+
+/* Popovers: frosted, continuous corners, a soft deep shadow, a springy entrance. */
+.ui-flow :is(.mf-popup, .mf-more) {
+  background: color-mix(in srgb, var(--surface-raised) 93%, transparent);
+  -webkit-backdrop-filter: blur(30px) saturate(180%); backdrop-filter: blur(30px) saturate(180%);
+  border: 0.5px solid var(--mac-edge); border-radius: 12px;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08), 0 24px 60px rgba(0, 0, 0, 0.5), 0 0 0 0.5px rgba(0, 0, 0, 0.6);
+}
+.ui-flow .mf-popup { animation: mf-pop-in 260ms var(--mac-spring) both; transform-origin: 50% 0; }
+@keyframes mf-pop-in { from { opacity: 0; transform: translateY(-4px) scale(0.96); } to { opacity: 1; transform: none; } }
+
+/* Hover lifts with a little spring, as macOS controls do. */
+.ui-flow :is(.mf-tile, .mf-tall, .mf-dgcard) { transition-timing-function: var(--mac-spring); }
+.mf-board[data-layout='diagram'] :is(.mf-tall, .mf-dgcard):hover { translate: 0 -2px; }
+
+/* Thin overlay scrollbars. */
+.ui-flow * { scrollbar-width: thin; scrollbar-color: color-mix(in srgb, var(--text) 25%, transparent) transparent; }
+
+/* Logos: each stock's mark beside its symbol, on a small white plate with a
+   hairline so a dark logo still reads on the dark stage. Symbols without a
+   held mark show their two-letter monogram in the same place. */
+.mf-tile__id, .mf-tall__id { display: flex; align-items: center; gap: 5px; min-width: 0; }
+.mf-tall__id { gap: 6px; }
+.ui-flow .mf-logo { box-shadow: 0 0 0 0.5px rgba(255, 255, 255, 0.18), 0 1px 2px rgba(0, 0, 0, 0.4); }
+.ui-flow .mf-logo.has-art { background: #fff; }
+.ui-flow .mf-logo .ui-symbol-mark__text { font-size: calc(var(--mark-size) * 0.42); }
+/* On a tile the symbol is the point: a wordmark fits a square plate instead of widening it. */
+.ui-flow :is(.mf-tile, .mf-tall) .mf-logo.is-wide { width: var(--mark-size); min-width: var(--mark-size); max-width: var(--mark-size); padding: 1px; }
+.ui-flow :is(.mf-tile, .mf-tall) .mf-logo.is-wide .ui-symbol-mark__art { max-width: calc(var(--mark-size) - 2px); max-height: calc(var(--mark-size) - 2px); }
+.mf-dgcard__id { align-items: center; }
+.mf-popup__logo { align-self: center; }
+
+/* Provisional paths: a stock whose future is still being read runs dashed
+   from the open to its spot move, so its tile has its path from the start. */
+.mf-dg__pending { fill: none; stroke-width: 0.9; stroke-dasharray: 3 4; opacity: 0.42; }
+.mf-dg__pending.is-up { stroke: var(--flow-up); }
+.mf-dg__pending.is-down { stroke: var(--flow-down); }
+.has-focus .mf-dg__pending { opacity: 0.12; }
+
+
+/* Paths run behind the cards: every tile and card has a solid base under its
+   glass tint, so a path shows only in the gaps and arrives at its card from
+   behind, never drawn across another card. */
+.mf-board[data-layout='diagram'] :is(.mf-tile.is-dg, .mf-tall, .mf-dgcard):is(.is-up, .is-down, .is-flat, .is-spot) { background-color: var(--stage-tile); }
+
+/* The bar between the halves: a thick rule along zero that carries on between
+   the bullish and bearish tiles, a thin bright core on it, green above and
+   red below. Flat names (and NIFTY when it has no card) end in it. */
+.mf-dg__bar { fill: none; stroke: var(--stage-bar); stroke-width: 8; stroke-linecap: round; stroke-linejoin: round;
+  filter: drop-shadow(0 -1.5px 0 color-mix(in srgb, var(--up) 70%, transparent)) drop-shadow(0 1.5px 0 color-mix(in srgb, var(--down) 70%, transparent)); }
+.mf-board[data-layout='diagram'] .mf-dg__zero { stroke: color-mix(in srgb, var(--text) 85%, transparent); stroke-width: 1.4; }
+
+/* A narrow window: the title gives way to the controls, the toolbar tightens. */
+@media (max-width: 760px) {
+  .ui-flow .ui-flow-pagebar.ui-pagebar { padding-left: 72px; padding-right: 6px; }
+  .ui-flow .ui-flow-pagebar.ui-pagebar::after { display: none; }
+  .ui-flow .ui-flow-pagebar.ui-pagebar::before { left: 12px; width: 10px; height: 10px; margin-top: -5px; box-shadow: inset 0 0 0 0.5px rgba(0, 0, 0, 0.25), 16px 0 0 #febc2e, 32px 0 0 #28c840; }
+}
+
+/* The detail's header on two lines, so a wide wordmark never pushes the
+   pager out of the popup or the line over the name:
+   logo · name · pager / logo · price · line. */
+.ui-flow .mf-popup__head {
+  display: grid; grid-template-columns: auto minmax(0, 1fr) auto;
+  grid-template-areas: "logo id tools" "logo price spark"; column-gap: 12px; row-gap: 4px; align-items: center;
+}
+.ui-flow .mf-popup__head > .mf-popup__logo { grid-area: logo; align-self: start; }
+.ui-flow .mf-popup__head > .mf-popup__id { grid-area: id; }
+.ui-flow .mf-popup__head > .mf-popup__tools { grid-area: tools; margin: 0; }
+.ui-flow .mf-popup__head > .mf-popup__price { grid-area: price; flex-wrap: wrap; row-gap: 0; }
+.ui-flow .mf-popup__head > .mf-popup__spark { grid-area: spark; justify-self: end; }
+
+/* ── The white theme ───────────────────────────────────────────────────────
+   Paper white: a white board on a soft grey desk, white tiles and cards with
+   a light wash in their direction's colour, crisp one-pixel edges, and soft
+   neutral shadows instead of the coloured glows the dark stage uses. */
+:root[data-theme='light'] .ui-flow.oi-design { --mac-desk: #eceef2; --mac-bar: rgba(255, 255, 255, 0.82); }
+:root[data-theme='light'] .mf-board[data-layout='diagram'] {
+  --stage: #ffffff;
+  --stage-tile: #ffffff;
+  --stage-deep: #f5f6f8;
+  --stage-bar: #d3d8df;
+  --hairline: #e6e9ee;
+  --flow-hair: #e3e7ec;
+  --line: #e3e7ec;
+  --text-muted: #667085;
+  --soft-shadow: 0 1px 2px rgba(16, 24, 40, 0.05), 0 6px 18px rgba(16, 24, 40, 0.06);
+}
+:root[data-theme='light'] .mf-board[data-layout='diagram'] .mf-tile.is-dg:is(.is-up, .is-down) {
+  background: linear-gradient(180deg, color-mix(in srgb, var(--tone) calc(5% + var(--heat, 0) * 12%), #ffffff), #ffffff 85%);
+  border-color: color-mix(in srgb, var(--tone) calc(22% + var(--heat, 0) * 38%), #e3e7ec);
+  box-shadow: 0 1px 2px rgba(16, 24, 40, 0.04);
+}
+:root[data-theme='light'] .mf-board[data-layout='diagram'] .mf-tile.is-dg.is-up { --tone: var(--up); }
+:root[data-theme='light'] .mf-board[data-layout='diagram'] .mf-tile.is-dg.is-down { --tone: var(--down); }
+:root[data-theme='light'] .mf-board[data-layout='diagram'] .mf-tile.is-dg:is(.is-up, .is-down):is(:hover, .is-lit) {
+  border-color: var(--tone); box-shadow: 0 0 0 1px var(--tone), var(--soft-shadow);
+}
+:root[data-theme='light'] .mf-board[data-layout='diagram'] :is(.mf-tall, .mf-dgcard):is(.is-up, .is-down) {
+  border-color: color-mix(in srgb, var(--tone) 40%, #e3e7ec);
+  box-shadow: var(--soft-shadow);
+}
+:root[data-theme='light'] .mf-board[data-layout='diagram'] :is(.mf-tall, .mf-dgcard).is-up { --tone: var(--up); }
+:root[data-theme='light'] .mf-board[data-layout='diagram'] :is(.mf-tall, .mf-dgcard).is-down { --tone: var(--down); }
+:root[data-theme='light'] .mf-board[data-layout='diagram'] .mf-tall:is(.is-up, .is-down) {
+  background: linear-gradient(180deg, color-mix(in srgb, var(--tone) calc(7% + var(--heat, 0) * 8%), #ffffff), #ffffff 60%);
+}
+:root[data-theme='light'] .mf-board[data-layout='diagram'] .mf-dgcard:is(.is-up, .is-down) {
+  background: radial-gradient(130% 100% at 0% 0%, color-mix(in srgb, var(--tone) calc(10% + var(--heat, 0) * 10%), transparent), transparent 60%), #ffffff;
+}
+:root[data-theme='light'] .mf-board[data-layout='diagram'] :is(.mf-tall, .mf-dgcard):is(.is-up, .is-down):is(:hover, .is-lit) {
+  border-color: var(--tone); box-shadow: 0 0 0 1px var(--tone), 0 2px 4px rgba(16, 24, 40, 0.06), 0 12px 28px rgba(16, 24, 40, 0.10);
+}
+:root[data-theme='light'] .mf-board[data-layout='diagram'] .mf-dgcard__chart { background: #f8f9fb; border-color: #e6e9ee; }
+:root[data-theme='light'] .mf-board[data-layout='diagram'] .mf-pill { background: #ffffff; box-shadow: 0 1px 1px rgba(16, 24, 40, 0.03); }
+:root[data-theme='light'] .mf-board[data-layout='diagram'] .mf-pill.is-up { background: color-mix(in srgb, var(--up) calc(var(--heat, 0) * 12%), #ffffff); }
+:root[data-theme='light'] .mf-board[data-layout='diagram'] .mf-pill.is-down { background: color-mix(in srgb, var(--down) calc(var(--heat, 0) * 12%), #ffffff); }
+:root[data-theme='light'] .mf-board[data-layout='diagram'] .mf-dg__gate.is-up rect { fill: color-mix(in srgb, var(--up) 9%, transparent); }
+:root[data-theme='light'] .mf-board[data-layout='diagram'] .mf-dg__gate.is-down rect { fill: color-mix(in srgb, var(--down) 9%, transparent); }
+:root[data-theme='light'] .mf-board[data-layout='diagram'] .mf-dg__gate path { filter: none; }
+:root[data-theme='light'] .mf-board[data-layout='diagram'] .mf-dg__funnel { fill: #f5f6f8; stroke: #e3e7ec; }
+:root[data-theme='light'] .mf-board[data-layout='diagram'] .mf-dg__bar { filter: drop-shadow(0 -1px 0 color-mix(in srgb, var(--up) 55%, transparent)) drop-shadow(0 1px 0 color-mix(in srgb, var(--down) 55%, transparent)); }
+:root[data-theme='light'] .mf-board[data-layout='diagram'] .mf-badge { box-shadow: none; }
+:root[data-theme='light'] .ui-flow .mf-logo { box-shadow: 0 0 0 1px #e6e9ee; }
+:root[data-theme='light'] .ui-flow[data-fit='true'] .mf-board { box-shadow: 0 0 0 1px rgba(16, 24, 40, 0.06), 0 24px 60px rgba(16, 24, 40, 0.10), 0 4px 12px rgba(16, 24, 40, 0.05); }
+
+/* Reduced motion, LAST: the motion rules above sit after the earlier
+   reduced-motion block and would otherwise win it. Nothing moves; the lead
+   paths show whole, the tiles and counts are simply there. */
+@media (prefers-reduced-motion: reduce) {
+  .mf-dg__lit .is-dash, .mf-dg__now, .mf-dg__live, .mf-dg__origin .is-halo, .mf-dg__origin .is-ring, .mf-tile.is-dg, .mf-pop,
+  .mf-pills li, .mf-tall, .mf-dgcard, .mf-strip, .mf-card.is-holding, .mf-tick,
+  .mf-dg__stream, .mf-dg__sweep, .mf-dg__gate path, .ui-flow .mf-popup { animation: none; }
+  .mf-dg__sweep { opacity: 0; }
+  .mf-board[data-layout='diagram'] :is(.mf-tall, .mf-dgcard):hover { translate: none; }
+  .mf-tick { opacity: 0; }
+  .ui-flow .mf-tile:is(:hover, .is-lit) { translate: none; }
+  .mf-dg__bold { animation: none; stroke-dasharray: none; stroke-dashoffset: 0; }
+  .mf-dg__origin .is-halo { opacity: 0.35; }
+}
+
+/* ── Website finish (mrchartist.com) ─────────────────────────────────────
+   The wordmark in the title bar: Order Flow in Chartist Sans, the accent
+   word in Chartist Serif, the Mr. Chartist dot in wine (the brand mark's
+   only job). A plain desk with no coloured glow, and nothing lifts on hover,
+   as on the website. */
+.ui-flow .ui-flow-pagebar.ui-pagebar::after { content: none; }
+.ui-flow .mf-brand {
+  position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);
+  display: inline-flex; align-items: center; gap: 8px; white-space: nowrap;
+  color: var(--text); text-decoration: none; border-radius: 999px; padding: 4px 10px;
+}
+.ui-flow .mf-brand__dot { width: 8px; height: 8px; border-radius: 50%; background: var(--brand-wine); flex: none; }
+.ui-flow .mf-brand__name { font: 600 15px/1 var(--font-display); letter-spacing: -0.02em; }
+.ui-flow .mf-brand__name em { font: italic 400 18px/1 var(--font-accent); letter-spacing: 0; color: var(--brand-wine); }
+.ui-flow .mf-brand__by { font: 500 12px/1 var(--font-sans); color: var(--text-muted); padding-left: 8px; border-left: 1px solid var(--line); }
+.ui-flow .mf-brand:focus-visible { outline: 2px solid var(--text); outline-offset: -2px; }
+@media (max-width: 1100px) { .ui-flow .mf-brand__by { display: none; } }
+@media (max-width: 760px) {
+  .ui-flow .mf-brand { position: static; transform: none; padding: 4px 6px; margin-right: auto; }
+  .ui-flow .mf-brand__name { font-size: 14px; }
+  .ui-flow .mf-brand__name em { font-size: 16px; }
+}
+@media (max-width: 420px) { .ui-flow .mf-brand { display: none; } }
+
+.ui-flow.oi-design[data-fit='true'] { background: var(--mac-desk); }
+:root[data-theme='light'] .ui-flow.oi-design { --mac-desk: #F2F2F7; }
+:root[data-theme='dark'] .ui-flow.oi-design { --mac-desk: #000000; }
+.mf-board[data-layout='diagram'] :is(.mf-tall, .mf-dgcard):hover { translate: none; }
+
+.mf-dg__funnel-stop.is-from { stop-color: var(--stage-deep, var(--bg)); stop-opacity: 0; }
+.mf-dg__funnel-stop.is-to { stop-color: var(--stage-deep, var(--bg)); stop-opacity: 1; }
+:root[data-theme='light'] .mf-dg__funnel-stop { stop-color: #F2F2F7; }
+.mf-board[data-layout='diagram'] .mf-dg__funnel { stroke: color-mix(in srgb, var(--text) 8%, transparent); }
+:root[data-theme='light'] .mf-board[data-layout='diagram'] .mf-dg__funnel { stroke: rgb(0 0 0 / .08); }
+/* Progress, focus and the sector medians in ink, never a colour. */
+.ui-flow .mf-status__bar i { background: var(--text); }
+.ui-flow :focus-visible { outline-color: var(--text); }
+.mf-dg__medians line { stroke: var(--text); opacity: 0.14; }

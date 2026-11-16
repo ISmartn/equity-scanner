@@ -1,0 +1,319 @@
+/* the app Design System Button.
+   One shell, one radius, one hairline, one press. Intents only ever change
+   fill and ink — never geometry — so a row of mixed-intent buttons lines up.
+
+   ── THE BUTTON SIZE SCALE (this file is the authority) ──────────────────────
+
+   A grep of the tree found button heights at 24, 26, 28, 29, 30, 32, 34, 36,
+   38, 40, 44 and 48px. That is drift, not a scale. Four steps cover every real
+   case in this app, plus one floor that is not a size:
+
+     --btn-h-xs  28px  Dense, DESKTOP-ONLY control inside a data strip where the
+                       strip itself is the rhythm: replay transport, a callout's
+                       close glyph, a chart-overlay dismiss. Never the only way
+                       to reach an action — every consumer raises it to
+                       --btn-h-tap under `(pointer: coarse)`.
+     --btn-h-sm  34px  The compact control rail. The Open Interest and OI Spurts
+                       chart docks, steppers, chips, info buttons, as-of
+                       shortcuts. 34 (not 32) because the shared dock in
+                       ControlStripMore.css already unified this rail at 34 and
+                       that is the value the two live workspaces are drawn to.
+     --btn-h-md  40px  A standalone button that is not the page's answer:
+                       Button size "s", window presets, the fullscreen toggle.
+     --btn-h-lg  48px  The primary action, and full-width rows in a bottom sheet
+                       (a sheet row IS a button). Button size "m".
+     --btn-h-tap 44px  The coarse-pointer FLOOR. Not a step — you never design
+                       to it, you never sit between it and a step; you raise a
+                       smaller step to it on touch. Aliases --tap-min.
+
+   Icon-only buttons are square at the same steps: width == height. Do not
+   invent an icon-specific ladder.
+
+   ── HOW THIS COMPOSES WITH ui-segmented-controls.css ──────────────────────
+
+   A segmented control is NOT on this scale. Its geometry is owned by that
+   sheet's `--ui-seg-*` knobs (`--ui-seg-track-min`, `--ui-seg-btn-min`,
+   `--ui-seg-btn-min-mobile`, `--ui-seg-paint`), because a segment's height
+   is a property of the TRACK it lives in, not of the button. The two systems
+   meet at the touch floor only: both clear 44px on a coarse pointer. If you
+   want a segmented rail to match a button rail, set the seg knob to the button
+   token — `--ui-seg-btn-min: var(--btn-h-sm, 34px)` — rather than declaring a
+   literal in either sheet. The 36/38px values still living on the mobile page
+   bars are segmented-track values and are governed there, not here.
+
+   CORRECTION: "both clear 44px on a coarse pointer" is not true today and is
+   a deliberate exception, not a bug. ui-segmented-controls.css:116 pins a
+   36px track and 32px buttons, PageBar.css:197 pins 32/40/32 and TopBar.css
+   :854 pins 32/40/32/36. Those are dense desktop chrome, and `(pointer:
+   coarse)` fires on touch laptops where they render full width — raising them
+   to 44 would cost real vertical density on a data-first surface. The floor
+   binds the BUTTON ladder (this file) and the work rail; the chrome and
+   segmented rails are documented exceptions. Do not "fix" them silently.
+
+   ── WHY THESE ARE TOKENS AND NOT SELECTORS ─────────────────────────────────
+
+   The previous segmented-controls sheet pinned geometry from a (1,5,2)
+   selector that no feature sheet could outrank, which forced three feature
+   sheets into hacks. This block is a plain `:root` at (0,1,0) and uses NO
+   `!important` for geometry, so any consumer can retune a step in its own
+   scope. Every consumer still writes `var(--btn-h-sm, 34px)` with the literal
+   fallback: a missing custom property is invalid at computed-value time and
+   falls back to `inherit`, not to a sane default (contract §1.6.3). */
+:root {
+  --btn-h-xs: 28px;
+  --btn-h-sm: 34px;
+  --btn-h-md: 40px;
+  --btn-h-lg: 48px;
+  --btn-h-tap: var(--tap-min, 44px);
+}
+
+.ui-btn {
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-small);
+  /* R9 — paired directional buttons ("Buy Call" / "Buy Put") are two equal
+     flex children. A flex item defaults to `min-width: auto`, which refuses to
+     shrink below its label and pushes the pair past the container at 360px;
+     `min-width: 0` plus the max-width cap makes the two halves share the row
+     evenly instead. `box-sizing` above keeps the padding inside that share. */
+  min-width: 0;
+  max-width: 100%;
+  /* Every intent restates its own colour; declaring the hairline here keeps
+     the box the same height whether an intent draws an edge or not. */
+  border: 1px solid transparent;
+  border-radius: 999px;
+  font-family: var(--font-sans);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0;
+  text-decoration: none;
+  cursor: pointer;
+  transition:
+    background-color var(--dur-tap, 120ms) var(--ease-ios-out, ease),
+    border-color var(--dur-tap, 120ms) var(--ease-ios-out, ease),
+    color var(--dur-tap, 120ms) var(--ease-ios-out, ease),
+    box-shadow var(--dur-tap, 120ms) var(--ease-ios-out, ease),
+    transform var(--dur-tap, 120ms) var(--ease-ios-out, ease);
+}
+
+/* Press is a fast, small settle — never a colour jump. */
+.ui-btn:active:not(:disabled) {
+  transform: scale(.97);
+}
+
+.ui-btn:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  box-shadow: 0 0 14px color-mix(in srgb, var(--accent) 22%, transparent);
+}
+
+.ui-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+/* Sizes — M is the scale's L step (the primary action), S is the M step. The
+   class names are the component's public API and predate the scale; the
+   heights are the scale. */
+.ui-btn-m {
+  height: var(--btn-h-lg, 48px);
+  padding: 0 var(--spacing-large);
+  font-size: 14px;
+}
+
+.ui-btn-s {
+  height: var(--btn-h-md, 40px);
+  padding: 0 var(--spacing-medium);
+  font-size: 12px;
+}
+
+/* Touch raises BOTH sizes to the full tap target. S was left at its painted
+   40px, which is under the 44px floor — `min-height` beats the fixed `height`
+   above, so the box grows without the intent rules changing. The square
+   minimum covers the icon-only form. */
+@media (pointer: coarse) {
+  .ui-btn-m,
+  .ui-btn-s { min-height: var(--btn-h-tap, 44px); }
+  .ui-btn-s { min-width: var(--btn-h-tap, 44px); }
+  /* The underline intent has no chrome to grow, so give it the target only. */
+  .ui-btn-intent-underline { min-width: 0; }
+}
+
+.ui-btn-label {
+  display: inline-flex;
+  align-items: center;
+  min-width: 0;
+  line-height: 1.2;
+}
+
+.ui-btn-icon-leading,
+.ui-btn-icon-trailing {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+}
+
+/* M icon size 24px, S icon size 16px */
+.ui-btn-m .ui-btn-icon-leading svg,
+.ui-btn-m .ui-btn-icon-trailing svg {
+  width: 24px;
+  height: 24px;
+}
+
+.ui-btn-s .ui-btn-icon-leading svg,
+.ui-btn-s .ui-btn-icon-trailing svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* ---- Intents: fill and ink only ----
+   Hover fills sit behind `@media (hover: hover)` (convention in ui-motion.css):
+   on a touch screen a tapped button otherwise keeps its hover paint until the
+   next tap lands somewhere else. :active still gives the press feedback. */
+
+/* Flat brand fill, matching the shipped the reference design CTA (#C80E7D → #a50f66 on
+   hover, white ink). Three things used to disagree here: the palette header
+   said "primary actions are monochrome", this file shipped a magenta gradient,
+   and the reference design ships flat brand. Flat brand is the one that is both correct
+   and accessible — white on brand-600 is 5.51:1, where the old gradient put
+   --cta-text (near-black in dark) on the gradient's top stop at 3.65:1 and
+   failed AA. Ink is pinned to white rather than --cta-text precisely because
+   --cta-text inverts with the theme and the fill no longer does. */
+.ui-btn-intent-primary {
+  /* Monochrome CTA (design contract §4): the fill and ink invert together with
+     the theme, so contrast is a property of the pair, not of one pinned side.
+     No resting shadow — depth comes from the fill, not a lift. */
+  background: var(--cta-fill, var(--brand-600));
+  color: var(--cta-text, var(--capital-white));
+  border-color: transparent;
+  box-shadow: none;
+}
+
+@media (hover: hover) {
+  .ui-btn-intent-primary:hover:not(:disabled) {
+    background: color-mix(in srgb, var(--cta-fill, var(--brand-700)) 86%, var(--cta-text, var(--capital-white)));
+    box-shadow: none;
+  }
+}
+
+.ui-btn-intent-primary:active:not(:disabled) {
+  background: var(--brand-700);
+  box-shadow: var(--shadow-2);
+}
+
+.ui-btn-intent-secondary {
+  background: var(--surface2);
+  color: var(--text);
+  border-color: var(--border2);
+  box-shadow: var(--shadow-smooth-L1);
+}
+
+@media (hover: hover) {
+  .ui-btn-intent-secondary:hover:not(:disabled) {
+    background: var(--surface3);
+    border-color: color-mix(in srgb, var(--accent) 38%, var(--border2));
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 12%, transparent), 0 0 16px color-mix(in srgb, var(--accent) 14%, transparent);
+  }
+}
+
+.ui-btn-intent-secondary:active:not(:disabled) {
+  background: var(--press-wash);
+}
+
+.ui-btn-intent-tertiary {
+  background: transparent;
+  color: var(--text2);
+  box-shadow: none;
+}
+
+@media (hover: hover) {
+  .ui-btn-intent-tertiary:hover:not(:disabled) {
+    color: var(--text);
+    background: var(--chip-surface-unselected);
+    border-color: color-mix(in srgb, var(--accent) 34%, var(--chip-stroke-unselected));
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 10%, transparent);
+  }
+}
+
+.ui-btn-intent-tertiary:active:not(:disabled) {
+  background: var(--press-wash);
+}
+
+/* Text-only affordance: the underline is the whole button, so it carries no
+   fill, no edge and no press scale — only the rule under the label moves. */
+.ui-btn-intent-underline {
+  height: auto;
+  padding: 0;
+  background: transparent;
+  color: var(--text2);
+  box-shadow: none;
+}
+
+.ui-btn-intent-underline .ui-btn-label {
+  box-shadow: inset 0 -1px 0 color-mix(in srgb, currentcolor 38%, transparent);
+}
+
+@media (hover: hover) {
+  .ui-btn-intent-underline:hover:not(:disabled) {
+    color: var(--text);
+  }
+
+  .ui-btn-intent-underline:hover:not(:disabled) .ui-btn-label {
+    box-shadow: inset 0 -1px 0 currentcolor;
+  }
+}
+
+.ui-btn-intent-underline:active:not(:disabled) {
+  transform: none;
+  opacity: .72;
+}
+
+.ui-btn-intent-critical {
+  background: var(--toast-negative-bg);
+  color: var(--toast-negative-text);
+  border-color: var(--toast-negative-border);
+  box-shadow: none;
+}
+
+@media (hover: hover) {
+  .ui-btn-intent-critical:hover:not(:disabled) {
+    background: color-mix(in srgb, var(--toast-negative-bg) 78%, var(--hover-wash));
+  }
+}
+
+.ui-btn-intent-critical:active:not(:disabled) {
+  background: color-mix(in srgb, var(--toast-negative-bg) 78%, var(--press-wash));
+}
+
+.ui-btn-intent-positive {
+  background: linear-gradient(180deg, var(--ui-positive-strong, var(--positive)), var(--ui-positive, var(--positive)));
+  color: var(--capital-white);
+  border-color: var(--line-strong);
+}
+
+@media (hover: hover) {
+  .ui-btn-intent-positive:hover:not(:disabled) {
+    filter: brightness(1.04) saturate(1.04);
+  }
+}
+
+.ui-btn-intent-positive:active:not(:disabled) {
+  filter: brightness(0.97);
+}
+
+/* `active` on the component is a sticky pressed/selected state, not the
+   pointer's :active. It reads as the accent ring so it survives every intent. */
+.ui-btn.is-active {
+  border-color: var(--selection-line);
+  box-shadow: 0 0 0 1px var(--selection-ink) inset;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ui-btn { transition-duration: 1ms; }
+  .ui-btn:active:not(:disabled) { transform: none; }
+}

@@ -1,0 +1,231 @@
+/* Final market-colour authority.
+   Capital Purple is an interaction accent, never a market direction or surface. */
+
+/* Legacy theme selectors previously remapped these shared borders to brand pink.
+   Keep structural strokes neutral in both themes. */
+:root[data-theme] {
+  --border: var(--line);
+  --border2: var(--line-strong);
+  --ui-border-soft: var(--line);
+  --ui-border-strong: var(--line-strong);
+  --top-control-border: var(--line);
+}
+
+
+:root[data-theme] body #root > .app.app[data-active-tab='chain'] :is(
+  .dashboard-body,
+  .main-area,
+  .main-content,
+  .chain-table-container
+) {
+  background: var(--bg) !important;
+  background-color: var(--bg) !important;
+  background-image: none !important;
+  border-color: var(--line) !important;
+}
+
+/* ONE GROUND, EVERY TAB (owner, 2026-09-24: "for each background we need to use
+   a similar colour").
+
+   This rule used to paint the workspace `--surface` — #1a1a1a in dark — while
+   the chain-only rule directly above it painted `--bg`, #0f0f0f. So the Option
+   Chain sat on the page ground and every other page sat on a lighter grey, and
+   switching pages changed the surface under the reader. That single difference
+   is why this workspace read as unfinished beside the chain.
+
+   Both now take `--bg`. Depth comes from hairlines and spacing, which is what
+   the comment above already promised. Raised surfaces keep their own tier:
+   popovers are spread deliberately (see the ~1.2:1 note in
+   ui-colour-system.css) because §2.A forbids them a shadow, so flattening
+   `--surface-raised` too would leave a menu with neither fill nor elevation. */
+:root[data-theme] body #root > .app.app[data-active-tab] :is(.dashboard-shell, .dashboard-body) {
+  background: var(--bg) !important;
+  background-image: none !important;
+}
+
+
+/* The rail is neutral at rest. Purple is allowed only while hovering/focusing. */
+
+
+
+
+
+#root > .app.app[data-active-tab='chain'] .chain-table
+  .chg-cell:not(.val-up):not(.val-down) {
+  color: var(--text-muted) !important;
+}
+
+/* LTP is always neutral ink — direction colour lives in the Chg columns only. */
+#root > .app.app[data-active-tab='chain'] .chain-table .ltp-cell,
+#root > .app.app[data-active-tab='chain'] .chain-table .ltp-cell .ltp-value {
+  color: var(--text) !important;
+}
+
+/* …and it is neutral ink WHEREVER it renders, not only under
+   [data-active-tab='chain'].
+   The guard above is scoped to one tab attribute, but the chain table is
+   mounted by more than that one route (the OI routes resolve to the chain with
+   activeTab pinned, and the mobile bottom-sheet renders leg rows in a portal
+   OUTSIDE `.app` entirely, where none of the selectors above can reach).
+   Nothing in `src` currently tints these classes, so this changes no painted
+   pixel today — it closes the hole rather than fixing a live bug, and it is
+   what design contract §4 states unconditionally: LTP, greeks, IV, strike,
+   absolute OI/volume, prices, expiry and level figures are ALWAYS neutral.
+   `.ltp-change-pct` is deliberately absent: that is a change, not a price. */
+.ltp-cell,
+.ltp-value,
+.ltp-cell .ltp-value {
+  color: var(--text);
+}
+
+/* ---------------------------------------------------------------------------
+   DIRECTION SYSTEM — one pair of inks, and colour is never alone.
+
+   `--up` / `--down` are FILLS (bars, chart marks, chip backgrounds).
+   `--up-ink` / `--down-ink` are TEXT. On light, the fill green is only ~2.9:1
+   on white, which is exactly why the ink half of the pair exists — never use
+   `--up` / `--down` as a text colour.
+
+   Flat / zero / unknown is `--text-muted`, never a third hue and never green.
+
+   Colour is never the sole carrier: a directional string in this app always
+   ships a leading `+` / `−` sign in its own text content, which survives
+   greyscale, monochrome displays and colour-vision deficiency. `.with-glyph`
+   adds a triangle on top of that where the reference pattern wants one. The
+   chain table intentionally suppresses its glyph (ui-grid.css §11.4) and
+   leans on the sign — that is the same rule, applied with the sign alone.
+   --------------------------------------------------------------------------- */
+
+
+
+
+/* Price/OI quadrants: LB + SC are bullish; SB + long unwind are bearish. */
+
+.ui-buildup-kpi:is(.long-build, .short-cover) {
+  --bu-accent: var(--up);
+  --bu-ink: var(--up);
+  color: var(--up-ink) !important;
+  border-color: color-mix(in srgb, var(--up) 44%, var(--line)) !important;
+  background: color-mix(in srgb, var(--up) 12%, transparent) !important;
+  background-image: none !important;
+  box-shadow: none !important;
+}
+
+.ui-buildup-kpi:is(.short-build, .long-unwind) {
+  --bu-accent: var(--down);
+  --bu-ink: var(--down);
+  color: var(--down-ink) !important;
+  border-color: color-mix(in srgb, var(--down) 44%, var(--line)) !important;
+  background: color-mix(in srgb, var(--down) 12%, transparent) !important;
+  background-image: none !important;
+  box-shadow: none !important;
+}
+
+/* The live-level divider is information, not a row of cards. */
+:root[data-theme] body #root > .app.app[data-active-tab='chain'] .chain-table
+  :is(.spot-divider-row, .spot-divider-cell, .spot-divider) {
+  border-color: var(--line) !important;
+  background: var(--surface) !important;
+  background-image: none !important;
+  box-shadow: none !important;
+}
+
+:root[data-theme] body #root > .app.app[data-active-tab='chain'] .chain-table
+  .spot-divider::before,
+:root[data-theme] body #root > .app.app[data-active-tab='chain'] .chain-table
+  .spot-divider::after {
+  content: none !important;
+  display: none !important;
+}
+
+/* Spot-only is the one case the cluster's three-track grid cannot serve: a
+ * lone child would sit in the leading minmax(150px, 1fr) track rather than the
+ * middle one. Collapse to a centred flex line for that variant only — placement
+ * within the divider (grid-column: 2) still comes from ui-market-levels.css. */
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+  .chain-table .spot-divider .spot-level-cluster--spot-only {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+
+
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+  .chain-table .spot-divider .spot-level-cluster .oc-spot-center {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 8px;
+  min-width: auto !important;
+  padding: 0 16px !important;
+  border-block: 0 !important;
+  border-inline: 1px solid var(--line) !important;
+  color: var(--text) !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+  .chain-table .spot-divider .spot-level-cluster
+  .oc-spot-center .oc-spot-label {
+  border-color: transparent !important;
+  color: var(--text-muted) !important;
+}
+
+#root > .app.app[data-active-tab='chain'] .chain-table .oc-spot-price {
+  color: var(--text);
+}
+
+#root > .app.app[data-active-tab='chain'] .chain-table .spot-up .oc-spot-change-pct {
+  color: var(--up-ink);
+}
+
+#root > .app.app[data-active-tab='chain'] .chain-table .spot-down .oc-spot-change-pct {
+  color: var(--down-ink);
+}
+
+#root > .app.app[data-active-tab='chain'] .chain-table .spot-flat .oc-spot-change-pct {
+  color: var(--text-muted);
+}
+
+/* Pattern cards keep neutral materials. Accent appears only through interaction. */
+
+
+/* Neutral table material. Market meaning stays in bars, values, and badges. */
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+  .chain-table .chain-row td {
+  border-color: var(--line) !important;
+  color: var(--text) !important;
+  background-color: var(--surface) !important;
+}
+
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+  .chain-table .chain-row-even td {
+  background-color: var(--bg-subtle) !important;
+}
+
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+  .chain-table :is(.chain-side-nav-row, .chain-header-row) th {
+  border-color: var(--line) !important;
+  background: var(--surface) !important;
+  background-image: none !important;
+  color: var(--text-muted) !important;
+}
+
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+  .chain-table .chain-side-nav-th.chain-side-nav-ce {
+  background: color-mix(in srgb, var(--down) 8%, var(--surface)) !important;
+}
+
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+  .chain-table .chain-side-nav-th.chain-side-nav-pe {
+  background: color-mix(in srgb, var(--up) 8%, var(--surface)) !important;
+}
+
+:root[data-theme] body #root > .app.app[data-active-tab='chain']
+  .chain-table .strike-cell.atm-strike {
+  background: var(--bg-subtle) !important;
+  background-image: none !important;
+  border-color: var(--line-strong) !important;
+}
+

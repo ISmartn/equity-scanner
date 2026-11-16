@@ -1,0 +1,298 @@
+/*
+ * the app — motion authority.
+ *
+ * One vocabulary for how this terminal moves, and one place to change it.
+ * Loaded late from main.tsx so the token remaps below outrank the original
+ * definitions in ui-theme.css.
+ *
+ * The brief was "smooth and easy, like iOS". Two things produce that feel and
+ * neither is a longer duration:
+ *
+ *   1. DECELERATION. iOS almost never eases symmetrically. Motion leaves fast
+ *      and lands slowly, so the eye tracks the arrival rather than the launch.
+ *      Every curve here is front-loaded for that reason.
+ *   2. INTERRUPTIBILITY. Nothing may feel stuck to a timeline. Durations stay
+ *      short (120-260ms) because anything longer starts to feel like the UI is
+ *      deciding rather than responding.
+ *
+ * This sheet adds no colour and no font sizes — it stays clear of both the
+ * palette and typography audits by construction.
+ */
+
+:root {
+  /* ── The curves ───────────────────────────────────────────────────────────
+     Named by intent, not by shape, so call sites read as decisions.
+
+     - `ios-out` is an expo-style deceleration: the closest CSS gets to how a
+       UIKit view settles. This is the default for anything entering, opening,
+       or moving to a new resting position.
+     - `ios-spring` is UIKit's sheet-presentation curve. It overshoots nothing
+       but pulls hard at the start, which is what makes a panel feel physical
+       rather than timed. Reserved for surfaces that slide.
+     - `ios-in-out` is for state that has to leave AND arrive (a value swapping
+       places), where a pure deceleration reads as a stumble at the start.
+     - `ios-exit` is the mirror of `ios-out`. Exits accelerate away: the user
+       has already decided, so the UI should not linger. */
+  --ease-ios-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-ios-spring: cubic-bezier(0.32, 0.72, 0, 1);
+  --ease-ios-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --ease-ios-exit: cubic-bezier(0.4, 0, 1, 1);
+
+  /* ── The durations ───────────────────────────────────────────────────────
+     A four-step scale. `tap` is deliberately near the threshold where motion
+     stops being perceived as motion — hover and press feedback must never
+     read as an animation, only as responsiveness. */
+  --dur-tap: 120ms;
+  --dur-quick: 180ms;
+  --dur-move: 240ms;
+  --dur-panel: 320ms;
+
+  /*
+   * Remap of the vocabulary already in use across the app.
+   *
+   * Dozens of sheets write var(--ease-ui-standard) / var(--ease-out) and so
+   * on. Rebinding those names here moves the ENTIRE app onto the iOS curves
+   * without editing each call site, and keeps a single authority for the next
+   * change. The old values were close cousins of these — the visible
+   * difference is the longer, softer tail on arrival.
+   */
+  --ease-ui-standard: var(--ease-ios-out);
+  --ease-ui-emphasized: var(--ease-ios-spring);
+  --ease-out: var(--ease-ios-out);
+  --ease-spring: var(--ease-ios-spring);
+  --ease-in-out: var(--ease-ios-in-out);
+}
+
+/* ── Scroll physics ────────────────────────────────────────────────────────
+ *
+ * DELIBERATELY NOT SET HERE: `scroll-behavior` on scroll containers.
+ *
+ * It is tempting, and it is a trap. `scroll-behavior: smooth` applies to
+ * direct scrollTop/scrollLeft assignment, not only to scrollTo() — and the
+ * option chain drives `container.scrollLeft` once per animation frame while
+ * a finger is down. Under smooth behaviour every one of those writes starts
+ * its own interpolation, so the chain visibly lags the finger and never
+ * settles where the gesture ended. Call sites that genuinely want an animated
+ * jump already pass { behavior: 'smooth' } explicitly.
+ *
+ * `scroll-behavior: smooth` on the document (set in index.css) is fine and
+ * stays: it is not inherited, so it governs anchor jumps only.
+ */
+
+/* Momentum and scroll-chaining containment for every scrolling surface in the
+ * app. Chaining is the mobile-specific half of "heavy": without containment,
+ * reaching the end of an inner scroller hands the gesture to the page behind
+ * it, so a flick that should stop at the edge instead drags the whole shell
+ * and then rubber-bands back. */
+.chain-table-container,
+.dashboard-body,
+.dashboard-shell,
+[class*='__scroll'],
+[class*='-scroll'],
+[class*='scroller'] {
+  -webkit-overflow-scrolling: touch;
+}
+
+.chain-table-container {
+  overscroll-behavior: contain;
+}
+
+/*
+ * The overlay scrollers, by name.
+ *
+ * The wildcard list above matches only surfaces whose class happens to contain
+ * the word "scroll". Every panel, popover and sheet body below scrolls and none
+ * of them is named that way, so all nine were left with neither momentum nor
+ * containment: on iOS they scrolled with a dead, non-inertial drag, and a flick
+ * past the end of any of them handed the gesture to the page underneath — the
+ * Customize columns list and the OI show-menu both dragged the whole workspace
+ * behind the open overlay.
+ *
+ * Listed explicitly rather than by another wildcard: `overscroll-behavior:
+ * contain` on a surface that is actually the page's own scroller would trap the
+ * document, so the set has to stay something a reader can check.
+ */
+.scp-body,
+.ui-sp-info-panel {
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* ── Scrollbars ───────────────────────────────────────────────────────────
+ * Thinner and quieter than the 8px bordered default, and they resolve to the
+ * existing surface tokens so nothing new enters the palette. The bordered
+ * thumb read as a UI control; an overlay-weight thumb reads as a position
+ * hint, which is what it is. */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+  background-clip: padding-box;
+  border: 3px solid transparent;
+  border-radius: 999px;
+  transition: background-color var(--dur-quick) var(--ease-ios-out);
+}
+
+/* ── Sheet presentation ───────────────────────────────────────────────────
+ *
+ * The one way a bottom sheet arrives. It is used by the Open Interest as-of
+ * panel, show menu, expiry popover and custom-window panel, and by the OI
+ * Spurts expiry sheet — five surfaces across three tabs, so the keyframe lives
+ * with the motion vocabulary rather than in any one feature's stylesheet. It
+ * was previously declared in `open-interest.css`, which meant a sheet on
+ * another tab animated only for as long as that tab's CSS happened to be in
+ * the bundle.
+ *
+ * Pair it with `--ease-ios-spring`, not `--ease-ios-out`: the spring is
+ * reserved for sliding surfaces, and a sheet is the sliding surface.
+ *
+ * 18px is deliberately short. The sheet is already near its resting place when
+ * it becomes visible, so the eye reads it as settling rather than travelling —
+ * a full-height slide at this duration reads as slow, and at a shorter duration
+ * reads as a jump. */
+@keyframes ui-asof-rise {
+  from { transform: translateY(18px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+/* ── Apple platform finish ────────────────────────────────────────────────
+ *
+ * Three defaults that decide whether this terminal reads as a native surface
+ * or as a web page on iOS and macOS Safari. All three are feel, not colour and
+ * not type, so they belong to this sheet rather than to any one tab — which is
+ * also what makes them apply identically to Option Chain, Open Interest and OI
+ * Spurts without being written three times.
+ *
+ * 1. TAP HIGHLIGHT. WebKit paints a grey rectangle over any element it
+ *    considers clickable for ~300ms after touchstart. It is drawn on the
+ *    element's border box, so it ignores border-radius entirely: every rounded
+ *    tile, pill and segmented control on these pages flashed a hard-cornered
+ *    grey box on each tap. Nothing else in the app produces a square. Four
+ *    sheets had already turned it off locally (MobileNav, ThemeToggle,
+ *    the instrument search) — which is the tell that it was wanted
+ *    everywhere and only ever fixed where someone noticed it. The `:where()`
+ *    keeps specificity at zero so any element can still opt back in.
+ *
+ *    This removes only the SYSTEM flash, not the feedback: every one of these
+ *    controls already defines its own :hover / :active / :focus-visible state.
+ *
+ * 2. TEXT SIZE ADJUST. Mobile Safari's text inflation algorithm silently scales
+ *    type up in blocks it judges too narrow — most aggressively on landscape
+ *    rotation. This repo floors type at 10px and aligns figures with
+ *    tabular-nums; inflation breaks both, and it breaks them on iOS only, so
+ *    the same build measured differently on a phone than on the desk it was
+ *    designed at. `100%` disables the algorithm without preventing the user's
+ *    own zoom.
+ *
+ * 3. SUBPIXEL SMOOTHING. Left at the browser default deliberately — this is a
+ *    note so it is not "fixed" later. `-webkit-font-smoothing: antialiased`
+ *    thins every glyph on macOS, and at the 10/11px steps this design leans on
+ *    it costs contrast the accessibility floor (§9.9) is already spending.
+ *
+ * 4. HOVER IS POINTER-ONLY. Mobile browsers emulate `:hover` on tap and then
+ *    leave it applied until the next tap lands somewhere else, so a tapped
+ *    tile, pill, segment or row keeps its hover wash after the finger lifts —
+ *    and a wash on the control that was just chosen reads as a second,
+ *    competing "selected" state. The convention, for every sheet in src:
+ *
+ *      @media (hover: hover) {
+ *        .thing:hover { background: var(--hover-wash); }
+ *      }
+ *
+ *    - Wrap in place. `@media` changes neither specificity nor source order,
+ *      so a guarded hover still loses to the `:active` / `.is-on` rules after
+ *      it exactly as before.
+ *    - Guard only the hover half of a combined selector. `:focus-visible` and
+ *      `:active` stay unguarded — keyboard focus and press feedback are needed
+ *      on every input type.
+ *    - Anything that must be discoverable without hover (a camera strip that
+ *      rests at low opacity, a row's reveal-on-hover action) needs its own
+ *      `@media (hover: none)` rule that shows it, not just a guarded hover.
+ *    - Not a paint: a `:hover` that only neutralises another rule (sets a
+ *      transparent background) or touches a desktop-only scrollbar thumb can
+ *      stay as it is.
+ */
+/* `slider`, `gridcell` and `canvas` were the three gaps in this list, and each
+   is a real tappable surface here: IvPlotReadout is a single role="slider" tab
+   stop that carries the whole hover/touch/keyboard contract for every hand-
+   rolled plot, the heatmap's tiles are role="gridcell" buttons, and a canvas
+   plane matches none of the element selectors at all. Each flashed WebKit's
+   hard-cornered grey rectangle on every tap on iOS. Fixed here rather than in
+   each sheet for the reason given above: a one-off patch wherever someone
+   noticed is how this ended up missing in the first place. */
+:where(a, button, input, label, select, summary, textarea, canvas, [role='button'], [role='tab'], [role='option'], [role='radio'], [role='switch'], [role='slider'], [role='gridcell']) {
+  -webkit-tap-highlight-color: transparent;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+/* ── Reduced motion ───────────────────────────────────────────────────────
+ *
+ * Transitions collapse to `0s`, animations to 1ms. `!important` because
+ * the sheets being overridden use it themselves.
+ *
+ * Transitions were 1ms, so that `transitionend` still fired for panels that
+ * closed on it. No code listens for it any more (grep src, 10 Oct 2026), and
+ * 1ms was expensive. `transition-property` defaults to `all`, so a blanket
+ * `transition-duration: 1ms` gave EVERY element a transition on every
+ * property. Any class or colour change then started one per element:
+ * thousands on an analysis page, each restyled again as it ran. On the OI
+ * Heatmap, a Tile colour switch took 670 ms with reduced motion on and 88 ms
+ * with it off (headless, production build). Windows with "Animation effects"
+ * off reports reduced motion, so this hit every such desktop. A `0s`
+ * transition is never created at all. Animations keep 1ms: one only exists
+ * where `animation-name` is set, and their end events still fire.
+ *
+ * `scroll-behavior: auto` is the substantive half — a user who has asked for
+ * reduced motion should not be given a long smooth-scroll animation on every
+ * anchor jump. */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --dur-tap: 1ms;
+    --dur-quick: 1ms;
+    --dur-move: 1ms;
+    --dur-panel: 1ms;
+  }
+
+  html,
+  body {
+    scroll-behavior: auto !important;
+  }
+
+  /*
+   * The DELAYS matter as much as the durations here, and they were missing.
+   *
+   * `.oc-expiry-menu__option` is painted `opacity: 0` and revealed only by its
+   * entrance animation, which is staggered by
+   * `calc(var(--oc-expiry-option-index) * 22ms + 35ms)`. Collapsing the
+   * duration to 1ms without collapsing the delay does not remove that stagger,
+   * it isolates it: with reduced motion on, the expiry menu opened as a mostly
+   * EMPTY list whose rows popped in one at a time over the next half second —
+   * a worse experience than the animation the setting asked to turn off. The
+   * option-chain loading skeleton (`nth-child` delays of .12s/.24s) shimmered
+   * out of phase for the same reason.
+   */
+  *,
+  *::before,
+  *::after {
+    animation-duration: 1ms !important;
+    animation-delay: 0ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0s !important;
+    transition-delay: 0ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Theme swap is instant: while applyTheme() holds [data-theme-switching]
+ * (two frames), no element animates its colours from the old theme to the new. */
+:root[data-theme-switching] *,
+:root[data-theme-switching] *::before,
+:root[data-theme-switching] *::after {
+  transition: none !important;
+}

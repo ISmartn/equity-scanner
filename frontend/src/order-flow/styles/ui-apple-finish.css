@@ -1,0 +1,396 @@
+/*
+ * the app — Apple platform finish.
+ *
+ * What makes the terminal read as native on iPhone, iPad and Mac, beyond the
+ * type (ui-typography.css) and the curves (ui-motion.css). Everything here
+ * is feel: no colour literals, no font sizes, no geometry, and every rule sits
+ * at zero specificity or animates opacity alone, so it can add polish but can
+ * never move, resize or repaint a control that already has its own state.
+ * Loaded after ui-motion.css.
+ */
+
+/* ── 1. Workspace arrival ─────────────────────────────────────────────────
+ *
+ * Switching workspace used to swap one page for the next in a single frame,
+ * which on a phone reads as a jump. The incoming page now fades up over the
+ * `move` step on the deceleration curve — the arrival, not the departure, is
+ * what the eye tracks.
+ *
+ * Opacity only, and `backwards` fill only: no transform, so no new containing
+ * block for the fixed sheets and popovers inside a page, and nothing is left
+ * animated once it has landed. The route fallback is excluded because it is
+ * itself a placeholder. Reduced motion collapses the duration in
+ * ui-motion.css, so this needs no guard of its own. */
+@keyframes ui-page-arrive {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.dashboard-body > :not(.ui-route-fallback) {
+  animation: ui-page-arrive var(--dur-move, 240ms) var(--ease-ios-out, cubic-bezier(0.16, 1, 0.3, 1)) backwards;
+}
+
+/* ── 2. Tap, do not zoom ──────────────────────────────────────────────────
+ *
+ * iOS Safari treats two quick taps on most elements as a double-tap zoom, so
+ * hammering a stepper's "+" or a strike-window chevron zoomed the whole page.
+ * `manipulation` keeps pan and pinch and drops only the double-tap gesture.
+ * Charts, canvases and scrollers are deliberately not listed: they own their
+ * gestures (docs/UI-DESIGN-CONTRACT.md §6). */
+:where(a, button, input, label, select, summary, [role='button'], [role='tab'], [role='radio'], [role='switch'], [role='option']) {
+  touch-action: manipulation;
+}
+
+/* ── 3. Selection and native controls ─────────────────────────────────────
+ *
+ * Text selection and native controls use the neutral selection pair in both
+ * themes. Feature-specific market colours keep their own meaning. */
+::selection {
+  background: var(--text);
+  color: var(--surface-raised);
+}
+
+:root {
+  accent-color: var(--selection-ink);
+}
+
+/* ── 4. Shared-surface finish ─────────────────────────────────────────────
+ *
+ * Brings the shared chrome up to the finish of the static guides
+ * (public/guides/guide.css): hairline edges, quiet type, one focus ring, a
+ * selection cue that is not only a fill. Tokens only; no literal colours;
+ * card at rest stays shadowless (docs/UI-DESIGN-CONTRACT.md §1.2). */
+
+/* 4.1 Focus ring for anything that has no ring of its own (zero specificity,
+   so every component ring above still wins). */
+:where(a, button, summary, [role='button'], [role='tab'], [role='radio'], [role='switch'], [role='option'], input, select, textarea):focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+:where(input, select, textarea):focus-visible {
+  outline-offset: 0;
+}
+
+
+
+/* 4.3 Page header strip: softer chevrons, a quiet crumb, a stronger title. */
+.ui-pagebar__chev {
+  opacity: 0.55;
+}
+.ui-pagebar__crumbs .ui-pagebar__current {
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: -0.014em;
+}
+.ui-pagebar__crumbs li:not(:last-child) {
+  font-weight: 500;
+  letter-spacing: 0.01em;
+}
+
+/* 4.4 "Opening workspace" and every route placeholder: a hairline panel with
+   its words only, no travelling bar (owner, 10 Oct: no loading animation). */
+.ui-route-fallback {
+  position: relative;
+  box-sizing: border-box;
+  align-content: center;
+  gap: 8px;
+  overflow: hidden;
+  text-align: center;
+}
+/* Only the page-level placeholder is a panel; inside a widget it stays flat. */
+.dashboard-body > .ui-route-fallback {
+  min-height: 240px;
+  margin: 16px;
+  padding: 32px 24px;
+  border: 1px solid color-mix(in srgb, var(--line-strong) 70%, transparent);
+  border-radius: var(--radius-xl, 16px);
+  background: var(--surface-raised);
+}
+.ui-route-fallback strong {
+  font-size: 15px;
+  letter-spacing: -0.01em;
+}
+.ui-route-fallback > span {
+  color: var(--text-subtle, var(--text-muted));
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+/* 4.5 Market data unavailable: a hairline panel with a clear hierarchy
+   (eyebrow > title > copy > selection > status > action). */
+.error-state.data-gap-state {
+  box-sizing: border-box;
+  max-width: 640px;
+  margin: 24px auto;
+  gap: 12px;
+  border: 1px solid color-mix(in srgb, var(--line-strong) 60%, transparent);
+  border-radius: var(--radius-xl, 16px);
+  background: var(--surface-raised);
+}
+.error-state.data-gap-state .data-gap-eyebrow {
+  letter-spacing: 0.08em;
+  color: var(--text-subtle, var(--text-muted));
+}
+.error-state.data-gap-state .error-state-title {
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 500;
+  letter-spacing: -0.014em;
+}
+.error-state.data-gap-state .data-gap-detail {
+  border-color: var(--line);
+  border-radius: var(--radius, 9px);
+  background: var(--bg-subtle, transparent);
+}
+.error-state.data-gap-state .data-gap-pill {
+  border-color: var(--line);
+  color: var(--text-muted);
+}
+@media (max-width: 480px) {
+  .error-state.data-gap-state {
+    margin: 12px;
+    padding: 32px 16px;
+  }
+  .error-state.data-gap-state .error-state-title {
+    font-size: 20px;
+  }
+}
+
+/* =============================================================================
+   5. Finishing layer — edges, glow, shared controls, two-font discipline.
+   Additive only: tokens below are NEW names (no authority token is redefined),
+   a resting card keeps no drop shadow (§1.2). Manrope is reserved for page
+   titles, hero figures, empty/error-state titles and panel/modal titles;
+   everything else is Manrope.
+   ========================================================================== */
+:root {
+  --edge-highlight: inset 0 1px 0 color-mix(in srgb, var(--text) 6%, transparent);
+  --glow-accent-soft:
+    0 0 0 3px color-mix(in srgb, var(--accent) 12%, transparent),
+    0 0 18px color-mix(in srgb, var(--accent) 14%, transparent);
+  --focus-ring-double: 0 0 0 2px var(--surface), 0 0 0 4px var(--accent-ring);
+}
+
+/* Popovers, menus, listboxes, dialogs and the Customise panel: the tiered
+   shadow stays, plus a 1px inner top highlight so the edge reads crisp. */
+.app :is([role='menu'], [role='listbox'], .ui-customize-panel) {
+  box-shadow: var(--shadow-4), var(--edge-highlight) !important;
+}
+.app [role='dialog'][aria-modal='true'] {
+  box-shadow: var(--shadow-5), var(--edge-highlight) !important;
+}
+
+/* Cards: hairline stays the only resting edge; hover warms the border. */
+@media (hover: hover) {
+  .app :is(.ui-aisum, .insight-card):hover {
+    border-color: color-mix(in srgb, var(--accent) 30%, var(--hairline));
+  }
+}
+
+/* Inputs: crisp hairline, accent edge + soft glow on focus. */
+.app :is(input:not([type='checkbox'], [type='radio'], [type='range']), select, textarea):focus-visible {
+  outline: none;
+  border-color: color-mix(in srgb, var(--accent) 55%, var(--line-strong));
+  box-shadow: var(--glow-accent-soft);
+}
+
+/* Shared pills / icon buttons / dropdown triggers: one focus ring, a pressed
+   state and a disabled state, without touching geometry. */
+.app :is(.ui-pagebar__secondary, .ui-btn, [aria-haspopup='listbox'], [aria-haspopup='menu']):focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring-double);
+}
+.app :is(.ui-pagebar__secondary, [aria-haspopup='listbox'], [aria-haspopup='menu']) > svg {
+  flex: 0 0 auto;
+  vertical-align: middle;
+}
+.app :is(.ui-pagebar__secondary, [aria-haspopup='listbox'], [aria-haspopup='menu']):disabled,
+.app :is(.ui-pagebar__secondary, [aria-haspopup='listbox'], [aria-haspopup='menu'])[aria-disabled='true'] {
+  opacity: 0.5;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+/* Two-font discipline. Season: titles and the few hero moments. */
+.app :is(.ui-pagebar__crumbs .ui-pagebar__current, .ui-chart-stagebar__title, .scp-title, .empty-title, .empty__title, .sheet__title, .error-state-title) {
+  font-family: var(--font-display);
+  font-weight: 500;
+  letter-spacing: -0.014em;
+}
+/* Sans (tabular): every dense UI surface, even inside a heading ancestor. */
+.app :is(th, td, label, button, input, select, textarea, [role='tooltip'], [role='tab'], [role='menuitem'], [role='option'], .recharts-text, svg text) {
+  font-family: var(--font-sans);
+}
+
+/* Customise / secondary page-bar pill everywhere (incl. Terminal widgets,
+   which sit outside the per-tab authority blocks): pill radius, hairline,
+   neutral hover edge and pressed wash. */
+.app .ui-pagebar__secondary {
+  border-radius: 999px;
+  padding-inline: 12px;
+  box-shadow: none;
+}
+@media (hover: hover) {
+  .app .ui-pagebar__secondary:hover:not(:disabled) {
+    border-color: var(--selection-line);
+    box-shadow: none;
+  }
+}
+.app .ui-pagebar__secondary:active:not(:disabled) {
+  background: var(--press-wash);
+}
+.app .ui-pagebar__secondary:focus-visible {
+  outline: 2px solid var(--selection-ink);
+  outline-offset: 2px;
+  box-shadow: none;
+}
+
+/* =============================================================================
+   6. The finish recipe, applied to every shared control (docs/design/FINISH-RECIPE.md).
+   One cascade home: this is the existing finishing layer, not a new authority.
+   Geometry (heights, padding) is never touched here — only shape, edge,
+   material and interaction — so a feature sheet keeps its own rhythm.
+   NEW token names only; no authority token is redefined.
+   ========================================================================== */
+:root {
+  /* SHAPE: concentric helpers. Inner radius = outer radius - padding, e.g.
+     calc(var(--radius-card) - 4px) for a plate inset 4px inside a card. */
+  --radius-pill: 999px;
+  --radius-card: 12px;
+  --radius-plate: 10px;
+  /* EDGE: THE boundary of every control (button, capsule, chip, pill, input,
+     select, stepper, segmented track, tab). WCAG 1.4.11 needs >= 3:1 against
+     --surface, --bg and --surface-raised; the card/panel hairline (--line,
+     --line-strong, ~1.2-1.7:1) stays soft and is NOT used on a control. Dark:
+     a mid plum-neutral step (white 39% over the page plum); light: a mid
+     neutral step (ink 48% over white). Palette steps only. Applied once, in
+     section 7 below, never per feature file. */
+  --edge-control: color-mix(in srgb, var(--capital-white) 41%, var(--capital-black));
+  /* Inverted neutral selection: dark in light mode, white in dark mode. */
+  --plate-selected: var(--selection-fill);
+  --plate-hover: color-mix(in srgb, var(--text) 5%, var(--surface));
+  --plate-selected-edge: var(--line-strong);
+}
+:root[data-theme='light'] {
+  --edge-control: color-mix(in srgb, var(--capital-black) 48%, var(--capital-white));
+  --plate-hover: color-mix(in srgb, var(--text) 5%, var(--surface));
+}
+
+/* INPUT / SELECT: pill, control edge, inset highlight, quiet disabled. Text
+   fields only (not checkbox/radio/range/textarea); `:where` keeps a feature
+   sheet's own radius or edge in charge. */
+:where(.app) :where(input:not([type='checkbox'], [type='radio'], [type='range'], [type='file'], [type='color']), select) {
+  border-radius: var(--radius-pill);
+  border-color: var(--edge-control);
+  font-variant-numeric: tabular-nums;
+}
+:where(.app) :where(input, select, textarea)::placeholder {
+  color: var(--text-subtle);
+}
+@media (hover: hover) {
+  :where(.app) :where(input:not([type='checkbox'], [type='radio'], [type='range']), select):hover:not(:disabled):not(:focus-visible) {
+    border-color: color-mix(in srgb, var(--accent) 36%, var(--edge-control));
+  }
+}
+:where(.app) :where(input, select, textarea):disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+/* STEPPER: one pill with a control edge; the end buttons inherit the pill
+   through overflow:hidden, pressed uses the wash + .97 scale. */
+.app .ui-stepper {
+  border: 1px solid var(--edge-control);
+  border-radius: var(--radius-pill);
+  box-shadow: var(--edge-highlight);
+  transition: border-color var(--dur-tap, 120ms) var(--ease-ios-out, ease), box-shadow var(--dur-tap, 120ms) var(--ease-ios-out, ease);
+}
+@media (hover: hover) {
+  .app .ui-stepper:hover {
+    border-color: color-mix(in srgb, var(--accent) 36%, var(--edge-control));
+  }
+}
+.app .ui-stepper:focus-within:has(:focus-visible) {
+  box-shadow: var(--focus-ring-double);
+}
+.app .ui-stepper > button:focus-visible {
+  outline: none;
+  background: var(--hover-wash);
+}
+.app .ui-stepper > button:active:not(:disabled) {
+  transform: scale(0.97);
+}
+
+/* CapsuleSegmented owns its flat track, selected fill and focus edge in
+   capsule-segmented.css. Interaction washes here do not add another border
+   or bevel to the black/white selection. */
+.ui-capsule.ui-capsule .ui-capsule__option:active:not(:disabled):not(.is-active) {
+  background: var(--press-wash);
+}
+@media (hover: hover) {
+  .ui-capsule.ui-capsule .ui-capsule__option:not(.is-active):not(:disabled):hover {
+    background: var(--hover-wash);
+  }
+}
+/* TimeSwitch owns the same flat selection finish in time-switch.css; chart
+   hosts may adjust its geometry without repainting the selected capsule. */
+
+/* BUTTON: every Button intent shares the focus ring and the raised edge. */
+.app .ui-btn:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring-double);
+}
+.app .ui-btn-intent-secondary,
+.app .ui-btn-intent-tertiary {
+  border-color: var(--line-strong);
+}
+.app .ui-btn-intent-secondary {
+  box-shadow: var(--edge-highlight);
+}
+
+/* CARDS: 12px, hairline only, no resting shadow (§1.2). Insight cards and
+   the AI summary share the same shape. */
+.app :is(.ui-aisum, .insight-card) {
+  border-radius: var(--radius-card);
+}
+
+/* POPOVERS / MENUS: 12px, --shadow-4 (already set above); rows are 10px plates. */
+.app :is([role='menu'], [role='listbox']) {
+  border-radius: var(--radius-card);
+}
+.app :is([role='menuitem'], [role='option']) {
+  border-radius: var(--radius-plate);
+}
+@media (hover: hover) {
+  .app :is([role='menuitem'], [role='option']):hover:not([aria-disabled='true'], :disabled) {
+    background: var(--hover-wash);
+  }
+}
+.app :is([role='menuitem'], [role='option'])[aria-selected='true'] {
+  background: var(--plate-selected);
+  color: var(--selection-text);
+  --text: var(--selection-text);
+  --text-primary: var(--selection-text);
+  --text-muted: color-mix(in srgb, var(--selection-text) 70%, var(--selection-fill));
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .app .ui-stepper > button:active:not(:disabled),
+.app .ui-btn:active:not(:disabled) {
+    transform: none;
+  }
+}
+
+
+/* =============================================================================
+   7. CONTROL EDGE, applied once for every control (one token: --edge-control).
+   Every control's outline already reads one of the hairline tokens below
+   (directly, or through its hover/open mix). Re-pointing those tokens ON THE
+   CONTROL ELEMENT ITSELF gives the stronger edge to the rest state and keeps
+   every hover/open/focus rule working: they mix the accent over the same
+   token, so the accent warm-up now sits on top of the stronger edge. Card and
+   panel hairlines are untouched (a card is not in this list), widths are never
+   changed, disabled keeps its fade (opacity), selected/primary states keep
+   their own accent/ink edge because they name --accent/--text, not these.
+   ========================================================================== */

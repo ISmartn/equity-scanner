@@ -10,7 +10,7 @@ start_backend() {
     .venv/bin/pip install -r requirements.txt
   fi
   source .venv/bin/activate
-  uvicorn app.main:app --reload --port "${BACKEND_PORT:-8000}" --log-level info
+  uvicorn app.main:app --reload --port "${BACKEND_PORT:-9000}" --log-level info
 }
 
 start_frontend() {

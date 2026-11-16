@@ -1,0 +1,252 @@
+/* the app design-system aliases for the `.oi-design` scope.
+   ------------------------------------------------------------------
+   Ported from the design system's `tokens/colors.css`, `layout.css` and
+   `typography.css` (project 0cd8298c — "the app Charts Design System").
+
+   This sheet lived under `src/features/oi-analysis/design/` until the OI
+   workspace was removed. It moved here because the option chain never
+   stopped needing it: OICell, VolumeCell and BuildupCell each carry the
+   `.oi-design` class and read the aliases below, so the tokens outlived the
+   feature whose canvas first mounted them. The class name is kept as-is —
+   renaming it would touch every cell and every sheet that styles one, for no
+   change in what any of them paint.
+
+   WHY THIS IS SCOPED. The design system and this repo grew two different
+   vocabularies for the same palette: the design says `--surface-sunken` and
+   `--line-strong`, the repo says `--bg-sunken` and its own `--line-strong`
+   with a different value. Publishing the design's names at `:root` would
+   silently repaint every surface in the terminal that already reads one of
+   the overlapping names. So the whole alias set lands on `.oi-design` —
+   everything under it speaks design, everything outside it is untouched.
+
+   NO NEW HEXES. The design's scales and this repo's are the same eleven
+   steps under different names: the design's green/red are byte-for-byte the
+   repo's `--success-*`/`--error-*` (green-500 is success-500, red-500 is
+   error-500), and brand/warm/neutral already match. Every
+   alias below resolves to a token the repo already defines, or is mixed from
+   two of them — which is what keeps `npm run audit:colours` green, since a
+   hex outside the five approved scales fails it. The three design values
+   that sit between palette steps — the dark sunken surface and the two dark
+   direction washes — are reached with color-mix rather than written out.
+
+   TYPE. The design's ladder bottoms out at `--text-tick` 9px. This repo
+   floors type at 10px (scripts/audit-font-sizes.mjs) and that gate breaks
+   the build, so `--text-tick` is pinned to 11px here and collapses onto
+   `--text-micro`. It is the one deliberate deviation from the design. */
+
+.oi-design {
+  /* Direction — fills. Never used to set type; see the *-text pair below. */
+  --up: var(--success-500);
+  --down: var(--error-500);
+  --flat: var(--neutral-500);
+
+  /* Direction — type. The design's rule is that a fill token carries no
+     promise about legibility, so text takes its own step of the scale. */
+  --up-text: var(--success-800);
+  --down-text: var(--error-800);
+  --warn: var(--warm-400);
+  --warn-text: var(--warm-600);
+
+  /* The two legs, as the charts name them. */
+  --dash-put: var(--success-600);
+  --dash-call: var(--error-600);
+  /* A numeral in a leg's hue sits ON a surface instead of being a mark drawn
+     on one, so it takes the text-safe step of the same scale — success-600 is
+     2.0:1 on white and fails as type. Same split as --up / --up-text. */
+  --dash-put-text: var(--success-800);
+  --dash-call-text: var(--error-700);
+
+  /* Surfaces */
+  --surface-card: var(--capital-white);
+  --surface-raised: var(--capital-white);
+  --surface-sunken: var(--capital-spring-wood);
+  --surface-hover: var(--neutral-100);
+  --surface-active: var(--neutral-200);
+
+  /* Lines */
+  --line: var(--neutral-200);
+  --line-strong: var(--neutral-300);
+
+  /* Washes behind the hatched "written" segment. */
+  --up-wash: var(--success-100);
+  --down-wash: var(--error-100);
+
+  /* Texture. `--rungs` is the diagonal hatch that means "written over the
+     window"; `--wash-unwound` is the flat ghost that means "closed over the
+     window". Texture carries the OI move so hue is free to name the leg. */
+  --rungs: repeating-linear-gradient(45deg, currentColor 0 2px, transparent 2px 5px);
+  --rungs-across-tight: repeating-linear-gradient(to right, currentColor 0 1.5px, transparent 1.5px 4px);
+  /* Mask, so only the alpha matters — written rgba to stay off the hex audit. */
+  --rungs-fade: linear-gradient(to top, rgba(0, 0, 0, 1) 0 76%, rgba(0, 0, 0, .5) 100%);
+  --wash-unwound: color-mix(in srgb, currentColor 34%, var(--surface-card));
+
+  /* Radii and motion — the design's 4px grid. */
+  --radius-2xs: 2px;
+  --radius-xs: 4px;
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  /* Motion resolves through the authority, not beside it. ui-motion.css
+     (main.tsx, last) owns the curves and the duration scale; these three
+     names have to keep existing inside this scope because the contract lists
+     them here and a missing custom property is invalid at computed-value
+     time, so they are BOUND rather than redeclared. The literal after each
+     comma is the design system's original value, kept only as the
+     motion.css-absent fallback. Same pattern as chrome-design-tokens.css. */
+  --dur-fast: var(--dur-tap, 120ms);
+  --ease-out: var(--ease-ios-out, cubic-bezier(.2, 0, .2, 1));
+  --press-scale: .96;
+
+  /* Type. Whole rungs only — there is nothing between them. */
+  --text-dense: 13px;
+  --text-caption: 12px;
+  --text-meta: 11px;
+  --text-micro: 11px;
+  --text-tick: 11px; /* design says 9px; this repo floors at 11px for anything a trader reads */
+  --text-body-sm: 14px;
+  --text-body: 16px;
+  --text-body-lg: 18px;
+  --text-display-lg: 60px;
+  --tracking-caps: .06em;
+  --type-caption: 500 12px/1.35 var(--font-sans);
+  --type-micro: 500 10px/1.4 var(--font-sans);
+  --font-num: var(--font-sans);
+
+  /* Motion and chrome geometry the control strip reads — from the design's
+     `tokens/layout.css`. The slide is the segmented thumb's travel curve. */
+  --dur-base: 200ms;
+  --dur-slide: 340ms;
+  --ease-spring: var(--ease-ios-spring, cubic-bezier(.32, .72, 0, 1));
+  --tap-min: 44px;
+
+  /* Elevation — low-opacity black, rgba to stay off the hex audit. */
+  --shadow-menu: 0 8px 24px rgba(15, 15, 15, .12), 0 2px 6px rgba(15, 15, 15, .06);
+
+  /* Ink the design names that the repo does not. Accent stays the brand
+     purple the repo already defines; disabled takes the neutral step the
+     design specifies for each theme. */
+  --text-disabled: var(--neutral-400);
+  --text-accent: var(--capital-purple);
+  --text-on-accent: var(--capital-white);
+  --text-on-up: var(--capital-black);
+  --text-on-down: var(--capital-white);
+  --line-accent: var(--capital-purple);
+  --warn-wash: var(--warm-100);
+
+  /* ══ FLUID PRIMITIVES ═══════════════════════════════════════════════════
+     Published so Open Interest and OI Spurts stop hand-rolling one `@media`
+     block per breakpoint and stop inventing their own clamp() values. Every
+     ramp interpolates over the SAME viewport band, 360px → 768px, so a size
+     step and a space step move together and nothing drifts out of rhythm.
+
+     SCOPE. These land on `.oi-design`, the same selector as the rest of this
+     sheet, for the same reason (§1.6): both page roots
+     (`.ui-oi-page.oi-design`), both PageBars (`.ui-pagebar.oi-design`)
+     and every portal layer the two pages render — the OI sheet, the two info
+     dialogs, the Spurts detail layer — already carry the class on themselves
+     or an ancestor, so both pages resolve them, while nothing outside the two
+     features is repainted. Publishing at `:root` would leak names like
+     `--fluid-space-md` into every other tab. Anything reading one of these
+     from OUTSIDE the scope must still write a fallback — a missing custom
+     property is invalid at computed-value time and falls back to `inherit`.
+
+     SPECIFICITY. These are only custom-property DECLARATIONS on a (0,1,0)
+     selector. This sheet pins no geometry, so no feature sheet has to outrank
+     it, and there is no `!important` anywhere below.
+
+     Derivation: value = min + (max − min) × (100vw − 360px) / 408px, written
+     out as `clamp(min, intercept + slope·vw, max)`.
+     ──────────────────────────────────────────────────────────────────────── */
+
+  /* ── Fluid type ──────────────────────────────────────────────────────────
+     ⚠ scripts/audit-font-sizes.mjs RESOLVES clamp() minimums and breaks the
+     build below 10px. Computed minimum is stated on every ramp; the lowest
+     ramp bottoms out exactly at the 10px build floor (`--text-tick` is
+     11px, for anything a trader reads). Never lower one of these minimums. */
+  --fluid-text-micro:   clamp(10px, 9.12px + 0.245vw, 11px);   /* min 10px — tick/eyebrow */
+  --fluid-text-meta:    clamp(11px, 10.12px + 0.245vw, 12px);  /* min 11px — meta, time */
+  --fluid-text-caption: clamp(12px, 11.12px + 0.245vw, 13px);  /* min 12px — caption, body copy */
+  --fluid-text-dense:   clamp(13px, 12.12px + 0.245vw, 14px);  /* min 13px — metric value, card identity */
+  --fluid-text-body:    clamp(14px, 12.24px + 0.490vw, 16px);  /* min 14px — plain-read answer */
+  --fluid-text-title:   clamp(16px, 11.59px + 1.226vw, 21px);  /* min 16px — sheet headline */
+  --fluid-text-display: clamp(21px, 14.82px + 1.716vw, 28px);  /* min 21px — display headline, weight 500 */
+
+  /* ── Fluid space. Ends land on the 4px grid; the in-between values are the
+     ramp, not invented literals. */
+  --fluid-space-3xs: clamp(4px, 2.24px + 0.490vw, 6px);
+  --fluid-space-2xs: clamp(6px, 4.24px + 0.490vw, 8px);
+  --fluid-space-xs:  clamp(8px, 6.24px + 0.490vw, 10px);
+  --fluid-space-sm:  clamp(10px, 8.24px + 0.490vw, 12px);
+  --fluid-space-md:  clamp(12px, 8.47px + 0.980vw, 16px);
+  --fluid-space-lg:  clamp(16px, 8.94px + 1.961vw, 24px);
+  --fluid-space-xl:  clamp(24px, 16.94px + 1.961vw, 32px);
+  /* Page gutter — the one horizontal inset both pages should read. */
+  --fluid-gutter:    clamp(10px, 6.47px + 0.980vw, 14px);
+
+  /* ── Minimum comfortable column, for `repeat(auto-fit, minmax(…, 1fr))`.
+     The `min(100%, …)` wrapper is load-bearing: a bare `minmax(240px, 1fr)`
+     in an auto-fit track CANNOT shrink below 240px and is the single most
+     common cause of sideways page scroll at 360px. Always read the token, not
+     the raw length. */
+  --fluid-col-min-sm: min(100%, 168px);  /* readout / stat tiles */
+  --fluid-col-min:    min(100%, 240px);  /* standard card grid */
+  --fluid-col-min-lg: min(100%, 320px);  /* chart + prose panels */
+
+  /* ── Plot height. §7: no chart carries one hardcoded pixel height at every
+     width. 200px at 360 → 320px at 768. */
+  --fluid-plot-h:    clamp(200px, 94px + 29.4vw, 320px);
+  --fluid-plot-h-sm: clamp(140px, 66px + 20.6vw, 224px);
+
+  /* ── Touch. `--tap-min` (44px, above) stays the accessible floor for a
+     standalone control; this is the coarse-pointer icon-button size the
+     contract allows inside dense chrome (§7, 32–36px). */
+  --tap-icon: 36px;
+}
+
+:root[data-theme='dark'] .oi-design {
+  --up-text: var(--success-400);
+  --down-text: var(--error-400);
+  --warn-text: var(--warm-300);
+  --dash-put: var(--success-500);
+  --dash-call: var(--error-400);
+  --dash-put-text: var(--success-400);
+  --dash-call-text: var(--error-400);
+  --flat: var(--neutral-400);
+
+  --surface-card: var(--neutral-900);
+  --surface-raised: var(--neutral-800);
+  /* The design's sunken dark surface sits between neutral-950 and -900. */
+  --surface-sunken: color-mix(in srgb, var(--neutral-900) 55%, var(--neutral-950));
+  --surface-hover: var(--neutral-850);
+  --surface-active: var(--neutral-800);
+
+  /* Matches ui-colour-system.css:206-215. These were left on the pre-fix
+     pair (800/700) when the authority stepped dark hairlines up: --line at
+     neutral-800 measures 1.17:1 on --surface, i.e. no visible card boundary
+     at all. This scope is descendant-scoped, so it wins over :root by scope
+     rather than specificity and the authority's fix could never reach it. */
+  --line: var(--neutral-700);
+  --line-strong: var(--neutral-600);
+
+  /* The design's dark washes: the darkest scale step pulled toward ground. */
+  --up-wash: color-mix(in srgb, var(--success-950) 80%, var(--neutral-950));
+  --down-wash: color-mix(in srgb, var(--error-950) 78%, var(--neutral-950));
+
+  --text-disabled: var(--neutral-600);
+  --text-accent: var(--brand-300);
+  --text-on-accent: var(--capital-black);
+  --text-on-down: var(--capital-black);
+  --line-accent: var(--brand-300);
+  --warn-wash: color-mix(in srgb, var(--warm-950) 85%, var(--neutral-950));
+  /* Separation reads worse on dark, so the same shadows go near-opaque. */
+  --shadow-menu: 0 8px 24px rgba(0, 0, 0, .56), 0 2px 6px rgba(0, 0, 0, .4);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .oi-design {
+    --dur-fast: 1ms;
+    --dur-base: 1ms;
+    --dur-slide: 1ms;
+    --press-scale: 1;
+  }
+}

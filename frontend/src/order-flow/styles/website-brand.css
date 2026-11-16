@@ -1,0 +1,107 @@
+/* ══════════════════════════════════════════════════════════════════════════
+   Mr. Chartist website brand: the same type, ink and market colours as
+   mrchartist.com, so Order Flow reads as part of the site. Imported last in
+   main.tsx: it is the authority over every older token above it.
+
+   Type (the website's three faces, self-hosted, SIL OFL 1.1; see
+   src/assets/fonts and NOTICE.md):
+     Chartist Sans       headings, the wordmark          (from Plus Jakarta Sans, 600)
+     Chartist Sans Flex  text, labels and every figure   (from Google Sans Flex, 300–600)
+     Chartist Serif      the one italic accent word      (from Instrument Serif)
+   The board is dense, so Chartist Sans Flex draws at its own size here (the
+   website scales it 107% for long reading).
+   Weights stop at 600 and are never faked bolder, as on the website.
+
+   Colour: a pure white or pure black ground, ink as the brand, iOS green
+   and red for up and down. Wine is a brand mark only: the logo dot and the
+   accent word, never a button, card, link or focus ring.
+   ══════════════════════════════════════════════════════════════════════════ */
+
+@font-face {
+  font-family: 'Chartist Sans';
+  src: url('../assets/fonts/chartist-sans.woff2') format('woff2');
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Chartist Sans Flex';
+  src: url('../assets/fonts/chartist-sans-flex.woff2') format('woff2');
+  font-weight: 300 600;
+  font-style: normal;
+  font-display: swap;
+}
+/* The symbols Chartist Sans Flex lacks (arrows, ▲ ▼, ✓, ●, other currencies) from a 32 KB cut of Inter. */
+@font-face {
+  font-family: 'Chartist Sans Flex';
+  src: url('../assets/fonts/inter-symbols-var.woff2') format('woff2');
+  font-weight: 300 600;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+2000-2001, U+2007-2008, U+2010-2012, U+2015-2017, U+201B, U+201F-2021, U+2023-2025, U+2027, U+2030-2038, U+203B-2043, U+2045-2055, U+2057, U+205F, U+20A0-20A8, U+20AA-20AB, U+20AD-20AF, U+20B1-20B5, U+20B8, U+20BA, U+20BC-20BF, U+2190-2199, U+25CF, U+2713;
+}
+@font-face {
+  font-family: 'Chartist Serif';
+  src: url('../assets/fonts/chartist-serif-italic.woff2') format('woff2');
+  font-weight: 400;
+  font-style: italic;
+  font-display: swap;
+}
+
+:root {
+  font-synthesis-weight: none;
+  --font-display: 'Chartist Sans', 'Chartist Sans Flex', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-sans: 'Chartist Sans Flex', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-figures: var(--font-sans);
+  --font-accent: 'Chartist Serif', Georgia, serif;
+  --brand-wine: #9B255C;
+}
+
+/* Light: the website's pure white, black ink and iOS market colours. */
+:root[data-theme="light"] {
+  --bg: #FFFFFF;
+  --text: #000000;
+  --text-muted: #58585C;
+  --up: #22A34A;
+  --down: #FF3B30;
+  --up-ink: #1F7F37;
+  --down-ink: #D70015;
+  --up-text: #1F7F37;
+  --down-text: #D70015;
+  --candle-up: #22A34A;
+  --candle-down: #FF3B30;
+  /* The website's three border strengths: card edges, dividers, controls. */
+  --hairline: rgb(0 0 0 / .10);
+  --line: rgb(0 0 0 / .14);
+  --line-strong: rgb(0 0 0 / .20);
+  /* Focus and selection are ink, never a colour (website rule). */
+  --accent: #000000;
+  --accent-text: #000000;
+  --accent-ring: #000000;
+  --brand-wine: #9B255C;
+}
+
+/* Dark: pure black ground, the website's softened iOS hues. */
+:root[data-theme="dark"] {
+  --bg: #000000;
+  --text: #FFFFFF;
+  --text-muted: #AEAEB2;
+  --up: #50B863;
+  --down: #E46156;
+  --up-ink: #64C775;
+  --down-ink: #ED756A;
+  --up-text: #64C775;
+  --down-text: #ED756A;
+  --candle-up: #50B863;
+  --candle-down: #E46156;
+  --hairline: rgb(255 255 255 / .09);
+  --line: rgb(255 255 255 / .13);
+  --line-strong: rgb(255 255 255 / .18);
+  --accent: #FFFFFF;
+  --accent-text: #FFFFFF;
+  --accent-ring: #FFFFFF;
+  --brand-wine: #E66EA3;
+}
+
+html, body, #root { font-family: var(--font-sans); }
+h1, h2, [data-ui-type="display"] { font-family: var(--font-display); }

@@ -1,0 +1,1436 @@
+{
+ "_note": "One source for every term the tools print: the page help (i) sheets, the in-tool tips and /glossary/ read this file. Edit here only. src/content/terms.test.ts checks it.",
+ "groups": [
+  {
+   "id": "basics",
+   "label": "The basics"
+  },
+  {
+   "id": "chain",
+   "label": "Reading the chain"
+  },
+  {
+   "id": "positioning",
+   "label": "Open Interest and build-up"
+  },
+  {
+   "id": "volatility",
+   "label": "Volatility, Greeks and gamma"
+  },
+  {
+   "id": "strategy",
+   "label": "Premium, strategy and payoff"
+  },
+  {
+   "id": "scanning",
+   "label": "Scanning and flow"
+  },
+  {
+   "id": "tools",
+   "label": "The tools"
+  }
+ ],
+ "terms": [
+  {
+   "id": "option",
+   "term": "Option",
+   "group": "basics",
+   "short": "A contract that gives its buyer a right, not an obligation, to buy or sell an underlying at a fixed price on or before a fixed date. The seller takes on the obligation.",
+   "also": [
+    "call",
+    "put"
+   ],
+   "tools": []
+  },
+  {
+   "id": "call",
+   "term": "Call",
+   "group": "basics",
+   "short": "An option that gives its buyer the right to buy at the strike. The seller (writer) has the obligation to sell. The app always writes the word Call in full.",
+   "also": [
+    "put",
+    "strike"
+   ],
+   "tools": []
+  },
+  {
+   "id": "put",
+   "term": "Put",
+   "group": "basics",
+   "short": "An option that gives its buyer the right to sell at the strike. The writer has the obligation to buy. The app always writes the word Put in full.",
+   "also": [
+    "call",
+    "strike"
+   ],
+   "tools": []
+  },
+  {
+   "id": "underlying",
+   "term": "Underlying",
+   "group": "basics",
+   "short": "The index or stock an option is written on, such as NIFTY, BANKNIFTY or RELIANCE, always shown by its symbol in capitals.",
+   "tools": []
+  },
+  {
+   "id": "strike",
+   "term": "Strike",
+   "group": "basics",
+   "short": "The fixed price written into the contract. One expiry carries a ladder of strikes, and each strike has its own Call and its own Put.",
+   "guide": "option-chain",
+   "also": [
+    "expiry",
+    "atm"
+   ],
+   "tools": []
+  },
+  {
+   "id": "expiry",
+   "term": "Expiry",
+   "group": "basics",
+   "short": "The date a contract ends. Each expiry has its own chain. On expiry day the series settles at 15:40 IST.",
+   "also": [
+    "days-to-expiry",
+    "strike"
+   ],
+   "tools": []
+  },
+  {
+   "id": "days-to-expiry",
+   "term": "Days to expiry",
+   "group": "basics",
+   "short": "Calendar days from the data time to the expiry date, written as N days to expiry, or N DTE on a small chip. On the expiry date itself it reads Expiry day (today on the expiry chip).",
+   "also": [
+    "expiry"
+   ],
+   "tools": [
+    "chain",
+    "options-scanner",
+    "terminal"
+   ]
+  },
+  {
+   "id": "lot-size",
+   "term": "Lot size",
+   "group": "basics",
+   "short": "The number of units in one contract, set by the exchange and revised from time to time. Premium and Open Interest are quoted per unit.",
+   "tools": [
+    "strategy-builder"
+   ]
+  },
+  {
+   "id": "premium",
+   "term": "Premium",
+   "group": "basics",
+   "short": "The price of an option, quoted per unit. It is intrinsic value plus time value.",
+   "also": [
+    "intrinsic-value",
+    "time-value"
+   ],
+   "tools": []
+  },
+  {
+   "id": "intrinsic-value",
+   "term": "Intrinsic value",
+   "group": "basics",
+   "short": "The part of the premium that is real today: for a Call, spot minus strike; for a Put, strike minus spot; never below zero.",
+   "also": [
+    "time-value"
+   ],
+   "tools": [
+    "chain"
+   ]
+  },
+  {
+   "id": "time-value",
+   "term": "Time value",
+   "group": "basics",
+   "short": "The part of the premium above intrinsic value. It pays for the chance of a move before expiry and wears away as expiry comes closer.",
+   "also": [
+    "theta",
+    "intrinsic-value"
+   ],
+   "tools": [
+    "chain"
+   ]
+  },
+  {
+   "id": "atm",
+   "term": "ATM, ITM and OTM",
+   "group": "basics",
+   "short": "At the money (ATM) is the strike nearest the price. In the money (ITM) strikes have intrinsic value; out of the money (OTM) strikes have none. A Call below the price is ITM; a Put above it is ITM.",
+   "guide": "atm-premium",
+   "also": [
+    "straddle",
+    "strike"
+   ],
+   "tools": [
+    "chain",
+    "terminal",
+    "strategy-builder"
+   ]
+  },
+  {
+   "id": "spot",
+   "term": "Spot",
+   "group": "basics",
+   "short": "The current price of the underlying in the cash market. The chain is centred on the strike nearest to it.",
+   "tools": [
+    "chain",
+    "terminal"
+   ]
+  },
+  {
+   "id": "forward",
+   "term": "Forward",
+   "group": "basics",
+   "short": "Where the market prices the underlying at expiry. It sits above spot by the cost of carry, and the app reads it from Call and Put prices at the listed strikes (put-call parity). It is not a futures quote.",
+   "tools": [
+    "implied-volatility",
+    "terminal"
+   ]
+  },
+  {
+   "id": "ltp",
+   "term": "LTP",
+   "group": "chain",
+   "short": "Last traded price: the price of the most recent trade in the contract. It is not always a price one can deal at; the bid and ask show that.",
+   "also": [
+    "bid-ask"
+   ],
+   "tools": [
+    "chain"
+   ]
+  },
+  {
+   "id": "bid-ask",
+   "term": "Bid and ask",
+   "group": "chain",
+   "short": "The best price a buyer is offering (bid) and the best price a seller is asking (ask) right now.",
+   "also": [
+    "bid-ask-spread",
+    "ltp"
+   ],
+   "tools": [
+    "chain",
+    "strategy-builder"
+   ]
+  },
+  {
+   "id": "bid-ask-spread",
+   "term": "Bid-ask spread",
+   "group": "chain",
+   "short": "The gap between ask and bid, as a share of the price. A wide gap makes every figure calculated from that contract less reliable.",
+   "also": [
+    "bid-ask"
+   ],
+   "tools": [
+    "strategy-builder",
+    "chain"
+   ]
+  },
+  {
+   "id": "volume",
+   "term": "Volume",
+   "group": "chain",
+   "short": "Contracts traded so far today. Volume counts trades; Open Interest counts positions still open.",
+   "also": [
+    "open-interest"
+   ],
+   "tools": [
+    "chain"
+   ]
+  },
+  {
+   "id": "premium-change",
+   "term": "Premium change",
+   "group": "chain",
+   "short": "How far a contract's price has moved from the previous close, in rupees and per cent. It is the price half of a build-up.",
+   "also": [
+    "build-up"
+   ],
+   "tools": []
+  },
+  {
+   "id": "max-pain",
+   "term": "Max Pain",
+   "group": "chain",
+   "short": "The strike where the total payout to option buyers at expiry is smallest, worked out from the Open Interest at every strike.",
+   "not": "A level read from the book, not a prediction.",
+   "guide": "max-pain",
+   "also": [
+    "open-interest"
+   ],
+   "tools": [
+    "chain",
+    "open-interest",
+    "pcr",
+    "terminal",
+    "oi-heatmap"
+   ]
+  },
+  {
+   "id": "payout-basin",
+   "term": "Payout basin",
+   "group": "chain",
+   "short": "On the Open Interest page's Max Pain view: the line across the stacked Call and Put payouts at each strike. Its lowest point is Max Pain.",
+   "also": [
+    "max-pain"
+   ],
+   "tools": [
+    "open-interest"
+   ]
+  },
+  {
+   "id": "oi-support-resistance",
+   "term": "OI Support and OI Resistance",
+   "group": "chain",
+   "short": "On the chain, the strike with the heaviest Put Open Interest below spot (the Support pill) and the strike with the heaviest Call Open Interest above it (the Resistance pill).",
+   "label": "Open Interest support and resistance",
+   "not": "Levels where positions are heaviest, not prices that must hold.",
+   "also": [
+    "call-wall",
+    "put-wall"
+   ],
+   "tools": [
+    "chain",
+    "terminal",
+    "oi-heatmap"
+   ]
+  },
+  {
+   "id": "vol-support-resistance",
+   "term": "VOL Support and VOL Resistance",
+   "group": "chain",
+   "short": "The same two levels drawn from today's traded volume instead of Open Interest: the strikes below and above spot where the most contracts changed hands.",
+   "also": [
+    "oi-support-resistance"
+   ],
+   "tools": [
+    "chain"
+   ]
+  },
+  {
+   "id": "greeks",
+   "term": "Greeks",
+   "group": "chain",
+   "short": "Delta, Gamma, Theta, Vega and Rho: how an option's premium reacts to price, time, volatility and interest rates.",
+   "also": [
+    "delta",
+    "gamma",
+    "theta",
+    "vega",
+    "rho"
+   ],
+   "tools": [
+    "chain",
+    "strategy-builder"
+   ]
+  },
+  {
+   "id": "open-interest",
+   "term": "Open Interest",
+   "group": "positioning",
+   "short": "Contracts still open at a strike: bought and sold but not yet closed or expired. It counts positions, not trades, and does not say who holds them.",
+   "guide": "open-interest",
+   "tool": "/open-interest",
+   "also": [
+    "oi-change",
+    "volume"
+   ],
+   "tools": [
+    "chain",
+    "open-interest"
+   ]
+  },
+  {
+   "id": "oi-change",
+   "term": "Open Interest change",
+   "group": "positioning",
+   "short": "Open Interest now less an earlier reading: contracts added (+) or closed (−) since the previous close, or across the chosen window.",
+   "guide": "oi-change",
+   "also": [
+    "build-up"
+   ],
+   "tools": [
+    "chain",
+    "open-interest"
+   ]
+  },
+  {
+   "id": "oi-change-pct",
+   "term": "Open Interest % change",
+   "group": "positioning",
+   "short": "The Open Interest change as a per cent of where it started.",
+   "not": "A tiny starting base inflates the per cent; read it with the size in lots.",
+   "tools": [
+    "options-scanner"
+   ]
+  },
+  {
+   "id": "oi-and-volume",
+   "term": "Open Interest and volume",
+   "group": "positioning",
+   "short": "Open Interest is contracts open now; volume is contracts traded. A trade can add volume and leave Open Interest unchanged.",
+   "tools": [
+    "open-interest"
+   ]
+  },
+  {
+   "id": "build-up",
+   "term": "Build-up",
+   "group": "positioning",
+   "short": "The direction of price (premium for an option, price for a future) read together with the direction of Open Interest. Four names result: Long build-up, Short build-up, Short covering and Long unwinding. A dash means no earlier reading or no clear pattern.",
+   "guide": "oi-spurts",
+   "also": [
+    "long-buildup",
+    "short-buildup",
+    "short-covering",
+    "long-unwinding"
+   ],
+   "tools": [
+    "options-scanner",
+    "oi-heatmap",
+    "market-flow",
+    "chain"
+   ]
+  },
+  {
+   "id": "long-buildup",
+   "term": "Long build-up",
+   "group": "positioning",
+   "short": "Price up and Open Interest up: conventionally read as new long positions opening.",
+   "guide": "oi-spurts",
+   "also": [
+    "short-buildup"
+   ],
+   "tools": [
+    "chain",
+    "oi-spurts",
+    "open-interest"
+   ]
+  },
+  {
+   "id": "short-buildup",
+   "term": "Short build-up",
+   "group": "positioning",
+   "short": "Price down and Open Interest up: conventionally read as new short positions opening.",
+   "guide": "oi-spurts",
+   "also": [
+    "long-buildup"
+   ],
+   "tools": [
+    "chain",
+    "oi-spurts",
+    "open-interest"
+   ]
+  },
+  {
+   "id": "short-covering",
+   "term": "Short covering",
+   "group": "positioning",
+   "short": "Price up and Open Interest down: conventionally read as short positions closing.",
+   "guide": "oi-spurts",
+   "also": [
+    "long-unwinding"
+   ],
+   "tools": [
+    "chain",
+    "oi-spurts",
+    "open-interest"
+   ]
+  },
+  {
+   "id": "long-unwinding",
+   "term": "Long unwinding",
+   "group": "positioning",
+   "short": "Price down and Open Interest down: conventionally read as long positions closing.",
+   "guide": "oi-spurts",
+   "also": [
+    "short-covering"
+   ],
+   "tools": [
+    "chain",
+    "oi-spurts",
+    "open-interest"
+   ]
+  },
+  {
+   "id": "call-wall",
+   "term": "Call wall",
+   "group": "positioning",
+   "short": "The strike with the most Call Open Interest at or above the price.",
+   "not": "Where Call positions are heaviest, not a price that must hold. Not the same as a Call gamma wall.",
+   "also": [
+    "put-wall",
+    "gamma-wall"
+   ],
+   "tools": [
+    "chain",
+    "pcr",
+    "terminal"
+   ]
+  },
+  {
+   "id": "put-wall",
+   "term": "Put wall",
+   "group": "positioning",
+   "short": "The strike with the most Put Open Interest at or below the price.",
+   "not": "Where Put positions are heaviest, not a price that must hold. Not the same as a Put gamma wall.",
+   "also": [
+    "call-wall",
+    "gamma-wall"
+   ],
+   "tools": [
+    "chain",
+    "pcr",
+    "terminal"
+   ]
+  },
+  {
+   "id": "oi-support-band",
+   "term": "Support and resistance (Open Interest)",
+   "group": "positioning",
+   "short": "On the Open Interest page: reference levels at the centre of the heaviest band of Put Open Interest (support) and of Call Open Interest (resistance).",
+   "label": "Support and resistance",
+   "not": "Reference levels, not prices that must hold.",
+   "also": [
+    "call-wall",
+    "put-wall"
+   ],
+   "tools": [
+    "open-interest"
+   ]
+  },
+  {
+   "id": "striped-tip",
+   "term": "Striped tip",
+   "group": "positioning",
+   "short": "Contracts added in the selected window, drawn on the end of an Open Interest bar.",
+   "tools": [
+    "open-interest"
+   ]
+  },
+  {
+   "id": "pcr",
+   "term": "PCR",
+   "group": "positioning",
+   "short": "Put Call Ratio: Put Open Interest divided by Call Open Interest across the strikes in scope, printed to two decimals. Above 1 more Puts are open; below 1 more Calls.",
+   "not": "A ratio of positions, not a trade direction.",
+   "guide": "pcr",
+   "tool": "/pcr",
+   "also": [
+    "pcr-verdict"
+   ],
+   "tools": [
+    "chain",
+    "pcr",
+    "terminal",
+    "open-interest"
+   ]
+  },
+  {
+   "id": "strike-pcr",
+   "term": "Strike PCR",
+   "group": "positioning",
+   "short": "Put Open Interest ÷ Call Open Interest at one strike. Above 1.00 the strike is Put-heavy; below 1.00 it is Call-heavy.",
+   "guide": "open-interest",
+   "also": [
+    "pcr",
+    "put-heavy",
+    "call-heavy"
+   ],
+   "tools": [
+    "open-interest",
+    "chain"
+   ]
+  },
+  {
+   "id": "put-heavy",
+   "term": "Put-heavy",
+   "group": "positioning",
+   "short": "A strike whose Strike PCR is above 1.00: more Put than Call Open Interest.",
+   "also": [
+    "strike-pcr"
+   ],
+   "tools": [
+    "open-interest"
+   ]
+  },
+  {
+   "id": "call-heavy",
+   "term": "Call-heavy",
+   "group": "positioning",
+   "short": "A strike whose Strike PCR is below 1.00: more Call than Put Open Interest.",
+   "also": [
+    "strike-pcr"
+   ],
+   "tools": [
+    "open-interest"
+   ]
+  },
+  {
+   "id": "pcr-verdict",
+   "term": "PCR verdict",
+   "group": "positioning",
+   "short": "Where the ratio sits against two lines: 1.03 or above reads Puts ahead, 0.97 or below reads Calls ahead, between them Balanced.",
+   "label": "Verdict",
+   "not": "It names where the ratio sits, not a forecast.",
+   "guide": "pcr",
+   "also": [
+    "pcr"
+   ],
+   "tools": [
+    "pcr"
+   ]
+  },
+  {
+   "id": "pcr-crossing",
+   "term": "Crossing",
+   "group": "positioning",
+   "short": "A dot on the PCR chart where the ratio changes side of 1.00.",
+   "label": "Crossing",
+   "also": [
+    "pcr"
+   ],
+   "tools": [
+    "pcr"
+   ]
+  },
+  {
+   "id": "spurt",
+   "term": "Spurt",
+   "group": "positioning",
+   "short": "A contract whose Open Interest moved by at least the big-move bar in the window, measured against the book it started with.",
+   "guide": "oi-spurts",
+   "also": [
+    "thin-book"
+   ],
+   "tools": [
+    "oi-spurts"
+   ]
+  },
+  {
+   "id": "rotation-map",
+   "term": "Rotation map",
+   "group": "positioning",
+   "short": "Premium change runs across, Open Interest change runs up; each corner is one build-up.",
+   "guide": "oi-spurts",
+   "also": [
+    "build-up"
+   ],
+   "tools": [
+    "oi-spurts"
+   ]
+  },
+  {
+   "id": "thin-book",
+   "term": "Thin book",
+   "group": "positioning",
+   "short": "A contract that began the window with 5000 contracts or fewer reads flat, not as a spike, because a small base makes any change look large.",
+   "also": [
+    "spurt"
+   ],
+   "tools": [
+    "oi-spurts"
+   ]
+  },
+  {
+   "id": "heatmap-tile",
+   "term": "Tile",
+   "group": "positioning",
+   "short": "On the Open Interest Heatmap, one strike at one time: the Open Interest figure, a build-up name and the change since the previous column.",
+   "label": "Tile",
+   "guide": "oi-heatmap",
+   "tools": [
+    "oi-heatmap"
+   ]
+  },
+  {
+   "id": "heatmap-shade",
+   "term": "Shade",
+   "group": "positioning",
+   "short": "On the Open Interest Heatmap, depth of colour compares tiles. In the default colouring it shows size, not change.",
+   "label": "Shade",
+   "guide": "oi-heatmap",
+   "tools": [
+    "oi-heatmap"
+   ]
+  },
+  {
+   "id": "strike-rail",
+   "term": "Strike rail",
+   "group": "positioning",
+   "short": "The column of strikes between the two wings of the heatmap. With one side shown it moves beside that side.",
+   "tools": [
+    "oi-heatmap"
+   ]
+  },
+  {
+   "id": "writer",
+   "term": "Writer",
+   "group": "positioning",
+   "short": "The seller of an option, who collects the premium and takes on the obligation.",
+   "not": "Open Interest does not say whether a writer or a buyer opened a position.",
+   "tools": []
+  },
+  {
+   "id": "implied-volatility",
+   "term": "Implied Volatility (IV)",
+   "group": "volatility",
+   "short": "The size of move an option's price implies for the underlying, as an annual per cent, solved backwards from the premium.",
+   "label": "Implied Volatility",
+   "guide": "implied-volatility",
+   "tool": "/implied-volatility",
+   "also": [
+    "atm-iv"
+   ],
+   "tools": [
+    "implied-volatility",
+    "chain",
+    "options-scanner"
+   ]
+  },
+  {
+   "id": "atm-iv",
+   "term": "ATM IV",
+   "group": "volatility",
+   "short": "The implied volatility at the forward-anchored at-the-money point, interpolated between the strikes either side so it does not jump.",
+   "guide": "implied-volatility",
+   "also": [
+    "implied-volatility",
+    "forward"
+   ],
+   "tools": [
+    "implied-volatility",
+    "terminal"
+   ]
+  },
+  {
+   "id": "priced-move",
+   "term": "Priced move",
+   "group": "volatility",
+   "short": "One standard deviation (1 SD) implied by the ATM IV to expiry, in points.",
+   "not": "A pricing convention, not a forecast.",
+   "also": [
+    "atm-iv",
+    "expected-move"
+   ],
+   "tools": [
+    "implied-volatility"
+   ]
+  },
+  {
+   "id": "actual-days",
+   "term": "Actual days",
+   "group": "volatility",
+   "short": "The underlying's typical day over its last 20 sessions, worked out from daily closes, to set beside the move the options price.",
+   "tools": [
+    "implied-volatility"
+   ]
+  },
+  {
+   "id": "iv-percentile",
+   "term": "IV Percentile",
+   "group": "volatility",
+   "short": "The share of the last 252 sessions whose IV closed below today's. It appears once 60 sessions of history exist.",
+   "also": [
+    "iv-rank"
+   ],
+   "tools": [
+    "implied-volatility"
+   ]
+  },
+  {
+   "id": "iv-rank",
+   "term": "IV Rank",
+   "group": "volatility",
+   "short": "Where today's IV sits between the year's lowest and highest close, from 0 to 100. It waits for a full 252 sessions.",
+   "also": [
+    "iv-percentile"
+   ],
+   "tools": [
+    "implied-volatility"
+   ]
+  },
+  {
+   "id": "smile",
+   "term": "Smile",
+   "group": "volatility",
+   "short": "IV plotted strike by strike for one expiry. The at-the-money figure is one point on it.",
+   "tools": [
+    "implied-volatility"
+   ]
+  },
+  {
+   "id": "put-skew",
+   "term": "Put skew",
+   "group": "volatility",
+   "short": "Downside IV minus upside IV, in IV points.",
+   "tools": [
+    "strategy-builder"
+   ]
+  },
+  {
+   "id": "delta",
+   "term": "Delta",
+   "group": "volatility",
+   "short": "How much an option's price moves for a one-rupee move in the underlying: 0 to 1 for a Call, 0 to −1 for a Put.",
+   "also": [
+    "gamma"
+   ],
+   "tools": [
+    "chain",
+    "options-scanner"
+   ]
+  },
+  {
+   "id": "delta-range",
+   "term": "Delta range",
+   "group": "volatility",
+   "short": "A filter on how far from the money a leg sits: 0.50 is at the money and 0.15 is far out; 30 reads as 0.30.",
+   "also": [
+    "delta"
+   ],
+   "tools": [
+    "strategy-builder"
+   ]
+  },
+  {
+   "id": "gamma",
+   "term": "Gamma",
+   "group": "volatility",
+   "short": "How fast Delta changes as the price moves. It is largest near the money and close to expiry.",
+   "guide": "gamma-exposure",
+   "also": [
+    "delta",
+    "gex"
+   ],
+   "tools": [
+    "chain"
+   ]
+  },
+  {
+   "id": "theta",
+   "term": "Theta",
+   "group": "volatility",
+   "short": "How much premium an option loses in a day as time passes, all else equal.",
+   "also": [
+    "time-value"
+   ],
+   "tools": [
+    "chain"
+   ]
+  },
+  {
+   "id": "vega",
+   "term": "Vega",
+   "group": "volatility",
+   "short": "How much an option's price changes for a one-point move in Implied Volatility.",
+   "also": [
+    "implied-volatility"
+   ],
+   "tools": [
+    "chain"
+   ]
+  },
+  {
+   "id": "rho",
+   "term": "Rho",
+   "group": "volatility",
+   "short": "How much an option's price changes for a one-point move in the interest rate. It matters least for short-dated options.",
+   "tools": [
+    "chain"
+   ]
+  },
+  {
+   "id": "gex",
+   "term": "GEX",
+   "group": "volatility",
+   "short": "Gamma exposure: at each strike, Gamma × (Call Open Interest − Put Open Interest) × spot² × 0.01, in rupees of hedging per 1% move. Calls count positive, Puts negative.",
+   "not": "It rests on an assumption about who holds the options, which exchange data cannot confirm.",
+   "guide": "gamma-exposure",
+   "tool": "/gamma-exposure",
+   "also": [
+    "gamma-flip",
+    "gamma-wall"
+   ],
+   "tools": [
+    "gex"
+   ]
+  },
+  {
+   "id": "gamma-flip",
+   "term": "Gamma flip",
+   "group": "volatility",
+   "short": "The price where the model's total gamma exposure changes sign, found by re-solving the book at other prices.",
+   "not": "Positive gamma is read as steadying, not as bullish; the flip is not a forecast.",
+   "guide": "gamma-exposure",
+   "also": [
+    "gex",
+    "ladder-cross"
+   ],
+   "tools": [
+    "gex",
+    "terminal",
+    "chain"
+   ]
+  },
+  {
+   "id": "gamma-wall",
+   "term": "Call gamma wall and Put gamma wall",
+   "group": "volatility",
+   "short": "The strike above spot with the largest Call gamma exposure, and the strike below it with the largest Put gamma exposure.",
+   "label": "Gamma wall",
+   "not": "Where the modelled book is thick, not a price that must hold. Not the same as a Call wall or Put wall.",
+   "guide": "gamma-exposure",
+   "also": [
+    "call-wall",
+    "put-wall"
+   ],
+   "tools": [
+    "gex",
+    "terminal"
+   ]
+  },
+  {
+   "id": "ladder-cross",
+   "term": "Ladder cross",
+   "group": "volatility",
+   "short": "The strike where the running total of gamma exposure, added from the lowest strike upward, crosses zero. A different level from the gamma flip.",
+   "also": [
+    "gamma-flip"
+   ],
+   "tools": [
+    "gex"
+   ]
+  },
+  {
+   "id": "gamma-concentration",
+   "term": "Gamma concentration",
+   "group": "volatility",
+   "short": "Call and Put gamma exposure added rather than netted, so it does not depend on the assumption about who holds the options.",
+   "also": [
+    "gex"
+   ],
+   "tools": [
+    "gex"
+   ]
+  },
+  {
+   "id": "gex-heaviest",
+   "term": "Heaviest strike",
+   "group": "volatility",
+   "short": "The strike with the largest gamma exposure when Calls and Puts are added as sizes: the most gamma on either side of the price.",
+   "not": "It does not depend on who holds the options.",
+   "guide": "gamma-exposure",
+   "also": [
+    "gex-both-sides"
+   ],
+   "tools": [
+    "gex"
+   ]
+  },
+  {
+   "id": "gex-both-sides",
+   "term": "Both sides",
+   "group": "volatility",
+   "short": "Call and Put gamma exposure at a strike added as sizes, without sign, so no assumption about who holds them is made.",
+   "guide": "gamma-exposure",
+   "also": [
+    "gamma-concentration"
+   ],
+   "tools": [
+    "gex"
+   ]
+  },
+  {
+   "id": "gex-dominant",
+   "term": "Call-dominant and Put-dominant strike",
+   "group": "volatility",
+   "short": "On the Net view, the colour of each bar: a Call-dominant strike has more Call than Put gamma exposure, a Put-dominant strike the reverse.",
+   "also": [
+    "gex"
+   ],
+   "tools": [
+    "gex"
+   ]
+  },
+  {
+   "id": "iv-session-range",
+   "term": "Session high and Session low",
+   "group": "volatility",
+   "short": "The highest and lowest ATM IV readings of the session so far, drawn as dashed lines on the Intraday chart.",
+   "also": [
+    "atm-iv"
+   ],
+   "tools": [
+    "implied-volatility"
+   ]
+  },
+  {
+   "id": "straddle",
+   "term": "Straddle",
+   "group": "strategy",
+   "short": "A Call and a Put at the same strike and expiry.",
+   "guide": "atm-premium",
+   "tool": "/straddle",
+   "also": [
+    "straddle-premium",
+    "strangle"
+   ],
+   "tools": [
+    "straddle"
+   ]
+  },
+  {
+   "id": "straddle-premium",
+   "term": "Straddle premium",
+   "group": "strategy",
+   "short": "The Call price plus the Put price at the chosen strikes.",
+   "guide": "atm-premium",
+   "also": [
+    "expected-move"
+   ],
+   "tools": [
+    "straddle",
+    "terminal",
+    "oi-heatmap"
+   ]
+  },
+  {
+   "id": "expected-move",
+   "term": "Expected move",
+   "group": "strategy",
+   "short": "0.85 × the at-the-money straddle premium, either side of the strike: the range the option market is pricing to expiry.",
+   "not": "A pricing convention, not a forecast.",
+   "guide": "atm-premium",
+   "also": [
+    "straddle-premium",
+    "priced-move"
+   ],
+   "tools": [
+    "straddle",
+    "terminal",
+    "chain",
+    "oi-heatmap"
+   ]
+  },
+  {
+   "id": "straddle-breakevens",
+   "term": "Breakevens (straddle)",
+   "group": "strategy",
+   "short": "The strike minus the straddle premium, and the strike plus it: the expiry levels where a buyer of both legs gets the premium back.",
+   "label": "Breakevens",
+   "also": [
+    "breakeven"
+   ],
+   "tools": [
+    "straddle"
+   ]
+  },
+  {
+   "id": "strangle",
+   "term": "Strangle",
+   "group": "strategy",
+   "short": "A Call and a Put at different strikes on the same expiry.",
+   "also": [
+    "straddle"
+   ],
+   "tools": [
+    "straddle"
+   ]
+  },
+  {
+   "id": "time-decay-only",
+   "term": "Time-decay only",
+   "group": "strategy",
+   "short": "The window's first premium scaled for the time left, with spot and volatility held at that first reading.",
+   "not": "A rule with two things frozen, not a forecast.",
+   "tools": [
+    "straddle"
+   ]
+  },
+  {
+   "id": "decay-baselines",
+   "term": "Day Open and 1m Close",
+   "group": "strategy",
+   "short": "The two Premium Decay baselines: change since the window opened, or change from the reading before.",
+   "tools": [
+    "straddle"
+   ]
+  },
+  {
+   "id": "payoff",
+   "term": "Expiry payoff",
+   "group": "strategy",
+   "short": "What the position is worth if the underlying ends at a given price on expiry day: exact arithmetic on intrinsic values.",
+   "label": "Expiry payoff",
+   "guide": "strategy-builder",
+   "tool": "/strategy-builder",
+   "also": [
+    "breakeven"
+   ],
+   "tools": [
+    "strategy-builder"
+   ]
+  },
+  {
+   "id": "target-date-estimate",
+   "term": "Target-date estimate",
+   "group": "strategy",
+   "short": "A Black-Scholes estimate of the position before expiry, using each leg's own IV and a 6.5% annual rate.",
+   "not": "A model estimate, not a quoted price.",
+   "also": [
+    "payoff"
+   ],
+   "tools": [
+    "strategy-builder"
+   ]
+  },
+  {
+   "id": "breakeven",
+   "term": "Breakeven",
+   "group": "strategy",
+   "short": "An underlying price at expiry where the position's result is zero, after the entered costs.",
+   "guide": "strategy-builder",
+   "also": [
+    "payoff"
+   ],
+   "tools": [
+    "strategy-builder"
+   ]
+  },
+  {
+   "id": "risk-pill",
+   "term": "Risk pill",
+   "group": "strategy",
+   "short": "States Defined risk, Unlimited risk or Mixed expiries, worked out from the legs at the highest strike.",
+   "tools": [
+    "strategy-builder"
+   ]
+  },
+  {
+   "id": "entry-price",
+   "term": "Entry price",
+   "group": "strategy",
+   "short": "Bought legs enter at the ask and sold legs at the bid, unless Customise sets the midpoint. Prices stay fixed until edited or repriced.",
+   "also": [
+    "bid-ask"
+   ],
+   "tools": [
+    "strategy-builder"
+   ]
+  },
+  {
+   "id": "lots-and-quantity",
+   "term": "Lots and Quantity",
+   "group": "strategy",
+   "short": "Lots set each leg; Quantity multiplies the whole basket.",
+   "also": [
+    "lot-size"
+   ],
+   "tools": [
+    "strategy-builder"
+   ]
+  },
+  {
+   "id": "probability-of-profit",
+   "term": "Probability of profit",
+   "group": "strategy",
+   "short": "A model estimate read from the chain's implied volatility near the money.",
+   "not": "It describes the model, not the market.",
+   "tools": [
+    "strategy-builder"
+   ]
+  },
+  {
+   "id": "hedge",
+   "term": "Hedge",
+   "group": "strategy",
+   "short": "A position taken to offset the risk of another one, such as a Put held against a long position.",
+   "tools": [
+    "strategy-builder"
+   ]
+  },
+  {
+   "id": "strategy-spread",
+   "term": "Spread (strategy)",
+   "group": "strategy",
+   "short": "A position built from two or more options on one underlying, such as one strike bought and another sold, so that both the gain and the loss are capped.",
+   "guide": "strategy-builder",
+   "also": [
+    "payoff"
+   ],
+   "tools": [
+    "strategy-builder"
+   ]
+  },
+  {
+   "id": "maximum-loss",
+   "term": "Maximum loss",
+   "group": "strategy",
+   "short": "The most a basket can lose at expiry, per basket.",
+   "not": "It is not margin.",
+   "tools": [
+    "strategy-builder"
+   ]
+  },
+  {
+   "id": "reward-risk",
+   "term": "Reward ÷ risk",
+   "group": "strategy",
+   "short": "Maximum profit divided by maximum loss.",
+   "not": "It says nothing about the chance of reaching either.",
+   "tools": [
+    "strategy-builder"
+   ]
+  },
+  {
+   "id": "debit-credit",
+   "term": "Debit and credit",
+   "group": "strategy",
+   "short": "A debit basket costs money to open; a credit basket brings money in.",
+   "tools": [
+    "strategy-builder"
+   ]
+  },
+  {
+   "id": "sold-strikes-from-spot",
+   "term": "Sold strikes from spot",
+   "group": "strategy",
+   "short": "How far the sold strikes sit from spot, counted in expected moves.",
+   "also": [
+    "expected-move"
+   ],
+   "tools": [
+    "strategy-builder"
+   ]
+  },
+  {
+   "id": "risk-budget",
+   "term": "Risk budget",
+   "group": "strategy",
+   "short": "Capital × the Risk budget %. Fits within budget counts how many of this basket its maximum loss lets the budget hold. Broker margin, when entered, gives the return on margin; the app does not work margin out.",
+   "also": [
+    "maximum-loss"
+   ],
+   "tools": [
+    "strategy-builder"
+   ]
+  },
+  {
+   "id": "volume-surge",
+   "term": "Volume surge",
+   "group": "scanning",
+   "short": "Contracts trading far above usual: against yesterday's volume on the Day window, against today's own pace in a shorter window.",
+   "tools": [
+    "options-scanner"
+   ]
+  },
+  {
+   "id": "volume-above-oi",
+   "term": "Volume above Open Interest",
+   "group": "scanning",
+   "short": "Contracts whose volume today exceeded the Open Interest they started with.",
+   "tools": [
+    "options-scanner"
+   ]
+  },
+  {
+   "id": "most-active",
+   "term": "Most active",
+   "group": "scanning",
+   "short": "Where the most money traded: average traded price × contracts.",
+   "tools": [
+    "options-scanner"
+   ]
+  },
+  {
+   "id": "traded-today-floor",
+   "term": "Traded today, at least",
+   "group": "scanning",
+   "short": "The liquidity floor, premium × contracts in rupees lakh, applied last. It starts at 10 lakh.",
+   "tools": [
+    "options-scanner"
+   ]
+  },
+  {
+   "id": "starting-size-guards",
+   "term": "Starting-size guards",
+   "group": "scanning",
+   "short": "Open Interest % scans and Volume above Open Interest start from at least 50 lots; Top gainers and Top losers start from a premium of at least ₹2.",
+   "tools": [
+    "options-scanner"
+   ]
+  },
+  {
+   "id": "flow-side",
+   "term": "Side",
+   "group": "scanning",
+   "short": "On Market Flow: bullish when the future rose past the floor, bearish when it fell past it, rangebound inside it. The floor is the smallest move that counts as a direction: 0.5% on the Day window, 0.3% on 1h and 0.15% on 15m, unless Customise sets another.",
+   "label": "Side",
+   "guide": "market-flow",
+   "tools": [
+    "market-flow"
+   ]
+  },
+  {
+   "id": "flow-strength",
+   "term": "Strength",
+   "group": "scanning",
+   "short": "On Market Flow: a standing within the side, from how far the move ran against the others, how much Open Interest moved with it, and how many of the five checks hold.",
+   "label": "Strength",
+   "guide": "market-flow",
+   "also": [
+    "flow-checks"
+   ],
+   "tools": [
+    "market-flow"
+   ]
+  },
+  {
+   "id": "flow-checks",
+   "term": "Checks",
+   "group": "scanning",
+   "short": "On Market Flow: positions opened with the move; spot or the wider window agrees; the shorter window agrees; option writers added more on the side that holds; the sector leans the same way. A check that cannot be measured is left out, not failed.",
+   "label": "Checks",
+   "guide": "market-flow",
+   "tools": [
+    "market-flow"
+   ]
+  },
+  {
+   "id": "flow-zone",
+   "term": "Zone",
+   "group": "scanning",
+   "short": "On Market Flow: the 15-minute stretch of the session's futures candles that added the most Open Interest while price moved the side's way, as a price range and the clock.",
+   "label": "Zone",
+   "guide": "market-flow",
+   "tools": [
+    "market-flow"
+   ]
+  },
+  {
+   "id": "flow-levels",
+   "term": "Possible support and resistance",
+   "group": "scanning",
+   "short": "On Market Flow: the strike with the heaviest Put Open Interest at or below spot, and the heaviest Call Open Interest at or above it, on the nearest expiry.",
+   "not": "Levels where positions are heaviest, not prices that must hold.",
+   "also": [
+    "call-wall",
+    "put-wall"
+   ],
+   "tools": [
+    "market-flow"
+   ]
+  },
+  {
+   "id": "tool-option-chain",
+   "term": "Option Chain",
+   "group": "tools",
+   "short": "The table of every strike for one underlying and one expiry: Calls on the left, the strike in the middle, Puts on the right.",
+   "guide": "option-chain",
+   "tool": "/option-chain",
+   "tools": []
+  },
+  {
+   "id": "tool-open-interest",
+   "term": "Open Interest (tool)",
+   "group": "tools",
+   "short": "Open Interest at each strike as bars, with its change, the Strike PCR and Max Pain views.",
+   "guide": "open-interest",
+   "tool": "/open-interest",
+   "tools": []
+  },
+  {
+   "id": "tool-oi-spurts",
+   "term": "Open Interest Spurts",
+   "group": "tools",
+   "short": "The contracts whose Open Interest moved most in a window, as a list of top moves or a rotation map.",
+   "guide": "oi-spurts",
+   "tool": "/oi-spurts",
+   "tools": []
+  },
+  {
+   "id": "tool-oi-heatmap",
+   "term": "Open Interest Heatmap",
+   "group": "tools",
+   "short": "A grid of Open Interest across strikes and time, each tile shaded and named by its build-up.",
+   "guide": "oi-heatmap",
+   "tool": "/oi-heatmap",
+   "tools": []
+  },
+  {
+   "id": "tool-pcr",
+   "term": "PCR (tool)",
+   "group": "tools",
+   "short": "The Put Call Ratio through the session, with its verdict lines, Call wall, Put wall and Max Pain.",
+   "guide": "pcr",
+   "tool": "/pcr",
+   "tools": []
+  },
+  {
+   "id": "tool-straddle",
+   "term": "Straddle (tool)",
+   "group": "tools",
+   "short": "The at-the-money straddle premium through the session, with the expected move and its breakevens.",
+   "guide": "atm-premium",
+   "tool": "/straddle",
+   "tools": []
+  },
+  {
+   "id": "tool-gex",
+   "term": "GEX Levels",
+   "group": "tools",
+   "short": "Gamma exposure by strike, with the gamma flip, the gamma walls and the ladder cross.",
+   "guide": "gamma-exposure",
+   "tool": "/gamma-exposure",
+   "tools": []
+  },
+  {
+   "id": "tool-implied-volatility",
+   "term": "Implied Volatility (tool)",
+   "group": "tools",
+   "short": "ATM IV through the session, IV by strike, IV across expiries and its yearly history.",
+   "guide": "implied-volatility",
+   "tool": "/implied-volatility",
+   "tools": []
+  },
+  {
+   "id": "tool-strategy-builder",
+   "term": "Strategy Builder",
+   "group": "tools",
+   "short": "Build a position leg by leg and read its payoff, breakevens, Greeks and probability of profit; the Finder scans ready-made strategies.",
+   "guide": "strategy-builder",
+   "tool": "/strategy-builder",
+   "tools": []
+  },
+  {
+   "id": "tool-options-scanner",
+   "term": "Options Scanner",
+   "group": "tools",
+   "short": "Every traded contract and underlying on one list, sorted by what moved: price, Open Interest, build-up or volume.",
+   "guide": "options-scanner",
+   "tool": "/options-scanner",
+   "tools": []
+  },
+  {
+   "id": "tool-market-flow",
+   "term": "Market Flow",
+   "group": "tools",
+   "short": "Every F&O underlying sorted into bullish, bearish and rangebound by its future's price and Open Interest.",
+   "guide": "market-flow",
+   "tool": "/market-flow",
+   "tools": []
+  },
+  {
+   "id": "tool-trader-cockpit",
+   "term": "Trader Cockpit",
+   "group": "tools",
+   "short": "One screen that carries the chain and the other tools as widgets, side by side, for one underlying and expiry.",
+   "guide": "trader-cockpit",
+   "tool": "/terminal",
+   "tools": []
+  }
+ ]
+}

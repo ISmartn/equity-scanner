@@ -1,0 +1,85 @@
+/*
+ * The instrument mark: a monogram in a rounded square, sized by --mark-size.
+ *
+ * Monochrome on purpose. The card's colour belongs to the verdict and to the
+ * figures in the reading; a tinted mark beside them would be a third colour
+ * competing for the same glance. Tokens only (contract §4), and the type
+ * stays at the 10px floor.
+ */
+
+.ui-symbol-mark {
+  position: relative;
+  box-sizing: border-box;
+  display: inline-grid;
+  place-items: center;
+  flex: none;
+  width: var(--mark-size, 22px);
+  height: var(--mark-size, 22px);
+  overflow: hidden;
+  border-radius: calc(var(--mark-size, 22px) * 0.3);
+  background: color-mix(in srgb, var(--text) 9%, transparent);
+  color: var(--text);
+  font-family: var(--font-sans);
+  user-select: none;
+}
+
+/* An index is the market itself: solid ink, reversed type. A stock sits
+   quieter, so a chain of them never reads as nine identical badges. */
+/* Only the MONOGRAM reverses out; artwork keeps its own light tile. */
+.ui-symbol-mark.is-index:not(.has-art) {
+  background: var(--text);
+  color: var(--surface-raised);
+}
+
+.ui-symbol-mark__text {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .01em;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+/* A wordmark keeps its proportions: the tile grows sideways rather than
+   squeezing the artwork into a square it was never drawn for. */
+.ui-symbol-mark.is-wide {
+  width: auto;
+  height: var(--mark-size, 22px);
+  min-width: var(--mark-size, 22px);
+  max-width: calc(var(--mark-size, 22px) * 2.8);
+  padding: 3px 5px;
+}
+/* The tile owns the padding; the artwork just fills what is left, keeping its
+   own proportions. Sizing the image itself let it render taller than the tile
+   and the wordmark lost its bottom row to `overflow: hidden`. */
+/* Bounds in pixels, not percentages: a percentage max-height against a grid
+   area of indefinite height resolves to none, so the wordmark kept spilling
+   past its tile and losing its bottom row to `overflow: hidden`. */
+.ui-symbol-mark.is-wide .ui-symbol-mark__art {
+  position: static;
+  width: auto;
+  height: auto;
+  max-width: calc(var(--mark-size, 22px) * 2.8 - 10px);
+  max-height: calc(var(--mark-size, 22px) - 6px);
+  padding: 0;
+  background: none;
+}
+/* Artwork carries its own light tile in BOTH themes: a logo drawn in dark ink
+   on transparency disappears on a dark card, and re-colouring someone's mark
+   is not ours to do. */
+/* Artwork replaces the monogram rather than sitting on top of it: in the wide
+   tile the art is in flow, so both were rendering, stacked. */
+.ui-symbol-mark.has-art { background: var(--capital-white); }
+.ui-symbol-mark.has-art .ui-symbol-mark__text { display: none; }
+.ui-symbol-mark__art {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  padding: 2px;
+  box-sizing: border-box;
+  object-fit: contain;
+  background: var(--capital-white);
+  opacity: 0;
+}
+/* Fades in over the monogram once it has loaded. */
+.ui-symbol-mark.has-art .ui-symbol-mark__art { opacity: 1; transition: opacity .15s ease; }

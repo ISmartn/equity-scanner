@@ -1,0 +1,56 @@
+/*
+ * Light-theme surface authority.
+ *
+ * The terminal shell establishes the light product canvas: ONE soft off-white
+ * plane separated by neutral hairlines. Depth comes from borders and spacing,
+ * not from cream/beige panel fills — and not from stacking three whites.
+ *
+ * It used to paint every surface paper-white (#ffffff) on top of a page whose
+ * own --bg is already #fafafa, so the product read as flat and colourless with
+ * three near-whites layered on each other (owner, 2026-09-24: "we are not using
+ * any colour in the background… we need a better colour"). The ground is now
+ * --neutral-50 everywhere, which IS --bg, so there is one plane. Hover and
+ * active each step up one rung so they still read against it.
+ */
+:root[data-theme='light'] body #root > .app.app[data-active-tab] {
+  --bg-subtle: var(--neutral-50);
+  --bg-sunken: var(--neutral-50);
+  --ui-widget-surface: var(--neutral-50);
+}
+
+/* OI tokens are intentionally scoped. Override them at that same boundary so
+   Open Interest, OI Spurts and the shared option-chain cells remain aligned. */
+:root[data-theme='light'] body #root > .app.app[data-active-tab] .oi-design {
+  --surface-card: var(--neutral-50);
+  --surface-raised: var(--neutral-50);
+  --surface-sunken: var(--neutral-50);
+  --surface-hover: var(--neutral-100);
+  --surface-active: var(--neutral-200);
+  --line: var(--neutral-200);
+  --line-strong: var(--neutral-300);
+}
+
+:root[data-theme='light'] body #root > .app.app[data-active-tab] :is(
+  .dashboard-body,
+  .main-area,
+  .main-content,
+  .ui-oi-page
+) {
+  background-color: var(--neutral-50);
+}
+
+/* The insight card's edge is its own shell property (§2.A, --aisum-edge in
+   ui-insight-cards.css), not the generic hairline this rule forces above. */
+:root[data-theme='light'] body #root > .app.app[data-active-tab] .ui-aisum {
+  border-color: var(--aisum-edge) !important;
+}
+
+/* Headers and active controls may use a near-white step, but never the former
+   cream canvas. Their hairline remains the visible boundary. */
+:root[data-theme='light'] body #root > .app.app[data-active-tab] :is(
+  .ui-oi-flowcol > .ui-strip__k,
+  .ui-sp-detail__meta > span
+) {
+  background-color: var(--neutral-50);
+  border-color: var(--line);
+}

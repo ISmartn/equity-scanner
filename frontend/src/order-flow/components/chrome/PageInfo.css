@@ -1,0 +1,329 @@
+/*
+ * The ⓘ explanation dialog — one surface for every workspace (PageInfo) and for
+ * Open Interest's four chart views (OpenInterestPage), which render the same
+ * component from their own entries.
+ *
+ * Finish matches the guide pages (public/guides/guide.css) and the app's other
+ * dialogs: tokens only, a hairline border and the modal scrim. the app
+ * Sans carries every label and heading. Body copy is compact, with a ~64ch measure and tabular
+ * numerals, on an 8px rhythm.
+ *
+ * - Desktop and tablet: centred, 720px at most, modal tier (`--scrim-modal`,
+ *   `--shadow-5`, `--radius-xl` — contract §1.2 / §2.B). The header and the
+ *   guide footer stay put; the body between them is the one scroller.
+ * - ≤768px: the app's bottom sheet — grab handle, top-only radius, safe-area
+ *   padding, 44px targets, and the glossary collapsed behind "Show all terms".
+ *
+ * z-index 1600/1601 matches the tier the TimeSwitch sheet used to clear the
+ * phone dock (z 1000).
+ */
+.ui-page-info-dialog-scrim {
+  position: fixed; z-index: 1600; inset: 0;
+  width: 100%; height: 100%; margin: 0; padding: 0; border: 0; border-radius: 0;
+  background: color-mix(in srgb, var(--scrim-modal) 80%, transparent);
+  -webkit-backdrop-filter: blur(3px); backdrop-filter: blur(3px);
+  cursor: default;
+}
+.ui-page-info-dialog {
+  position: fixed; z-index: 1601; inset: 0; margin: auto;
+  box-sizing: border-box; display: flex; flex-direction: column;
+  width: min(560px, calc(100vw - 32px)); height: min(600px, calc(100dvh - 64px));
+  overflow: clip;
+  border: 1px solid var(--line-strong); border-radius: var(--radius-xl, 16px);
+  background: var(--surface-raised); box-shadow: var(--shadow-5); color: var(--text);
+  font-family: var(--font-sans);
+  font-variant-numeric: tabular-nums;
+  animation: ui-asof-rise var(--dur-move, 240ms) var(--ease-ios-out, ease-out) both;
+}
+.ui-page-info-dialog:focus { outline: none; }
+.ui-page-info-dialog__grab { display: none; }
+
+/* ── Header: title, one-line subtitle, close ────────────────────────────── */
+.ui-page-info-dialog__head {
+  flex: none; display: flex; align-items: flex-start; justify-content: space-between; gap: 16px;
+  padding: 14px 12px 10px 18px;
+}
+.ui-page-info-dialog__heading { display: grid; gap: 5px; min-width: 0; }
+.ui-page-info-dialog .ui-page-info-dialog__title,
+#root > .app .ui-page-info-dialog .ui-page-info-dialog__title {
+  margin: 0; font-family: var(--font-sans) !important;
+  font-size: 17px; font-weight: 600; line-height: 1.3; letter-spacing: -.014em;
+  text-wrap: balance;
+}
+.ui-page-info-dialog__head p {
+  margin: 0; max-width: 62ch; color: var(--text-muted);
+  font-size: 13px; line-height: 1.5; text-wrap: pretty;
+}
+.ui-page-info-dialog__close {
+  flex: none; box-sizing: border-box; display: grid; place-items: center;
+  width: 36px; height: 36px; margin: 0; padding: 0; border: 0; border-radius: var(--radius-sm, 6px);
+  background: transparent; color: var(--text-muted); cursor: pointer;
+  transition: background-color var(--dur-tap, 120ms) var(--ease-ios-out, ease), color var(--dur-tap, 120ms) var(--ease-ios-out, ease);
+}
+@media (hover: hover) { .ui-page-info-dialog__close:hover { background: var(--surface-hover, var(--hover-wash)); color: var(--text); } }
+.ui-page-info-dialog__close:active { background: var(--press-wash); }
+.ui-page-info-dialog__close:focus-visible,
+.ui-page-info-dialog__more:focus-visible,
+.ui-page-info-dialog__learn:focus-visible,
+.ui-page-info-dialog__foot a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+/* ── Body: the one scroller ─────────────────────────────────────────────── */
+.ui-page-info-dialog__tabs { flex: none; padding: 0 18px 10px; border-bottom: 1px solid var(--line); }
+.ui-page-info-dialog__tabs .ui-capsule { width: 100%; max-width: 440px; }
+.ui-page-info-dialog__body {
+  flex: 1 1 auto; min-height: 0; display: grid; align-content: start; gap: 12px;
+  padding: 14px 18px;
+  overflow-y: auto; overscroll-behavior: contain; -webkit-overflow-scrolling: touch;
+  scrollbar-gutter: stable;
+  scrollbar-width: thin; scrollbar-color: var(--line-strong) transparent;
+}
+/* Only a tab stop while it actually scrolls (see PageInfoDialog). Inset,
+   because the dialog clips its overflow and an outset ring would be cut. */
+.ui-page-info-dialog__body:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+.ui-page-info-dialog__body > section { display: grid; gap: 10px; min-width: 0; }
+.ui-page-info-dialog__body > section[hidden] { display: none; }
+
+/* Heading row: the eyebrow on the left, and (when the guide teaches that part) a link to the guide's section on the right,
+   over one hairline, so each part of the card reads as its own block. */
+.ui-page-info-dialog__sechead {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  padding-bottom: 8px; border-bottom: 1px solid var(--line);
+}
+/* The global heading rule forces the h3's own colour, so
+   the label's tone lives on the span inside it. */
+.ui-page-info-dialog__body h3 {
+  display: flex; align-items: center; gap: 8px; margin: 0;
+  font-size: 13px; font-weight: 600; line-height: 1.4; text-transform: none; letter-spacing: 0;
+}
+/* Match the compact panel headings despite the global heading rule. */
+.ui-page-info-dialog__body h3,
+#root > .app .ui-page-info-dialog__body h3 { letter-spacing: 0; }
+.ui-page-info-dialog__body h3 > span { color: var(--text); }
+.ui-page-info-dialog__learn {
+  flex: none; display: inline-flex; align-items: center; gap: 3px; margin-inline: -6px; padding: 4px 6px;
+  border-radius: var(--radius-sm, 6px);
+  color: var(--accent-text); font-size: 12px; font-weight: 600; line-height: 1.3; text-decoration: none; white-space: nowrap;
+}
+@media (hover: hover) { .ui-page-info-dialog__learn:hover { background: var(--accent-wash, var(--hover-wash)); text-decoration: underline; text-underline-offset: 3px; } }
+.ui-page-info-dialog__body p,
+.ui-page-info-dialog__body li,
+.ui-page-info-dialog__body dd {
+  margin: 0; max-width: 62ch; color: var(--text);
+  font-size: 13px; line-height: 1.55; text-wrap: pretty;
+}
+
+/* ── How to read it: numbered steps with chips ──────────────────────────── */
+.ui-page-info-dialog__steps { display: grid; gap: 10px; margin: 0; padding: 0; list-style: none; counter-reset: read-step; }
+.ui-page-info-dialog__steps li { position: relative; min-height: 24px; padding-left: 34px; counter-increment: read-step; }
+.ui-page-info-dialog__steps li::before {
+  position: absolute; top: 0; left: 0; box-sizing: border-box; display: grid; place-items: center;
+  width: 24px; height: 24px; border: 0; border-radius: var(--radius-sm);
+  background: color-mix(in srgb, var(--accent-text) 16%, transparent); color: var(--accent-text);
+  content: counter(read-step);
+  font-family: var(--font-num, var(--font-sans)); font-size: 12px; font-weight: 700;
+  font-variant-numeric: tabular-nums; line-height: 1;
+}
+
+/* ── Caution: quiet, on the warning tokens. It qualifies the reading; it is
+   not a direction or an error, so amber and never red (contract §4). One even
+   hairline, no stripe; the sentence is set in the ink colour, because brown on
+   a tan wash was the hardest line in the card to read. ─────────────────── */
+.ui-page-info-dialog__caution {
+  padding: 12px 14px; box-sizing: border-box;
+  border: 1px solid var(--warning-border);
+  border-radius: var(--radius-md, 10px);
+  background: var(--warning-surface);
+}
+.ui-page-info-dialog__caution .ui-page-info-dialog__sechead { border-bottom-color: var(--warning-border); }
+.ui-page-info-dialog__body .ui-page-info-dialog__caution h3 > svg { flex: none; color: var(--warning-text); }
+.ui-page-info-dialog__body .ui-page-info-dialog__caution h3 > span { color: var(--warning-text); }
+.ui-page-info-dialog__body .ui-page-info-dialog__caution p { color: var(--text); }
+.ui-page-info-dialog__caution .ui-page-info-dialog__learn { color: var(--warning-text); }
+
+/* ── What you can do here: control, then what it does ───────────────────── */
+.ui-page-info-dialog__actions,
+.ui-page-info-dialog__terms { margin: 0; padding: 0; }
+.ui-page-info-dialog__actions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px 20px; }
+.ui-page-info-dialog__actions > div {
+  display: grid; align-content: start; gap: 4px; min-width: 0;
+  padding-block: 10px; border-top: 1px solid var(--line);
+}
+.ui-page-info-dialog__actions > div:nth-child(-n + 2) { padding-top: 0; border-top: 0; }
+.ui-page-info-dialog__actions > div:last-child { padding-bottom: 0; }
+.ui-page-info-dialog__actions dt {
+  margin: 0; color: var(--text); font-size: 13px; font-weight: 600; line-height: 1.4;
+}
+
+/* ── Key terms: a compact two-column glossary ───────────────────────────── */
+.ui-page-info-dialog__terms {
+  display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px 20px;
+}
+.ui-page-info-dialog__terms > div { display: grid; gap: 2px; align-content: start; min-width: 0; }
+.ui-page-info-dialog__terms dt { margin: 0; color: var(--text); font-size: 13px; font-weight: 600; line-height: 1.5; }
+/* A term's name opens its glossary entry: same ink as the name, a quiet underline says it is a link. */
+.ui-page-info-dialog__terms dt a { color: inherit; text-decoration: underline; text-decoration-color: color-mix(in srgb, currentColor 35%, transparent); text-underline-offset: 3px; }
+.ui-page-info-dialog__terms dt a:hover { text-decoration-color: currentColor; }
+.ui-page-info-dialog__terms dt a:focus-visible { outline: 2px solid var(--accent-ring, var(--text)); outline-offset: 2px; border-radius: 2px; }
+.ui-page-info-dialog__terms dd { color: var(--text-secondary); font-size: 13px; line-height: 1.5; }
+.ui-page-info-dialog__more { display: none; }
+
+/* ── Quick tips ─────────────────────────────────────────────────────────── */
+.ui-page-info-dialog__tips { display: grid; gap: 8px; margin: 0; padding: 0; list-style: none; }
+.ui-page-info-dialog__tips li + li {
+  padding-top: 10px;
+  border-top: 1px solid var(--line);
+}
+
+/* ── From the guide: a small taste of the full page ──────────────────────────
+   One of the guide's own pictures (the file that matches the app's theme), what the guide teaches, one real worked line and
+   three doors in, without an extra nested card. */
+.ui-page-info-dialog__glimpse {
+  padding: 0; box-sizing: border-box;
+  border: 0;
+  background: transparent;
+}
+.ui-page-info-dialog__glimpse .ui-page-info-dialog__sechead { border-bottom-color: color-mix(in srgb, var(--accent-text) 24%, var(--line)); }
+.ui-page-info-dialog__body .ui-page-info-dialog__glimpse h3 > span { color: var(--accent-text); }
+.ui-page-info-dialog__shot {
+  display: block; overflow: hidden; max-height: 200px;
+  border: 1px solid var(--line); border-radius: var(--radius-sm, 8px); background: var(--surface-sunken, var(--bg-sunken));
+}
+.ui-page-info-dialog__shot img { display: block; width: 100%; height: auto; max-height: 200px; object-fit: cover; object-position: top left; }
+/* The app's theme picks the picture: the other file is never drawn, so (being lazy) never fetched. */
+:root[data-theme="light"] .ui-page-info-dialog__shot img.is-dark { display: none; }
+:root:not([data-theme="light"]) .ui-page-info-dialog__shot img.is-light { display: none; }
+.ui-page-info-dialog__body .ui-page-info-dialog__glimpse-title { color: var(--text); font-size: 15px; font-weight: 600; line-height: 1.4; }
+/* The worked line: figures in the tabular face on a quiet inset, labelled as real. */
+.ui-page-info-dialog__body .ui-page-info-dialog__example {
+  display: grid; gap: 4px; padding: 10px 12px; box-sizing: border-box;
+  border: 0; border-radius: var(--radius-sm, 8px); background: var(--surface-sunken, var(--bg-sunken));
+  font-variant-numeric: tabular-nums;
+}
+.ui-page-info-dialog__example b { color: var(--text-muted); font-size: 12px; font-weight: 700; letter-spacing: .07em; text-transform: uppercase; }
+.ui-page-info-dialog__doors { display: flex; flex-wrap: wrap; gap: 8px; margin: 0; padding: 0; list-style: none; }
+.ui-page-info-dialog__doors a {
+  display: inline-flex; align-items: center; gap: 4px; box-sizing: border-box; min-height: 32px; padding-inline: 12px;
+  border: 1px solid color-mix(in srgb, var(--accent-text) 30%, transparent); border-radius: 999px;
+  background: var(--surface-raised); color: var(--accent-text);
+  font-size: 13px; font-weight: 600; line-height: 1.3; text-decoration: none;
+}
+@media (hover: hover) { .ui-page-info-dialog__doors a:hover { background: var(--accent-wash, var(--hover-wash)); } }
+.ui-page-info-dialog__doors a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+/* ── Footer: the guide, always in reach ─────────────────────────────────── */
+.ui-page-info-dialog__foot {
+  flex: none; display: flex; align-items: center; justify-content: space-between; gap: 16px;
+  padding: 12px 20px; border-top: 1px solid var(--line);
+}
+/* The way into the full guide: a quiet button, not a bare link, so it is the obvious next step after the card. */
+.ui-page-info-dialog__foot a {
+  display: inline-flex; align-items: center; gap: 6px; box-sizing: border-box; min-height: 40px; padding-inline: 14px;
+  border: 1px solid color-mix(in srgb, var(--accent-text) 30%, transparent); border-radius: 999px;
+  background: var(--accent-wash, transparent);
+  color: var(--accent-text); font-size: 14px; font-weight: 600; line-height: 1.4; text-decoration: none;
+}
+@media (hover: hover) { .ui-page-info-dialog__foot a:hover { background: color-mix(in srgb, var(--accent-text) 14%, transparent); } }
+.ui-page-info-dialog__hint { display: none; color: var(--text-muted); font-size: 12px; line-height: 1.3; }
+@media (hover: hover) and (pointer: fine) { .ui-page-info-dialog__hint { display: inline; } }
+.ui-page-info-dialog__sr {
+  position: absolute; inset: 0 auto auto 0; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden;
+  clip-path: inset(50%); white-space: nowrap; border: 0;
+}
+
+/* ── Phones: the bottom sheet ───────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .ui-page-info-dialog {
+    inset: auto 0 0 0; width: auto; height: min(88dvh, 720px);
+    border-bottom: 0; border-radius: var(--radius-xl, 16px) var(--radius-xl, 16px) 0 0;
+    box-shadow: 0 -18px 48px color-mix(in srgb, var(--text) 30%, transparent);
+    animation: ui-asof-rise var(--dur-panel, 320ms) var(--ease-ios-spring, ease-out) both;
+  }
+  .ui-page-info-dialog__grab {
+    position: absolute; top: 8px; left: 50%; display: block;
+    width: 40px; height: 4px; border-radius: 999px; background: var(--line-strong);
+    transform: translateX(-50%);
+  }
+  .ui-page-info-dialog__head {
+    padding-block: 24px 16px;
+    padding-inline: max(16px, env(safe-area-inset-left, 0px)) max(8px, env(safe-area-inset-right, 0px));
+  }
+  .ui-page-info-dialog .ui-page-info-dialog__title,
+  #root > .app .ui-page-info-dialog .ui-page-info-dialog__title { font-size: 18px; }
+  .ui-page-info-dialog__close { width: var(--tap-min, 44px); height: var(--tap-min, 44px); }
+  .ui-page-info-dialog__body {
+    gap: 18px; padding-block: 16px 24px;
+    padding-inline: max(16px, env(safe-area-inset-left, 0px)) max(16px, env(safe-area-inset-right, 0px));
+  }
+  .ui-page-info-dialog__learn { min-height: var(--tap-min, 44px); margin-block: -10px; }
+  .ui-page-info-dialog__doors { display: grid; grid-template-columns: minmax(0, 1fr); }
+  .ui-page-info-dialog__doors a { min-height: var(--tap-min, 44px); justify-content: center; }
+  .ui-page-info-dialog__shot, .ui-page-info-dialog__shot img { max-height: 160px; }
+  .ui-page-info-dialog__actions { grid-template-columns: minmax(0, 1fr); gap: 8px; }
+  .ui-page-info-dialog__actions > div:not(:first-child) { padding-top: 10px; border-top: 1px solid var(--line); }
+  .ui-page-info-dialog__tabs { padding-inline: 16px; }
+  .ui-page-info-dialog__tabs .ui-capsule { height: var(--tap-min, 44px); }
+  .ui-page-info-dialog__tabs .ui-capsule.ui-capsule .ui-capsule__option { padding-inline: 4px; }
+  .ui-page-info-dialog__terms { grid-template-columns: minmax(0, 1fr); gap: 16px; }
+  /* The glossary opens on its first four rows; the rest wait behind a button. */
+  .ui-page-info-dialog__terms:not(.is-expanded) > div:nth-child(n+5) { display: none; }
+  .ui-page-info-dialog__more {
+    box-sizing: border-box; display: flex; align-items: center; justify-content: center;
+    width: 100%; min-height: var(--tap-min, 44px); margin: 0; padding: 0 16px;
+    border: 1px solid var(--line-strong); border-radius: var(--radius-sm, 6px);
+    background: transparent; color: var(--text); cursor: pointer;
+    font-family: var(--font-sans); font-size: 14px; font-weight: 600;
+  }
+  .ui-page-info-dialog__more:active { background: var(--press-wash); }
+  .ui-page-info-dialog__foot {
+    padding-block: 8px calc(8px + env(safe-area-inset-bottom, 0px));
+    padding-inline: max(16px, env(safe-area-inset-left, 0px)) max(16px, env(safe-area-inset-right, 0px));
+  }
+  .ui-page-info-dialog__foot a { flex: 1 1 auto; justify-content: center; min-height: var(--tap-min, 44px); }
+  .ui-page-info-dialog__hint { display: none; }
+  /* No safe-area footer when there is no guide: the body carries the inset. */
+  .ui-page-info-dialog__body:last-child { padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px)); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ui-page-info-dialog { animation: none; }
+  .ui-page-info-dialog__close { transition-duration: 1ms; }
+}
+
+/* ── Colour and size finish (15 Oct 2026) ────────────────────────────────────
+   Small, and colour that means something. Each tone is the colour the chart
+   itself uses, drawn from tokens so both themes follow: Call and Put as the
+   Option Chain paints them, up and down as a build-up's premium leg, warn is
+   the amber of Max pain and cautions. */
+.ui-page-info-dialog { --tone: var(--accent-text); }
+.ui-page-info-dialog [data-tone='call'], .ui-page-info-dialog [data-tone='down'] { --tone: var(--down-ink); }
+.ui-page-info-dialog [data-tone='put'], .ui-page-info-dialog [data-tone='up'] { --tone: var(--up-ink); }
+.ui-page-info-dialog [data-tone='warn'] { --tone: var(--warning-text); }
+.ui-page-info-dialog [data-tone='accent'] { --tone: var(--accent-text); }
+
+/* The colour key: one row of chips under the tabs' content start. */
+.ui-page-info-dialog__legend { display: flex; flex-wrap: wrap; gap: 6px; margin: 0; padding: 0; list-style: none; }
+.ui-page-info-dialog__legend[hidden] { display: none; }
+.ui-page-info-dialog__body .ui-page-info-dialog__legend li {
+  display: inline-flex; align-items: baseline; gap: 6px; max-width: none; padding: 4px 10px;
+  border: 1px solid color-mix(in srgb, var(--tone) 38%, transparent); border-radius: 999px;
+  background: color-mix(in srgb, var(--tone) 13%, transparent);
+  font-size: 12px; line-height: 1.3;
+}
+.ui-page-info-dialog__legend b { color: var(--tone); font-weight: 700; }
+.ui-page-info-dialog__legend span { color: var(--text-secondary); font-size: 12px; }
+
+/* A term with a tone carries a bar in that colour: match it to the page's own paint. */
+.ui-page-info-dialog__terms > div[data-tone] { padding-left: 9px; border-left: 3px solid var(--tone); border-radius: 1px; }
+.ui-page-info-dialog__terms > div[data-tone] dt { color: var(--tone); }
+
+/* Section heads get a small pip in the brand colour, so the card scans by colour as well as by word. */
+.ui-page-info-dialog__body h3 > span::before {
+  content: ''; display: inline-block; width: 6px; height: 6px; margin-right: 7px; border-radius: 50%;
+  background: var(--accent-text); vertical-align: 1px;
+}
+.ui-page-info-dialog__body .ui-page-info-dialog__caution h3 > span::before { display: none; }
+.ui-page-info-dialog__body > section { gap: 8px; }
+.ui-page-info-dialog__sechead { padding-bottom: 6px; }
+.ui-page-info-dialog__steps { gap: 8px; }
+.ui-page-info-dialog__caution { padding: 10px 12px; }
+.ui-page-info-dialog__actions, .ui-page-info-dialog__terms { gap: 10px 18px; }

@@ -1,0 +1,789 @@
+/*
+ * the app product colour authority
+ * --------------------------------------------------------------------------
+ * Source of truth: ui-theme-docs/colour.html.
+ *
+ * This file intentionally loads after every legacy feature stylesheet. It
+ * provides one complete semantic palette for light and dark themes, then maps
+ * the application's older token names onto those semantics. Layout, density,
+ * typography and component structure remain owned by their existing files.
+ *
+ * Rules:
+ * - Purple identifies primary actions, workspace identity, focus and a
+ *   secondary chart series. Selection uses neutral ink and surface pairs.
+ * - Green means up / bullish / buy / support / success.
+ * - Red means down / bearish / sell / resistance / error.
+ * - Primary actions are monochrome and invert with the theme.
+ */
+
+:root {
+  /* Core */
+  --capital-purple: #66033c;
+  --capital-black: #0f0f0f;
+  --capital-white: #ffffff;
+  --capital-spring-wood: #f9f6f1;
+
+  /* Binary switches retain the brand colour even in neutral selection scopes.
+     Resolve this pair at the palette root, before a page remaps its accents. */
+  /* the reference design: brand-700 on dark, capital purple on light (set below). */
+  --switch-on-fill: var(--brand-700);
+  --switch-on-thumb: var(--capital-white);
+  --status-badge-fill: var(--capital-purple);
+  --status-badge-text: var(--capital-white);
+
+  /* Brand */
+  --brand-50: #fef1fa;
+  --brand-100: #fde6f7;
+  --brand-200: #feccf1;
+  --brand-300: #fea3e5;
+  --brand-400: #fc6ad0;
+  --brand-500: #e61c9a;
+  --brand-600: #c80e7d;
+  --brand-700: #a50f66;
+  --brand-800: #8a1157;
+  --brand-900: #66033c;
+  --brand-950: #3d0920;
+  --brand-1000: #15020b;
+
+  /* Warm */
+  --warm-50: #f9f6f1;
+  --warm-100: #ede5d8;
+  --warm-200: #d9c9ae;
+  --warm-300: #c5aa84;
+  --warm-400: #b89367;
+  --warm-500: #ac7c54;
+  --warm-600: #976448;
+  --warm-700: #835241;
+  --warm-800: #694137;
+  --warm-900: #573730;
+  --warm-950: #301c18;
+
+  /* Error / bearish */
+  --error-50: #fdf3f3;
+  --error-100: #fce5e4;
+  --error-200: #fad0ce;
+  --error-300: #f6aeab;
+  --error-400: #ee807b;
+  --error-500: #e35650;
+  --error-600: #c4342e;
+  --error-700: #ae2c27;
+  --error-800: #902824;
+  --error-900: #782724;
+  --error-950: #41100e;
+
+  /* Success / bullish */
+  --success-50: #eefdf5;
+  --success-100: #dafeec;
+  --success-200: #b5f5d6;
+  --success-300: #7dedb7;
+  --success-400: #40e897;
+  --success-500: #1fbf74;
+  --success-600: #08955a;
+  /* Green ramp sampled from the reference design (2026-10): 400 is its dark-theme up
+     text, 600 its light-theme up text, 650/700 its Buy buttons, 100/950 its
+     OI Support chip fills. 600 is 3.85:1 on white, so light text uses
+     --up-ink (700, 6.65:1) and 600 stays a fill. */
+  --success-650: #0e854d;
+  --success-700: #116a40;
+  --success-800: #0d5634;
+  --success-900: #0a3f27;
+  --success-950: #02311d;
+
+  /* Neutral */
+  --neutral-50: #fafafa;
+  --neutral-100: #f5f5f5;
+  --neutral-200: #e6e6e6;
+  /* the reference design light row divider and strike band. */
+  --neutral-225: #e2e2e2;
+  --neutral-300: #d3d3d3;
+  --neutral-400: #a3a3a3;
+  --neutral-450: #8c8c8c;
+  --neutral-500: #727272;
+  --neutral-525: #6e6e6e;
+  --neutral-550: #5f5f5f;
+  --neutral-600: #535353;
+  --neutral-700: #404040;
+  /* the reference design dark strike band and row divider. */
+  --neutral-740: #383838;
+  --neutral-760: #333333;
+  --neutral-800: #272727;
+  /* Three intermediate dark steps the semantic layer already used as bare
+     literals (#242424 surface-high, #1f1f1f surface-raised, #0a0a0a bg-sunken).
+     They are members of this scale — the colour audit already whitelists all
+     three — so they are named here and consumed by token below. Values are
+     byte-identical to what shipped; nothing repaints. */
+  --neutral-825: #242424;
+  --neutral-850: #1f1f1f;
+  --neutral-900: #1a1a1a;
+  --neutral-910: #171717;
+  --neutral-950: #0f0f0f;
+  --neutral-975: #0a0a0a;
+  /* the reference design dark page: true black. */
+  --neutral-1000: #000000;
+
+  /* Dark is the safe first-paint default. */
+  --bg: var(--neutral-1000);
+  --bg-subtle: var(--neutral-900);
+  --bg-sunken: var(--neutral-1000);
+  --surface: var(--neutral-910);
+  /* Was -850/-825: #1a1a1a → #1f1f1f → #242424, i.e. +5 and +5 of 255, which
+     is 1.056:1 and 1.062:1 between tiers. Nothing under ~1.2 separates on a
+     real display, so with §2.A's mandatory `box-shadow: none` a popover had
+     neither elevation nor (before the --line fix above) a visible edge. These
+     are existing scale steps; the stack is now ~1.42:1 end to end. */
+  --surface-raised: var(--neutral-825);
+  --surface-high: var(--neutral-800);
+  /* Opaque table tiers also apply to pinned cells and embedded widgets. */
+  --table-head-surface: var(--neutral-825);
+  /* Tables sit on their panel's fill, as on the reference design: the page is black,
+     the panel and its rows are --surface. */
+  --table-body-surface: var(--surface);
+  --table-hover-surface: color-mix(in srgb, var(--neutral-50) 5%, var(--surface));
+  --text: var(--neutral-50);
+  --text-muted: var(--neutral-400);
+  /* neutral-500 (#727272) lands at 3.6:1 on the dark surfaces and reads as a
+     smudge at the 9-12px label sizes this token is used for. neutral-450 keeps
+     the same neutral hue and clears AA on bg, surface and surface-high. */
+  --text-subtle: var(--neutral-450);
+  --text-inverse: var(--capital-black);
+  /* the reference design dark divider #333333: 1.66:1 on the black page, so a card
+     still has a visible edge (contract §1.2) without the old grey cast. */
+  --line: var(--neutral-760);
+  --line-strong: var(--neutral-600);
+  /* THE hairline. --line-strong at FULL strength is the only expression that
+     clears ~1.5:1 against a card fill in both themes; the 16 different
+     color-mix(--line-strong N%, transparent) variants this replaces all landed
+     under it. --hairline = a card's outer EDGE, --line = dividers INSIDE it. */
+  --hairline: var(--neutral-760);
+  --hairline-hover: color-mix(in srgb, var(--line-strong) 62%, var(--text));
+  --accent: var(--brand-600);
+  --accent-hover: var(--brand-500);
+  --accent-text: var(--brand-300);
+  /* A focus ring must clear 3:1 against the adjacent colour. The old
+     32%-of-brand-500 tint composited to 1.40:1, so every
+     `0 0 0 3px var(--accent-ring)` in the app was non-compliant. Solid
+     --accent-hover is 4.6:1 on the dark page. */
+  --accent-ring: var(--accent-hover);
+  --accent-wash: color-mix(in srgb, var(--capital-purple) 22%, transparent);
+  --cta-fill: var(--capital-white);
+  --cta-text: var(--capital-black);
+  --hover-wash: color-mix(in srgb, var(--neutral-50) 7%, transparent);
+  --press-wash: color-mix(in srgb, var(--neutral-50) 12%, transparent);
+  /* Selection is neutral in both themes; brand colour belongs to primary actions. */
+  --selection-fill: var(--capital-white);
+  --selection-text: var(--capital-black);
+  --selection-track: var(--surface);
+  --selection-ink: var(--text);
+  --selection-wash: color-mix(in srgb, var(--text) 10%, var(--surface));
+  --selection-line: color-mix(in srgb, var(--text) 45%, var(--line));
+  --buy-fill: var(--success-650);
+  --sell-fill: var(--error-600);
+  --up: var(--success-400);
+  --down: var(--error-400);
+  --candle-up: var(--success-500);
+  --candle-down: var(--error-500);
+  --vol-up: var(--success-800);
+  --vol-down: var(--error-800);
+  --series-1: var(--neutral-50);
+  --series-2: var(--brand-500);
+  --series-3: var(--neutral-500);
+  --attentive: var(--warm-300);
+  --warning-surface: color-mix(in srgb, var(--warm-900) 28%, transparent);
+  --warning-border: var(--warm-900);
+  --warning-text: var(--warm-300);
+  --nav-active-fill: var(--capital-white);
+  --nav-active-text: var(--capital-black);
+  --shadow-0: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --shadow-1: 0 1px 3px rgba(0, 0, 0, 0.5), 0 1px 2px rgba(0, 0, 0, 0.4);
+  --shadow-2: 0 4px 12px rgba(0, 0, 0, 0.55), 0 1px 3px rgba(0, 0, 0, 0.4);
+  --shadow-3: 0 8px 24px rgba(0, 0, 0, 0.6), 0 2px 6px rgba(0, 0, 0, 0.45);
+  --shadow-4: 0 12px 32px rgba(0, 0, 0, 0.65), 0 4px 8px rgba(0, 0, 0, 0.45);
+  --shadow-5: 0 24px 64px rgba(0, 0, 0, 0.72), 0 8px 16px rgba(0, 0, 0, 0.5);
+  color-scheme: dark;
+}
+
+:root[data-theme="dark"] {
+  /* Aligned with the app Flutter Options Trader: neutral-950 (#0F0F0F) dark background */
+  --capital-black: var(--neutral-950);
+
+  --bg: var(--neutral-1000);
+  --bg-subtle: var(--neutral-900);
+  --bg-sunken: var(--neutral-1000);
+  --surface: var(--neutral-910);
+  /* Was -850/-825: #1a1a1a → #1f1f1f → #242424, i.e. +5 and +5 of 255, which
+     is 1.056:1 and 1.062:1 between tiers. Nothing under ~1.2 separates on a
+     real display, so with §2.A's mandatory `box-shadow: none` a popover had
+     neither elevation nor (before the --line fix above) a visible edge. These
+     are existing scale steps; the stack is now ~1.42:1 end to end. */
+  --surface-raised: var(--neutral-825);
+  --surface-high: var(--neutral-800);
+  --text: var(--neutral-50);
+  --text-muted: var(--neutral-400);
+  /* neutral-500 (#727272) lands at 3.6:1 on the dark surfaces and reads as a
+     smudge at the 9-12px label sizes this token is used for. neutral-450 keeps
+     the same neutral hue and clears AA on bg, surface and surface-high. */
+  --text-subtle: var(--neutral-450);
+  --text-inverse: var(--capital-black);
+  /* the reference design dark divider #333333: 1.66:1 on the black page, so a card
+     still has a visible edge (contract §1.2) without the old grey cast. */
+  --line: var(--neutral-760);
+  --line-strong: var(--neutral-600);
+  /* THE hairline. --line-strong at FULL strength is the only expression that
+     clears ~1.5:1 against a card fill in both themes; the 16 different
+     color-mix(--line-strong N%, transparent) variants this replaces all landed
+     under it. --hairline = a card's outer EDGE, --line = dividers INSIDE it. */
+  --hairline: var(--neutral-760);
+  --hairline-hover: color-mix(in srgb, var(--line-strong) 62%, var(--text));
+  --accent: var(--brand-600);
+  --accent-hover: var(--brand-500);
+  --accent-text: var(--brand-300);
+  /* A focus ring must clear 3:1 against the adjacent colour. The old
+     32%-of-brand-500 tint composited to 1.40:1, so every
+     `0 0 0 3px var(--accent-ring)` in the app was non-compliant. Solid
+     --accent-hover is 4.6:1 on the dark page. */
+  --accent-ring: var(--accent-hover);
+  --accent-wash: color-mix(in srgb, var(--capital-purple) 22%, transparent);
+  --cta-fill: var(--capital-white);
+  --cta-text: var(--capital-black);
+  --hover-wash: color-mix(in srgb, var(--neutral-50) 7%, transparent);
+  --press-wash: color-mix(in srgb, var(--neutral-50) 12%, transparent);
+  --buy-fill: var(--success-650);
+  --sell-fill: var(--error-600);
+  --up: var(--success-400);
+  --down: var(--error-400);
+  --candle-up: var(--success-500);
+  --candle-down: var(--error-500);
+  --vol-up: var(--success-800);
+  --vol-down: var(--error-800);
+  --series-1: var(--neutral-50);
+  --series-2: var(--brand-500);
+  --series-3: var(--neutral-500);
+  --attentive: var(--warm-300);
+  --warning-surface: color-mix(in srgb, var(--warm-900) 28%, transparent);
+  --warning-border: var(--warm-900);
+  --warning-text: var(--warm-300);
+  --nav-active-fill: var(--capital-white);
+  --nav-active-text: var(--capital-black);
+  --shadow-0: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --shadow-1: 0 1px 3px rgba(0, 0, 0, 0.5), 0 1px 2px rgba(0, 0, 0, 0.4);
+  --shadow-2: 0 4px 12px rgba(0, 0, 0, 0.55), 0 1px 3px rgba(0, 0, 0, 0.4);
+  --shadow-3: 0 8px 24px rgba(0, 0, 0, 0.6), 0 2px 6px rgba(0, 0, 0, 0.45);
+  --shadow-4: 0 12px 32px rgba(0, 0, 0, 0.65), 0 4px 8px rgba(0, 0, 0, 0.45);
+  --shadow-5: 0 24px 64px rgba(0, 0, 0, 0.72), 0 8px 16px rgba(0, 0, 0, 0.5);
+  color-scheme: dark;
+}
+
+:root[data-theme="light"] {
+  --bg: var(--capital-white);
+  --bg-subtle: var(--neutral-100);
+  --bg-sunken: var(--neutral-100);
+  --surface: var(--capital-white);
+  --surface-raised: var(--capital-white);
+  --surface-high: var(--capital-white);
+  --table-head-surface: var(--neutral-100);
+  --selection-fill: var(--capital-black);
+  --selection-text: var(--capital-white);
+  --selection-track: var(--neutral-100);
+  --table-body-surface: var(--capital-white);
+  --table-hover-surface: color-mix(in srgb, var(--capital-black) 5%, var(--capital-white));
+  --text: var(--capital-black);
+  /* Same reasoning as dark: neutral-500 is 3.9:1 on white and neutral-400 is
+     2.5:1, both short of AA for the small label text these drive. */
+  --text-muted: var(--neutral-600);
+  --text-subtle: var(--neutral-525);
+  --text-inverse: var(--capital-white);
+  --line: var(--neutral-225);
+  --line-strong: var(--neutral-300);
+  /* the reference design light keeps panel edges and row dividers in the same pale
+     grey family (neutral-200 / neutral-225); the darker neutral-300 edge
+     read heavier than the reference. */
+  --hairline: var(--neutral-200);
+  --hairline-hover: color-mix(in srgb, var(--line-strong) 55%, var(--text));
+  --accent: var(--capital-purple);
+  --accent-hover: var(--brand-800);
+  --accent-text: var(--capital-purple);
+  /* Was capital-purple at 18% → 1.44:1 composited on white, well under the 3:1
+     focus floor. Solid --accent is 12.8:1. */
+  --accent-ring: var(--accent);
+  --accent-wash: var(--brand-50);
+  --cta-fill: var(--capital-black);
+  --cta-text: var(--capital-white);
+  --hover-wash: color-mix(in srgb, var(--capital-black) 5%, transparent);
+  --press-wash: color-mix(in srgb, var(--capital-black) 9%, transparent);
+  --buy-fill: var(--success-700);
+  --sell-fill: var(--error-600);
+  --switch-on-fill: var(--capital-purple);
+  --up: var(--success-600);
+  --down: var(--error-600);
+  --candle-up: var(--success-500);
+  --candle-down: var(--error-600);
+  --vol-up: var(--success-200);
+  --vol-down: var(--error-200);
+  --series-1: var(--capital-black);
+  --series-2: var(--capital-purple);
+  --series-3: var(--neutral-500);
+  --attentive: var(--warm-600);
+  --warning-surface: var(--warm-100);
+  --warning-border: var(--warm-200);
+  --warning-text: var(--warm-800);
+  --nav-active-fill: var(--capital-black);
+  --nav-active-text: var(--capital-white);
+  /* Only light needs the ink split: the fill green is 2.9:1 on white.
+     Red was aliased straight to the fill on the strength of its 5.4:1 on
+     WHITE — but direction ink is most often printed on --dnbg over
+     --bg-subtle, where error-600 measures 4.22:1 and misses AA. error-700 is
+     5.13:1 there and 6.58:1 on white.
+
+     Green follows the same rule: success-700 (#116A40) is 6.65:1 on white
+     and clears AA on --upbg over --bg-subtle, where 600 and 650 do not. */
+  --up-ink: var(--success-700);
+  --down-ink: var(--error-700);
+  --shadow-0: 0 1px 2px rgba(15, 15, 15, 0.04);
+  --shadow-1:
+    0 1px 3px rgba(15, 15, 15, 0.06), 0 1px 2px rgba(15, 15, 15, 0.04);
+  --shadow-2:
+    0 4px 12px rgba(15, 15, 15, 0.07), 0 1px 3px rgba(15, 15, 15, 0.04);
+  --shadow-3:
+    0 8px 24px rgba(15, 15, 15, 0.09), 0 2px 6px rgba(15, 15, 15, 0.04);
+  --shadow-4:
+    0 12px 32px rgba(15, 15, 15, 0.11), 0 4px 8px rgba(15, 15, 15, 0.05);
+  --shadow-5:
+    0 24px 64px rgba(15, 15, 15, 0.17), 0 8px 16px rgba(15, 15, 15, 0.06);
+  color-scheme: light;
+}
+
+/* One-way compatibility bridge. No alias below points back to itself. */
+:root {
+  /* Legacy foundation names still used by a few chart and overlay surfaces.
+     Keep them theme-responsive instead of allowing their old blue palette to
+     leak through when the user switches modes. */
+  --bg-base: var(--bg);
+  --bg-surface: var(--surface);
+  --bg-glass: color-mix(in srgb, var(--surface) 82%, transparent);
+  --text-primary: var(--text);
+  --text-secondary: var(--text-muted);
+  --accent-primary: var(--accent);
+  --accent-bullish: var(--up);
+  --accent-bearish: var(--down);
+  --border-color: var(--line);
+
+  /* At-the-money is positional, never a colour (owner, 2026-10-09: "we never
+     need to show the ATM in this type of color"). Every ATM mark — chain
+     strike plate and badge, Open Interest and Spurts markers, the heatmap's
+     strike — reads this one neutral. ITM, Max Pain and Flip keep the warm hue. */
+  --atm-hue: var(--text-muted);
+
+  --bg1: var(--bg);
+  --bg2: var(--bg-subtle);
+  --bg3: var(--bg-sunken);
+  --bg-card: var(--surface-raised);
+  --bg-panel: var(--surface);
+  --bg-input: var(--surface);
+  --panel: var(--surface);
+  --panel-2: var(--surface-raised);
+  --surface2: var(--surface-raised);
+  --surface3: var(--surface-high);
+  --surface-hover: var(--hover-wash);
+  --popbg: var(--surface-high);
+  --terminal-panel: var(--surface);
+  --terminal-panel-strong: var(--surface-high);
+  --terminal-panel-soft: var(--bg-subtle);
+  --terminal-divider: var(--line);
+  --border: var(--line);
+  --border2: var(--line-strong);
+  --border-hover: var(--line-strong);
+  --line2: var(--line-strong);
+  --line-2: var(--line-strong);
+  --text1: var(--text);
+  --text2: var(--text-muted);
+  --text3: var(--text-subtle);
+  --text4: var(--text-subtle);
+  --text-primary: var(--text);
+  --text-heading: var(--text);
+  --ink: var(--text);
+  --ink-2: var(--text-muted);
+  --muted: var(--text-muted);
+  --sub: var(--text-muted);
+  --faint: var(--text-subtle);
+
+  --ui-bg-0: var(--bg);
+  --ui-bg-1: var(--bg-subtle);
+  --ui-bg-2: var(--bg-sunken);
+  --ui-surface-1: var(--surface);
+  --ui-surface-2: var(--surface-raised);
+  --ui-surface-3: var(--surface-high);
+  --ui-border-soft: var(--line);
+  --ui-border-strong: var(--line-strong);
+  --ui-text-1: var(--text);
+  --ui-text-2: var(--text-muted);
+  --ui-text-3: var(--text-subtle);
+  --ui-accent: var(--accent);
+  --ui-accent-2: var(--accent-hover);
+  --ui-positive: var(--up);
+  --ui-positive-strong: var(--up);
+  --ui-negative: var(--down);
+  --ui-negative-strong: var(--down);
+  --ui-attentive: var(--attentive);
+  --ui-oi-call: var(--down);
+  --ui-oi-call-ink: var(--down-ink);
+  --ui-oi-put: var(--up);
+  --ui-oi-put-ink: var(--up-ink);
+  --ui-purple: var(--accent-text);
+  --ui-prototype-purple: var(--accent);
+  --ui-prototype-lavender: var(--series-3);
+  --ui-prototype-green: var(--up);
+  --ui-prototype-red: var(--down);
+  --ui-prototype-amber: var(--attentive);
+  --ui-prototype-cyan: var(--up);
+  --ui-prototype-white: var(--capital-white);
+  --ui-prototype-panel: var(--bg-subtle);
+  --ui-prototype-panel-2: var(--bg-sunken);
+  --ui-prototype-line: var(--line);
+  --ui-prototype-line-2: var(--line-strong);
+  --ui-prototype-ink: var(--text);
+  --ui-prototype-ink-2: var(--text-muted);
+  --ui-prototype-muted: var(--text-subtle);
+
+  --positive: var(--up);
+  --negative: var(--down);
+  --green: var(--up);
+  --red: var(--down);
+  --yellow: var(--attentive);
+  --blue: var(--accent-text);
+  --cyan: var(--accent-text);
+  --teal: var(--up);
+  --purple: var(--accent-text);
+  --pink: var(--accent-text);
+  --orange: var(--attentive);
+  --brand: var(--accent);
+  --brand2: var(--accent-hover);
+  --brand-purple: var(--accent-text);
+  --brand-coral: var(--attentive);
+  /* Ink half of the up/down pair. Dark needs no separation — the fill greens
+     and reds are already bright enough to read on #0F0F0F — so these stay
+     aliased there and are overridden for light below. */
+  --up-ink: var(--up);
+  --down-ink: var(--down);
+  --upbg: color-mix(in srgb, var(--up) 12%, transparent);
+  --dnbg: color-mix(in srgb, var(--down) 12%, transparent);
+  --green-bg: color-mix(in srgb, var(--up) 12%, transparent);
+  --red-bg: color-mix(in srgb, var(--down) 12%, transparent);
+  --yellow-bg: color-mix(in srgb, var(--attentive) 14%, transparent);
+  --blue-bg: var(--accent-wash);
+  --purple-bg: var(--accent-wash);
+  --surface-transparent-positive-primary: color-mix(
+    in srgb,
+    var(--up) 12%,
+    transparent
+  );
+  --surface-transparent-negative-primary: color-mix(
+    in srgb,
+    var(--down) 12%,
+    transparent
+  );
+
+  --toast-neutral-bg: var(--bg-subtle);
+  --toast-neutral-border: var(--line);
+  --toast-neutral-text: var(--text);
+  --toast-positive-bg: color-mix(in srgb, var(--up) 12%, transparent);
+  --toast-positive-border: color-mix(in srgb, var(--up) 34%, transparent);
+  --toast-positive-text: var(--up);
+  --toast-negative-bg: color-mix(in srgb, var(--down) 12%, transparent);
+  --toast-negative-border: color-mix(in srgb, var(--down) 34%, transparent);
+  --toast-negative-text: var(--down);
+  --toast-attentive-bg: color-mix(in srgb, var(--attentive) 14%, transparent);
+  --toast-attentive-border: color-mix(
+    in srgb,
+    var(--attentive) 34%,
+    transparent
+  );
+  --toast-attentive-text: var(--attentive);
+
+  --components-toasts-Neutral-bg: var(--toast-neutral-bg);
+  --components-toasts-Neutral-border: var(--toast-neutral-border);
+  --components-toasts-Neutral-surface: var(--toast-neutral-bg);
+  --components-toasts-Neutral-surface-L1: var(--toast-neutral-bg);
+  --components-toasts-Neutral-stroke: var(--toast-neutral-border);
+  --components-toasts-Neutral-stroke-L1: var(--toast-neutral-border);
+  --components-toasts-Neutral-text: var(--toast-neutral-text);
+  --components-toasts-Neutral-icon: var(--toast-neutral-text);
+  --components-toasts-positive-bg: var(--toast-positive-bg);
+  --components-toasts-positive-border: var(--toast-positive-border);
+  --components-toasts-positive-surface: var(--toast-positive-bg);
+  --components-toasts-positive-surface-L1: var(--toast-positive-bg);
+  --components-toasts-positive-stroke: var(--toast-positive-border);
+  --components-toasts-positive-stroke-L1: var(--toast-positive-border);
+  --components-toasts-positive-text: var(--toast-positive-text);
+  --components-toasts-positive-icon: var(--toast-positive-text);
+  --components-toasts-negative-bg: var(--toast-negative-bg);
+  --components-toasts-negative-border: var(--toast-negative-border);
+  --components-toasts-negative-surface: var(--toast-negative-bg);
+  --components-toasts-negative-surface-L1: var(--toast-negative-bg);
+  --components-toasts-negative-stroke: var(--toast-negative-border);
+  --components-toasts-negative-stroke-L1: var(--toast-negative-border);
+  --components-toasts-negative-text: var(--toast-negative-text);
+  --components-toasts-negative-icon: var(--toast-negative-text);
+  --components-toasts-Attentive-bg: var(--toast-attentive-bg);
+  --components-toasts-Attentive-border: var(--toast-attentive-border);
+  --components-toasts-Attentive-surface: var(--toast-attentive-bg);
+  --components-toasts-Attentive-surface-L1: var(--toast-attentive-bg);
+  --components-toasts-Attentive-stroke: var(--toast-attentive-border);
+  --components-toasts-Attentive-stroke-L1: var(--toast-attentive-border);
+  --components-toasts-Attentive-text: var(--toast-attentive-text);
+  --components-toasts-Attentive-icon: var(--toast-attentive-text);
+
+  --chip-surface-unselected: transparent;
+  --chip-surface-selected: var(--accent-wash);
+  --chip-stroke-unselected: var(--line);
+  --chip-stroke-selected: var(--accent);
+  --components-Chip-surface-unselected: var(--chip-surface-unselected);
+  --components-Chip-surface-selected: var(--chip-surface-selected);
+  --components-Chip-stroke-unselected: var(--chip-stroke-unselected);
+  --components-Chip-stroke-selected: var(--chip-stroke-selected);
+  --components-Navigation-surface-L1: var(--bg);
+  --components-Navigation-surface-L2: var(--surface);
+  --components-Navigation-stroke-top: var(--line);
+  --components-Navigation-stroke-bottom: var(--line);
+
+  /*
+   * Several legacy chart consumers read this historical button token as an
+   * analytical accent. Keep it on accent; actual buttons are corrected below.
+   */
+  --components-button-primary-surface-top: var(--accent);
+  --components-button-primary-surface-bottom: var(--accent-hover);
+  --btn-primary-top: var(--accent);
+  --btn-primary-bottom: var(--accent-hover);
+  --ui-cta-gradient: linear-gradient(
+    180deg,
+    var(--accent),
+    var(--accent-hover)
+  );
+  --brand-grad: linear-gradient(180deg, var(--accent), var(--accent-hover));
+  --surface-solid-brand-primary-L1: var(--surface);
+  --surface-solid-brand-primary-L2: var(--surface-raised);
+  --surface-solid-brand-primary-L3: var(--surface-high);
+  --surface-solid-brand-l2: var(--surface-raised);
+  --surface-solid-brand-l3: var(--surface-high);
+
+  /* ── Scrims ──────────────────────────────────────────────────────────────
+     The two weights an overlay is allowed to dim the page by, so the analytical
+     tabs stop each inventing their own. Before these existed the app shipped
+     FOUR values for one idea: `rgb(0 0 0 / .24)` on the OI Spurts chart-info
+     scrim, the same literal again on the Open Interest view-info scrim, a
+     `--capital-black 42%` on the Open Interest show menu, and the contract's
+     own `72%` on the Option Chain mobile sheet. Three tabs, three answers to
+     "how dark is dismissable", and two of them were hex literals that
+     `audit:colours` rejects.
+
+     The split is by CONSEQUENCE, not by component. A popover is dismissed by
+     tapping past it and the page behind stays readable, so it takes the light
+     weight. A modal or bottom sheet owns the screen until it is answered, so it
+     takes the contract's §2.B weight. Both are theme-independent: the scrim
+     darkens toward the same neutral in light and dark, because it is a
+     shadow of the overlay, not a surface of the theme.
+
+     Pair either with `blur(2px)` and its `-webkit-` twin — the blur is what
+     makes the layer read as an Apple material rather than as flat tint, and
+     WebKit still needs the prefix.
+
+     Written against --neutral-950, not --capital-black: the dark theme rebinds
+     --capital-black to the plum brand-1000, which would have made the dark
+     scrim a plum wash while the light one stayed neutral — breaking the
+     theme-independence this comment promises. */
+  --scrim-popover: color-mix(in srgb, var(--neutral-950) 32%, transparent);
+  --scrim-modal: color-mix(in srgb, var(--neutral-950) 72%, transparent);
+
+  --shadow-l1: var(--shadow-1);
+  --shadow-l2: var(--shadow-2);
+  --shadow-l3: var(--shadow-3);
+  --shadow-l4: var(--shadow-4);
+  --shadow-L1: var(--shadow-1);
+  --shadow-L2: var(--shadow-2);
+  --shadow-L3: var(--shadow-3);
+  --shadow-L4: var(--shadow-4);
+  --shadow-smooth-l1: var(--shadow-1);
+  --shadow-smooth-l2: var(--shadow-2);
+  --shadow-smooth-l3: var(--shadow-3);
+  --shadow-smooth-l4: var(--shadow-4);
+  --shadow-smooth-l5: var(--shadow-5);
+  --shadow-smooth-L1: var(--shadow-1);
+  --shadow-smooth-L2: var(--shadow-2);
+  --shadow-smooth-L3: var(--shadow-3);
+  --shadow-smooth-L4: var(--shadow-4);
+  --shadow-smooth-L5: var(--shadow-5);
+  --inner-shadow: inset 0 1px 0 var(--hover-wash);
+  --focus-ring: 0 0 0 3px var(--accent-ring);
+
+  --chart-bg: var(--surface);
+  --chart-panel: var(--surface-raised);
+  /* Chart scaffolding is intentionally quieter than structural borders. */
+  --chart-grid: color-mix(in srgb, var(--text) 10%, transparent);
+  --chart-axis: var(--text-muted);
+  --chart-text: var(--text-muted);
+  --chart-line-primary: var(--series-1);
+  --chart-line-secondary: var(--series-2);
+  --chart-line-tertiary: var(--series-3);
+  --chart-line-positive: var(--up);
+  --chart-line-negative: var(--down);
+  --chart-line-attentive: var(--attentive);
+  --chart-bar-primary: var(--series-1);
+  --chart-bar-secondary: var(--series-2);
+  --chart-bar-positive: var(--vol-up);
+  --chart-bar-negative: var(--vol-down);
+  --chart-fill-primary: color-mix(in srgb, var(--series-2) 14%, transparent);
+  --chart-fill-positive: color-mix(in srgb, var(--up) 14%, transparent);
+  --chart-fill-negative: color-mix(in srgb, var(--down) 14%, transparent);
+  --chart-tooltip-bg: var(--surface-high);
+  --chart-tooltip-border: var(--line-strong);
+  --oi-chart-surface: var(--surface);
+  --oi-chart-border: var(--line);
+  --oi-chart-muted: var(--text-muted);
+}
+
+/* Scoped token bridges beat late feature-level legacy palettes. */
+#root > .app {
+  --main-nav-header-bg: var(--bg);
+  --main-nav-left-bg: var(--bg);
+  --main-nav-right-bg: var(--bg);
+  --main-nav-surface: var(--surface);
+  --main-nav-surface-hover: var(--hover-wash);
+  --main-nav-surface-active: var(--accent-wash);
+  --main-nav-divider: var(--line);
+  --main-nav-border: var(--line);
+  --main-nav-text: var(--text);
+  --main-nav-muted: var(--text-muted);
+  --main-nav-faint: var(--text-muted);
+  --main-nav-icon-muted: var(--text-muted);
+  --main-nav-icon-active: var(--text);
+  --main-nav-accent: var(--accent);
+  --main-nav-accent-soft: var(--accent-wash);
+  --main-nav-focus: var(--accent);
+  --main-nav-popover: var(--surface-high);
+  --main-nav-shadow: var(--shadow-4);
+
+  --context-header-bg: var(--bg);
+  --context-header-surface: var(--surface);
+  --context-header-surface-hover: var(--hover-wash);
+  --context-header-surface-active: var(--accent-wash);
+  --context-header-border: var(--line);
+  --context-header-divider: var(--line);
+  --context-header-text: var(--text);
+  --context-header-muted: var(--text-muted);
+  --context-header-faint: var(--text-muted);
+  --context-header-accent: var(--accent);
+  --context-header-accent-soft: var(--accent-wash);
+  --context-header-accent-border: var(--accent);
+  --context-header-positive: var(--up);
+  --context-header-negative: var(--down);
+  --context-header-warning: var(--attentive);
+  --context-header-shadow: var(--shadow-1);
+
+  --command-bg: var(--bg);
+  --command-bg-active: var(--nav-active-fill);
+  --command-line: var(--line);
+  --command-text: var(--text-muted);
+  --command-muted: var(--text-subtle);
+  --command-accent: var(--accent);
+  --command-focus: var(--accent-ring);
+
+  --ui-left-nav-bg: var(--bg);
+  --ui-left-nav-bg-2: var(--surface);
+  --ui-left-nav-line: var(--line);
+  --ui-left-nav-text: var(--text);
+  --ui-left-nav-soft: var(--text-muted);
+  --ui-left-nav-active: var(--nav-active-fill);
+  --ui-left-nav-active-2: var(--nav-active-text);
+
+  --ui-control-panel: var(--surface);
+  --ui-control-panel-strong: var(--surface-raised);
+  --ui-control-border: var(--line);
+  --ui-control-border-active: var(--accent);
+  --ui-control-accent: var(--accent);
+  --ui-control-shadow: var(--shadow-2);
+  --ui-chrome-panel: var(--surface);
+  --ui-chrome-line: var(--line);
+  --ui-chrome-text: var(--text);
+  --ui-chrome-muted: var(--text-muted);
+  --ui-chrome-accent: var(--accent);
+  --ui-selection-surface: var(--surface);
+  --ui-selection-surface-hover: var(--hover-wash);
+  --ui-selection-border: var(--accent);
+  --ui-selection-text: var(--text);
+  --ui-selection-focus: var(--accent-ring);
+
+  --ui-overlay-surface: var(--surface-high);
+  --ui-overlay-surface-subtle: var(--surface-raised);
+  --ui-overlay-hover: var(--hover-wash);
+  --ui-overlay-line: var(--line-strong);
+  --ui-overlay-text: var(--text);
+  --ui-overlay-muted: var(--text-muted);
+  --ui-overlay-faint: var(--text-muted);
+  --ui-overlay-accent: var(--accent);
+  --ui-overlay-accent-soft: var(--accent-wash);
+  --ui-overlay-shadow: var(--shadow-4);
+
+  --ui-utility-surface: var(--surface);
+  --ui-utility-surface-hover: var(--hover-wash);
+  --ui-utility-surface-active: var(--press-wash);
+  --ui-utility-border: var(--line);
+  --ui-utility-border-hover: var(--line-strong);
+  --ui-utility-text: var(--text-muted);
+  --ui-utility-text-strong: var(--text);
+  --ui-utility-icon: var(--text-muted);
+  --ui-utility-focus: var(--accent);
+}
+
+#root > .app.app[data-active-tab="chain"] {
+  --oc-approved-bg: var(--bg);
+  --oc-approved-panel: var(--surface);
+  --oc-approved-panel-2: var(--surface-raised);
+  --oc-approved-line: var(--line);
+  --oc-approved-line-2: var(--line-strong);
+  --oc-approved-ink: var(--text);
+  --oc-approved-ink-2: var(--text-muted);
+  --oc-approved-muted: var(--text-muted);
+  --oc-approved-green: var(--up);
+  --oc-approved-green-soft: color-mix(in srgb, var(--up) 10%, transparent);
+  --oc-approved-red: var(--down);
+  --oc-approved-red-soft: color-mix(in srgb, var(--down) 10%, transparent);
+  --oc-approved-accent: var(--accent);
+  --oc-approved-accent-soft: var(--accent-wash);
+  --oc-approved-accent-line: var(--accent);
+  --oc-approved-amber: var(--attentive);
+  --oc-approved-chip: var(--surface);
+  --oc-strike-bg: var(--oc-grid-strike, var(--surface));
+  --oc-itm-bg: var(--chain-itm-fill, var(--success-200));
+  --oc-cell-border: var(--oc-grid-line, var(--line));
+  --oc-box-border: var(--oc-grid-line-strong, var(--line-strong));
+}
+
+/* Actual decisive actions consume CTA semantics directly. */
+
+/* Restore semantic status colour after legacy broad strong/small/svg rules.
+   These are ink selectors, so they resolve through --up-ink / --down-ink. On
+   dark those are the fill colours unchanged; on light the fill green is only
+   2.9:1 on white, which is why the ink half of the pair exists. */
+
+/* The stroke stays the fill colour; only the label switches to ink. */
+
+/* Core page and overlay materials must never remain a light/dark island. */
+html,
+body,
+#root,
+#root > .app {
+  background: var(--bg) !important;
+  color: var(--text) !important;
+}
+
+#root
+  > .app
+  :is(input, textarea, select, [contenteditable="true"])::placeholder {
+  color: var(--text-subtle);
+  opacity: 1;
+}
+
+#root > .app :is(button, input, textarea, select, a):focus-visible {
+  outline-color: var(--accent) !important;
+}
+
+/* Navigation chrome is owned by the component-level shell styles. */

@@ -1,0 +1,172 @@
+/*
+ * The option chain's one segmented control (CapsuleSegmented). Neutral tokens
+ * only: a capsule track on the card surface, and a capsule highlight in the
+ * contrasting neutral ink with an inverted label. Never a brand colour, never a
+ * square corner.
+ *
+ * Selectors carry `.ui-capsule.ui-capsule` so the chain's broad
+ * `.workspace-columns-host .ui-customize-panel *` resets cannot flatten it.
+ */
+.ui-capsule.ui-capsule {
+  position: relative;
+  display: inline-flex;
+  align-items: stretch;
+  gap: 2px;
+  box-sizing: border-box;
+  padding: 3px;
+  border: 1px solid var(--line, var(--border-color));
+  border-radius: 999px;
+  background: var(--selection-track);
+  box-shadow: none;
+}
+
+.ui-capsule--page.ui-capsule { height: var(--ui-pagebar-action-h, 42px); }
+.ui-capsule--panel.ui-capsule { height: 36px; }
+.ui-capsule--fill.ui-capsule { display: flex; width: 100%; }
+
+.ui-capsule.ui-capsule .ui-capsule__option {
+  position: relative;
+  isolation: isolate;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-width: 0;
+  margin: 0;
+  padding: 0 14px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--text-muted);
+  font: 600 12px/1 var(--font-sans);
+  letter-spacing: 0;
+  text-align: center;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: color var(--dur-fast, 120ms) var(--ease-out, ease-out);
+}
+
+.ui-capsule--fill.ui-capsule .ui-capsule__option {
+  flex: 1 1 0;
+  padding: 0 8px;
+}
+
+.ui-capsule.ui-capsule .ui-capsule__option.is-active {
+  color: var(--selection-text);
+}
+
+.ui-capsule.ui-capsule .ui-capsule__pill {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: 999px;
+  background: var(--selection-fill);
+  box-shadow: none;
+  pointer-events: none;
+}
+
+.ui-capsule.ui-capsule .ui-capsule__label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* A count is part of the option, not a chip beside it: no border, no fill —
+   it just prints one step quieter than the label and inverts with it on the
+   selected pill. Tabular so the capsule does not resize as the figure changes
+   width while someone types. */
+.ui-capsule.ui-capsule .ui-capsule__count {
+  flex: 0 0 auto;
+  font-variant-numeric: tabular-nums;
+  opacity: 0.6;
+}
+
+.ui-capsule.ui-capsule .ui-capsule__badge {
+  flex: 0 0 auto;
+  padding: 2px 5px;
+  border: 1px solid currentColor;
+  border-radius: 999px;
+  font: 600 10px/1 var(--font-sans);
+  letter-spacing: 0.02em;
+  opacity: 0.8;
+}
+
+/* Status is distinct from the neutral selected pill, in either theme. */
+.ui-capsule.ui-capsule .ui-capsule__badge--brand {
+  border-color: var(--status-badge-fill);
+  background: var(--status-badge-fill);
+  color: var(--status-badge-text);
+  opacity: 1;
+}
+
+/* Present, not available. The segment keeps its width so the track does not
+   reflow as the figures change, and reads as the one place with nothing in
+   it — the same weight the authority sheet gives a disabled page-bar
+   segment. */
+.ui-capsule.ui-capsule .ui-capsule__option:disabled {
+  opacity: 0.48;
+  cursor: not-allowed;
+}
+
+@media (hover: hover) {
+  .ui-capsule.ui-capsule .ui-capsule__option:not(.is-active):not(:disabled):hover {
+    color: var(--text, var(--text-primary));
+  }
+}
+
+.ui-capsule.ui-capsule .ui-capsule__option:focus-visible {
+  outline: 2px solid var(--selection-ink);
+  outline-offset: 1px;
+}
+
+@media (max-width: 768px) {
+  .ui-capsule--page.ui-capsule { height: 34px; }
+  .ui-capsule--page.ui-capsule .ui-capsule__option { padding: 0 10px; }
+}
+
+/* ── The page capsule on a narrow phone ────────────────────────────────────
+ *
+ * The page bar is one row: a back chevron, the title, the help button and this
+ * control. On a 320–360px phone that row is ~40px short, and the shortfall
+ * used to be taken out of this capsule's START edge, where it could not be
+ * scrolled back (see PageBar.css). It is taken out of the DRAWING instead.
+ *
+ * The label sizes do not move — 12px is the ladder's step for a control and
+ * "Simple" must stay a word, not an initial. What gives is the air: 2px of
+ * padding each side of each option, and a badge that stops reserving a chip's
+ * worth of room for four characters. Together that is ~16px, which with the
+ * dead Home chevron gone is the whole shortfall. */
+@media (max-width: 400px) {
+  .ui-capsule--page.ui-capsule .ui-capsule__option { padding: 0 8px; gap: 5px; }
+  .ui-capsule--page.ui-capsule .ui-capsule__badge { padding: 2px 4px; letter-spacing: 0; }
+}
+
+/* Touch: a 26px option needs a 44px hit area without growing the drawing.
+   The inset is derived from the paint rather than guessed, so it holds at both
+   capsule sizes: a 26px option grows by 9px each way and a 30px one by 7, and
+   both land on --tap-min. The previous flat -4px left the page capsule at 34px
+   — under the floor, on the one control the chain's whole view hangs off. Only
+   the block axis grows; the inline edges stay at 0 so neighbouring options
+   never overlap each other's targets. */
+@media (pointer: coarse) {
+  .ui-capsule.ui-capsule .ui-capsule__option::after {
+    content: '';
+    position: absolute;
+    inset: calc((100% - var(--tap-min, 44px)) / 2) 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ui-capsule.ui-capsule .ui-capsule__option { transition: none; }
+}
+
+/* Touch: a 34px stepper end gets a 44px hit area without growing the drawing,
+   the same inset the capsule options use (above). Only the
+   block axis grows, so the two ends never overlap each other's targets. */
+@media (pointer: coarse) {
+  .ui-step.ui-stepper > button { position: relative; }
+  .ui-step.ui-stepper > button::after {
+    content: '';
+    position: absolute;
+    inset: calc((100% - var(--tap-min, 44px)) / 2) 0;
+  }
+}

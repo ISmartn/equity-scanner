@@ -1,0 +1,125 @@
+/* Order Flow, as a lab page. The board keeps its layout; this sheet replaces
+   the standalone site chrome (wordmark, traffic lights, mac window, website
+   type and colours) with the lab's page shell. Imported after the board's
+   own sheets so these rules win. */
+
+.ol-scope {
+  --font-sans: "IBM Plex Sans", system-ui, sans-serif;
+  --font-display: "IBM Plex Sans", system-ui, sans-serif;
+  --font-figures: "IBM Plex Sans", system-ui, sans-serif;
+  --font-accent: "IBM Plex Sans", system-ui, sans-serif;
+  font-family: "IBM Plex Sans", system-ui, sans-serif;
+  color: #f1f5f9;
+  background: transparent;
+}
+
+html .ol-scope .ui-flow,
+html .ol-scope .ui-flow.oi-design[data-fit="true"] {
+  height: 100%;
+  min-height: 0;
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  padding: 0;
+  background: transparent;
+  font-family: "IBM Plex Sans", system-ui, sans-serif;
+}
+
+/* The control row matches the lab's page toolbar. */
+html .ol-scope .ui-flow .ui-flow-pagebar.ui-pagebar {
+  position: static;
+  z-index: auto;
+  height: auto;
+  min-height: 0;
+  margin: 0 0 4px;
+  padding: 4px 8px;
+  gap: 8px;
+  border: 1px solid #2a3544;
+  border-radius: 8px;
+  background: #1a2332;
+  box-shadow: none;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  --ui-pagebar-action-h: 28px;
+}
+
+html .ol-scope .ui-flow .ui-flow-pagebar.ui-pagebar::before,
+html .ol-scope .ui-flow .ui-flow-pagebar.ui-pagebar::after {
+  content: none;
+  display: none;
+}
+
+html body #root .ol-scope .ui-flow .ui-pagebar.ui-pagebar > .ui-pagebar__actions {
+  margin-left: 0;
+  margin-inline: 0;
+  justify-content: flex-start;
+}
+
+html body #root .ol-scope .ui-flow .ui-pagebar.ui-pagebar > .ui-pagebar__actions > :first-child {
+  margin-left: 0;
+  margin-inline: 0;
+}
+
+html .ol-scope .ui-flow .ui-capsule.ui-capsule {
+  height: 28px;
+  padding: 2px;
+  border-radius: 6px;
+  border-color: #2a3544;
+  background: #0f1419;
+}
+
+html .ol-scope .ui-flow .ui-capsule.ui-capsule .ui-capsule__option {
+  border-radius: 4px;
+  padding: 0 10px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #94a3b8;
+}
+
+html .ol-scope .ui-flow .ui-capsule.ui-capsule .ui-capsule__pill {
+  border-radius: 4px;
+  background: rgb(59 130 246 / 0.22);
+}
+
+html .ol-scope .ui-flow .ui-capsule.ui-capsule .ui-capsule__option.is-active {
+  color: #7dd3fc;
+}
+
+/* The board is a lab panel, not a floating macOS window. */
+html .ol-scope .ui-flow[data-fit="true"] .mf-board,
+html .ol-scope .mf-board[data-layout="diagram"] {
+  border: 1px solid #2a3544;
+  border-radius: 8px;
+  box-shadow: none;
+  --stage: #0f1419;
+  --stage-tile: #1a2332;
+  --stage-deep: #0f1419;
+  --stage-bar: #2a3544;
+  --badge-ink: #052e16;
+  --badge-ink-down: #450a0a;
+  --surface: #0f1419;
+  --surface-raised: #1a2332;
+  --surface-high: #243044;
+  --text: #f1f5f9;
+  --text-muted: #94a3b8;
+  --text-secondary: #cbd5e1;
+  --line: #2a3544;
+  --line-strong: #3d4d63;
+  --hairline: #2a3544;
+  --up: #4ade80;
+  --down: #f87171;
+  --up-ink: #4ade80;
+  --down-ink: #f87171;
+  --up-text: #4ade80;
+  --down-text: #f87171;
+  --flow-hair: #2a3544;
+  --flow-up: #4ade80;
+  --flow-down: #f87171;
+  --flow-up-ink: #4ade80;
+  --flow-down-ink: #f87171;
+  --accent: #3b82f6;
+  --accent-ring: #3b82f6;
+  background: #0f1419;
+  color: #f1f5f9;
+}
