@@ -6,8 +6,10 @@ import { fmtPrice } from '@/order-flow/utils/formatters';
 import { candlesFromCloses } from './diagramModel';
 import { MINUTE } from './flowChartModel';
 import { useFlowFocus, type FocusState } from './flowFocus';
-import { buildUpText, ChangeText, DotMeter, signedText, Spark, toneOf, windowCandles } from './FlowParts';
+import { buildUpText, ChangeText, DotMeter, pctText, signedText, Spark, toneOf, windowCandles } from './FlowParts';
+import { INDEX_MEMBERS, indexBook } from './indexMembers';
 import { clockOf, compactUnits, levelText, type FlowLevel, type FlowStock, type MarketFlow } from './marketFlowModel';
+import { getThemeDirectory } from '@/order-flow/lib/underlyings';
 import { useBox } from './useBox';
 
 interface FlowPopupProps {
@@ -42,7 +44,11 @@ export function FlowPopup({ flow, mode }: FlowPopupProps) {
     const setShown = (next: FocusState | null) => { shownRef.current = next; setShownState(next); };
     return focus.subscribe(state => {
       window.clearTimeout(timer.current);
-      const wanted = state.symbol && (state.pinned || (mode === 'half' && state.origin !== 'chart')) ? state : null;
+      // A sector's stocks open on a click. Hover still lights its lines, and a
+      // pinned list stays up while the pointer moves across the other names.
+      const symbolWanted = state.symbol && (state.pinned || (mode === 'half' && state.origin !== 'chart')) ? state : null;
+      const sectorWanted = focus.pinned.sector ? focus.pinned : null;
+      const wanted = symbolWanted ?? sectorWanted;
       // Leaving waits a beat too: crossing the gap between two tiles does not close and reopen it.
       if (!wanted) {
         if (shownRef.current?.pinned || state.symbol || state.sector) setShown(null);
@@ -70,6 +76,17 @@ export function FlowPopup({ flow, mode }: FlowPopupProps) {
   }, [shown?.pinned]);
 
   const stock = useMemo(() => (shown?.symbol ? flow.stocks.find(item => item.symbol === shown.symbol) ?? null : null), [shown, flow.stocks]);
+  if (shown?.sector && !shown.symbol) {
+    const open = (symbol: string) => focus.togglePin(symbol, 'tile');
+    const close = () => focus.clear();
+    return (
+      <div className={`mf-popup ${mode === 'sheet' ? 'is-sheet' : 'is-full'} is-pinned is-index`} role={shown.pinned ? 'dialog' : 'tooltip'} aria-label="Stocks">
+        {shown.sector === 'index'
+          ? <IndexPicker flow={flow} pinned={shown.pinned} onOpen={open} onClose={close} />
+          : <SectorStocks flow={flow} sectorId={shown.sector} pinned={shown.pinned} onOpen={open} onClose={close} />}
+      </div>
+    );
+  }
   if (!shown || !stock) return null;
   const full = shown.pinned && mode === 'half';
   const where = mode === 'sheet' ? 'is-sheet' : full ? 'is-full' : stock.side === 'bearish' ? 'is-top' : 'is-bottom';
@@ -78,8 +95,11 @@ export function FlowPopup({ flow, mode }: FlowPopupProps) {
   const prev = list && at > 0 ? list[at - 1] : null;
   const next = list && at >= 0 && at < list.length - 1 ? list[at + 1] : null;
   step.current = by => { const target = by > 0 ? next : prev; if (target) focus.togglePin(target.symbol, 'key'); };
+  const book = stock.kind === 'index' ? indexBook(stock.symbol, flow.stocks) : null;
+  const listed = stock.kind === 'index' && stock.symbol in INDEX_MEMBERS;
+  const indexList = Boolean(shown.pinned && book && book.rows.length);
   return (
-    <div className={`mf-popup ${where} ${toneOf(stock)}${shown.pinned ? ' is-pinned' : ''}`} role={shown.pinned ? 'dialog' : 'tooltip'} aria-label={`${stock.symbol} in detail`}>
+    <div className={`mf-popup ${where} ${toneOf(stock)}${shown.pinned ? ' is-pinned' : ''}${indexList ? ' is-index' : ''}`} role={shown.pinned ? 'dialog' : 'tooltip'} aria-label={`${stock.symbol} in detail`}>
       <header className="mf-popup__head">
         <SymbolMark symbol={stock.symbol} kind={stock.kind} size={30} showTitle={false} className="mf-logo mf-popup__logo" />
         <span className="mf-popup__id">
@@ -105,8 +125,11 @@ export function FlowPopup({ flow, mode }: FlowPopupProps) {
           </span>
         )}
       </header>
-      <MiniChart stock={stock} window={flow.window} />
-      <dl className="mf-popup__facts">
+      {indexList && book && (
+        <IndexStocks symbol={stock.symbol} book={book} listed={listed} onOpen={symbol => focus.togglePin(symbol, 'tile')} />
+      )}
+      {!indexList && <MiniChart stock={stock} window={flow.window} />}
+      {!indexList && <dl className="mf-popup__facts">
         <div><dt>Rank</dt><dd>{stock.rank != null && list ? <>#{stock.rank} <small>of {list.length} {stock.side === 'bullish' ? 'up' : 'down'}</small></> : <small>Flat, inside ±{flow.floorPct}%</small>}</dd></div>
         <div><dt>Build-up</dt><dd className={`mf-tone is-${stock.side ?? 'flat'}`}>{buildUpText(stock)}</dd></div>
         <div><dt>Conviction</dt><dd>{stock.checks.length ? <DotMeter checks={stock.checks} count /> : <small>—</small>}</dd></div>
@@ -114,8 +137,8 @@ export function FlowPopup({ flow, mode }: FlowPopupProps) {
         <div><dt>Support</dt><dd className="is-put">{levelPair(stock.support, stock.support2, 'S')}</dd></div>
         <div><dt>Resistance</dt><dd className="is-call">{levelPair(stock.resistance, stock.resistance2, 'R')}</dd></div>
         <div className="is-wide"><dt>Zone</dt><dd>{stock.zone ? <>{fmtPrice(stock.zone.low)}–{fmtPrice(stock.zone.high)} <small>{clockOf(stock.zone.from)}–{clockOf(stock.zone.to)}</small></> : <small>None</small>}</dd></div>
-      </dl>
-      {full && stock.checks.length > 0 && (
+      </dl>}
+      {!indexList && full && stock.checks.length > 0 && (
         <section className="mf-popup__checks" aria-label="Why it ranks here">
           <h4>Why it ranks here</h4>
           <ul>
@@ -128,6 +151,9 @@ export function FlowPopup({ flow, mode }: FlowPopupProps) {
           </ul>
         </section>
       )}
+      {shown.pinned && stock.kind === 'index' && !indexList && (
+        <IndexStocks symbol={stock.symbol} book={book} listed={listed} onOpen={symbol => focus.togglePin(symbol, 'tile')} />
+      )}
       {shown.pinned ? (
         <footer className="mf-popup__foot">
           <span>{pcrText(stock)}Levels from the {expiryDisplay(stock.expiry).label} expiry</span>
@@ -136,6 +162,97 @@ export function FlowPopup({ flow, mode }: FlowPopupProps) {
         <p className="mf-popup__hint">Click to keep it open · {pcrText(stock)}levels from the {expiryDisplay(stock.expiry).label} expiry</p>
       )}
     </div>
+  );
+}
+
+function SectorStocks({ flow, sectorId, pinned, onOpen, onClose }: { flow: MarketFlow; sectorId: string; pinned: boolean; onOpen: (symbol: string) => void; onClose: () => void }) {
+  const sector = flow.sectors.find(item => item.id === sectorId) ?? null;
+  const label = getThemeDirectory()?.sectors[sectorId]?.label ?? sector?.label ?? 'Sector';
+  const bySymbol = new Map(flow.stocks.map(stock => [stock.symbol, stock]));
+  const rows = (sector?.symbols ?? []).flatMap(symbol => {
+    const stock = bySymbol.get(symbol);
+    return stock && stock.kind !== 'index' ? [stock] : [];
+  }).sort((a, b) => (b.changePct ?? -Infinity) - (a.changePct ?? -Infinity));
+  const changes = rows.map(row => row.changePct).filter((value): value is number => value != null && Number.isFinite(value));
+  const up = changes.filter(value => value > 0.05).length;
+  const down = changes.filter(value => value < -0.05).length;
+  const sorted = [...changes].sort((a, b) => a - b);
+  const median = sorted.length === 0 ? null : sorted.length % 2 === 1 ? sorted[(sorted.length - 1) / 2] : (sorted[sorted.length / 2 - 1] + sorted[sorted.length / 2]) / 2;
+  const book = { total: rows.length, rows, missing: 0, up, down, flat: changes.length - up - down, median };
+  return (
+    <>
+      <header className="mf-popup__head">
+        <span className="mf-popup__id">
+          <b>{label}</b>
+          <span>{sector ? `${sector.bullish} up · ${sector.bearish} down` : 'Stocks'}</span>
+        </span>
+        <span className="mf-popup__price"><ChangeText value={sector?.changePct} /></span>
+        {pinned && <button type="button" className="mf-popup__tool mf-popup__close" aria-label="Close the detail" onClick={onClose}><XIcon size={16} /></button>}
+      </header>
+      <IndexStocks symbol={label} book={book} listed={rows.length > 0} onOpen={onOpen} />
+    </>
+  );
+}
+
+function IndexPicker({ flow, pinned, onOpen, onClose }: { flow: MarketFlow; pinned: boolean; onOpen: (symbol: string) => void; onClose: () => void }) {
+  const order = ['NIFTY', 'BANKNIFTY', 'FINNIFTY', 'MIDCPNIFTY', 'SENSEX', 'BANKEX', 'NIFTYNXT50'];
+  const indexes = flow.stocks.filter(stock => stock.kind === 'index' && stock.symbol in INDEX_MEMBERS)
+    .sort((a, b) => order.indexOf(a.symbol) - order.indexOf(b.symbol));
+  const [symbol, setSymbol] = useState(() => indexes.find(stock => stock.symbol === 'NIFTY')?.symbol ?? indexes[0]?.symbol ?? 'NIFTY');
+  const current = indexes.find(stock => stock.symbol === symbol) ?? indexes[0] ?? null;
+  const book = indexBook(current?.symbol ?? symbol, flow.stocks);
+  return (
+    <>
+      <header className="mf-popup__head">
+        <span className="mf-popup__id">
+          <b>{current?.symbol ?? 'Indices'}</b>
+          <span>{current?.name ?? 'Indices'} · stocks</span>
+        </span>
+        {current && (
+          <span className="mf-popup__price">
+            <b>₹{fmtPrice(current.fut?.price ?? current.spot)}</b>
+            <ChangeText value={current.changePct} />
+          </span>
+        )}
+        {pinned && <button type="button" className="mf-popup__tool mf-popup__close" aria-label="Close the detail" onClick={onClose}><XIcon size={16} /></button>}
+      </header>
+      <div className="mf-indexchips" role="tablist" aria-label="Indices">
+        {indexes.map(item => (
+          <button key={item.symbol} type="button" role="tab" aria-selected={item.symbol === (current?.symbol ?? symbol)} className={item.symbol === (current?.symbol ?? symbol) ? 'is-on' : ''} onClick={() => setSymbol(item.symbol)}>
+            {item.symbol} <ChangeText value={item.changePct} />
+          </button>
+        ))}
+      </div>
+      <IndexStocks symbol={current?.symbol ?? symbol} book={book} listed={Boolean(book)} onOpen={onOpen} />
+    </>
+  );
+}
+
+function IndexStocks({ symbol, book, listed, onOpen }: { symbol: string; book: ReturnType<typeof indexBook>; listed: boolean; onOpen: (symbol: string) => void }) {
+  if (!listed || !book) {
+    return (
+      <section className="mf-members" aria-label={`${symbol} stocks`}>
+        <p className="mf-members__sum">Stocks in this index are not listed here yet.</p>
+      </section>
+    );
+  }
+  const median = book.median == null ? '—' : pctText(book.median);
+  const off = book.missing > 0 ? ` · ${book.missing} not on this board` : '';
+  return (
+    <section className="mf-members" aria-label={`${symbol} stocks`}>
+      <p className="mf-members__sum">{book.rows.length} of {book.total} · {book.up} up · {book.down} down · median {median}{off}</p>
+      <ul className="mf-members__list">
+        {book.rows.map(row => (
+          <li key={row.symbol}>
+            <button type="button" className="mf-members__row" onClick={() => onOpen(row.symbol)}>
+              <span className="mf-members__sym">{row.symbol}</span>
+              <ChangeText value={row.changePct} className="mf-members__pct" />
+              <span className={`mf-members__bu mf-tone is-${row.side ?? 'flat'}`}>{buildUpText(row)}</span>
+            </button>
+          </li>
+        ))}
+      </ul>
+    </section>
   );
 }
 

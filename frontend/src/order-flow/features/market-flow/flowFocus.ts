@@ -39,6 +39,11 @@ export class FlowFocus {
   }
 
   get state(): FocusState {
+    // A click pins. While the pointer stays on that same index or stock, the
+    // pin has to win: a chart hover would otherwise replace it and close the
+    // detail before the constituent list can be read.
+    if (this.pin.symbol && this.hover.symbol === this.pin.symbol) return this.pin;
+    if (this.pin.sector && !this.hover.symbol && this.hover.sector === this.pin.sector) return this.pin;
     return this.hover.symbol || this.hover.sector ? this.hover : this.pin;
   }
 

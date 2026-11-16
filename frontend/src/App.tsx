@@ -16,6 +16,7 @@ import { NewsImpactPage } from "@/pages/NewsImpactPage";
 import { NewsdeskPage } from "@/pages/NewsdeskPage";
 import { OiMomentumPage } from "@/pages/OiMomentumPage";
 import { OrderFlowPage } from "@/pages/OrderFlowPage";
+import { FoDeskPage } from "@/pages/FoDeskPage";
 import { MtfRsiPage } from "@/pages/MtfRsiPage";
 import { NiftyChartPage } from "@/pages/NiftyChartPage";
 import { IndicatorAnalysisPage } from "@/pages/IndicatorAnalysisPage";
@@ -40,6 +41,7 @@ const NAV_TABS = [
   { label: "Indicator Analysis", path: "/indicator-analysis" },
   { label: "Momentum Scanner", path: "/scanner" },
   { label: "Live Scan", path: "/live-scan" },
+  { label: "F&O", path: "/fno" },
   { label: "Darvas", path: "/darvas-screener" },
   { label: "Screener", path: "/multi-year-breakout" },
   { label: "Sector Rotation", path: "/sector-rotation" },
@@ -188,6 +190,7 @@ export default function App() {
           <Route path="/market-info" element={<MarketInfoPage />} />
           <Route path="/oi-momentum" element={<OiMomentumPage />} />
           <Route path="/order-flow" element={<OrderFlowPage />} />
+          <Route path="/fno" element={<FoDeskPage />} />
           <Route path="/mtf-rsi" element={<MtfRsiPage />} />
           <Route path="/nifty" element={<NiftyChartPage />} />
           <Route path="/indicator-analysis" element={<IndicatorAnalysisPage />} />

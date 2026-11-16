@@ -148,14 +148,15 @@ Live ATM support-zone scanner using **rolling Upstox option-chain polls** (3–5
 
 ## Order Flow
 
-A whole-market F&O board on the lab's stored session: daily closes from `daily_candles` (index candles for Nifty, Bank Nifty and Sensex) and the same option-chain overlay the momentum scanner uses (`derivative_snapshots`). Names the overlay would reject stay on the tape; `fo_action` carries that decision.
+The standalone order-flow board, served from this app’s Upstox feed. A market file of nearest-expiry option chains is rebuilt every 4 minutes in the session. Futures build-up is the front-month price change read against the open-interest change. Full notes: [docs/order_flow.md](docs/order_flow.md).
 
 | Route | Description |
 |-------|-------------|
-| `/order-flow` | UI — Nifty 50 or all F&O, sector lean, build-up, conviction checks |
-| `GET /api/order-flow?scope=nifty50\|fno` | Board for the latest stored session (`refresh=true` recomputes) |
+| `/order-flow` | UI — the order-flow board |
+| `GET /api/order-flow/market` | Latest market file |
+| `GET /api/order-flow/futures/{symbol}` | Front-month future for the current session |
 
-Sync option-chain snapshots from **Market Info** when the board shows daily moves without a build-up.
+The live scan uses the same daily build-up rules on its own futures ticks. A buy into short build-up, and a sell into long build-up, stand aside. The other readings are labels on the call.
 
 ## Newsdesk
 

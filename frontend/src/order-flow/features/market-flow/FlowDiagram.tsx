@@ -411,7 +411,7 @@ function DiagramBody({ flow, settings, status, W, H }: FlowDiagramProps & { W: n
             <path key={stock.symbol} id={`${pathId}-${i}`} className={`mf-dg__bold is-${tone(stock)}`} d={paths.line.get(stock.symbol)}
               pathLength={1} style={{ '--i': i } as React.CSSProperties} />
           ))}
-          {index && <path className="mf-dg__bold is-index" d={paths.line.get(index.symbol)} />}
+          {index && <path className="mf-dg__bold is-index" data-sym={index.symbol} d={paths.line.get(index.symbol)} />}
           <path className="mf-dg__conn is-up" d={connectors.up} />
           <path className="mf-dg__conn is-down" d={connectors.down} />
         </g>
@@ -464,12 +464,6 @@ function DiagramBody({ flow, settings, status, W, H }: FlowDiagramProps & { W: n
         <circle className="mf-dg__node" cx={xT0} cy={zeroY} r="3.5" />
         <circle className="mf-dg__node" cx={gateR + 8} cy={zeroY} r="3.5" />
         <circle className="mf-dg__node" cx={zeroDividerX} cy={layout.midY} r="4" />
-        {index && (() => {
-          const item = lines.find(l => l.symbol === index.symbol);
-          if (!item) return null;
-          const y = yOf(item.v[item.v.length - 1]);
-          return <text className="mf-dg__index" x={xT1 - 6} y={y - 6} textAnchor="end">NIFTY fut {pctText(index.changePct)}</text>;
-        })()}
       </svg>
 
       <FlowStrip flow={flow} status={status} width={gateR - PAD} />
@@ -507,6 +501,18 @@ function DiagramBody({ flow, settings, status, W, H }: FlowDiagramProps & { W: n
         <rect className="mf-chart__hit" x={xT0 + pillW + 8} y={plotTop} width={Math.max(0, xT1 - xT0 - pillW - 8)} height={plotBottom - plotTop}
           onPointerMove={move} onPointerLeave={leave} onClick={() => (snapRef.current ? focus.togglePin(snapRef.current, 'chart') : focus.clear())} />
       </svg>
+      {index && (() => {
+        const item = lines.find(line => line.symbol === index.symbol);
+        if (!item) return null;
+        const y = yOf(item.v[item.v.length - 1]);
+        return (
+          <button type="button" className="mf-dg__indexbtn" data-sym={index.symbol}
+            style={{ left: Math.max(PAD, xT1 - 156), top: Math.max(plotTop, y - 24) }}
+            onClick={event => { event.stopPropagation(); focus.togglePin(index.symbol, 'tile'); }}>
+            NIFTY {pctText(index.changePct)}
+          </button>
+        );
+      })()}
     </>
   );
 }
