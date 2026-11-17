@@ -24,6 +24,33 @@ type StanceFilter = "all" | "buy" | "sell" | "wait" | "stand_aside";
 
 const LIVE = new Set(["starting", "connecting", "connected", "reconnecting"]);
 
+function StartProgress({
+  startup,
+}: {
+  startup: NonNullable<LiveScanStatus["startup"]>;
+}) {
+  const total = startup.total ?? 0;
+  const done = startup.done ?? 0;
+  const pct = total > 0 ? Math.min(100, Math.round((done / total) * 100)) : null;
+  return (
+    <div className="rounded-md border border-surface-border bg-surface-raised px-2 py-1.5">
+      <div className="flex items-baseline justify-between gap-3 text-data-xs">
+        <span className="font-semibold text-slate-100">{startup.label}</span>
+        <span className="tabular-nums text-slate-400">
+          {pct != null ? `${done} / ${total}` : "Working"}
+          {startup.detail ? ` · ${startup.detail}` : ""}
+        </span>
+      </div>
+      <div className="mt-1 h-1 overflow-hidden rounded bg-surface-border">
+        <div
+          className={`h-full bg-accent ${pct == null ? "w-1/3 animate-pulse" : ""}`}
+          style={pct == null ? undefined : { width: `${pct}%` }}
+        />
+      </div>
+    </div>
+  );
+}
+
 function errorText(err: unknown): string {
   if (!(err instanceof Error)) return "Request failed";
   try {
@@ -212,7 +239,7 @@ export function LiveScanPage() {
         {status?.offhours ? (
           <span className="text-[10px] text-slate-400">After hours — stream stays up until Stop</span>
         ) : null}
-        {status?.candle_sync && status.candle_sync.requested > 0 ? (
+        {status?.candle_sync && status.candle_sync.requested > 0 && status.status !== "starting" ? (
           <span className="text-[10px] text-slate-400">
             {status.candle_sync.phase === "updating"
               ? `Updating ${status.candle_sync.requested} stocks missing ${status.candle_sync.session}`
@@ -221,6 +248,10 @@ export function LiveScanPage() {
           </span>
         ) : null}
       </PageToolbar>
+
+      {status?.startup && (status.status === "starting" || status.status === "connecting") ? (
+        <StartProgress startup={status.startup} />
+      ) : null}
 
       {error ? (
         <div className="rounded-md border border-loss/40 bg-loss/10 px-2 py-1 text-data-xs text-loss">{error}</div>

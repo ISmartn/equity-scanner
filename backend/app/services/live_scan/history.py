@@ -60,6 +60,7 @@ async def ensure_latest_candles(
     session_date: str,
     should_cancel: Callable[[], bool] | None = None,
     on_found: Callable[[list[str]], None] | None = None,
+    on_progress: Callable[[dict[str, Any]], None] | None = None,
 ) -> dict[str, Any]:
     tokens = [item.cash_key for item in universe]
     stale = await asyncio.to_thread(get_store().tickers_missing_daily_session, tokens, session_date)
@@ -99,6 +100,7 @@ async def ensure_latest_candles(
         should_cancel=should_cancel,
         concurrency=_CANDLE_CONCURRENCY,
         request_delay_sec=_CANDLE_DELAY_SEC,
+        on_progress=on_progress,
     )
     summary.update(
         {

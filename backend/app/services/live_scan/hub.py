@@ -219,6 +219,7 @@ class LiveScanHub:
         self._subscribed = 0
         self._generation = 0
         self._candle_sync: dict[str, Any] | None = None
+        self._startup: dict[str, Any] | None = None
         self._baskets = default_baskets()
         self._journal = CallJournal("")
         self._journal_rows: list[dict[str, Any]] = []
@@ -256,9 +257,11 @@ class LiveScanHub:
             self._generation += 1
             generation = self._generation
             self.status = "starting"
+            self._note_startup("universe", "Building the universe")
 
         try:
             universe = await build_universe()
+            self._note_startup("baskets", "Loading index baskets", total=len(universe))
             baskets = default_baskets()
             try:
                 baskets["NIFTY"] = await load_nifty_members()
@@ -275,6 +278,32 @@ class LiveScanHub:
                     "failed": 0,
                     "phase": "updating" if stale else "ready",
                 }
+                if stale:
+                    self._note_startup(
+                        "candles",
+                        f"Updating stocks missing {session_date}",
+                        done=0,
+                        total=len(stale),
+                    )
+                else:
+                    self._note_startup("candles", f"Daily candles are current through {session_date}")
+
+            def note_candle(progress: dict[str, Any]) -> None:
+                ticker = progress.get("current_ticker")
+                self._note_startup(
+                    "candles",
+                    f"Updating stocks missing {session_date}",
+                    done=int(progress.get("processed") or 0),
+                    total=int(progress.get("total") or 0),
+                    detail=str(ticker) if ticker else None,
+                )
+                self._candle_sync = {
+                    "session": session_date,
+                    "requested": int(progress.get("total") or 0),
+                    "success": int(progress.get("success") or 0),
+                    "failed": int(progress.get("failed") or 0),
+                    "phase": "updating",
+                }
 
             equity = [item for item in universe if item.kind != "index"]
             indexes = [item for item in universe if item.kind == "index"]
@@ -284,6 +313,12 @@ class LiveScanHub:
                 session_date=session_date,
                 should_cancel=lambda: generation != self._generation,
                 on_found=note_missing,
+                on_progress=note_candle,
+            )
+            self._note_startup(
+                "indexes",
+                "Updating index candles",
+                total=len(indexes),
             )
             index_sync = await ensure_latest_index_candles(
                 indexes,
@@ -305,10 +340,13 @@ class LiveScanHub:
             if generation != self._generation:
                 return self.status_payload()
             as_of = trade_date()
+            self._note_startup("context", "Loading the morning context", total=len(universe))
             contexts = await asyncio.to_thread(load_context, universe, before_date=as_of)
+            self._note_startup("profile", "Loading the volume profile")
             minute_rows = await asyncio.to_thread(get_store().live_minute_profile, as_of)
             profile = VolumeProfile.calibrated(minute_rows)
             book = LiveBook(contexts, profile=profile)
+            self._note_startup("journal", "Loading today's journal")
             journal = CallJournal(as_of)
             stored_plans = await asyncio.to_thread(get_store().list_live_call_journal, as_of)
             journal.load(stored_plans)
@@ -316,11 +354,13 @@ class LiveScanHub:
             with self._lock:
                 if self._generation == generation and self.status == "starting":
                     self.status = "stopped"
+                    self._startup = None
             raise
         if generation != self._generation:
             with self._lock:
                 if self.status == "starting":
                     self.status = "stopped"
+                    self._startup = None
             return self.status_payload()
 
         await asyncio.to_thread(self._shutdown_threads)
@@ -348,6 +388,11 @@ class LiveScanHub:
             self._hold_through_close = hold_through_close()
             self._stop = threading.Event()
             self.status = "connecting"
+            self._note_startup(
+                "connecting",
+                "Connecting to the feed",
+                detail=f"{len(universe)} symbols · {len(book.instrument_keys)} keys",
+            )
             self._writer.start()
             stop = self._stop
             self._ingest = threading.Thread(target=self._ingest_loop, args=(stop,), name="live-scan-ingest", daemon=True)
@@ -377,6 +422,7 @@ class LiveScanHub:
         self._flush_journal(force=True)
         self._writer.stop()
         self.status = "stopped"
+        self._startup = None
         return self.status_payload()
 
     def _shutdown_threads(self) -> None:
@@ -390,6 +436,23 @@ class LiveScanHub:
         self._thread = None
         self._publisher = None
         self._ingest = None
+
+    def _note_startup(
+        self,
+        phase: str,
+        label: str,
+        *,
+        done: int | None = None,
+        total: int | None = None,
+        detail: str | None = None,
+    ) -> None:
+        self._startup = {
+            "phase": phase,
+            "label": label,
+            "done": done,
+            "total": total,
+            "detail": detail,
+        }
 
     # ----------------------------------------------------------------- status
 
@@ -426,6 +489,7 @@ class LiveScanHub:
             "session_name": session_name(),
             "session_flushed": self._session_flushed,
             "candle_sync": self._candle_sync,
+            "startup": self._startup,
             "pipeline": {
                 "frames_in": self._frames_in,
                 "frame_backlog": len(self._frames),
@@ -707,6 +771,7 @@ class LiveScanHub:
                 self._frames.append((epoch, time.time(), None))
                 self._frame_signal.set()
             self.status = "connected"
+            self._startup = None
             self.last_error = None
             self._connected_at = time.time()
             for offset in range(0, len(instrument_keys), _SUBSCRIBE_CHUNK):

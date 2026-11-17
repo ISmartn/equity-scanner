@@ -392,3 +392,7 @@
 # ingest started 2026-11-16T08:35:30.676176+00:00 since_last=True concurrency=2 profiles=8
 
 # ingest started 2026-11-16T09:44:31.382494+00:00 since_last=True concurrency=2 profiles=3
+
+# ingest started 2026-11-17T04:53:49.762168+00:00 since_last=True concurrency=2 profiles=1600
+
+# ingest started 2026-11-17T05:18:57.458000+00:00 since_last=True concurrency=2 profiles=749

@@ -2190,6 +2190,13 @@ export interface LiveScanStatus {
     deferred?: number;
     phase?: string;
   } | null;
+  startup?: {
+    phase: string;
+    label: string;
+    done: number | null;
+    total: number | null;
+    detail: string | null;
+  } | null;
   writer: {
     queued: number;
     dropped: number;
