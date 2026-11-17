@@ -247,7 +247,7 @@ export function FoDeskPage() {
           className="ml-1 w-28 rounded border border-surface-border bg-surface px-2 py-0.5 text-data-xs text-slate-100"
         />
         <span className="text-[10px] text-slate-500">
-          Same session call as Live Scan, for every F&O stock and index. Exit is 2R. Swing is 2.5R.
+          Same session call as Live Scan, for every F&O stock and index. Exit is 2R. Swing is 2.5R. A tight 8-day coil can also call the break.
         </span>
       </div>
 

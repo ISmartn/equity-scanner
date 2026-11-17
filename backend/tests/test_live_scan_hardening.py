@@ -478,6 +478,13 @@ def test_gap_through_entry_fills_at_the_first_print():
     assert row["result_pct"] == pytest.approx(0.49, abs=0.01)
 
 
+def test_a_print_through_the_stop_is_not_filled_on_the_way_back():
+    journal = CallJournal("2026-11-05")
+    journal.advance([_call("A", 94.0)], "t0")
+    journal.advance([_call("A", 100.4, stance="buy")], "t1")
+    assert journal.rows() == []
+
+
 def test_gap_through_stop_fills_at_the_first_print():
     journal = CallJournal("2026-11-05")
     journal.advance([_call("A", 98.0)], "t0")
@@ -745,7 +752,7 @@ def _quote(**overrides: Any) -> dict[str, Any]:
         "atp": 101.0,
         "vtt": 500_000,
         "avg_volume_20": 1_000_000,
-        "sma20": 90.0,
+        "sma20": 96.0,
         "prior_high": 101.0,
         "prior_low": 94.0,
         "trend_20_pct": 8.0,
@@ -776,6 +783,40 @@ def test_choppy_twenty_day_path_stands_aside():
     assert call["stance"] == "stand_aside"
     assert "range" in call["reason"]
     assert session_call(_quote(efficiency_20=0.5), 0.5)["stance"] == "buy"
+
+
+def test_eight_day_coil_break_is_a_call_when_the_trend_stands_aside():
+    coil = dict(efficiency_20=0.08, atr_pct=2.0, coil_high=101.0, coil_low=97.0, atp=101.0)
+    inside = session_call(_quote(**coil, ltp=99.0), 0.5)
+    assert inside["stance"] == "stand_aside"
+    assert "8-day coil" in inside["reason"]
+    assert inside["entry"] is None
+
+    buy = session_call(_quote(**coil, ltp=101.2), 0.5)
+    assert buy["stance"] == "buy"
+    assert buy["setup"] == "coil"
+    assert buy["entry"] == 101.0
+    assert "breaking higher" in buy["reason"]
+
+    late = session_call(_quote(**coil, ltp=104.0), 0.5)
+    assert late["stance"] == "stand_aside"
+    assert late["plan_phase"] == "late"
+    assert "already ran" in late["reason"]
+
+    blocked = session_call(
+        _quote(**coil, ltp=101.2, fut_ltp=98.0, fut_prev_close=100.0, fut_oi=12_000, fut_poi=10_000),
+        0.5,
+    )
+    assert blocked["stance"] == "stand_aside"
+    assert "short build-up" in blocked["reason"]
+
+    cheap = session_call(_quote(**coil, ltp=81.2, prev_close=80.0, sma20=70.0), 0.5)
+    assert cheap["stance"] == "stand_aside"
+    assert cheap["setup"] != "coil"
+
+    trend = session_call(_quote(efficiency_20=0.5, coil_high=101.0, coil_low=97.0), 0.5)
+    assert trend["stance"] == "buy"
+    assert trend["setup"] == "trend"
 
 
 def test_wide_spread_holds_a_break_on_wait():
@@ -835,3 +876,5 @@ def test_history_stats_use_median_volume_atr_and_efficiency(tmp_path):
     assert stats["avg_volume_20"] == 1_000_000
     assert stats["efficiency_20"] == pytest.approx(1.0)
     assert stats["atr_pct"] == pytest.approx(2.0 / 120.0 * 100.0, rel=0.01)
+    assert stats["coil_high"] == 121.0
+    assert stats["coil_low"] == 112.0

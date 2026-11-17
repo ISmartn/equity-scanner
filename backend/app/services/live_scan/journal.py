@@ -352,6 +352,8 @@ class CallJournal:
         self._rows: dict[tuple[str, str], dict[str, Any]] = {}
         self._dirty: set[tuple[str, str]] = set()
         self._soft: set[tuple[str, str]] = set()
+        # Seen through the stop before any entry. A later climb back to the entry is not a fill.
+        self._voided: set[tuple[str, str]] = set()
         self._last_flush = 0.0
         self._last_soft_flush = 0.0
         self.session_closed = False
@@ -444,9 +446,12 @@ class CallJournal:
         stop = float(call["stop"])
         exit_price = float(call["exit"])
         stance = str(call.get("stance") or "")
+        if key in self._voided:
+            return
         through = _through(side, ltp, entry)
         if not through:
             if _against(side, ltp, stop):
+                self._voided.add(key)
                 return
             status = "pending"
         elif stance in {"buy", "sell"}:

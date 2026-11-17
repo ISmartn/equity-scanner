@@ -5,14 +5,15 @@ The replay
 For every symbol and session it rebuilds the morning context the live board
 loads (the 20 sessions before the day, same statistics as
 ``_daily_history_stats``), picks the side with ``trend_side``, drops ranges
-under the efficiency floor, and sizes the plan with ``candle_plan``. The day's
+under the efficiency floor, and sizes the plan with ``candle_plan``. The live
+8-day coil break is not replayed here. The day's
 bar then decides the outcome, under the journal's rules:
 
 * Open through the entry inside the window: filled at the open.
 * Otherwise filled at the entry if the day's range reaches it.
 * Open beyond the entry window (a chase): filled at the entry if price came back
   under it, as the journal records a fresh plan on the pullback. Open through
-  the stop: filled at the entry if the day's range climbs back to it.
+  the stop is not a fill.
 * Whenever one bar cannot say which level came first, the session is replayed
   minute by minute through the journal's own ``advance_plan`` if the live feed
   stored that session's minute bars from open to close. Otherwise the worse
@@ -48,6 +49,8 @@ from .clocks import SESSION_CLOSE, now_ist
 from .journal import CallJournal, advance_plan
 from .ranker import (
     _ENTRY_WINDOW,
+    _MAX_CANDLE_ATR,
+    _MAX_SMA_DISTANCE_PCT,
     _MIN_CANDLE_ATR,
     _MIN_EFFICIENCY,
     _MIN_PRICE,
@@ -188,6 +191,9 @@ class Funnel:
     against_5d: int = 0
     near_average: int = 0
     narrow_candle: int = 0
+    wide_candle: int = 0
+    extended: int = 0
+    at_extreme: int = 0
     weekend: int = 0
     no_plan: int = 0
     wrong_side: int = 0
@@ -396,6 +402,17 @@ def simulate_symbol(
         if atr and (prior_high - prior_low) < _MIN_CANDLE_ATR * atr:
             funnel.narrow_candle += 1
             continue
+        if atr and (prior_high - prior_low) > _MAX_CANDLE_ATR * atr:
+            funnel.wide_candle += 1
+            continue
+        if sma and sma > 0 and abs(prev_close - sma) / sma * 100.0 >= _MAX_SMA_DISTANCE_PCT:
+            funnel.extended += 1
+            continue
+        high20 = high20_a[t]
+        low20 = low20_a[t]
+        if (side == "buy" and prior_high >= high20) or (side == "sell" and prior_low <= low20):
+            funnel.at_extreme += 1
+            continue
         plan = candle_plan(
             side,
             prior_high if side == "buy" else prior_low,
@@ -418,14 +435,12 @@ def simulate_symbol(
         buy = side == "buy"
         reaches_entry = (h >= entry) if buy else (l <= entry)
         crossed_open = (o - entry) if buy else (entry - o)
-        # The journal records a plan the first second price sits between the stop
-        # and the entry, so a gap through either level can still fill later in the day.
+        # A day that trades through the stop before the entry is not a fill.
+        # Climbing back to the entry booked a loss on every one of those days.
         if (o <= stop) if buy else (o >= stop):
-            if not reaches_entry:
-                funnel.through_stop += 1
-                continue
-            fill, fill_type = entry, "recovery"
-        elif crossed_open > params.entry_window_r * plan_risk:
+            funnel.through_stop += 1
+            continue
+        if crossed_open > params.entry_window_r * plan_risk:
             back_under = (l < entry) if buy else (h > entry)
             if not back_under:
                 funnel.chased_gap += 1

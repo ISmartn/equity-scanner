@@ -270,7 +270,7 @@ def _history_quote(**overrides):
         "avg_volume_20": 1_000_000,
         "last_minute_volume": None,
         "minute_history": [],
-        "sma20": 90.0,
+        "sma20": 96.0,
         "prior_high": 101.0,
         "prior_low": 94.0,
         "trend_20_pct": 8.0,
@@ -302,7 +302,7 @@ def test_session_call_buy_sell_and_stand_aside():
             ltp=197.2,
             prev_close=200.0,
             atp=198.0,
-            sma20=220.0,
+            sma20=210.0,
             trend_20_pct=-6.0,
             return_5d_pct=-4.0,
             prior_low=198.0,
@@ -872,6 +872,15 @@ def test_quality_gates_stand_aside():
     narrow = session_call(_history_quote(atr_pct=2.0, prior_low=100.8), 0.5)
     assert narrow["stance"] == "stand_aside"
     assert "0.8 ATR" in narrow["reason"]
+    wide = session_call(_history_quote(atr_pct=2.0), 0.5)
+    assert wide["stance"] == "stand_aside"
+    assert "1.8 ATR" in wide["reason"]
+    extended = session_call(_history_quote(sma20=90.0), 0.5)
+    assert extended["stance"] == "stand_aside"
+    assert "8%" in extended["reason"]
+    extreme = session_call(_history_quote(high_20=101.0), 0.5)
+    assert extreme["stance"] == "stand_aside"
+    assert "20-day high" in extreme["reason"]
 
 
 def test_futures_build_up_blocks_only_the_opposing_sign():
@@ -891,7 +900,7 @@ def test_futures_build_up_blocks_only_the_opposing_sign():
             ltp=197.2,
             prev_close=200.0,
             atp=198.0,
-            sma20=220.0,
+            sma20=210.0,
             trend_20_pct=-6.0,
             return_5d_pct=-4.0,
             prior_low=198.0,
@@ -914,7 +923,7 @@ def test_futures_build_up_blocks_only_the_opposing_sign():
             ltp=197.2,
             prev_close=200.0,
             atp=198.0,
-            sma20=220.0,
+            sma20=210.0,
             trend_20_pct=-6.0,
             return_5d_pct=-4.0,
             prior_low=198.0,

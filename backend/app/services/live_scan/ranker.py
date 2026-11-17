@@ -30,6 +30,9 @@ _ENTRY_WINDOW = 0.15
 _RISK_MIN_ATR = 0.5
 _RISK_MAX_ATR = 1.5
 _MIN_CANDLE_ATR = 0.8
+# A prior candle wider than this already moved. Those breaks were the worst
+# bucket in the year replay (profit factor 0.53).
+_MAX_CANDLE_ATR = 1.8
 _RISK_MIN_SPREADS = 4.0
 # Kaufman efficiency below this is a range, not a trend, whatever the endpoints say.
 _MIN_EFFICIENCY = 0.2
@@ -37,6 +40,14 @@ _MIN_EFFICIENCY = 0.2
 # than the rest of the book, in both halves of the year. Indexes are exempt.
 _MIN_PRICE = 100.0
 _MIN_SMA_DISTANCE_PCT = 2.0
+# Names 8% or more through the 20-day average lost more than the names sitting
+# between 2% and 8%. The year replay's 8–15% band was −0.09R.
+_MAX_SMA_DISTANCE_PCT = 8.0
+# A second path for a base the 20-day efficiency test calls noise. The last 8
+# completed sessions are a coil when their high-low span is between 0.8 and 3
+# ATR. The side is the break of that box, and only inside the same 0.15R window.
+_COIL_MIN_ATR = 0.8
+_COIL_MAX_ATR = 3.0
 # Futures build-up uses the order-flow daily noise floor (0.5% price, 2% open
 # interest). The options-chain 5% band is a different instrument.
 _FUT_PRICE_FLOOR_PCT = 0.5
@@ -421,6 +432,21 @@ def _narrow_candle(prior_high: float | None, prior_low: float | None, atr: float
     return (prior_high - prior_low) < _MIN_CANDLE_ATR * atr
 
 
+def _wide_candle(prior_high: float | None, prior_low: float | None, atr: float | None) -> bool:
+    if atr is None or atr <= 0 or prior_high is None or prior_low is None:
+        return False
+    return (prior_high - prior_low) > _MAX_CANDLE_ATR * atr
+
+
+def _at_range_extreme(side: str, level: float | None, high_20: float | None, low_20: float | None) -> bool:
+    """True when the break level is already the high or low of the last 20 sessions."""
+    if level is None or level <= 0:
+        return False
+    if side == "buy":
+        return high_20 is not None and high_20 > 0 and level >= high_20
+    return low_20 is not None and low_20 > 0 and level <= low_20
+
+
 _FUTURES_LABEL = {
     "long_buildup": "futures long build-up",
     "short_buildup": "futures short build-up",
@@ -458,6 +484,126 @@ def _futures_label(quadrant: str | None, rollover: bool) -> str | None:
     return _FUTURES_LABEL.get(quadrant)
 
 
+def _coil_watch(reason: str) -> bool:
+    """The 20-day story stood aside, so a tight base is still allowed to speak."""
+    return reason.startswith((
+        "The 20-day path is a range",
+        "Daily trend and the last candle do not agree",
+        "The 5-day move is against this side",
+        "Price is still within 2% of the 20-day average",
+        "Yesterday's range is under 0.8 ATR",
+        "Yesterday's range is over 1.8 ATR",
+        "Yesterday's high is already the 20-day high",
+        "Yesterday's low is already the 20-day low",
+        "The 20-day trend is there, but yesterday's candle has no usable range",
+    ))
+
+
+def _coil_break(
+    quote: dict[str, Any],
+    *,
+    ltp: float,
+    atr: float | None,
+    spread: float | None,
+    quadrant: str | None,
+    rollover: bool,
+    participating: bool,
+    wide_spread: bool,
+    spread_pct: float | None,
+    above_vwap: bool,
+    below_vwap: bool,
+) -> dict[str, Any] | None:
+    """Buy or sell a break of the last 8 sessions when that span is a coil.
+
+    The side is the break itself. A print still inside the box is not a call.
+    The same 0.15R window, VWAP, spread, volume, and futures vetoes apply.
+    """
+    if atr is None or atr <= 0:
+        return None
+    high = _optional_float(quote.get("coil_high"))
+    low = _optional_float(quote.get("coil_low"))
+    if high is None or low is None or high <= low:
+        return None
+    width = high - low
+    if width < _COIL_MIN_ATR * atr or width > _COIL_MAX_ATR * atr:
+        return None
+    box = f"{low:.2f}–{high:.2f}"
+    if low < ltp < high:
+        return {
+            "stance": "stand_aside",
+            "phase": "none",
+            "reason": f"Price is inside an 8-day coil ({box}). A call needs a break of that range.",
+            "plan": None,
+            "setup": "coil",
+        }
+    if ltp >= high:
+        side = "buy"
+        plan = candle_plan("buy", high, low, atr=atr, spread=spread)
+        trigger = "high"
+    else:
+        side = "sell"
+        plan = candle_plan("sell", low, high, atr=atr, spread=spread)
+        trigger = "low"
+    if plan is None:
+        return None
+    level = high if side == "buy" else low
+    if _at_range_extreme(
+        side,
+        level,
+        _optional_float(quote.get("high_20")),
+        _optional_float(quote.get("low_20")),
+    ):
+        return None
+    crossed = (ltp - plan["entry"]) if side == "buy" else (plan["entry"] - ltp)
+    in_window = 0 <= crossed <= _ENTRY_WINDOW * plan["risk"]
+    futures_block = _futures_block(side, quadrant, rollover)
+    if not in_window:
+        return {
+            "stance": "stand_aside",
+            "phase": "late",
+            "reason": (
+                f"The break of the 8-day coil ({box}) already ran. "
+                "Do not chase ticks. Wait for a pullback to that range"
+            ),
+            "plan": plan,
+            "setup": "coil",
+        }
+    if futures_block:
+        fought = "short build-up" if side == "buy" else "long build-up"
+        return {
+            "stance": "stand_aside",
+            "phase": "enter",
+            "reason": f"The 8-day coil is broken, but futures show {fought}",
+            "plan": plan,
+            "setup": "coil",
+        }
+    if side == "buy" and not above_vwap:
+        reason = "The 8-day coil is broken higher, but price is still under VWAP"
+        stance = "wait"
+    elif side == "sell" and not below_vwap:
+        reason = "The 8-day coil is broken lower, but price is still above VWAP"
+        stance = "wait"
+    elif wide_spread and spread_pct is not None:
+        reason = f"The 8-day coil is broken, but the spread is {spread_pct:.2f}%. Wait for the book"
+        stance = "wait"
+    elif not participating:
+        reason = "The 8-day coil is broken, but volume is still light"
+        stance = "wait"
+    elif side == "buy":
+        reason = f"An 8-day coil ({box}) is breaking higher. Buy the break of {high:.2f}"
+        label = _futures_label(quadrant, rollover)
+        if label:
+            reason += f", {label}"
+        stance = "buy"
+    else:
+        reason = f"An 8-day coil ({box}) is breaking lower. Sell the break of {low:.2f}"
+        label = _futures_label(quadrant, rollover)
+        if label:
+            reason += f", {label}"
+        stance = "sell"
+    return {"stance": stance, "phase": "enter", "reason": reason, "plan": plan, "setup": "coil", "trigger": trigger}
+
+
 def _is_stale(tick_age: float | None, now: float | None) -> bool:
     """Without a clock (pure tests) nothing is stale. With one, no print or an old print is."""
     if now is None:
@@ -466,16 +612,17 @@ def _is_stale(tick_age: float | None, now: float | None) -> bool:
 
 
 def session_call(quote: dict[str, Any], progress: float, now: float | None = None) -> dict[str, Any]:
-    """Buy or sell only on a break of yesterday's completed candle, not on tick color.
+    """Buy or sell on a break of yesterday's candle, or of a tight 8-day coil.
 
-    The 20-day trend chooses the side, and only when the path is efficient,
-    the close is at least 2% through the 20-day average, and the 5-day move
-    agrees. Non-F&O names and prices under ₹100 stay aside. Entry is that
-    candle's high (buy) or low (sell), and only when the candle is at least
-    0.8 ATR wide. Stop is the other side, bounded by ATR. The day exit is two
-    times that risk. The swing exit is 2.5R. A buy into futures short build-up,
-    or a sell into long build-up, stands aside. Other futures readings are
-    labelled on the call. A print that is merely green or red stays on Wait.
+    The 20-day trend chooses the first side, and only when the path is
+    efficient, the close is at least 2% through the 20-day average, and the
+    5-day move agrees. When that story stands aside, a coil of the last 8
+    sessions can still call the break of its own high or low. Non-F&O names
+    and prices under ₹100 stay aside. Stop is the other side of the level,
+    bounded by ATR. The day exit is two times that risk. The swing exit is
+    2.5R. A buy into futures short build-up, or a sell into long build-up,
+    stands aside. Other futures readings are labelled on the call. A print
+    that is merely green or red stays on Wait.
     """
     ltp = float(quote.get("ltp") or 0)
     prev_close = float(quote.get("prev_close") or 0)
@@ -504,6 +651,7 @@ def session_call(quote: dict[str, Any], progress: float, now: float | None = Non
     stance = "stand_aside"
     phase = "none"
     reason = "Daily trend and the last candle do not agree"
+    setup: str | None = None
     plan: dict[str, Any] | None = None
     if _weekend(now):
         reason = "Weekend session. A one-hour day does not fit this break"
@@ -552,6 +700,21 @@ def session_call(quote: dict[str, Any], progress: float, now: float | None = Non
         elif _narrow_candle(prior_high, prior_low, atr):
             plan = None
             reason = "Yesterday's range is under 0.8 ATR. The stop would sit in noise"
+        elif _wide_candle(prior_high, prior_low, atr):
+            plan = None
+            reason = "Yesterday's range is over 1.8 ATR. The break is already extended"
+        elif _sma_distance_pct(prev_close, sma) >= _MAX_SMA_DISTANCE_PCT:
+            plan = None
+            reason = "Price is more than 8% through the 20-day average"
+        elif _at_range_extreme(
+            side,
+            prior_high if side == "buy" else prior_low,
+            _optional_float(quote.get("high_20")),
+            _optional_float(quote.get("low_20")),
+        ):
+            plan = None
+            edge = "high" if side == "buy" else "low"
+            reason = f"Yesterday's {edge} is already the 20-day {edge}"
         else:
             entry = plan["entry"]
             risk = plan["risk"]
@@ -604,6 +767,30 @@ def session_call(quote: dict[str, Any], progress: float, now: float | None = Non
                     f"The break of yesterday's {trigger} already ran. "
                     "Do not chase ticks. Wait for a pullback to that candle"
                 )
+        if stance in {"buy", "sell", "wait"}:
+            setup = "trend"
+        cheap = not is_index and prev_close < _MIN_PRICE
+        too_far = _sma_distance_pct(prev_close, sma) >= _MAX_SMA_DISTANCE_PCT
+        if stance == "stand_aside" and phase == "none" and not cheap and not too_far and _coil_watch(reason):
+            coil = _coil_break(
+                quote,
+                ltp=ltp,
+                atr=atr,
+                spread=spread,
+                quadrant=quadrant,
+                rollover=rollover,
+                participating=participating,
+                wide_spread=wide_spread,
+                spread_pct=spread_pct,
+                above_vwap=above_vwap,
+                below_vwap=below_vwap,
+            )
+            if coil is not None:
+                stance = coil["stance"]
+                phase = coil["phase"]
+                reason = coil["reason"]
+                plan = coil["plan"]
+                setup = coil["setup"]
 
     conviction = abs(change_pct or 0) * _vol_scale(atr_pct)
     if sess is not None and sess > 0:
@@ -641,6 +828,9 @@ def session_call(quote: dict[str, Any], progress: float, now: float | None = Non
         "swing_basis": plan["swing_basis"] if plan else None,
         "stop_basis": plan["basis"] if plan else None,
         "plan_phase": phase,
+        "setup": setup,
+        "coil_high": _round(_optional_float(quote.get("coil_high")), 2),
+        "coil_low": _round(_optional_float(quote.get("coil_low")), 2),
         "quadrant": quadrant,
         "oi_change_pct": _round(oi_change, 2),
         "rollover_week": rollover,

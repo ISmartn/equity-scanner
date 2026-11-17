@@ -327,7 +327,7 @@ export function LiveScanPage() {
             );
           })}
           <span className="text-[10px] text-slate-500">
-            Exit is the 2R target. Swing is 2.5R and can stay open past the close.
+            Exit is the 2R target. Swing is 2.5R and can stay open past the close. A tight 8-day coil can also call the break when the 20-day trend stands aside.
           </span>
         </div>
       ) : null}
@@ -628,7 +628,7 @@ function CallTable({ rows, onOpen }: { rows: LiveCallRow[]; onOpen: (symbol: str
         {rows.length === 0 ? (
           <tr>
             <td colSpan={12} className="px-2 py-6 text-center text-slate-500">
-              No session calls yet. F&O only, at least 2% from the 20-day average, a 5-day move the same way, and a break of a prior candle at least 0.8 ATR wide. Short build-up blocks a buy, and long build-up blocks a sell.
+              No session calls yet. F&O only, between 2% and 8% from the 20-day average, a 5-day move the same way, and a prior candle between 0.8 and 1.8 ATR that is not already the 20-day extreme. Short build-up blocks a buy, and long build-up blocks a sell.
             </td>
           </tr>
         ) : (

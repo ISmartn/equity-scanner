@@ -29,6 +29,8 @@ class SymbolContext:
     sma20: float | None = None
     high_20: float | None = None
     low_20: float | None = None
+    coil_high: float | None = None
+    coil_low: float | None = None
     trend_20_pct: float | None = None
     return_5d_pct: float | None = None
     history_bars: int = 0
@@ -127,6 +129,8 @@ def load_context(
             sma20=_float_or_none(candle.get("sma20")),
             high_20=_float_or_none(candle.get("high_20")),
             low_20=_float_or_none(candle.get("low_20")),
+            coil_high=_float_or_none(candle.get("coil_high")),
+            coil_low=_float_or_none(candle.get("coil_low")),
             trend_20_pct=_float_or_none(candle.get("trend_20_pct")),
             return_5d_pct=_float_or_none(candle.get("return_5d_pct")),
             history_bars=int(candle.get("history_bars") or 0),

@@ -571,6 +571,8 @@ class LiveBook:
                     "efficiency_20": context.efficiency_20,
                     "high_20": context.high_20,
                     "low_20": context.low_20,
+                    "coil_high": context.coil_high,
+                    "coil_low": context.coil_low,
                     "trend_20_pct": context.trend_20_pct,
                     "return_5d_pct": context.return_5d_pct,
                     "history_bars": context.history_bars,

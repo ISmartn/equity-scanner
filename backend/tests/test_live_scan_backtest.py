@@ -33,8 +33,10 @@ def _uptrend(count: int = 20) -> list[tuple[str, float, float, float, float]]:
     """A clean rising series: close above its average, positive 20-day trend, efficient path."""
     bars = []
     for index, day in enumerate(_dates(count)):
-        close = 100.0 + index
-        bars.append((day, close - 0.5, close + 1.0, close - 1.0, close))
+        close = 100.0 + index * 0.4
+        # An early spike keeps yesterday off the 20-day high without widening the recent ATR.
+        high = close + (12.0 if index == 2 else 1.0)
+        bars.append((day, close - 0.4, high, close - 1.0, close))
     return bars
 
 
@@ -90,17 +92,17 @@ def test_trend_side_is_the_session_call_rule() -> None:
         "symbol": "X",
         "ltp": 105.0,
         "prev_close": 104.0,
-        "sma20": 90.0,
+        "sma20": 100.0,
         "trend_20_pct": 6.0,
         "efficiency_20": 0.5,
         "return_5d_pct": 4.0,
         "prior_high": 106.0,
         "prior_low": 100.0,
-        "atr_pct": 3.0,
+        "atr_pct": 4.0,
         "history_bars": 20,
     }
     call = session_call(quote, 0.5)
-    plan = candle_plan("buy", 106.0, 100.0, atr=0.03 * 104.0)
+    plan = candle_plan("buy", 106.0, 100.0, atr=0.04 * 104.0)
     assert call["entry"] == round(plan["entry"], 2)
     assert call["stop"] == round(plan["stop"], 2)
 
@@ -363,6 +365,10 @@ def test_run_backtest_reads_the_store(tmp_path) -> None:
     store = TimelineStore(tmp_path / "bt.db")
     history = _uptrend(40)
     # Index 30 is a Saturday. The replay skips weekend sessions, so use the Friday before it.
+    # A high just outside the ATR window keeps that Friday off the 20-day extreme.
+    prior = list(history[14])
+    prior[2] = history[28][2] + 2.0
+    history[14] = tuple(prior)
     plan_bars = history[:29]
     plan = _plan_for(plan_bars)
     day = history[29][0]

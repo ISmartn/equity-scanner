@@ -3570,6 +3570,7 @@ def _write_live_call_journal(conn: sqlite3.Connection, rows: list[dict[str, Any]
 
 
 _ATR_PERIOD = 14
+_COIL_BARS = 8
 
 
 def _aligned_bars(rows: list[Any]) -> list[tuple[float, float, float]]:
@@ -3605,6 +3606,16 @@ def _atr_pct(bars: list[tuple[float, float, float]], last_close: float | None) -
     return sum(ranges) / len(ranges) / last_close * 100.0
 
 
+def _coil_edges(bars: list[tuple[float, float, float]] | None) -> tuple[float | None, float | None]:
+    """High and low of the last 8 completed sessions. Bars are newest first."""
+    if not bars or len(bars) < _COIL_BARS:
+        return None, None
+    window = bars[:_COIL_BARS]
+    if any(high <= 0 or low <= 0 or high < low for high, low, _close in window):
+        return None, None
+    return max(high for high, _low, _close in window), min(low for _high, low, _close in window)
+
+
 def _efficiency(closes: list[float]) -> float | None:
     """Kaufman efficiency ratio: net move over path length. Near 0 is chop, near 1 is trend."""
     if len(closes) < 3:
@@ -3635,6 +3646,7 @@ def _daily_history_stats(
     the next twenty sessions.
     """
     last_close = float(prior_close or 0) or None
+    coil_high, coil_low = _coil_edges(bars)
     oldest_close = closes[-1] if closes else None
     close_5_back = closes[5] if len(closes) >= 6 else None
     trend_20 = None
@@ -3654,6 +3666,8 @@ def _daily_history_stats(
         "sma20": (sum(closes) / len(closes)) if closes else None,
         "high_20": max(highs) if highs else None,
         "low_20": min(lows) if lows else None,
+        "coil_high": coil_high,
+        "coil_low": coil_low,
         "trend_20_pct": trend_20,
         "return_5d_pct": return_5d,
         "history_bars": bar_count,
