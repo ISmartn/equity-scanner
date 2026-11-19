@@ -129,12 +129,6 @@ def compute_notify_tier(
 ) -> tuple[str | None, Literal["full", "early"] | None]:
     if alert in ("strong", "mild") and baseline_mode == "full":
         return alert, "full"
-    if (
-        baseline_mode == "partial"
-        and rapid_put_surge
-        and volume_confirmed
-    ):
-        return "mild", "early"
     return None, None
 
 

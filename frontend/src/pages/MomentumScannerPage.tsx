@@ -1,3 +1,4 @@
+import { ScannerReadingNote } from "@/components/ScannerReadingNote";
 import { TimelineDatePicker } from "@/components/TimelineDatePicker";
 import { TimelineStockChart } from "@/components/TimelineStockChart";
 import {
@@ -1187,6 +1188,8 @@ export function MomentumScannerPage() {
           </span>
         )}
       </PageToolbar>
+
+      <ScannerReadingNote tradeDate={tradeDate} />
 
       {/* Below 2xl the fundamentals panel sits under the chart so the table keeps all its columns. */}
       <div

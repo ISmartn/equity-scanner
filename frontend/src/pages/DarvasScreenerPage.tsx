@@ -6,6 +6,7 @@ import ToggleButton from "@mui/material/ToggleButton";
 import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
 import { Bookmark, Box, Search, Star, TrendingUp } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { ScannerReadingNote } from "@/components/ScannerReadingNote";
 import { TimelineDatePicker } from "@/components/TimelineDatePicker";
 import { TimelineStockChart } from "@/components/TimelineStockChart";
 import { AppButton } from "@/components/mui";
@@ -93,6 +94,24 @@ function formatPct(value: number | null): string {
 function formatPrice(value: number | null): string {
   if (value == null) return "—";
   return `₹${value.toLocaleString("en-IN", { maximumFractionDigits: 2 })}`;
+}
+
+/** Breakout in a Stage-2 trend, contracting, and not sitting in a box. */
+function isPreferredDarvas(row: ScannerPatternSignal): boolean {
+  return (
+    row.triggered_today
+    && row.macro_pass
+    && detailBoolean(row, "volatility_contraction")
+    && !detailBoolean(row, "darvas_box_like")
+  );
+}
+
+function darvasRank(row: ScannerPatternSignal): number {
+  if (isPreferredDarvas(row)) return 0;
+  if (row.triggered_today && row.macro_pass) return 1;
+  if (row.triggered_today) return 2;
+  if (row.macro_pass && detailBoolean(row, "volatility_contraction") && !detailBoolean(row, "darvas_box_like")) return 3;
+  return 4;
 }
 
 function StatusPill({ row }: { row: ScannerPatternSignal }) {
@@ -225,7 +244,7 @@ export function DarvasScreenerPage() {
       if (boxOnly && !detailBoolean(row, "darvas_box_like")) return false;
       if (dryVolumeOnly && !detailBoolean(row, "volume_dry")) return false;
       return true;
-    });
+    }).sort((a, b) => darvasRank(a) - darvasRank(b) || b.score - a.score);
   }, [rows, search, status, boxOnly, dryVolumeOnly]);
 
   const boxes = useMemo(() => computeDarvasBoxes(history), [history]);
@@ -289,8 +308,8 @@ export function DarvasScreenerPage() {
               <ToggleButton value="trigger">Breakouts</ToggleButton>
             </ToggleButtonGroup>
             <ToolbarDivider />
-            <FilterToggle label="Stage 2" selected={macroOnly} onChange={setMacroOnly} title="Minervini Stage-2 trend template" />
-            <FilterToggle label="Box-like" selected={boxOnly} onChange={setBoxOnly} />
+            <FilterToggle label="Stage 2" selected={macroOnly} onChange={setMacroOnly} title="Breakouts in a Stage-2 trend are listed first" />
+            <FilterToggle label="Box-like" selected={boxOnly} onChange={setBoxOnly} title="Optional. A contracting range that is not boxed is listed ahead of a box-like range" />
             <FilterToggle label="Dry volume" selected={dryVolumeOnly} onChange={setDryVolumeOnly} />
             <ToolbarDivider />
             <TextField
@@ -350,6 +369,8 @@ export function DarvasScreenerPage() {
           Reload
         </AppButton>
       </PageToolbar>
+
+      <ScannerReadingNote tradeDate={tradeDate} />
 
       <div className="grid min-h-0 flex-1 grid-cols-1 gap-1 lg:grid-cols-[minmax(36rem,1.15fr)_minmax(0,1.85fr)]">
         <section className="panel flex min-h-0 flex-col overflow-hidden">
@@ -411,6 +432,7 @@ export function DarvasScreenerPage() {
                       <td className="text-right text-slate-200">{formatPct(detailNumber(row, "range_10d_pct"))}</td>
                       <td>
                         <div className="flex flex-wrap gap-1">
+                          {isPreferredDarvas(row) && <span className="rounded bg-emerald-500/15 px-1 text-[10px] leading-[14px] text-emerald-300" title="Breakout, Stage 2, contracting, not boxed">Preferred</span>}
                           {detailBoolean(row, "darvas_box_like") && <span className="rounded bg-sky-500/15 px-1 text-[10px] leading-[14px] text-sky-300">Box</span>}
                           {detailBoolean(row, "volatility_contraction") && <span className="rounded bg-violet-500/15 px-1 text-[10px] leading-[14px] text-violet-300">VCP</span>}
                           {detailBoolean(row, "volume_dry") && <span className="rounded bg-amber-500/15 px-1 text-[10px] leading-[14px] text-amber-300">Dry</span>}

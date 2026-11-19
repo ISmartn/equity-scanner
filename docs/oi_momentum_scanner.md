@@ -29,23 +29,30 @@ Instead of a single ATM strike (which flickers when spot oscillates ±25 pts), w
 Between poll `t` and baseline `t − Δt`:
 
 ```
-Δput_OI_zone  = Σ max(0, put_oi_now − put_oi_prev)   over zone strikes
-Δcall_OI_zone = Σ min(0, call_oi_now − call_oi_prev)
-Δput_vol_zone = Σ max(0, put_vol_now − put_vol_prev)
+Δput_added    = Σ max(0, put_oi_now − put_oi_prev)    over zone strikes
+Δput_unwound  = Σ min(0, put_oi_now − put_oi_prev)
+Δcall_added   = Σ max(0, call_oi_now − call_oi_prev)
+Δcall_unwound = Σ min(0, call_oi_now − call_oi_prev)
 ```
+
+A call needs both open interest and price to agree, on a **full** window of at least 60 seconds. Inside that floor the reading stays neutral and does not notify.
 
 ### Alert levels
 
-| Level | Conditions |
-|-------|------------|
-| **warming** | First polls — building baseline (need ~1× window of history) |
-| **neutral** | No rapid put surge in window |
-| **mild** | Put OI surge (>2% of zone put OI) + volume gate |
-| **strong** | Mild gates + call unwind + PCR momentum ≥ 2 + volume confirmed |
+| Level | Side | Conditions |
+|-------|------|------------|
+| **warming** | none | Window still filling, or the chosen window is under 1 minute |
+| **neutral** | none | Neither side cleared the floor, volume did not confirm, or both sides added together |
+| **mild** | support | Put OI added (>2% of zone put OI), put volume in band, spot not falling through, not strike rotation |
+| **strong** | support | Mild support plus call unwind and PCR momentum ≥ 2 |
+| **mild** | resistance | Call OI added (>2% of zone call OI), call volume in band, spot not ripping up |
+| **strong** | resistance | Mild resistance plus put unwind |
+
+Strike rotation (ATM put build with the lower strike unwinding) suppresses support only.
 
 ### Volume gate (illiquidity filter)
 
-Put OI Δ alone can be a block-deal mirage. **Strong** alerts require zone put **volume** Δ ≥ 500 contracts in the window (tunable in `engine.py`).
+Open interest alone can be a block-deal mirage. A side alerts only when its OI/volume ratio sits in the existing band. A surge without that ratio stays neutral.
 
 ## API
 
@@ -107,8 +114,8 @@ Upstox **Market Data Feed V3** (`MarketDataStreamerV3`) pushes protobuf ticks wi
 |-------|-----------|---------|
 | **Bootstrap** | One REST `get_put_call_option_chain` | Map zone strikes → `instrument_key` |
 | **Stream** | WS `ltpc` on index + `full` on 4 zone options | Live spot + OI/volume ticks |
-| **Sample** | ~5s (3s in 30s scalp) | Finer history for short live windows |
-| **Alerts** | Same engine, scaled gates | **30s scalp** (live only) through **5m** |
+| **Sample** | ~5s | History for the rolling window |
+| **Alerts** | Full window only, at least 1 minute | **1m** through **5m**. Shorter windows stay on screen and do not notify |
 
 REST-only mode keeps **3m / 5m** windows (60s poll cadence makes shorter windows unreliable). Live mode can use **1m / 2m** because OI updates continuously over WS — not once per REST poll.
 
@@ -123,7 +130,7 @@ REST-only mode keeps **3m / 5m** windows (60s poll cadence makes shorter windows
 
 | UI: **Start live OI** on `/oi-momentum` — evaluate auto-switches to WebSocket; UI refreshes every **~10s** (no REST chain fetch). Window dropdown adds **1m / 2m** when live is on.
 
-**System alerts:** toggle **Alerts on** — sound, floating toast, and OS browser notification when the backend emits a **new** `alert_event` (mild/strong full window, or early partial with surge + volume). Each event is logged to `backend/data/oi_momentum_alerts.jsonl` with spot trail, price delta, and zone OI. Use **Export alerts** or `GET /api/oi-momentum/alerts`.
+**System alerts:** toggle **Alerts on** — sound, floating toast, and OS browser notification when the backend emits a **new** `alert_event` (support or resistance, mild or strong, full window only). Each event is logged to `backend/data/oi_momentum_alerts.jsonl` with spot trail, price delta, and zone OI. Use **Export alerts** or `GET /api/oi-momentum/alerts`.
 
 ### Limits & notes
 
@@ -133,6 +140,12 @@ REST-only mode keeps **3m / 5m** windows (60s poll cadence makes shorter windows
 - `full_d30` available for depth; OI momentum uses `full` (includes OI + volume).
 
 ## Changelog
+
+### Two-sided reading (2026-11-18)
+
+- Support and resistance are both read on the same zone. A call waits for a full window of at least 1 minute.
+- Put or call open interest without a confirming volume ratio stays neutral. Partial windows do not notify.
+- The 30s scalp option is off the live window list.
 
 ### Phase 1.4 — Alert quality refinements (2026-06-30)
 

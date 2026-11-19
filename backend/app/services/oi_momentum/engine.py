@@ -8,6 +8,9 @@ from typing import Any, Literal
 from .snapshot_store import ChainSnapshot, StrikeSnapshot
 
 AlertLevel = Literal["strong", "mild", "neutral", "warming"]
+ReadingSide = Literal["support", "resistance", "none"]
+# A call needs a full window. Sub-minute live windows stay on screen and do not notify.
+MIN_ALERT_WINDOW_SEC = 60.0
 
 DEFAULT_STRIKE_STEP: dict[str, int] = {
     "NIFTY": 50,
@@ -60,6 +63,18 @@ class ZoneMetrics:
     volume_confirmed: bool
     pcr_momentum: float | None
     oi_volume_ratio: float | None
+    zone_call_addition: int = 0
+    zone_put_unwinding: int = 0
+    zone_call_volume_delta: int = 0
+    total_zone_call_oi: int = 0
+    rapid_call_surge: bool = False
+    put_unwind: bool = False
+    call_volume_confirmed: bool = False
+    call_oi_volume_ratio: float | None = None
+
+
+def _price_band_pts(spot: float, window_sec: float) -> float:
+    return max(4.0, spot * 0.00015 * max(window_sec / 60.0, 0.5))
 
 
 def price_support_aligned(
@@ -67,11 +82,21 @@ def price_support_aligned(
     spot: float,
     window_sec: float,
 ) -> bool:
-    """Bullish OI support should not fire on sharp spot drops in the window."""
+    """Put support agrees when spot is flat or up. A sharp drop is the other reading."""
     if spot_delta is None:
         return True
-    max_drop_pts = max(4.0, spot * 0.00015 * max(window_sec / 60.0, 0.5))
-    return spot_delta >= -max_drop_pts
+    return spot_delta >= -_price_band_pts(spot, window_sec)
+
+
+def price_resistance_aligned(
+    spot_delta: float | None,
+    spot: float,
+    window_sec: float,
+) -> bool:
+    """Call resistance agrees when spot is flat or down. A sharp rise fights that reading."""
+    if spot_delta is None:
+        return True
+    return spot_delta <= _price_band_pts(spot, window_sec)
 
 
 def detect_strike_rotation(strike_details: list[dict[str, Any]]) -> bool:
@@ -123,6 +148,7 @@ class MomentumResult:
     signal_quality: dict[str, Any]
     metrics: ZoneMetrics
     strike_details: list[dict[str, Any]]
+    side: ReadingSide = "none"
 
     def to_dict(self) -> dict[str, Any]:
         out = asdict(self)
@@ -246,6 +272,10 @@ def _zone_metrics(
     zone_call_unwinding = 0
     zone_put_volume_delta = 0
     total_zone_put_oi = 0
+    zone_call_addition = 0
+    zone_put_unwinding = 0
+    zone_call_volume_delta = 0
+    total_zone_call_oi = 0
 
     for strike in strikes:
         curr = current.row_by_strike(strike)
@@ -255,19 +285,34 @@ def _zone_metrics(
         put_delta = curr.put_oi - prev.put_oi
         call_delta = curr.call_oi - prev.call_oi
         put_vol_delta = curr.put_volume - prev.put_volume
+        call_vol_delta = curr.call_volume - prev.call_volume
         if put_delta > 0:
             zone_put_addition += put_delta
+        if put_delta < 0:
+            zone_put_unwinding += put_delta
         if call_delta < 0:
             zone_call_unwinding += call_delta
+        if call_delta > 0:
+            zone_call_addition += call_delta
         zone_put_volume_delta += max(put_vol_delta, 0)
+        zone_call_volume_delta += max(call_vol_delta, 0)
         total_zone_put_oi += curr.put_oi
+        total_zone_call_oi += curr.call_oi
 
     base_oi = max(total_zone_put_oi, MIN_ZONE_PUT_OI)
+    call_base = max(total_zone_call_oi, MIN_ZONE_PUT_OI)
     rapid_put_surge = zone_put_addition > base_oi * put_surge_pct
+    rapid_call_surge = zone_call_addition > call_base * put_surge_pct
     call_unwind = zone_call_unwinding < 0
+    put_unwind = zone_put_unwinding < 0
     volume_confirmed, oi_volume_ratio = volume_confirmed_for_build(
         zone_put_addition,
         zone_put_volume_delta,
+        min_put_volume_delta,
+    )
+    call_volume_confirmed, call_oi_volume_ratio = volume_confirmed_for_build(
+        zone_call_addition,
+        zone_call_volume_delta,
         min_put_volume_delta,
     )
 
@@ -289,6 +334,14 @@ def _zone_metrics(
         volume_confirmed=volume_confirmed,
         pcr_momentum=pcr_momentum,
         oi_volume_ratio=oi_volume_ratio,
+        zone_call_addition=zone_call_addition,
+        zone_put_unwinding=zone_put_unwinding,
+        zone_call_volume_delta=zone_call_volume_delta,
+        total_zone_call_oi=total_zone_call_oi,
+        rapid_call_surge=rapid_call_surge,
+        put_unwind=put_unwind,
+        call_volume_confirmed=call_volume_confirmed,
+        call_oi_volume_ratio=call_oi_volume_ratio,
     )
 
 
@@ -375,12 +428,14 @@ def evaluate_support_momentum(
             },
             metrics=metrics,
             strike_details=_strike_details(current, None, metrics.strikes),
+            side="none",
         )
 
     strike_details = _strike_details(current, previous, zone)
     spot_delta = current.spot - previous.spot
     strike_rotation = detect_strike_rotation(strike_details)
     price_aligned = price_support_aligned(spot_delta, current.spot, target)
+    resistance_price_aligned = price_resistance_aligned(spot_delta, current.spot, target)
 
     metrics = _zone_metrics(
         current,
@@ -397,75 +452,99 @@ def evaluate_support_momentum(
     remaining_sec = max(0.0, target - (baseline_age or 0.0))
     polls_hint = max(1, int(remaining_sec // 10) + 1)
     suppress_reason: str | None = None
+    side: ReadingSide = "none"
+    atm = int(current.smoothed_atm)
+
+    support_ready = metrics.rapid_put_surge and metrics.volume_confirmed and not strike_rotation and price_aligned
+    resistance_ready = (
+        metrics.rapid_call_surge and metrics.call_volume_confirmed and resistance_price_aligned
+    )
 
     if baseline_mode == "partial":
-        if metrics.rapid_put_surge and metrics.volume_confirmed:
-            alert: AlertLevel = "mild"
-            message = (
-                f"Early signal (partial {window_label} of {target_label}): puts building at "
-                f"{int(current.smoothed_atm)} zone (+{metrics.zone_put_addition:,} put OI vs last poll, "
-                f"volume confirmed). Full-window confirmation pending."
-            )
-        else:
-            alert = "warming"
-            message = (
-                f"Partial window ({window_label} of {target_label} target) — "
-                f"strike deltas vs last poll shown below; full-window alerts after "
-                f"~{polls_hint} more poll(s)."
-            )
-    elif (
-        metrics.rapid_put_surge
-        and metrics.call_unwind
-        and pcr >= PCR_MOMENTUM_STRONG
-        and metrics.volume_confirmed
-    ):
+        alert: AlertLevel = "warming"
+        message = (
+            f"Partial window ({window_label} of {target_label} target). "
+            f"A call waits for the full window, about {polls_hint} more poll(s)."
+        )
+    elif target < MIN_ALERT_WINDOW_SEC:
+        alert = "warming"
+        message = (
+            f"This {target_label} window is for watching. A call needs a full window of at least 1 minute."
+        )
+    elif support_ready and resistance_ready:
+        alert = "neutral"
+        message = (
+            f"Both puts and calls are adding open interest at the {atm} zone. No single reading."
+        )
+    elif support_ready and metrics.call_unwind and pcr >= PCR_MOMENTUM_STRONG:
         alert = "strong"
+        side = "support"
         message = (
-            f"Strong bullish momentum: support building at {int(current.smoothed_atm)} zone "
-            f"(+{metrics.zone_put_addition:,} put OI, {metrics.zone_call_unwinding:,} call OI "
-            f"in {window_label} window, volume confirmed)."
+            f"Support at {atm}: puts added {metrics.zone_put_addition:,} and calls unwound "
+            f"{metrics.zone_call_unwinding:,} in {window_label}, with price and volume agreeing."
         )
-    elif metrics.rapid_put_surge and metrics.volume_confirmed:
+    elif support_ready:
         alert = "mild"
+        side = "support"
         message = (
-            f"Mild bullish momentum: puts building at {int(current.smoothed_atm)} zone "
-            f"(+{metrics.zone_put_addition:,} put OI in window; "
-            f"{'calls unwinding' if metrics.call_unwind else 'calls not capitulating yet'})."
+            f"Puts building at {atm} (+{metrics.zone_put_addition:,} in {window_label}, volume confirmed). "
+            f"{'Calls are unwinding.' if metrics.call_unwind else 'Calls are not leaving yet.'}"
         )
-    elif metrics.rapid_put_surge:
-        alert = "mild"
-        ratio_txt = f"{metrics.oi_volume_ratio:.4f}" if metrics.oi_volume_ratio is not None else "n/a"
+    elif metrics.rapid_put_surge and metrics.volume_confirmed and strike_rotation:
+        alert = "warming"
+        suppress_reason = "strike_rotation"
         message = (
-            f"Put OI surge at {int(current.smoothed_atm)} zone but OI/volume ratio gate not met "
-            f"(+{metrics.zone_put_addition:,} OI, ratio {ratio_txt})."
+            f"Put open interest is rotating across strikes, not fresh support "
+            f"(+{metrics.zone_put_addition:,} at the higher strike)."
+        )
+    elif metrics.rapid_put_surge and metrics.volume_confirmed and not price_aligned:
+        alert = "warming"
+        suppress_reason = "price_divergence"
+        message = (
+            f"Puts built at {atm} but spot moved {spot_delta:+.1f} pts against that support."
+        )
+    elif resistance_ready and metrics.put_unwind:
+        alert = "strong"
+        side = "resistance"
+        message = (
+            f"Resistance at {atm}: calls added {metrics.zone_call_addition:,} and puts unwound "
+            f"{metrics.zone_put_unwinding:,} in {window_label}, with price and volume agreeing."
+        )
+    elif resistance_ready:
+        alert = "mild"
+        side = "resistance"
+        message = (
+            f"Calls building at {atm} (+{metrics.zone_call_addition:,} in {window_label}, volume confirmed). "
+            f"{'Puts are leaving.' if metrics.put_unwind else 'Puts are not leaving yet.'}"
+        )
+    elif metrics.rapid_call_surge and metrics.call_volume_confirmed and not resistance_price_aligned:
+        alert = "warming"
+        suppress_reason = "price_divergence"
+        message = (
+            f"Calls built at {atm} but spot rose {spot_delta:+.1f} pts through that resistance."
+        )
+    elif metrics.rapid_put_surge or metrics.rapid_call_surge:
+        alert = "neutral"
+        message = (
+            f"Open interest moved at {atm}, but the volume ratio did not confirm it."
         )
     else:
         alert = "neutral"
-        message = "Neutral — no rapid ATM support-zone put build-up in the rolling window."
+        message = "Neutral. Neither side of the zone cleared the open-interest floor in this window."
 
-    if alert in ("strong", "mild"):
-        if strike_rotation:
-            suppress_reason = "strike_rotation"
-            alert = "warming"
-            message = (
-                f"Put OI rotating across strikes (ATM build + lower-strike unwind) — "
-                f"not treated as fresh support (+{metrics.zone_put_addition:,} net zone OI)."
-            )
-        elif not price_aligned:
-            suppress_reason = "price_divergence"
-            alert = "warming"
-            message = (
-                f"Put build at {int(current.smoothed_atm)} zone but spot fell {spot_delta:+.1f} pts "
-                f"in window — waiting for price alignment."
-            )
-
+    notify = (
+        alert in ("strong", "mild")
+        and baseline_mode == "full"
+        and target >= MIN_ALERT_WINDOW_SEC
+    )
     signal_quality = {
         "strike_rotation": strike_rotation,
-        "price_aligned": price_aligned,
+        "price_aligned": price_aligned if side != "resistance" else resistance_price_aligned,
         "spot_delta_pts": round(spot_delta, 2),
         "oi_volume_ratio": metrics.oi_volume_ratio,
-        "notify_eligible": alert in ("strong", "mild"),
+        "notify_eligible": notify,
         "suppress_reason": suppress_reason,
+        "side": side,
     }
 
     return MomentumResult(
@@ -485,4 +564,5 @@ def evaluate_support_momentum(
         signal_quality=signal_quality,
         metrics=metrics,
         strike_details=strike_details,
+        side=side,
     )

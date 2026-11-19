@@ -21,8 +21,8 @@ def test_compute_notify_tier_early_partial():
         rapid_put_surge=True,
         volume_confirmed=True,
     )
-    assert alert == "mild"
-    assert phase == "early"
+    assert alert is None
+    assert phase is None
 
 
 def test_compute_notify_tier_neutral():

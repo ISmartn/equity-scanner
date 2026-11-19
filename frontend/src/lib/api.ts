@@ -799,6 +799,11 @@ export interface OiMomentumMetrics {
   volume_confirmed: boolean;
   pcr_momentum: number | null;
   oi_volume_ratio?: number | null;
+  zone_call_addition?: number;
+  zone_put_unwinding?: number;
+  rapid_call_surge?: boolean;
+  put_unwind?: boolean;
+  call_volume_confirmed?: boolean;
 }
 
 export interface OiMomentumSignalQuality {
@@ -838,6 +843,7 @@ export interface OiMomentumEvaluation {
   signal_quality?: OiMomentumSignalQuality;
   metrics: OiMomentumMetrics;
   strike_details: OiMomentumStrikeDetail[];
+  side?: "support" | "resistance" | "none";
 }
 
 export interface OiMomentumAlertRecord {

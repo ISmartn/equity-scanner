@@ -396,3 +396,21 @@
 # ingest started 2026-11-17T04:53:49.762168+00:00 since_last=True concurrency=2 profiles=1600
 
 # ingest started 2026-11-17T05:18:57.458000+00:00 since_last=True concurrency=2 profiles=749
+
+# ingest started 2026-11-17T15:40:35.288557+00:00 since_last=True concurrency=3 profiles=2627
+2026-11-17T15:41:50.426439+00:00	error	BNAGROCHEM	Upstox API error [400]: {"status":"error","errors":[{"errorCode":"UDAPI100011","message":"Invalid Instrument key","propertyPath":null,"invalidValue":null,"error_code":"UDAPI100011","property_path":null,"invalid_value":null}]}
+2026-11-17T15:41:50.440158+00:00	skip	BNAGROCHEM	marked ingest_skip (upstox_invalid_instrument)
+2026-11-17T15:46:04.227959+00:00	error	SHIVAM-RE1	Upstox API error [400]: {"status":"error","errors":[{"errorCode":"UDAPI100011","message":"Invalid Instrument key","propertyPath":null,"invalidValue":null,"error_code":"UDAPI100011","property_path":null,"invalid_value":null}]}
+2026-11-17T15:46:04.250748+00:00	skip	SHIVAM-RE1	marked ingest_skip (upstox_invalid_instrument)
+
+# ingest started 2026-11-18T04:28:43.275866+00:00 since_last=True concurrency=2 profiles=1600
+
+# ingest started 2026-11-18T06:45:35.449150+00:00 since_last=True concurrency=2 profiles=80
+
+# ingest started 2026-11-18T15:48:09.151793+00:00 since_last=True concurrency=3 profiles=2625
+2026-11-18T15:49:55.262273+00:00	error	DRAGARWQ	Upstox API error [400]: {"status":"error","errors":[{"errorCode":"UDAPI100011","message":"Invalid Instrument key","propertyPath":null,"invalidValue":null,"error_code":"UDAPI100011","property_path":null,"invalid_value":null}]}
+2026-11-18T15:49:55.278845+00:00	skip	DRAGARWQ	marked ingest_skip (upstox_invalid_instrument)
+2026-11-18T15:50:05.389270+00:00	error	ELPROINTL	Upstox API error [400]: {"status":"error","errors":[{"errorCode":"UDAPI100011","message":"Invalid Instrument key","propertyPath":null,"invalidValue":null,"error_code":"UDAPI100011","property_path":null,"invalid_value":null}]}
+2026-11-18T15:50:05.404410+00:00	skip	ELPROINTL	marked ingest_skip (upstox_invalid_instrument)
+
+# ingest started 2026-11-19T04:28:51.829496+00:00 since_last=True concurrency=2 profiles=1600

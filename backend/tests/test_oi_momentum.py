@@ -128,10 +128,9 @@ def test_partial_early_signal_when_surge_and_volume():
         target_window_sec=180.0,
         baseline_mode="partial",
     )
-    assert result.alert == "mild"
-    assert result.metrics.volume_confirmed is True
-    assert result.metrics.rapid_put_surge is True
-    assert result.signal_quality["notify_eligible"] is True
+    assert result.alert == "warming"
+    assert result.signal_quality["notify_eligible"] is False
+    assert result.side == "none"
 
 
 def test_strike_rotation_suppresses_notify():
@@ -142,7 +141,7 @@ def test_strike_rotation_suppresses_notify():
         if row.strike_price == 22000.0:
             prev_rows.append(StrikeSnapshot(row.strike_price, row.call_oi, row.put_oi - 30_000, row.call_volume, row.put_volume - 600_000))
         elif row.strike_price == 21950.0:
-            prev_rows.append(StrikeSnapshot(row.strike_price, row.call_oi, row.put_oi + 5_000, row.call_volume, row.put_volume - 200_000))
+            prev_rows.append(StrikeSnapshot(row.strike_price, row.call_oi, row.put_oi + 8_000, row.call_volume, row.put_volume - 200_000))
         else:
             prev_rows.append(row)
     previous = ChainSnapshot(now - 180, base.spot, base.smoothed_atm, base.strike_step, tuple(prev_rows))
@@ -151,6 +150,59 @@ def test_strike_rotation_suppresses_notify():
     assert result.signal_quality["strike_rotation"] is True
     assert result.signal_quality["notify_eligible"] is False
     assert result.alert == "warming"
+
+
+def test_call_build_with_put_unwind_is_resistance():
+    base = parse_option_chain_rows(_sample_chain_payload(), symbol="NIFTY")
+    now = time.time()
+    prev_rows = []
+    for row in base.rows:
+        if row.strike_price == 22000.0:
+            prev_rows.append(
+                StrikeSnapshot(
+                    row.strike_price,
+                    row.call_oi - 30_000,
+                    row.put_oi + 8_000,
+                    row.call_volume - 400_000,
+                    row.put_volume,
+                )
+            )
+        elif row.strike_price == 21950.0:
+            prev_rows.append(
+                StrikeSnapshot(
+                    row.strike_price,
+                    row.call_oi - 8_000,
+                    row.put_oi,
+                    row.call_volume - 80_000,
+                    row.put_volume,
+                )
+            )
+        else:
+            prev_rows.append(row)
+    previous = ChainSnapshot(now - 180, base.spot, base.smoothed_atm, base.strike_step, tuple(prev_rows))
+    current = ChainSnapshot(now, base.spot - 4, base.smoothed_atm, base.strike_step, base.rows)
+    result = evaluate_support_momentum(current, previous, window_sec=180.0, baseline_mode="full")
+    assert result.side == "resistance"
+    assert result.alert == "strong"
+    assert result.signal_quality["notify_eligible"] is True
+
+
+def test_put_surge_without_volume_stays_neutral():
+    base = parse_option_chain_rows(_sample_chain_payload(), symbol="NIFTY")
+    now = time.time()
+    prev_rows = []
+    for row in base.rows:
+        if row.strike_price == 22000.0:
+            prev_rows.append(
+                StrikeSnapshot(row.strike_price, row.call_oi, row.put_oi - 40_000, row.call_volume, row.put_volume)
+            )
+        else:
+            prev_rows.append(row)
+    previous = ChainSnapshot(now - 180, base.spot, base.smoothed_atm, base.strike_step, tuple(prev_rows))
+    current = ChainSnapshot(now, base.spot + 2, base.smoothed_atm, base.strike_step, base.rows)
+    result = evaluate_support_momentum(current, previous, window_sec=180.0, baseline_mode="full")
+    assert result.alert == "neutral"
+    assert result.signal_quality["notify_eligible"] is False
 
 
 def test_momentum_thresholds_scale_for_scalp_window():

@@ -216,13 +216,9 @@ async def evaluate_stream_momentum(
         "history": history,
         "evaluation": result.to_dict(),
         "note": (
-            "Live OI from Upstox Market Data Feed V3 (full mode) on ATM zone strikes. "
+            "Live OI from Upstox Market Data Feed V3 on the at-the-money zone. "
             f"Snapshots every ~{sample_min_sec}s; rolling window {window_sec}s. "
-            + (
-                "Scalp mode (≤30s): high noise — volume/surge gates scaled for short window."
-                if window_sec <= 30
-                else "Shorter windows (1–2m) are viable in live mode — OI updates continuously."
-            )
+            "A call needs the full window, at least 1 minute, with price and volume agreeing."
         ),
     }
     return await _attach_alert_event(

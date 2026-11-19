@@ -36,7 +36,6 @@ const WINDOW_OPTIONS_REST = [
 ] as const;
 
 const WINDOW_OPTIONS_LIVE = [
-  { label: "30s scalp (high noise)", sec: 30 },
   { label: "1 min (live)", sec: 60 },
   { label: "2 min (live)", sec: 120 },
   { label: "3 min", sec: 180 },
@@ -67,11 +66,11 @@ function handleOiAlertNotify(
   if (!event?.is_new) return;
 
   const isStrong = event.notify_alert === "strong";
-  const phaseLabel = event.notify_phase === "early" ? "early" : "confirmed";
+  const side = result.evaluation.side === "resistance" ? "resistance" : "support";
   notifyUserAlert({
-    title: `${symbol} OI ${isStrong ? "strong" : "mild"} (${phaseLabel})`,
+    title: `${symbol} OI ${side} ${isStrong ? "strong" : "mild"}`,
     body: event.record.message,
-    tone: isStrong ? "bullish" : "warning",
+    tone: side === "resistance" ? "bearish" : isStrong ? "bullish" : "warning",
     tag: `oi-momentum-${event.record.id}`,
   });
 }
@@ -86,7 +85,12 @@ function downloadJson(filename: string, data: unknown) {
   URL.revokeObjectURL(url);
 }
 
-function alertStyles(alert: OiMomentumEvaluation["alert"]): string {
+function alertStyles(alert: OiMomentumEvaluation["alert"], side?: OiMomentumEvaluation["side"]): string {
+  if (side === "resistance" && (alert === "strong" || alert === "mild")) {
+    return alert === "strong"
+      ? "border-rose-500/40 bg-rose-500/10 text-rose-300"
+      : "border-orange-500/40 bg-orange-500/10 text-orange-200";
+  }
   switch (alert) {
     case "strong":
       return "border-emerald-500/40 bg-emerald-500/10 text-emerald-300";
@@ -131,7 +135,8 @@ export function OiMomentumPage() {
   const [symbol, setSymbol] = useState<string>(
     (SYMBOLS as readonly string[]).includes(initialPrefs.symbol) ? initialPrefs.symbol : "NIFTY",
   );
-  const [windowSec, setWindowSec] = useState(Number(initialPrefs.windowSec) || 180);
+  const savedWindow = Number(initialPrefs.windowSec) || 180;
+  const [windowSec, setWindowSec] = useState(savedWindow >= 60 ? savedWindow : 180);
   const [streamLive, setStreamLive] = useState(false);
   const [streamStatus, setStreamStatus] = useState<OiStreamStatus | null>(null);
   const [streamBusy, setStreamBusy] = useState(false);
@@ -145,8 +150,7 @@ export function OiMomentumPage() {
   const timerRef = useRef<number | null>(null);
   const [advancedOpen, setAdvancedOpen] = useState(false);
 
-  const isScalpMode = streamLive && windowSec <= 30;
-  const effectivePollSec = isScalpMode ? 5 : streamLive ? 10 : pollIntervalSec;
+  const effectivePollSec = streamLive ? 10 : pollIntervalSec;
   const windowOptions = streamLive ? WINDOW_OPTIONS_LIVE : WINDOW_OPTIONS_REST;
 
   const poll = useCallback(async () => {
@@ -342,14 +346,6 @@ export function OiMomentumPage() {
           <RefreshCw className={`h-3.5 w-3.5 ${loading ? "animate-spin" : ""}`} />
           Poll now
         </button>
-        {isScalpMode && (
-          <span
-            className="shrink-0 rounded border border-amber-500/40 bg-amber-500/10 px-1.5 py-px text-[10px] font-semibold uppercase text-amber-200"
-            title="High noise; volume/surge gates scaled for the short window. Prefer 1–3m for confirmation."
-          >
-            Scalp 30s
-          </span>
-        )}
         {evaluation && (
           <>
             <ToolbarDivider />
@@ -380,10 +376,14 @@ export function OiMomentumPage() {
       )}
 
       {evaluation && (
-        <div className={`flex items-start gap-2 rounded-md border px-2 py-1.5 ${alertStyles(evaluation.alert)}`}>
+        <div className={`flex items-start gap-2 rounded-md border px-2 py-1.5 ${alertStyles(evaluation.alert, evaluation.side)}`}>
           {alertIcon(evaluation.alert)}
           <div className="min-w-0">
-            <p className="text-data-sm font-semibold uppercase tracking-wide">{evaluation.alert}</p>
+            <p className="text-data-sm font-semibold uppercase tracking-wide">
+              {evaluation.side === "support" || evaluation.side === "resistance"
+                ? `${evaluation.side} · ${evaluation.alert}`
+                : evaluation.alert}
+            </p>
             <p className="text-data-md">{evaluation.message}</p>
           </div>
         </div>
@@ -439,8 +439,12 @@ export function OiMomentumPage() {
                 <dd className="num text-gain">+{evaluation.metrics.zone_put_addition.toLocaleString("en-IN")}</dd>
               </div>
               <div className="flex justify-between gap-2">
-                <dt className="text-slate-400">Call OI Δ (zone)</dt>
-                <dd className="num text-loss">{evaluation.metrics.zone_call_unwinding.toLocaleString("en-IN")}</dd>
+                <dt className="text-slate-400">Call OI added</dt>
+                <dd className="num text-loss">+{(evaluation.metrics.zone_call_addition ?? 0).toLocaleString("en-IN")}</dd>
+              </div>
+              <div className="flex justify-between gap-2">
+                <dt className="text-slate-400">Call OI unwound</dt>
+                <dd className="num text-slate-200">{evaluation.metrics.zone_call_unwinding.toLocaleString("en-IN")}</dd>
               </div>
               <div className="flex justify-between gap-2">
                 <dt className="text-slate-400">Put vol Δ (zone)</dt>
@@ -470,9 +474,15 @@ export function OiMomentumPage() {
               />
               <GateRow label="Call unwind" pass={evaluation.metrics.call_unwind} />
               <GateRow
-                label="OI/volume ratio in band"
+                label="Put volume confirms"
                 pass={evaluation.metrics.volume_confirmed}
               />
+              <GateRow
+                label={`Call surge (>${((evaluation.put_surge_threshold_pct ?? 0.02) * 100).toFixed(1)}% zone OI)`}
+                pass={Boolean(evaluation.metrics.rapid_call_surge)}
+              />
+              <GateRow label="Call volume confirms" pass={Boolean(evaluation.metrics.call_volume_confirmed)} />
+              <GateRow label="Put unwind" pass={Boolean(evaluation.metrics.put_unwind)} />
               {evaluation.signal_quality && (
                 <>
                   <GateRow label="Price aligned" pass={evaluation.signal_quality.price_aligned} />
@@ -630,7 +640,7 @@ export function OiMomentumPage() {
           {streamLive && (
             <p className="text-data-xs text-emerald-300">
               Live refresh ~{effectivePollSec}s
-              {isScalpMode ? " · snapshots ~3s" : " · snapshots ~5s"}
+              {" · snapshots ~5s"}
             </p>
           )}
           <label className="flex items-center gap-2 text-data-sm text-slate-300">
@@ -698,13 +708,9 @@ export function OiMomentumPage() {
 
         <AdvancedSection title="Help" defaultOpen={false}>
           <p className="text-data-xs text-slate-300">
-            Rolling ATM support-zone scanner. REST poll (60s) or Upstox WebSocket live OI on zone strikes.
-            Live mode supports 30s scalp through 5m windows — shorter = faster, noisier.
-          </p>
-          <p className="text-data-xs text-amber-200">
-            <span className="font-medium">Scalp mode (30s, live only)</span>
-            {" — "}
-            High noise; volume/surge gates scaled for the short window. Prefer 1–3m for confirmation.
+            The zone is the smoothed at-the-money strike and the strike just under it. A call needs the
+            full window, at least 1 minute. Support is puts added with price holding and volume confirming.
+            Resistance is calls added with price not running through. Inside that floor the reading stays neutral.
           </p>
         </AdvancedSection>
       </AdvancedDrawer>
