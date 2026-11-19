@@ -134,6 +134,29 @@ npm run news:backfill
 | `GET /api/news/events` | Linked news events |
 | `GET /api/news/ticker/{ticker}/impact` | Aggregates + markers |
 
+## Setup watchlist (before the breakout)
+
+Lists stocks still inside a base each evening, then alerts when one reaches its pivot: at 9:08 from the opening auction, and live during the session. It also reads NSE filings the minute they are published. Read the results section of [docs/early_setup.md](docs/early_setup.md) before trading it: on NSE data for February 2025 to November 2026, taking every setup mechanically lost money after costs.
+
+```bash
+npm run setups:data -- --days 500   # once: delivery, corporate actions, industries (add --candles / --index if needed)
+npm run setups:build                # each evening, after the daily candle ingest
+npm run setups:report               # how the list has done, by exit rule
+npm run setups:fit                  # derive the score's weights from your candles and test them on unseen sessions
+npm run setups:filings-history      # once: a year of filings, to measure what each kind did to prices
+```
+
+| Route | Description |
+|-------|-------------|
+| `/setups` | UI — both lists with live state, filings, resolved setups, alerts, results |
+| `GET /api/early-setup/watchlist` | Stored lists (`status=`, `list=daily|weekly|all`) with flags, events, large buys, pre-open |
+| `POST /api/early-setup/build` | Top up NSE data and update the lists from daily candles |
+| `GET /api/early-setup/live` | Watchlist stocks against their pivots on the live feed |
+| `GET/POST /api/early-setup/preopen` | The 9:08 opening-auction reading for watchlist stocks |
+| `GET /api/early-setup/filings` | Price-moving NSE filings with size, and what each kind did to prices |
+| `GET /api/early-setup/alerts` | Alerts raised (also sent to Telegram when configured) |
+| `GET /api/early-setup/report` | Results by exit rule, market state and score (`list=`, `max_positions=`) |
+
 ## OI Support Momentum (intraday)
 
 Live ATM support-zone scanner using **rolling Upstox option-chain polls** (3–5 minute windows). See [docs/oi_momentum_scanner.md](docs/oi_momentum_scanner.md).

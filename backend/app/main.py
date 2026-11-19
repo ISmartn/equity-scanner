@@ -7,6 +7,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from .logging_config import setup_logging
 from .db.store import get_store
+from .routes.early_setup import router as early_setup_router
 from .routes.forecast import router as forecast_router
 from .routes.market_info import router as market_info_router
 from .routes.mtf_rsi import router as mtf_rsi_router
@@ -48,6 +49,7 @@ app.include_router(market_info_router)
 app.include_router(oi_momentum_router)
 app.include_router(order_flow_router)
 app.include_router(live_scan_router)
+app.include_router(early_setup_router)
 app.include_router(mtf_rsi_router)
 app.include_router(nifty_router)
 app.include_router(indicator_analysis_router)
@@ -78,6 +80,12 @@ async def on_startup() -> None:
     from .services.order_flow import get_collector
 
     get_collector().start()
+
+    # Exchange filings for the setup watchlist. SETUP_FILINGS_POLL=0 keeps it off.
+    if os.getenv("SETUP_FILINGS_POLL", "1").strip() != "0":
+        from .services.early_setup.filings import get_filings_poller
+
+        get_filings_poller().start()
 
     model = os.getenv("FORECAST_MODEL", "timesfm-2.5")
     logger.info("Backend started — default forecast model: %s (lazy load, not preloaded)", model)

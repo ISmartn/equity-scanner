@@ -262,6 +262,23 @@ def select_cash_symbols(
     return chosen
 
 
+def _watchlist_first(candidates: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Setup-watchlist names take the spare feed slots before other liquid cash names.
+
+    The sort is stable, so each group keeps its most-active-first order.
+    """
+    from ..early_setup import repo as setup_repo
+
+    try:
+        watching = {entry.ticker for entry in setup_repo.list_entries(status="active", limit=10_000)}
+    except Exception:
+        logger.exception("Setup watchlist unavailable while building the universe")
+        return candidates
+    if not watching:
+        return candidates
+    return sorted(candidates, key=lambda row: normalize_symbol(str(row.get("ticker") or "")) not in watching)
+
+
 async def build_universe(as_of: date | None = None) -> list[UniverseSymbol]:
     """F&O names that have an NSE_EQ profile, joined to the front-month future when present."""
     session_date = as_of or datetime.now(IST).date()
@@ -308,6 +325,7 @@ async def build_universe(as_of: date | None = None) -> list[UniverseSymbol]:
         session_date.isoformat(),
         MIN_CASH_HISTORY_BARS,
     )
+    candidates = await asyncio.to_thread(_watchlist_first, candidates)
     chosen = select_cash_symbols(
         candidates,
         exclude=set(symbols),

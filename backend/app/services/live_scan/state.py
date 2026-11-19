@@ -607,6 +607,12 @@ class LiveBook:
                     "cash_key": context.cash_key,
                     "last_tick_at": cash.last_tick_at,
                     "future_last_tick_at": future.last_tick_at if future else None,
+                    "watch_pivot": context.watch_pivot,
+                    "watch_stop": context.watch_stop,
+                    "watch_score": context.watch_score,
+                    "watch_days": context.watch_days,
+                    "watch_first_seen": context.watch_first_seen,
+                    "watch_weekly": context.watch_weekly,
                 }
             )
         return quotes

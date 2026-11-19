@@ -8,6 +8,7 @@ from datetime import date
 from typing import Any
 
 from ...db.store import TimelineStore, get_store
+from ..early_setup import repo as setup_repo
 from .universe import UniverseSymbol
 
 _PIVOT_KEYS = ("pivot_high", "pivot_high_20d", "pivot")
@@ -49,6 +50,14 @@ class SymbolContext:
     atr_pct: float | None = None
     efficiency_20: float | None = None
     days_to_expiry: int | None = None
+    # Setup watchlist (services/early_setup): a base that has not broken out yet.
+    watch_pivot: float | None = None
+    watch_stop: float | None = None
+    watch_score: float | None = None
+    watch_days: int | None = None
+    watch_first_seen: str | None = None
+    # The same stock's entry on the weekly list, when it has one: pivot, stop, score, days, first_seen.
+    watch_weekly: dict[str, Any] | None = None
 
     @property
     def on_last_scan(self) -> bool:
@@ -104,9 +113,24 @@ def load_context(
     for row in db.latest_scan_myb_rows():
         myb.setdefault(str(row["ticker"]), []).append(row)
 
+    watching: dict[str, Any] = {}
+    watching_weekly: dict[str, dict[str, Any]] = {}
+    for entry in setup_repo.list_entries(status="active", limit=10_000, store=db):
+        if entry.timeframe == "weekly":
+            watching_weekly[entry.ticker] = {
+                "pivot": entry.pivot,
+                "stop": entry.stop,
+                "score": entry.score,
+                "days": entry.days_in_base,
+                "first_seen": entry.first_seen,
+            }
+        else:
+            watching[entry.ticker] = entry
+
     contexts: dict[str, SymbolContext] = {}
     for item in universe:
         candle = candles.get(item.cash_key) or {}
+        watch = watching.get(item.symbol) if item.kind != "index" else None
         pattern = _best_pattern(patterns.get(item.symbol, []))
         breakout = _best_myb(myb.get(item.symbol, []))
         poi = poi_rows.get(item.symbol)
@@ -149,6 +173,12 @@ def load_context(
             atr_pct=_float_or_none(candle.get("atr_pct")),
             efficiency_20=_float_or_none(candle.get("efficiency_20")),
             days_to_expiry=_days_between(before_date, item.future_expiry),
+            watch_pivot=watch.pivot if watch else None,
+            watch_stop=watch.stop if watch else None,
+            watch_score=watch.score if watch else None,
+            watch_days=watch.days_in_base if watch else None,
+            watch_first_seen=watch.first_seen if watch else None,
+            watch_weekly=watching_weekly.get(item.symbol) if item.kind != "index" else None,
         )
     return contexts
 

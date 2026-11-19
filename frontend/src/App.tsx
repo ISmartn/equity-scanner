@@ -10,6 +10,7 @@ import { MoveFilterPage } from "@/pages/MoveFilterPage";
 import { MarketInfoPage } from "@/pages/MarketInfoPage";
 import { MomentumScannerPage } from "@/pages/MomentumScannerPage";
 import { LiveScanPage } from "@/pages/LiveScanPage";
+import { EarlySetupPage } from "@/pages/EarlySetupPage";
 import { DarvasScreenerPage } from "@/pages/DarvasScreenerPage";
 import { MultiYearBreakoutPage } from "@/pages/MultiYearBreakoutPage";
 import { NewsImpactPage } from "@/pages/NewsImpactPage";
@@ -40,6 +41,7 @@ const NAV_TABS = [
   { label: "Nifty Chart", path: "/nifty" },
   { label: "Indicator Analysis", path: "/indicator-analysis" },
   { label: "Momentum Scanner", path: "/scanner" },
+  { label: "Setups", path: "/setups" },
   { label: "Live Scan", path: "/live-scan" },
   { label: "F&O", path: "/fno" },
   { label: "Darvas", path: "/darvas-screener" },
@@ -195,6 +197,7 @@ export default function App() {
           <Route path="/nifty" element={<NiftyChartPage />} />
           <Route path="/indicator-analysis" element={<IndicatorAnalysisPage />} />
           <Route path="/scanner" element={<MomentumScannerPage />} />
+          <Route path="/setups" element={<EarlySetupPage />} />
           <Route path="/live-scan" element={<LiveScanPage />} />
           <Route path="/darvas-screener" element={<DarvasScreenerPage />} />
           <Route path="/multi-year-breakout" element={<MultiYearBreakoutPage />} />
