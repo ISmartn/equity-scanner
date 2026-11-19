@@ -23,4 +23,5 @@ backend/data/logs/
 **/fundamentals_sync_errors.log
 experiments/x-tweet-fetcher-test/.venv/
 experiments/x-tweet-fetcher-test/out/
-experiments/x-tweet-fetcher-test/src/
+experiments/x-tweet-fetcher-test/src/# Fitted from the local candle database by `npm run setups:fit`
+data/early_setup_weights.json

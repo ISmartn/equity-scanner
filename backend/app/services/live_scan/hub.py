@@ -33,6 +33,9 @@ from upstox_client import MarketDataStreamerV3
 
 from ...config import get_access_token
 from ...db.store import get_store
+from ..early_setup import live as setup_live
+from ..early_setup import repo as setup_repo
+from ..early_setup import watchlist as setup_watchlist
 from ..mtf_rsi_manager import get_mtf_rsi_manager
 from ..oi_momentum.ws_feed import get_stream_manager
 from .baskets import default_baskets, load_nifty_members
@@ -224,6 +227,11 @@ class LiveScanHub:
         self._journal = CallJournal("")
         self._journal_rows: list[dict[str, Any]] = []
         self._journal_summary: dict[str, Any] = self._journal.summary()
+        # Setup watchlist against its pivots. Written by the ranker thread only.
+        self._watch_rows: list[dict[str, Any]] = []
+        self._alerter: setup_live.SetupAlerter | None = None
+        self._watchlist_sync: dict[str, Any] | None = None
+        self._watchlist_behind: str | None = None
         # Ingest pipeline. The deque is the only object the socket thread touches.
         # A ``None`` payload is the reconnect marker, ordered with the frames around it.
         self._frames: deque[tuple[int, float, bytes | None]] = deque(maxlen=_FRAME_BACKLOG)
@@ -340,6 +348,18 @@ class LiveScanHub:
             if generation != self._generation:
                 return self.status_payload()
             as_of = trade_date()
+            self._note_startup("watchlist", "Updating the setup watchlist")
+            try:
+                # Candles are current now, so the list reflects yesterday's close.
+                self._watchlist_sync = await asyncio.to_thread(
+                    lambda: setup_watchlist.update_watchlist(refresh_data=True)
+                )
+            except Exception as exc:
+                logger.exception("Setup watchlist update failed; continuing with the stored list")
+                self._watchlist_sync = {"status": "failed", "message": str(exc)}
+            done = (self._watchlist_sync or {}).get("processed_through")
+            # Pivots from an older session may already be broken or moved.
+            self._watchlist_behind = session_date if not done or str(done) < session_date else None
             self._note_startup("context", "Loading the morning context", total=len(universe))
             contexts = await asyncio.to_thread(load_context, universe, before_date=as_of)
             self._note_startup("profile", "Loading the volume profile")
@@ -350,6 +370,9 @@ class LiveScanHub:
             journal = CallJournal(as_of)
             stored_plans = await asyncio.to_thread(get_store().list_live_call_journal, as_of)
             journal.load(stored_plans)
+            alerted = await asyncio.to_thread(setup_repo.alert_keys, as_of)
+            notes = await asyncio.to_thread(setup_live.watch_notes, as_of)
+            alerter = setup_live.SetupAlerter(as_of, seen=alerted, notes=notes)
         except Exception:
             with self._lock:
                 if self._generation == generation and self.status == "starting":
@@ -373,6 +396,11 @@ class LiveScanHub:
             self._journal = journal
             self._journal_rows = journal.rows()
             self._journal_summary = journal.summary()
+            if self._alerter is not None:
+                self._alerter.stop()
+            self._alerter = alerter
+            self._watch_rows = []
+            alerter.start()
             self._universe = universe
             self._session_date = as_of
             self._subscribed = len(book.instrument_keys)
@@ -421,6 +449,8 @@ class LiveScanHub:
         self._shutdown_threads()
         self._flush_journal(force=True)
         self._writer.stop()
+        if self._alerter is not None:
+            self._alerter.stop()
         self.status = "stopped"
         self._startup = None
         return self.status_payload()
@@ -563,6 +593,25 @@ class LiveScanHub:
         stale = b"true" if self._is_stale(self._ranked_at) else b"false"
         return cached[:-1] + b',"stale":' + stale + b',"status":' + _dumps(self.status_payload()) + b"}"
 
+    def setup_watch(self) -> dict[str, Any]:
+        """Watchlist names on the feed, both segments, most urgent first."""
+        with self._lock:
+            rows = self._watch_rows
+            ranked_at = self._ranked_at
+        alerter = self._alerter
+        return {
+            "status": self.status,
+            "session_date": self._session_date or None,
+            "ranked_at": ranked_at,
+            "stale": self._is_stale(ranked_at),
+            "rows": rows,
+            "alerts_raised": alerter.raised if alerter else 0,
+            "alerts_delivered": alerter.delivered if alerter else 0,
+            "telegram_configured": setup_live.telegram_configured(),
+            "watchlist_sync": self._watchlist_sync,
+            "watchlist_behind": self._watchlist_behind,
+        }
+
     def _is_stale(self, ranked_at: float | None) -> bool:
         if self.status != "connected":
             return True
@@ -607,6 +656,10 @@ class LiveScanHub:
             baskets=self._baskets,
             now=now,
         )
+        watch_rows = setup_live.rank_watchlist(quotes, book.profile.expected_fraction(now), now)
+        alerter = self._alerter
+        if alerter is not None:
+            alerter.observe(watch_rows, tradable=in_session(now))
         windows = book.drain_windows()
         stamp = now_ist().isoformat()
         journal = self._journal
@@ -619,6 +672,7 @@ class LiveScanHub:
         with self._lock:
             self._ranked = ranked
             self._ranked_at = time.time()
+            self._watch_rows = watch_rows
             self._journal_rows = rows
             self._journal_summary = summary
             self._ranked_seq += 1

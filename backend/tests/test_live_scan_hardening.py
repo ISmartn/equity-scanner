@@ -878,3 +878,53 @@ def test_history_stats_use_median_volume_atr_and_efficiency(tmp_path):
     assert stats["atr_pct"] == pytest.approx(2.0 / 120.0 * 100.0, rel=0.01)
     assert stats["coil_high"] == 121.0
     assert stats["coil_low"] == 112.0
+
+
+# ------------------------------------------------------------ setup watchlist
+
+
+def test_hub_ranks_watchlist_names_against_their_pivot(tmp_path):
+    hub = LiveScanHub(writer=LiveScanWriter(TimelineStore(tmp_path / "watch.db")))
+    hub._book = LiveBook(
+        {
+            "RELIANCE": _context(watch_pivot=100.0, watch_stop=97.0, watch_score=61.0, watch_days=7),
+            "TCS": _context("TCS", "NSE_EQ|TCS", None),
+        }
+    )
+    _apply(hub._book, CASH, _tick(99.95, 1000), time.time())
+    hub._publish_once()
+    watch = hub.setup_watch()
+    assert [row["symbol"] for row in watch["rows"]] == ["RELIANCE"]  # TCS is not on the watchlist
+    assert watch["rows"][0]["state"] == "testing"
+    assert watch["rows"][0]["pivot"] == 100.0 and watch["rows"][0]["days_in_base"] == 7
+
+    _apply(hub._book, CASH, _tick(100.6, 1200), time.time())
+    hub._publish_once()
+    assert hub.setup_watch()["rows"][0]["state"] in {"breakout", "crossed_light"}
+
+
+def test_morning_context_carries_the_active_watchlist(tmp_path):
+    from app.services.early_setup import repo
+    from app.services.early_setup.repo import WatchEntry
+    from app.services.live_scan.context import load_context
+    from app.services.live_scan.universe import UniverseSymbol
+
+    store = TimelineStore(tmp_path / "ctx.db")
+    repo.save_entries(
+        [
+            WatchEntry(ticker="RELIANCE", pivot=1510.0, stop=1462.5, first_seen="2026-11-10",
+                       last_seen="2026-11-16", last_checked="2026-11-16", days_in_base=5, score=58.0),
+            WatchEntry(ticker="TCS", pivot=4000.0, stop=3900.0, first_seen="2026-11-01", last_seen="2026-11-05",
+                       last_checked="2026-11-06", status="failed"),
+        ],
+        store,
+    )
+    universe = [
+        UniverseSymbol(symbol=name, company_name=name, sector=None, cash_key=f"NSE_EQ|{name}",
+                       future_key=None, future_expiry=None, kind="equity", segment="cash")
+        for name in ("RELIANCE", "TCS")
+    ]
+    contexts = load_context(universe, before_date="2026-11-17", store=store)
+    assert (contexts["RELIANCE"].watch_pivot, contexts["RELIANCE"].watch_stop) == (1510.0, 1462.5)
+    assert contexts["RELIANCE"].watch_days == 5
+    assert contexts["TCS"].watch_pivot is None  # a failed setup is no longer watched

@@ -10,3 +10,4 @@ torch>=2.1.0
 matplotlib>=3.8.0
 telethon>=1.36.0
 rapidfuzz>=3.9.0
+pypdf>=4.0.0
