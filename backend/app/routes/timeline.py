@@ -217,6 +217,26 @@ async def timeline_candles(
     )
 
 
+@router.get("/intraday")
+async def timeline_intraday(
+    symbol: str = Query(..., min_length=1),
+    interval: int = Query(5, description="Minutes per bar: 1, 3, 5, 15, 30 or 60"),
+    x_upstox_access_token: str | None = Header(default=None),
+) -> dict[str, Any]:
+    from ..services import intraday_candles
+
+    try:
+        return await intraday_candles.fetch_intraday_candles(
+            symbol, interval, access_token=x_upstox_access_token
+        )
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    except LookupError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
+    except RuntimeError as exc:
+        raise HTTPException(status_code=502, detail=str(exc)) from exc
+
+
 @router.post("/sync-profiles")
 async def sync_profiles() -> dict:
     async with aiohttp.ClientSession() as session:

@@ -336,6 +336,20 @@ export async function fetchTimelineCandles(symbol: string): Promise<TimelineCand
   return parseJson(res);
 }
 
+/** Minutes per bar offered on the Stock Research chart. */
+export const INTRADAY_INTERVALS = [1, 3, 5, 15, 30, 60] as const;
+export type IntradayInterval = (typeof INTRADAY_INTERVALS)[number];
+
+/** Minute candles for one stock; `date` is "YYYY-MM-DD HH:MM" in IST. */
+export async function fetchTimelineIntraday(
+  symbol: string,
+  interval: IntradayInterval,
+): Promise<{ symbol: string; interval: number; source: string; candles: TimelineCandlePoint[] }> {
+  const params = new URLSearchParams({ symbol, interval: String(interval) });
+  const res = await fetch(`/api/timeline/intraday?${params}`);
+  return parseJson(res);
+}
+
 export async function syncTimelineProfiles(): Promise<{
   profiles_upserted: number;
   total_mainboard: number;

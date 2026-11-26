@@ -75,7 +75,8 @@ function formatMovePct(value: number | null): string {
 function timeToDateString(time: Time): string | null {
   if (typeof time === "string") return time;
   if (typeof time === "number") {
-    return new Date(time * 1000).toISOString().slice(0, 10);
+    // A minute bar: the key is the IST wall clock read as UTC (see toChartTime).
+    return new Date(time * 1000).toISOString().slice(0, 16).replace("T", " ");
   }
   if (time && typeof time === "object" && "year" in time) {
     const { year, month, day } = time;
@@ -132,7 +133,14 @@ function volumeBarColor(bar: TimelineCandlePoint, isHighlight: boolean): string 
   return bar.close >= bar.open ? "rgba(34, 197, 94, 0.45)" : "rgba(239, 68, 68, 0.45)";
 }
 
+/**
+ * A daily bar is keyed by its date. A minute bar's date is "YYYY-MM-DD HH:MM" in IST:
+ * it becomes seconds with the wall clock read as UTC, so the axis shows the exchange's clock.
+ */
 function toChartTime(dateStr: string): Time {
+  if (dateStr.length > 10) {
+    return (Date.parse(`${dateStr.replace(" ", "T")}:00Z`) / 1000) as Time;
+  }
   return dateStr as Time;
 }
 

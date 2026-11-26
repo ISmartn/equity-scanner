@@ -8,7 +8,8 @@ Implements the standalone provider contract (server/providers/types.mjs):
                                previous close and OI from Upstox daily candles
 
 The near-month future's instrument key comes from ``futures_oi_daily``, the
-lab's stored F&O snapshot. Only one future month is stored, so the board gets
+lab's stored F&O snapshot, or from Upstox's instrument dump once the stored
+contract has expired. Only one future month is read, so the board gets
 one month per underlying. Index futures (NIFTY, BANKNIFTY) are not stored, so
 those indices show their spot move until the board has a future for them.
 
@@ -236,8 +237,28 @@ class UpstoxOrderFlowProvider:
             prev_close = last["close"] if last else None
         return parse_option_chain(payload, expiry=expiry, at=time.time() * 1000, prev_close=prev_close)
 
+    @staticmethod
+    def _front_future_from_dump(symbol: str, session: str) -> tuple[str, str] | None:
+        """The nearest listed future on or after ``session``, from Upstox's instrument dump (cached for 12 hours).
+
+        The stored snapshot is written when a live scan closes, so after a monthly
+        expiry it still names the contract that has just expired. The dump always
+        carries the next month.
+        """
+        from ..live_scan.universe import load_equity_future_rows, select_front_futures
+
+        internal = normalize_symbol(symbol)
+        contracts = select_front_futures(load_equity_future_rows(), {internal}, date.fromisoformat(session))
+        contract = contracts.get(internal)
+        return (contract.instrument_key, contract.expiry) if contract else None
+
     async def futures(self, u: dict[str, Any], session: str) -> list[dict[str, Any]]:
         found = self._front_future(u["symbol"], session)
+        if not found:
+            try:
+                found = await asyncio.to_thread(self._front_future_from_dump, u["symbol"], session)
+            except Exception:
+                found = None
         if not found:
             return []
         key, expiry = found

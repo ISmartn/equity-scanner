@@ -19,17 +19,34 @@ import {
 import { StockTickerSearch } from "@/components/StockTickerSearch";
 import { TimelineStockChart } from "@/components/TimelineStockChart";
 import {
+  INTRADAY_INTERVALS,
   fetchStockFundamentals,
   fetchTimelineCandles,
+  fetchTimelineIntraday,
   syncStockFundamentals,
+  type IntradayInterval,
   type StockFundamentals,
   type TimelineCandlePoint,
 } from "@/lib/api";
 import { loadUiPrefs, saveUiPrefs } from "@/lib/uiPrefs";
 
 const PREFS_KEY = "trading.stockResearch.prefs";
-type Prefs = { ticker: string };
-const DEFAULT_PREFS: Prefs = { ticker: "" };
+/** "D" is the daily chart; a number is minutes per bar. */
+type ChartFrame = "D" | IntradayInterval;
+type Prefs = { ticker: string; frame: ChartFrame };
+const DEFAULT_PREFS: Prefs = { ticker: "", frame: "D" };
+const FRAME_OPTIONS: Array<{ value: ChartFrame; label: string }> = [
+  { value: "D", label: "1D" },
+  ...INTRADAY_INTERVALS.map((minutes) => ({
+    value: minutes as ChartFrame,
+    label: minutes === 60 ? "1h" : `${minutes}m`,
+  })),
+];
+const INTRADAY_REFRESH_MS = 30_000;
+
+function isChartFrame(value: unknown): value is ChartFrame {
+  return value === "D" || INTRADAY_INTERVALS.some((minutes) => minutes === value);
+}
 
 function companyNameFromFundamentals(data: StockFundamentals | null): string | null {
   const profile = data?.profile;
@@ -67,6 +84,10 @@ export function StockResearchPage() {
   const [ticker, setTicker] = useState(paramTicker || initialPrefs.ticker || "");
 
   const [history, setHistory] = useState<TimelineCandlePoint[]>([]);
+  const [frame, setFrame] = useState<ChartFrame>(isChartFrame(initialPrefs.frame) ? initialPrefs.frame : "D");
+  const [intradayBars, setIntradayBars] = useState<TimelineCandlePoint[]>([]);
+  const [intradayLoading, setIntradayLoading] = useState(false);
+  const [intradayError, setIntradayError] = useState<string | null>(null);
   const [chartSource, setChartSource] = useState("local");
   const [chartLoading, setChartLoading] = useState(false);
   const [chartError, setChartError] = useState<string | null>(null);
@@ -78,8 +99,8 @@ export function StockResearchPage() {
   const [advancedOpen, setAdvancedOpen] = useState(false);
 
   useEffect(() => {
-    saveUiPrefs(PREFS_KEY, { ticker } satisfies Prefs);
-  }, [ticker]);
+    saveUiPrefs(PREFS_KEY, { ticker, frame } satisfies Prefs);
+  }, [ticker, frame]);
 
   useEffect(() => {
     if (paramTicker && paramTicker !== ticker) {
@@ -101,6 +122,20 @@ export function StockResearchPage() {
       setChartError(exc instanceof Error ? exc.message : String(exc));
     } finally {
       setChartLoading(false);
+    }
+  }, []);
+
+  const loadIntraday = useCallback(async (symbol: string, minutes: IntradayInterval, quiet: boolean) => {
+    if (!quiet) setIntradayLoading(true);
+    setIntradayError(null);
+    try {
+      const payload = await fetchTimelineIntraday(symbol, minutes);
+      setIntradayBars(payload.candles);
+    } catch (exc) {
+      if (!quiet) setIntradayBars([]);
+      setIntradayError(exc instanceof Error ? exc.message : String(exc));
+    } finally {
+      if (!quiet) setIntradayLoading(false);
     }
   }, []);
 
@@ -130,6 +165,20 @@ export function StockResearchPage() {
     void loadChart(symbol);
     void loadFundamentals(symbol);
   }, [ticker, loadChart, loadFundamentals]);
+
+  useEffect(() => {
+    const symbol = ticker.trim().toUpperCase();
+    if (!symbol || frame === "D") {
+      setIntradayBars([]);
+      setIntradayError(null);
+      return undefined;
+    }
+    void loadIntraday(symbol, frame, false);
+    const timer = window.setInterval(() => {
+      if (document.visibilityState === "visible") void loadIntraday(symbol, frame, true);
+    }, INTRADAY_REFRESH_MS);
+    return () => window.clearInterval(timer);
+  }, [ticker, frame, loadIntraday]);
 
   const onTickerChange = (next: string) => {
     const symbol = next.trim().toUpperCase();
@@ -161,6 +210,10 @@ export function StockResearchPage() {
   const highlightDate = history.length ? history[history.length - 1].date : "";
   const lastClose = history.length ? history[history.length - 1].close : null;
   const lastMove = history.length ? history[history.length - 1].daily_return_pct ?? null : null;
+
+  const intraday = frame !== "D";
+  const chartHistory = intraday ? intradayBars : history;
+  const shownError = intraday ? intradayError : chartError;
 
   return (
     <main className="page-shell flex flex-col gap-1 overflow-y-auto px-1.5 py-1 sm:px-2 lg:overflow-hidden">
@@ -210,10 +263,30 @@ export function StockResearchPage() {
       ) : (
         <div className="grid min-h-0 flex-1 gap-1.5 lg:grid-cols-[minmax(0,1.4fr)_minmax(20rem,0.9fr)] lg:grid-rows-[minmax(0,1fr)]">
           <section className="flex h-[28rem] min-h-0 flex-col gap-1 lg:h-auto">
-            {chartError && (
+            <div className="flex shrink-0 items-center gap-1" role="group" aria-label="Chart timeframe">
+              {FRAME_OPTIONS.map((option) => (
+                <button
+                  key={option.value}
+                  type="button"
+                  onClick={() => setFrame(option.value)}
+                  aria-pressed={frame === option.value}
+                  className={`h-6 rounded-md border px-2 text-data-xs font-medium ${
+                    frame === option.value
+                      ? "border-accent/60 bg-accent/15 text-slate-100"
+                      : "border-surface-border bg-surface text-slate-300 hover:border-accent/40"
+                  }`}
+                >
+                  {option.label}
+                </button>
+              ))}
+              {intraday && (
+                <span className="ml-1 text-data-xs text-slate-400">Minute bars, IST. Refreshes every 30s.</span>
+              )}
+            </div>
+            {shownError && (
               <div className="flex shrink-0 items-start gap-2 rounded-md border border-amber-500/30 bg-amber-500/10 px-2 py-1 text-data-xs text-amber-200">
                 <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0" />
-                <span>{chartError}</span>
+                <span>{shownError}</span>
               </div>
             )}
             <div className="min-h-0 flex-1 overflow-hidden">
@@ -221,11 +294,11 @@ export function StockResearchPage() {
                 symbol={ticker}
                 companyName={companyName}
                 sector={sector}
-                source={chartSource}
-                history={history}
-                highlightDate={highlightDate}
-                highlightMovePct={lastMove}
-                loading={chartLoading}
+                source={intraday ? `${frame}m` : chartSource}
+                history={chartHistory}
+                highlightDate={intraday ? "" : highlightDate}
+                highlightMovePct={intraday ? null : lastMove}
+                loading={intraday ? intradayLoading : chartLoading}
                 fillHeight
                 tailVisibleRange
                 showRsi

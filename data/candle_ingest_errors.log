@@ -414,3 +414,19 @@
 2026-11-18T15:50:05.404410+00:00	skip	ELPROINTL	marked ingest_skip (upstox_invalid_instrument)
 
 # ingest started 2026-11-19T04:28:51.829496+00:00 since_last=True concurrency=2 profiles=1600
+
+# ingest started 2026-11-19T08:51:34.927326+00:00 since_last=True concurrency=2 profiles=81
+
+# ingest started 2026-11-20T05:15:13.559738+00:00 since_last=True concurrency=2 profiles=1600
+
+# ingest started 2026-11-23T03:44:02.413155+00:00 since_last=True concurrency=3 profiles=2623
+2026-11-23T03:45:38.268055+00:00	error	COMPINFO	Upstox API error [400]: {"status":"error","errors":[{"errorCode":"UDAPI100011","message":"Invalid Instrument key","propertyPath":null,"invalidValue":null,"error_code":"UDAPI100011","property_path":null,"invalid_value":null}]}
+2026-11-23T03:45:38.291560+00:00	skip	COMPINFO	marked ingest_skip (upstox_invalid_instrument)
+2026-11-23T03:50:57.947344+00:00	error	WARDINMOBI	Upstox API error [400]: {"status":"error","errors":[{"errorCode":"UDAPI100011","message":"Invalid Instrument key","propertyPath":null,"invalidValue":null,"error_code":"UDAPI100011","property_path":null,"invalid_value":null}]}
+2026-11-23T03:50:57.967239+00:00	skip	WARDINMOBI	marked ingest_skip (upstox_invalid_instrument)
+
+# ingest started 2026-11-25T05:10:55.998024+00:00 since_last=True concurrency=2 profiles=1600
+
+# ingest started 2026-11-26T05:00:12.874862+00:00 since_last=True concurrency=2 profiles=1600
+
+# ingest started 2026-11-26T06:04:35.750869+00:00 since_last=True concurrency=2 profiles=82
