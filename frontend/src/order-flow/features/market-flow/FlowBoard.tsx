@@ -19,6 +19,8 @@ interface FlowBoardProps {
   layout: FlowLayout;
   /** The status line, set in the chart's head on a desktop and above the board elsewhere. */
   status: ReactNode;
+  /** The page's own controller, when something outside the board (the notification pane) drives the detail too. */
+  focus?: FlowFocus;
 }
 
 /** The head row above the chart on a desktop; the chart's zero rule is placed from it, level with the divider. */
@@ -36,8 +38,9 @@ const CHART_TITLE: Record<MarketFlow['window'], string> = { day: 'Through the da
  * The board holds the focus controller: tiles, lines, sectors, cards and the
  * detail all talk through it, and none of them re-renders the board.
  */
-export function FlowBoard({ flow, settings, layout, status }: FlowBoardProps) {
-  const focus = useMemo(() => new FlowFocus(), []);
+export function FlowBoard({ flow, settings, layout, status, focus: shared }: FlowBoardProps) {
+  const own = useMemo(() => new FlowFocus(), []);
+  const focus = shared ?? own;
   const [panel, setPanel] = useState<Panel>('chart');
   const [chartRef, chartBox] = useBox<HTMLDivElement>();
   const attach = useCallback((node: HTMLDivElement | null) => focus.attach(node), [focus]);

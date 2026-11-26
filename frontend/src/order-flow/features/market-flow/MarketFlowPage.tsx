@@ -5,6 +5,8 @@ import { useFitScrollerHeight } from '@/order-flow/hooks/useFitScrollerHeight';
 import { useMediaQuery } from '@/order-flow/hooks/useMediaQuery';
 import type { Underlying } from '@/order-flow/lib/underlyings';
 import { FlowBoard, type FlowLayout } from './FlowBoard';
+import { FlowFocus } from './flowFocus';
+import { FlowSignals, useFlowSignals } from './FlowSignals';
 import { FlowStatus } from './FlowStatus';
 import { DEFAULT_FLOW_SETTINGS, type FlowSettings } from './marketFlowModel';
 import { inUniverse, loadUniverse, saveUniverse, type FlowUniverse } from './nifty50';
@@ -60,16 +62,22 @@ export function MarketFlowPage({ universe }: MarketFlowPageProps) {
 
   const shown = useMemo(() => universe.filter(item => inUniverse(item.symbol, scope)), [universe, scope]);
   const { flow, market, loading, error, provider, futuresRead, futuresTotal, rescan } = useMarketFlow(shown, SETTINGS);
+  const signals = useFlowSignals(flow);
+  // One focus for the page: the board's tiles and the notification pane light the same detail.
+  const focus = useMemo(() => new FlowFocus(), []);
 
   const pageActions = (
-    <CapsuleSegmented options={UNIVERSES} value={scope} onChange={setScope} ariaLabel="Underlyings" groupId="flow-universe" size="page" className="ui-flow-universe" />
+    <>
+      <CapsuleSegmented options={UNIVERSES} value={scope} onChange={setScope} ariaLabel="Underlyings" groupId="flow-universe" size="page" className="ui-flow-universe" />
+      <FlowSignals signals={signals} focus={focus} />
+    </>
   );
 
   return (
     <div className="ui-flow oi-design" data-window="day" data-universe={scope} data-layout={layout} data-fit={fits ? 'true' : undefined} ref={pageRef}>
       <h1 className="is-visually-hidden">Order Flow</h1>
       <PageBar current="Order Flow" crumbs={false} className="oi-design ui-flow-pagebar">{pageActions}</PageBar>
-      <FlowBoard key={scope} flow={flow} settings={CHART} layout={layout}
+      <FlowBoard key={scope} focus={focus} flow={flow} settings={CHART} layout={layout}
         status={<FlowStatus flow={flow} at={market?.at ?? null} loading={loading} error={error} provider={provider} futuresRead={futuresRead} futuresTotal={futuresTotal} onRescan={rescan} />} />
     </div>
   );

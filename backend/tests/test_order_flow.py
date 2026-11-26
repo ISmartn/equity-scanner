@@ -128,3 +128,64 @@ def test_universe_loads_every_priced_underlying() -> None:
     universe = load_universe()
     assert len(universe) == 217
     assert {u["symbol"] for u in universe} >= {"NIFTY", "RELIANCE"}
+
+
+# ── The trigger log ───────────────────────────────────────────────────────
+
+
+def _signal(**over):
+    row = {
+        "id": "RELIANCE:1000", "symbol": "RELIANCE", "kind": "buy", "state": "active", "triggeredAt": 2000.0,
+        "entryLow": 1400.0, "entryHigh": 1410.0, "stop": 1400.0, "target": {"name": "R1", "price": 1440.0},
+        "staleAt": None, "staleReason": None, "context": {"strength": 0.8, "buildUp": "LONG_BUILD"},
+    }
+    row.update(over)
+    return row
+
+
+def test_signal_log_records_and_keeps_a_stale_trigger_stale(tmp_path) -> None:
+    from app.services.order_flow.signal_log import SignalLog
+
+    log = SignalLog(tmp_path)
+    assert log.upsert("2026-11-26", [_signal()], now_ms=5)["added"] == 1
+    # The same trigger again changes nothing.
+    assert log.upsert("2026-11-26", [_signal()], now_ms=6) == {"added": 0, "updated": 0, "total": 1}
+    stale = _signal(state="stale", staleAt=3000.0, staleReason="Stop broken at 1399.00")
+    assert log.upsert("2026-11-26", [stale], now_ms=7)["updated"] == 1
+    # An older, still-active copy arriving late must not bring it back.
+    log.upsert("2026-11-26", [_signal()], now_ms=8)
+    [row] = log.read("2026-11-26")["signals"]
+    assert row["state"] == "stale" and row["staleReason"].startswith("Stop broken")
+    assert row["recordedAt"] == 5 and row["updatedAt"] == 7
+    assert log.dates() == [{"date": "2026-11-26", "count": 1}]
+
+
+def test_signal_log_candles_never_shrink(tmp_path) -> None:
+    from app.services.order_flow.signal_log import SignalLog
+
+    log = SignalLog(tmp_path)
+    log.upsert("2026-11-26", [_signal()])
+    log.put_candles("2026-11-26", "RELIANCE", [[1, 1400.0, 10.0], [2, 1401.0, 11.0]])
+    log.put_candles("2026-11-26", "RELIANCE", [[1, 1400.0, 10.0]])
+    assert log.read("2026-11-26", with_candles=True)["candles"]["RELIANCE"] == [[1, 1400.0, 10.0], [2, 1401.0, 11.0]]
+
+
+def test_signal_routes_validate_and_round_trip(tmp_path, monkeypatch) -> None:
+    from fastapi.testclient import TestClient
+
+    from app.main import app
+    from app.routes import order_flow as routes
+    from app.services.order_flow.signal_log import SignalLog
+
+    log = SignalLog(tmp_path)
+    monkeypatch.setattr(routes, "get_signal_log", lambda: log)
+    client = TestClient(app)
+    ok = client.post("/api/order-flow/signals", json={"date": "2026-11-26", "signals": [_signal()]})
+    assert ok.status_code == 200 and ok.json()["added"] == 1
+    assert client.post("/api/order-flow/signals", json={"date": "../x", "signals": []}).status_code == 422
+    assert client.post("/api/order-flow/signals", json={"date": "2026-11-26", "signals": [_signal(kind="hold")]}).status_code == 422
+    assert client.put("/api/order-flow/signals/2026-11-26/candles/RELIANCE", json={"candles": [[1, 2, 3]]}).status_code == 200
+    got = client.get("/api/order-flow/signals/2026-11-26?candles=1").json()
+    assert got["count"] == 1 and got["candles"]["RELIANCE"] == [[1.0, 2.0, 3.0]]
+    assert client.get("/api/order-flow/signals/dates").json() == [{"date": "2026-11-26", "count": 1}]
+    assert client.get("/api/order-flow/signals/not-a-date").status_code == 400

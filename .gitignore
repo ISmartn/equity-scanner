@@ -18,6 +18,7 @@ data/timeline.db
 backend/data/oi_momentum_alerts.jsonl
 backend/data/fundamentals_sync_errors.log
 backend/data/order_flow/
+backend/data/order_flow_signals/
 backend/data/logs/
 **/fundamentals_sync_all.log
 **/fundamentals_sync_errors.log

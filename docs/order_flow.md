@@ -71,3 +71,36 @@ Short covering, long unwinding, and a neutral reading are written on the reason 
 When a plan is first saved, `live_call_journal.fut_quadrant` and `fut_oi_change_pct` keep that moment’s reading. Later ticks do not replace it. The Record table shows the snapshot in the Futures column.
 
 This is thinner than the board. The scan has the front month only, it does not sum later months, and it does not read the option chain. Five live sessions were not enough to show that the extra readings should block a call, which is why they stay labels.
+
+## The trigger log (for backtests)
+
+The notification pane's buy, sell and stale triggers are recorded on the server, so they outlive the browser tab and can be backtested later. Recording happens while the Order Flow page is open: a trigger the page never saw is not logged.
+
+Files, one directory per session under `backend/data/order_flow_signals/` (kept apart from the market files, which are deleted when a new session is stored; these are never deleted):
+
+- `<date>/signals.json`: every trigger of the session, keyed by id (`SYMBOL:zone start`).
+- `<date>/candles/<SYMBOL>.json`: that underlying's 1-minute futures candles, `[epoch_ms, close, open_interest]`, so a backtest can walk forward from the trigger without a provider.
+
+A trigger record holds:
+
+| Field | Meaning |
+|---|---|
+| `kind` | `buy` (zone on a bullish stock) or `sell` (bearish) |
+| `triggeredAt` | Market time, epoch ms, the zone completed |
+| `entryLow`, `entryHigh` | The zone's price band: the entry |
+| `stop` | The zone's far edge: low for a buy, high for a sell |
+| `target` | First option level past the zone (`R1`/`R2` for a buy, `S1`/`S2` for a sell), or null |
+| `state`, `staleAt`, `staleReason` | `active` or `stale`, and when and why it went stale. Stale never reverts |
+| `recordedAt`, `updatedAt` | Server wall clock when first heard and last changed |
+| `context` | The reading that raised it, frozen when first seen: window, floor, build-up, price and open-interest change, strength, rank, checks held, PCR, support and resistance, zone open interest added, and `seenAt` / `seenPrice` (how late the page was to the trigger) |
+
+Endpoints:
+
+| Method | Path | What it does |
+|---|---|---|
+| `POST` | `/api/order-flow/signals` | `{date, signals: [...]}`: add or update triggers (idempotent by id) |
+| `PUT` | `/api/order-flow/signals/{date}/candles/{symbol}` | `{candles: [[at, close, oi], ...]}`: a shorter series never replaces a longer one |
+| `GET` | `/api/order-flow/signals/dates` | Sessions with a log, newest first |
+| `GET` | `/api/order-flow/signals/{date}?candles=1` | One session's triggers, and their candles with `candles=1` |
+
+A trigger is stale when the side turns, a newer zone replaces it, price breaks the stop or reaches the target, or 60 minutes pass. `triggeredAt` is the zone's own end time, but the page can only act on it when it sees it: for a backtest, enter at `seenAt` / `seenPrice` or later, not at the zone's end. A trigger first seen on a reload is already late by however long the page was closed.
