@@ -1314,7 +1314,7 @@
   color: var(--surface, #FFFFFF); background: var(--text);
 }
 .ui-flow .mf-signals {
-  position: fixed; left: 12px; bottom: 12px; z-index: 60; width: min(360px, calc(100vw - 24px));
+  position: fixed; left: 12px; bottom: 12px; z-index: 60; width: min(420px, calc(100vw - 24px));
   display: flex; flex-direction: column; gap: 10px; padding: 12px 14px;
   border: 1px solid var(--hairline, var(--flow-hair)); border-radius: var(--box-radius, 12px); background: var(--surface);
   box-shadow: 0 18px 48px color-mix(in srgb, #000000 32%, transparent);
@@ -1350,3 +1350,17 @@
 .mf-signal__levels dd small { font-weight: 600; color: var(--text-muted); }
 .mf-signal__why { font-size: 11.5px; color: var(--text-muted); }
 .mf-signals__note.is-warn { color: var(--warn-text, var(--text)); }
+
+/* A stale trigger: the board's decision to close or continue, and why. */
+.mf-signal.is-decide { border-left-color: var(--text); opacity: 1; }
+.mf-signal.is-holding, .mf-signal.is-active { opacity: 1; }
+.mf-signal.is-closed, .mf-signal.is-missed { border-left-color: var(--text-muted); opacity: 0.78; }
+.mf-signal__decide, .mf-signal__decided { display: grid; gap: 6px; padding-top: 6px; border-top: 1px solid var(--flow-hair); }
+.mf-signal__decided { font-size: 11.5px; color: var(--text-muted); line-height: 1.4; }
+.mf-signal__decided b, .mf-signal__plan b { color: var(--text); font-variant-numeric: tabular-nums; }
+.mf-signal__pnl { font-variant-numeric: tabular-nums; font-weight: 650; white-space: nowrap; }
+.mf-signal__pnl small { font-weight: 600; color: var(--text-muted); }
+.mf-signal__pnl.is-up { color: var(--flow-up-ink); }
+.mf-signal__pnl.is-down { color: var(--flow-down-ink); }
+.mf-signal__plan { font-size: 11.5px; line-height: 1.4; color: var(--text-muted); }
+.mf-signal__advice { font-size: 12px; line-height: 1.4; }

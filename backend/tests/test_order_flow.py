@@ -160,6 +160,25 @@ def test_signal_log_records_and_keeps_a_stale_trigger_stale(tmp_path) -> None:
     assert log.dates() == [{"date": "2026-11-26", "count": 1}]
 
 
+def test_signal_log_only_moves_forward_through_a_decision(tmp_path) -> None:
+    from app.services.order_flow.signal_log import SignalLog
+
+    log = SignalLog(tmp_path)
+    stale = _signal(state="stale", outcome="target", staleAt=3000.0, staleReason="R1 reached at 1441.00", exitPrice=1441.0, decision=None)
+    cont = {**stale, "decision": "continued", "hold": {"stop": 1405.0, "target": {"name": "R2", "price": 1480.0}}}
+    closed = {**cont, "decision": "closed", "closedBy": "target", "decidedPrice": 1480.0}
+    log.upsert("2026-11-27", [_signal()])
+    assert log.upsert("2026-11-27", [stale])["updated"] == 1
+    assert log.upsert("2026-11-27", [cont])["updated"] == 1
+    # A late copy of the stale (no decision yet) must not undo the continue.
+    assert log.upsert("2026-11-27", [stale])["updated"] == 0
+    assert log.upsert("2026-11-27", [closed])["updated"] == 1
+    # A close is final.
+    assert log.upsert("2026-11-27", [cont])["updated"] == 0
+    [row] = log.read("2026-11-27")["signals"]
+    assert row["decision"] == "closed" and row["closedBy"] == "target" and row["hold"]["target"]["name"] == "R2"
+
+
 def test_signal_log_candles_never_shrink(tmp_path) -> None:
     from app.services.order_flow.signal_log import SignalLog
 
@@ -184,6 +203,7 @@ def test_signal_routes_validate_and_round_trip(tmp_path, monkeypatch) -> None:
     assert ok.status_code == 200 and ok.json()["added"] == 1
     assert client.post("/api/order-flow/signals", json={"date": "../x", "signals": []}).status_code == 422
     assert client.post("/api/order-flow/signals", json={"date": "2026-11-26", "signals": [_signal(kind="hold")]}).status_code == 422
+    assert client.post("/api/order-flow/signals", json={"date": "2026-11-26", "signals": [_signal(decision="maybe")]}).status_code == 422
     assert client.put("/api/order-flow/signals/2026-11-26/candles/RELIANCE", json={"candles": [[1, 2, 3]]}).status_code == 200
     got = client.get("/api/order-flow/signals/2026-11-26?candles=1").json()
     assert got["count"] == 1 and got["candles"]["RELIANCE"] == [[1.0, 2.0, 3.0]]

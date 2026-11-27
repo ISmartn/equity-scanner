@@ -3,11 +3,15 @@ import { BellIcon, XIcon } from '@/order-flow/assets/svg/icons';
 import { CapsuleSegmented } from '@/order-flow/components/common/CapsuleSegmented';
 import { fmtPrice } from '@/order-flow/utils/formatters';
 import type { FlowFocus } from './flowFocus';
-import { loadSignals, reconcileSignals, saveSignals, STALE_AFTER_MINUTES, type FlowSignal } from './flowSignals';
-import { clockOf, type MarketFlow } from './marketFlowModel';
+import { loadSignals, pnlOf, priceOf, reconcileSignals, saveSignals, STALE_AFTER_MINUTES, type FlowSignal } from './flowSignals';
+import { clockOf, type FlowStock, type MarketFlow } from './marketFlowModel';
 import { useSignalRecorder } from './signalRecorder';
 
 type Filter = 'all' | 'buy' | 'sell' | 'stale';
+type Status = 'active' | 'holding' | 'closed' | 'missed';
+
+/** Where a trigger stands: live, watched on after the board decided to continue, or done. */
+export const statusOf = (signal: FlowSignal): Status => (signal.state === 'active' ? 'active' : signal.decision === 'continued' ? 'holding' : signal.decision === 'missed' ? 'missed' : 'closed');
 const PANE_ID = 'mf-signals';
 
 /** The session's trigger log, kept in this browser and rebuilt against every new reading of the board. */
@@ -32,7 +36,7 @@ export function useFlowSignals(flow: MarketFlow | null) {
 type Signals = ReturnType<typeof useFlowSignals>;
 
 /** The bell in the page bar and the pane it opens: every buy, sell and stale trigger of the session, newest first. */
-export function FlowSignals({ signals: log, focus }: { signals: Signals; focus: FlowFocus }) {
+export function FlowSignals({ signals: log, focus, flow }: { signals: Signals; focus: FlowFocus; flow: MarketFlow | null }) {
   const { signals, unread, markRead, clear, saveFailed } = log;
   const [open, setOpen] = useState(false);
   const [top, setTop] = useState(0);
@@ -55,10 +59,18 @@ export function FlowSignals({ signals: log, focus }: { signals: Signals; focus: 
   };
   const counts = useMemo(() => {
     const c = { all: signals.length, buy: 0, sell: 0, stale: 0 };
-    for (const signal of signals) c[signal.state === 'stale' ? 'stale' : signal.kind]++;
+    for (const signal of signals) {
+      const status = statusOf(signal);
+      if (status === 'closed' || status === 'missed') c.stale++;
+      else c[signal.kind]++;
+    }
     return c;
   }, [signals]);
-  const shown = signals.filter(signal => filter === 'all' || (filter === 'stale' ? signal.state === 'stale' : signal.state === 'active' && signal.kind === filter));
+  const shown = signals.filter(signal => {
+    const status = statusOf(signal);
+    return filter === 'all' || (filter === 'stale' ? status === 'closed' || status === 'missed' : signal.kind === filter && (status === 'active' || status === 'holding'));
+  });
+  const stocks = useMemo(() => new Map((flow?.stocks ?? []).map(stock => [stock.symbol, stock])), [flow]);
 
   return (
     <>
@@ -75,14 +87,14 @@ export function FlowSignals({ signals: log, focus }: { signals: Signals; focus: 
             <button type="button" className="mf-popup__tool" aria-label="Close notifications" onClick={close}><XIcon size={16} /></button>
           </header>
           <CapsuleSegmented<Filter> options={[
-            { value: 'all', label: 'All', count: counts.all },
-            { value: 'buy', label: 'Buy', count: counts.buy },
-            { value: 'sell', label: 'Sell', count: counts.sell },
-            { value: 'stale', label: 'Stale', count: counts.stale },
+            { value: 'all', label: 'All', count: counts.all, title: `All notifications (${counts.all})` },
+            { value: 'buy', label: 'Buy', count: counts.buy, title: `Buy triggers still live or being held (${counts.buy})` },
+            { value: 'sell', label: 'Sell', count: counts.sell, title: `Sell triggers still live or being held (${counts.sell})` },
+            { value: 'stale', label: 'Stale', count: counts.stale, title: `Stale triggers: closed by the board, or never in play (${counts.stale})` },
           ]} value={filter} onChange={setFilter} ariaLabel="Show" groupId="flow-signals" size="panel" fill className="mf-signals__filter" />
           {shown.length ? (
             <ol className="mf-signals__list">
-              {shown.map(signal => <SignalRow key={signal.id} signal={signal} fresh={signal.updatedAt > log.readAt} focus={focus} />)}
+              {shown.map(signal => <SignalRow key={signal.id} signal={signal} stock={stocks.get(signal.symbol) ?? null} fresh={signal.updatedAt > log.readAt} focus={focus} />)}
             </ol>
           ) : (
             <p className="mf-signals__empty">
@@ -93,7 +105,7 @@ export function FlowSignals({ signals: log, focus }: { signals: Signals; focus: 
             {saveFailed ? 'Could not save to the server; trying again with the next reading. ' : 'Every trigger is saved on the server for backtests; Clear only empties this list. '}
           </p>
           <p className="mf-signals__note">
-            Entry is the zone, the stop its far edge, the target the first option level past it. Stale once the side turns, the zone is replaced, the stop or target is hit, or after {STALE_AFTER_MINUTES} minutes.
+            Entry is the zone, the stop its far edge, the target the first option level past it. Stale once the side turns, the zone is replaced, the stop or target is hit, or after {STALE_AFTER_MINUTES} minutes; the board then decides to close or continue it and says why. Profit and loss are from the middle of the entry zone.
           </p>
         </aside>
       )}
@@ -101,28 +113,49 @@ export function FlowSignals({ signals: log, focus }: { signals: Signals; focus: 
   );
 }
 
+const signedNumber = (value: number, digits = 2) => `${value > 0 ? '+' : value < 0 ? '−' : ''}${Math.abs(value).toFixed(digits)}`;
+const rupees = new Intl.NumberFormat('en-IN', { maximumFractionDigits: 0 });
+const signedRupees = (value: number) => `${value > 0 ? '+' : value < 0 ? '−' : ''}₹${rupees.format(Math.abs(Math.round(value)))}`;
+const toneOfPnl = (value: number) => (value > 0 ? 'is-up' : value < 0 ? 'is-down' : '');
+const CLOSED_BY = { call: 'Closed', stop: 'Stopped out', target: 'Target hit' } as const;
+
+/** What a trade made from the entry to a price, as words: points, %, and a lot. */
+function Pnl({ signal, price }: { signal: FlowSignal; price: number }) {
+  const pnl = pnlOf(signal, price);
+  return (
+    <span className={`mf-signal__pnl ${toneOfPnl(pnl.points)}`}>
+      {signedNumber(pnl.points)} pts · {signedNumber(pnl.pct)}% · {signedRupees(pnl.perLot)}<small>/lot</small>
+    </span>
+  );
+}
+
 /**
  * A row lights its stock on the board and opens the same detail a tile does
- * (hover or keyboard focus to preview, click to keep it open).
+ * (hover or keyboard focus to preview, click to keep it open). A trigger that
+ * went stale carries the board's decision, close or continue, and why.
  */
-function SignalRow({ signal, fresh, focus }: { signal: FlowSignal; fresh: boolean; focus: FlowFocus }) {
-  const stale = signal.state === 'stale';
+function SignalRow({ signal, stock, fresh, focus }: { signal: FlowSignal; stock: FlowStock | null; fresh: boolean; focus: FlowFocus }) {
+  const status = statusOf(signal);
   const tone = signal.kind === 'buy' ? 'is-up' : 'is-down';
   const lit = useRef(false);
   const enter = () => { lit.current = true; focus.hoverSymbol(signal.symbol, 'tile'); };
   const leave = () => { if (lit.current) { lit.current = false; focus.hoverSymbol(null, 'tile'); } };
   // A row that goes away (filter, clear, the pane closing) under the pointer lets the detail go.
   useEffect(() => leave, []); // eslint-disable-line react-hooks/exhaustive-deps
+  const pin = () => focus.togglePin(signal.symbol, 'tile');
+  const chip = status === 'active' ? [tone, signal.kind === 'buy' ? 'Buy' : 'Sell'] : status === 'holding' ? [tone, 'Holding'] : status === 'closed' ? ['is-stale', 'Closed'] : ['is-stale', 'Stale'];
+  const now = stock && stock.futures === 'read' ? priceOf(stock) : null;
+  const lean = status === 'holding' ? 'continue' : 'close';
   return (
-    <li className={`mf-signal ${tone}${stale ? ' is-stale' : ''}${fresh ? ' is-fresh' : ''}`} tabIndex={0}
-      aria-label={`${signal.symbol} ${stale ? 'stale' : signal.kind}: show detail`}
+    <li className={`mf-signal ${tone} is-${status}${fresh ? ' is-fresh' : ''}`} tabIndex={0}
+      aria-label={`${signal.symbol} ${status === 'active' ? signal.kind : status}: show detail`}
       onPointerEnter={enter} onPointerLeave={leave} onFocus={enter} onBlur={leave}
-      onClick={() => focus.togglePin(signal.symbol, 'tile')}
-      onKeyDown={event => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); focus.togglePin(signal.symbol, 'tile'); } }}>
+      onClick={pin}
+      onKeyDown={event => { if (event.target === event.currentTarget && (event.key === 'Enter' || event.key === ' ')) { event.preventDefault(); pin(); } }}>
       <div className="mf-signal__top">
-        <span className={`mf-signal__kind ${stale ? 'is-stale' : tone}`}>{stale ? 'Stale' : signal.kind === 'buy' ? 'Buy' : 'Sell'}</span>
-        <b className="mf-signal__sym">{signal.symbol}</b>
-        {stale && <small className="mf-signal__was">was {signal.kind}</small>}
+        <span className={`mf-signal__kind ${chip[0]}`}>{chip[1]}</span>
+        <b className="mf-signal__sym" title={stock?.name ? `${signal.symbol} · ${stock.name}` : signal.symbol}>{signal.symbol}</b>
+        {status !== 'active' && status !== 'holding' && <small className="mf-signal__was">was {signal.kind}</small>}
         <time className="mf-signal__time" dateTime={new Date(signal.triggeredAt).toISOString()} title="When the zone completed">{clockOf(signal.triggeredAt)}</time>
       </div>
       <dl className="mf-signal__levels">
@@ -130,8 +163,27 @@ function SignalRow({ signal, fresh, focus }: { signal: FlowSignal; fresh: boolea
         <div><dt>Stop</dt><dd className="is-stop">{fmtPrice(signal.stop)}</dd></div>
         <div><dt>Target</dt><dd className="is-target">{signal.target ? <>{fmtPrice(signal.target.price)} <small>{signal.target.name}</small></> : '—'}</dd></div>
       </dl>
-      {stale && signal.staleReason && (
+      {signal.state === 'stale' && signal.staleReason && (
         <p className="mf-signal__why">{signal.staleReason}{signal.staleAt != null && <> · {clockOf(signal.staleAt)}</>}</p>
+      )}
+      {status === 'holding' && signal.hold && signal.decidedPrice != null && (
+        <div className={`mf-signal__decide is-${lean}`}>
+          <p className="mf-signal__advice"><b>Decision: continue.</b> {signal.decisionWhy}</p>
+          <p className="mf-signal__plan">
+            Since {signal.decidedAt != null ? clockOf(signal.decidedAt) : ''} at {fmtPrice(signal.decidedPrice)}. Watching {signal.hold.stop != null ? <>stop <b>{fmtPrice(signal.hold.stop)}</b>{signal.outcome === 'target' && ' (the entry)'}</> : 'no stop'}{' and '}
+            {signal.hold.target ? <>target <b>{fmtPrice(signal.hold.target.price)}</b> <small>{signal.hold.target.name}</small></> : 'no target'}; closes when one is reached.
+          </p>
+          {now != null && <p className="mf-signal__plan">Now {fmtPrice(now)} <Pnl signal={signal} price={now} /></p>}
+        </div>
+      )}
+      {status === 'closed' && signal.decidedPrice != null && signal.closedBy && (
+        <div className={`mf-signal__decide is-${lean}`}>
+          {signal.closedBy === 'call' && <p className="mf-signal__advice"><b>Decision: close.</b> {signal.decisionWhy}</p>}
+          {signal.closedBy !== 'call' && signal.decisionWhy && <p className="mf-signal__plan">Continued: {signal.decisionWhy}</p>}
+          <p className="mf-signal__plan">
+            {CLOSED_BY[signal.closedBy]} at {fmtPrice(signal.decidedPrice)}{signal.decidedAt != null && <> · {clockOf(signal.decidedAt)}</>} <Pnl signal={signal} price={signal.decidedPrice} />
+          </p>
+        </div>
       )}
     </li>
   );

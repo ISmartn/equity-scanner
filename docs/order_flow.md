@@ -90,7 +90,8 @@ A trigger record holds:
 | `entryLow`, `entryHigh` | The zone's price band: the entry |
 | `stop` | The zone's far edge: low for a buy, high for a sell |
 | `target` | First option level past the zone (`R1`/`R2` for a buy, `S1`/`S2` for a sell), or null |
-| `state`, `staleAt`, `staleReason` | `active` or `stale`, and when and why it went stale. Stale never reverts |
+| `state`, `staleAt`, `staleReason`, `outcome`, `exitPrice` | `active` or `stale`; when, why (`target`, `stop`, `side`, `zone`, `replaced`, `aged`) and at what future price it went stale. Stale never reverts |
+| `decision`, `decidedAt`, `decidedPrice`, `closedBy`, `hold` | What became of a stale trigger: `closed` (by the board's `call` when it went stale, or by the `stop` or `target` of a continued one), `continued` (with `hold`: the stop and target it is then watched against), or `missed` (first read already stale, never in play). `decisionWhy` holds the reason. Only moves forward: a close is final |
 | `recordedAt`, `updatedAt` | Server wall clock when first heard and last changed |
 | `context` | The reading that raised it, frozen when first seen: window, floor, build-up, price and open-interest change, strength, rank, checks held, PCR, support and resistance, zone open interest added, and `seenAt` / `seenPrice` (how late the page was to the trigger) |
 
@@ -104,3 +105,14 @@ Endpoints:
 | `GET` | `/api/order-flow/signals/{date}?candles=1` | One session's triggers, and their candles with `candles=1` |
 
 A trigger is stale when the side turns, a newer zone replaces it, price breaks the stop or reaches the target, or 60 minutes pass. `triggeredAt` is the zone's own end time, but the page can only act on it when it sees it: for a backtest, enter at `seenAt` / `seenPrice` or later, not at the zone's end. A trigger first seen on a reload is already late by however long the page was closed.
+
+### Close or continue
+
+The board makes this call itself. When a trigger the page was watching goes stale, it is decided on the spot from the reading then, and the row says which and why:
+
+- **Close** takes the exit at the price then.
+- **Continue** keeps watching it. After a target, the stop trails to the entry and the next option level ahead becomes the target. After any other reason the original stop stays (none if price is already through it) and the nearest level ahead is the target. A continued trigger closes by itself when price reaches either, and the close is recorded with `closedBy` (`stop` or `target`).
+
+It continues only while the same positions are still being added (long build-up for a buy, short build-up for a sell), at least half the checks hold, and for a target a further level lies ahead (an aged trigger needs only the first two). A stop, a turned side, a lost zone or a replaced zone always closes. A trigger the page first reads already stale was never in play and is `missed`. The reason is stored in `decisionWhy`. This is a reading of the board, not advice.
+
+Triggers logged before this existed have no `outcome` or `decision`.

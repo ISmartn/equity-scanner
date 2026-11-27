@@ -69,7 +69,7 @@ export function MarketFlowPage({ universe }: MarketFlowPageProps) {
   const pageActions = (
     <>
       <CapsuleSegmented options={UNIVERSES} value={scope} onChange={setScope} ariaLabel="Underlyings" groupId="flow-universe" size="page" className="ui-flow-universe" />
-      <FlowSignals signals={signals} focus={focus} />
+      <FlowSignals signals={signals} focus={focus} flow={flow} />
     </>
   );
 

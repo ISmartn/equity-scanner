@@ -70,6 +70,8 @@ class SignalRecord(BaseModel):
     symbol: str = Field(pattern=r"^[A-Za-z0-9&._-]{1,40}$")
     kind: Literal["buy", "sell"]
     state: Literal["active", "stale"]
+    outcome: Literal["target", "stop", "side", "zone", "replaced", "aged"] | None = None
+    decision: Literal["closed", "continued", "missed"] | None = None
     triggeredAt: float
     entryLow: float
     entryHigh: float

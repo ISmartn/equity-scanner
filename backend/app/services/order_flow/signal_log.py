@@ -1,7 +1,8 @@
 """The Order Flow trigger log: every buy / sell / stale the board raised, kept for backtests.
 
 The board derives its triggers in the browser (frontend ``flowSignals.ts``) and
-posts each one here as it is raised and again when it goes stale. Layout, one
+posts each one here as it is raised, again when it goes stale, and again when
+the reader closes it or continues it (``decision``). Layout, one
 directory per session, kept apart from the market files (the collector deletes
 those when a new session is stored; these are never deleted):
 
@@ -53,6 +54,26 @@ def _write_json(path: Path, value: Any) -> None:
         raise
 
 
+# How far a trigger has got: active, stale and waiting, stale and watched on, then the two ends.
+_STAGE = {None: 0, "continued": 1, "closed": 2, "missed": 2}
+
+
+def _stage(record: dict[str, Any]) -> int:
+    if record.get("state") != "stale":
+        return -1
+    return _STAGE.get(record.get("decision"), 0)
+
+
+def _newer(before: dict[str, Any], record: dict[str, Any]) -> bool:
+    """A record replaces the held one only by going further: a late, older copy never undoes a stale, a continue or a close."""
+    if _stage(record) != _stage(before):
+        return _stage(record) > _stage(before)
+    if _stage(before) in (-1, 2):
+        return False
+    ignore = ("recordedAt", "updatedAt")
+    return {k: v for k, v in record.items() if k not in ignore} != {k: v for k, v in before.items() if k not in ignore}
+
+
 class SignalLog:
     def __init__(self, root: Path = SIGNALS_DIR) -> None:
         self.root = root
@@ -80,11 +101,10 @@ class SignalLog:
                     held[key] = {**record, "recordedAt": stamp, "updatedAt": stamp}
                     added += 1
                     continue
-                if before.get("state") == "stale":
+                if not _newer(before, record):
                     continue
-                if record.get("state") == "stale" or record.get("context") != before.get("context"):
-                    held[key] = {**record, "recordedAt": before.get("recordedAt", stamp), "updatedAt": stamp}
-                    updated += 1
+                held[key] = {**record, "recordedAt": before.get("recordedAt", stamp), "updatedAt": stamp}
+                updated += 1
             if added or updated:
                 _write_json(self._signals_path(date), held)
         return {"added": added, "updated": updated, "total": len(held)}

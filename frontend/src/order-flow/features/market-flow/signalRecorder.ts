@@ -9,7 +9,7 @@ const CANDLE_REFRESH_MS = 5 * MINUTE;
 
 /**
  * Every trigger goes to the server as it is raised and again when it goes
- * stale (backend/app/services/order_flow/signal_log.py), with the 1-minute
+ * stale, and again when it is closed or continued (backend/app/services/order_flow/signal_log.py), with the 1-minute
  * futures candles of each underlying that triggered, so a backtest can walk
  * forward from the trigger. The server upserts by id, so a resend is harmless:
  * anything that did not get through is sent again with the next reading.
@@ -23,13 +23,14 @@ export function useSignalRecorder(flow: MarketFlow | null, date: string, signals
 
   useEffect(() => {
     if (!flow || !date || flow.date !== date) return;
-    const pending = signals.filter(signal => sent.current.get(signal.id) !== signal.state);
+    const stamp = (signal: FlowSignal) => `${signal.state}|${signal.decision ?? ''}`;
+    const pending = signals.filter(signal => sent.current.get(signal.id) !== stamp(signal));
     const send = async (url: string, method: 'POST' | 'PUT', body: unknown) => {
       const res = await fetch(`${API}${url}`, { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
       if (!res.ok) throw new Error(`${res.status}`);
     };
     if (pending.length) {
-      for (const signal of pending) sent.current.set(signal.id, signal.state);
+      for (const signal of pending) sent.current.set(signal.id, stamp(signal));
       send('/api/order-flow/signals', 'POST', { date, signals: pending })
         .then(() => setFailed(false))
         .catch(() => { for (const signal of pending) sent.current.delete(signal.id); setFailed(true); });
